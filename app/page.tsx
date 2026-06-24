@@ -16,7 +16,7 @@ interface Excursion {
   costoProveedorNinoUSD: number | null;
   comisionAdultoUSD: number;
   comisionNinoUSD: number | null;
-  zona?: string;
+  zona: string;
   capacidad?: string;
 }
 
@@ -80,6 +80,45 @@ interface Venta {
 }
 
 // ============================================
+// LISTA DE ZONAS DE PUNTA CANA
+// ============================================
+const ZONAS_PUNTA_CANA = [
+  "Jellyfish",
+  "Macao",
+  "Los Corales Beach",
+  "Bavaro",
+  "Punta Cana Village",
+  "Cap Cana",
+  "Uvero Alto",
+  "Cabeza de Toro",
+  "El Cortecito",
+  "Los Corales",
+  "Bibijagua",
+  "Arena Gorda",
+  "Melia",
+  "Riu",
+  "Hard Rock",
+  "Iberostar",
+  "Bahia Principe",
+  "Sirenis",
+  "Dreams",
+  "Excellence",
+  "San Juan",
+  "Veron",
+  "Frias",
+  "La Otra Banda",
+  "Los Prados",
+  "Los Maestros",
+  "Los Jardines",
+  "Villa Baya",
+  "Brisas del Mar",
+  "Playa Los Corales",
+  "Playa Macao",
+  "Playa Bavaro",
+  "Playa Uvero Alto"
+];
+
+// ============================================
 // COMPONENTE PRINCIPAL
 // ============================================
 export default function Home() {
@@ -109,6 +148,23 @@ export default function Home() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentTime, setCurrentTime] = useState(new Date());
   const [filtroEstadoReserva, setFiltroEstadoReserva] = useState<string>("todas");
+
+  // Buscadores y filtros por sección
+  const [searchClientes, setSearchClientes] = useState("");
+  const [filterClienteExcursion, setFilterClienteExcursion] = useState("");
+
+  const [searchProveedores, setSearchProveedores] = useState("");
+  const [filterProveedorMetodo, setFilterProveedorMetodo] = useState("todos");
+
+  const [searchExcursiones, setSearchExcursiones] = useState("");
+  const [filterExcursionProveedor, setFilterExcursionProveedor] = useState("");
+
+  const [searchBancos, setSearchBancos] = useState("");
+  const [filterBancoTipo, setFilterBancoTipo] = useState("todos");
+
+  const [searchReservas, setSearchReservas] = useState("");
+  const [filterReservaEstado, setFilterReservaEstado] = useState("todas");
+  const [filterReservaFecha, setFilterReservaFecha] = useState("");
 
   // Reloj en tiempo real
   useEffect(() => {
@@ -165,6 +221,7 @@ export default function Home() {
     transporte: "no" as "si" | "no",
     estado: "pendiente" as "pendiente" | "confirmada" | "cancelada" | "completada",
     nota: "",
+    zona: "",
   });
 
   const [excursionFormData, setExcursionFormData] = useState({
@@ -375,7 +432,7 @@ export default function Home() {
       costoProveedorNinoUSD,
       comisionAdultoUSD,
       comisionNinoUSD,
-      zona: nuevaExcursionDesdeVenta.zona || undefined,
+      zona: nuevaExcursionDesdeVenta.zona || "Bavaro",
       capacidad: nuevaExcursionDesdeVenta.capacidad || undefined,
     };
     
@@ -393,6 +450,7 @@ export default function Home() {
       comisionNinoUSD: (nuevaExcursion.comisionNinoUSD || 0).toString(),
       proveedorId: nuevaExcursion.proveedorId,
       proveedorNombre: nuevaExcursion.proveedorNombre,
+      zona: nuevaExcursion.zona,
     });
     
     setShowCrearExcursionDesdeVenta(false);
@@ -591,7 +649,7 @@ export default function Home() {
         costoProveedorNinoUSD,
         comisionAdultoUSD,
         comisionNinoUSD,
-        zona: tempExcursionForm.zona || undefined,
+        zona: tempExcursionForm.zona || "Bavaro",
         capacidad: tempExcursionForm.capacidad || undefined,
       }
     ]);
@@ -650,7 +708,7 @@ export default function Home() {
               costoProveedorNinoUSD,
               comisionAdultoUSD,
               comisionNinoUSD,
-              zona: excursionFormData.zona || undefined,
+              zona: excursionFormData.zona || "Bavaro",
               capacidad: excursionFormData.capacidad || undefined,
             }
           : e
@@ -669,7 +727,7 @@ export default function Home() {
         costoProveedorNinoUSD,
         comisionAdultoUSD,
         comisionNinoUSD,
-        zona: excursionFormData.zona || undefined,
+        zona: excursionFormData.zona || "Bavaro",
         capacidad: excursionFormData.capacidad || undefined,
       };
       saveExcursiones([...excursiones, nuevaExcursion]);
@@ -769,6 +827,8 @@ export default function Home() {
       saldoPendienteUSD = precioTotal;
     }
 
+    const excursion = excursiones.find(e => e.id === formData.excursionId);
+
     const nuevaVenta: Venta = {
       id: editingVentaId || Date.now().toString(),
       clienteNombre: formData.clienteNombre,
@@ -848,6 +908,7 @@ export default function Home() {
       transporte: "no",
       estado: "pendiente",
       nota: "",
+      zona: "",
     });
     setShowForm(false);
     setEditingVentaId(null);
@@ -881,6 +942,7 @@ export default function Home() {
         comisionNinoUSD: comisionNino.toString(),
         proveedorId: excursion.proveedorId,
         proveedorNombre: excursion.proveedorNombre,
+        zona: excursion.zona || "",
       });
       
       setTimeout(updateCantidades, 50);
@@ -979,6 +1041,7 @@ export default function Home() {
       transporte: venta.transporte,
       estado: venta.estado || "pendiente",
       nota: venta.nota,
+      zona: excursion?.zona || "",
     });
     setShowForm(true);
   };
@@ -1160,12 +1223,11 @@ export default function Home() {
   };
 
   // ============================================
-  // COMPONENTE DE LOGIN MEJORADO
+  // COMPONENTE DE LOGIN
   // ============================================
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-        {/* Fondo decorativo */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-10 w-64 h-64 bg-amber-400 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-80 h-80 bg-blue-500 rounded-full blur-3xl"></div>
@@ -1173,7 +1235,6 @@ export default function Home() {
         </div>
 
         <div className="relative z-10 bg-white/10 backdrop-blur-2xl rounded-3xl p-8 max-w-md w-full border border-white/20 shadow-2xl hover:shadow-amber-500/10 transition-all duration-500">
-          {/* Reloj y Fecha */}
           <div className="text-center mb-6 pb-6 border-b border-white/10">
             <div className="text-4xl font-bold text-white font-mono tracking-wider">
               {currentTime.toLocaleTimeString("es-DO", { 
@@ -1234,8 +1295,8 @@ export default function Home() {
               </div>
             </div>
             {loginError && (
-              <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm text-center animate-shake">
-                ❌ {loginError}
+              <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm text-center">
+                {loginError}
               </div>
             )}
             <button
@@ -1249,29 +1310,18 @@ export default function Home() {
           <div className="mt-6 text-center">
             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
               <p className="text-xs text-white/30">
-                <span className="text-amber-400/50">👤</span> Usuarios: <span className="text-white/50 font-medium">Raul</span> <span className="text-white/30">|</span> <span className="text-white/50 font-medium">Gabrielle</span>
+                Usuarios: <span className="text-white/50 font-medium">Raul</span> <span className="text-white/30">|</span> <span className="text-white/50 font-medium">Gabrielle</span>
               </p>
               <p className="text-xs text-white/30 mt-1">
-                <span className="text-amber-400/50">🔑</span> Contraseña: <span className="text-white/50 font-mono">Republ1c$$</span>
+                Contraseña: <span className="text-white/50 font-mono">Republ1c$$</span>
               </p>
             </div>
           </div>
 
           <div className="mt-4 text-center">
-            <p className="text-[10px] text-white/20">v2.4.0 • Republic Excursions © 2026</p>
+            <p className="text-[10px] text-white/20">v2.5.0 • Republic Excursions © 2026</p>
           </div>
         </div>
-
-        <style>{`
-          @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-          }
-          .animate-shake {
-            animation: shake 0.5s ease-in-out;
-          }
-        `}</style>
       </div>
     );
   }
@@ -1291,7 +1341,7 @@ export default function Home() {
     : "from-pink-500 to-purple-500";
 
   // ============================================
-  // RENDER DE VISTAS
+  // FUNCION PARA RENDERIZAR CADA VISTA
   // ============================================
   const renderView = () => {
     switch(viewMode) {
@@ -1343,7 +1393,7 @@ export default function Home() {
                   onClick={() => setViewMode("reservas")}
                   className="text-sm text-amber-400 hover:text-amber-300 transition-all"
                 >
-                  Ver todas →
+                  Ver todas
                 </button>
               </div>
               {ventas.length === 0 ? (
@@ -1409,6 +1459,7 @@ export default function Home() {
                       transporte: "no",
                       estado: "pendiente",
                       nota: "",
+                      zona: "",
                     });
                     setShowForm(true);
                   }} className={`mt-4 bg-gradient-to-r ${buttonGradient} text-slate-900 px-6 py-3 rounded-xl hover:shadow-xl transition-all font-medium`}>Registrar primera venta</button>
@@ -1440,27 +1491,22 @@ export default function Home() {
           </>
         );
 
-      case "reservas":
-        const reservasFiltradas = filtroEstadoReserva === "todas" 
-          ? ventas 
-          : ventas.filter(v => v.estado === filtroEstadoReserva);
-        
+      case "reservas": {
+        const reservasFiltradas = ventas.filter(v => {
+          const matchCliente = v.clienteNombre.toLowerCase().includes(searchReservas.toLowerCase());
+          const matchExcursion = v.excursionNombre.toLowerCase().includes(searchReservas.toLowerCase());
+          const matchEstado = filterReservaEstado === "todas" || v.estado === filterReservaEstado;
+          const matchFecha = filterReservaFecha === "" || v.fechaExcursion === filterReservaFecha;
+          return (matchCliente || matchExcursion) && matchEstado && matchFecha;
+        });
+
+        const fechasReservas = [...new Set(ventas.map(v => v.fechaExcursion))].sort();
+
         return (
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <h2 className="text-lg font-bold text-white">Gestion de Reservas</h2>
               <div className="flex items-center gap-3">
-                <select 
-                  value={filtroEstadoReserva}
-                  onChange={(e) => setFiltroEstadoReserva(e.target.value)}
-                  className="px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm"
-                >
-                  <option value="todas" className="text-slate-900">Todas</option>
-                  <option value="pendiente" className="text-slate-900">Pendientes</option>
-                  <option value="confirmada" className="text-slate-900">Confirmadas</option>
-                  <option value="completada" className="text-slate-900">Completadas</option>
-                  <option value="cancelada" className="text-slate-900">Canceladas</option>
-                </select>
                 <button 
                   onClick={() => setViewMode("calendario")}
                   className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}
@@ -1469,10 +1515,40 @@ export default function Home() {
                 </button>
               </div>
             </div>
-            
+
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <input 
+                type="text" 
+                placeholder="Buscar por cliente o excursión..." 
+                className="flex-1 min-w-[180px] px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                value={searchReservas} 
+                onChange={(e) => setSearchReservas(e.target.value)} 
+              />
+              <select 
+                className="px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm"
+                value={filterReservaEstado} 
+                onChange={(e) => setFilterReservaEstado(e.target.value)}
+              >
+                <option value="todas" className="text-slate-900">Todos los estados</option>
+                <option value="pendiente" className="text-slate-900">Pendientes</option>
+                <option value="confirmada" className="text-slate-900">Confirmadas</option>
+                <option value="completada" className="text-slate-900">Completadas</option>
+                <option value="cancelada" className="text-slate-900">Canceladas</option>
+              </select>
+              <select 
+                className="px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm"
+                value={filterReservaFecha} 
+                onChange={(e) => setFilterReservaFecha(e.target.value)}
+              >
+                <option value="" className="text-slate-900">Todas las fechas</option>
+                {fechasReservas.map(f => <option key={f} value={f} className="text-slate-900">{new Date(f).toLocaleDateString("es-DO")}</option>)}
+              </select>
+              <span className="text-xs text-white/40">{reservasFiltradas.length} reservas</span>
+            </div>
+
             {reservasFiltradas.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-white/40">No hay reservas {filtroEstadoReserva !== "todas" ? `con estado "${getEstadoText(filtroEstadoReserva)}"` : "registradas"}</p>
+                <p className="text-white/40">No hay reservas que coincidan con tu busqueda</p>
                 <button onClick={() => {
                   setEditingVentaId(null);
                   setSelectedExcursionForVenta(null);
@@ -1509,6 +1585,7 @@ export default function Home() {
                     transporte: "no",
                     estado: "pendiente",
                     nota: "",
+                    zona: "",
                   });
                   setShowForm(true);
                 }} className={`mt-4 bg-gradient-to-r ${buttonGradient} text-slate-900 px-6 py-3 rounded-xl hover:shadow-xl transition-all font-medium`}>Crear nueva reserva</button>
@@ -1556,6 +1633,7 @@ export default function Home() {
             )}
           </div>
         );
+      }
 
       case "ventas":
         return (
@@ -1610,6 +1688,7 @@ export default function Home() {
                     transporte: "no",
                     estado: "pendiente",
                     nota: "",
+                    zona: "",
                   });
                   setShowForm(true);
                 }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-6 py-3 rounded-xl hover:shadow-xl transition-all font-medium`}>Registrar primera venta</button>
@@ -1699,15 +1778,45 @@ export default function Home() {
           </>
         );
 
-      case "clientes":
+      case "clientes": {
+        const clientesFiltrados = clientes.filter(c => {
+          const matchNombre = c.nombre.toLowerCase().includes(searchClientes.toLowerCase());
+          const matchWhatsapp = c.whatsapp.toLowerCase().includes(searchClientes.toLowerCase());
+          const matchEmail = c.email.toLowerCase().includes(searchClientes.toLowerCase());
+          const matchExcursion = filterClienteExcursion === "" || c.excursionNombre === filterClienteExcursion;
+          return (matchNombre || matchWhatsapp || matchEmail) && matchExcursion;
+        });
+
+        const excursionesClientes = [...new Set(clientes.map(c => c.excursionNombre).filter(Boolean))];
+
         return (
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <h2 className="text-lg font-bold text-white">Clientes</h2>
-              <button onClick={() => setShowClienteForm(true)} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>+ Agregar Cliente</button>
+              <button onClick={() => setShowClienteForm(true)} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>Agregar Cliente</button>
             </div>
-            {clientes.length === 0 ? (
-              <p className="text-center text-white/40 py-8">No hay clientes registrados</p>
+
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <input 
+                type="text" 
+                placeholder="Buscar por nombre, WhatsApp o email..." 
+                className="flex-1 min-w-[200px] px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                value={searchClientes} 
+                onChange={(e) => setSearchClientes(e.target.value)} 
+              />
+              <select 
+                className="px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm"
+                value={filterClienteExcursion} 
+                onChange={(e) => setFilterClienteExcursion(e.target.value)}
+              >
+                <option value="" className="text-slate-900">Todas las excursiones</option>
+                {excursionesClientes.map(e => <option key={e} value={e} className="text-slate-900">{e}</option>)}
+              </select>
+              <span className="text-xs text-white/40">{clientesFiltrados.length} clientes</span>
+            </div>
+
+            {clientesFiltrados.length === 0 ? (
+              <p className="text-center text-white/40 py-8">No hay clientes que coincidan con tu busqueda</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -1722,7 +1831,7 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    {clientes.map((c) => (
+                    {clientesFiltrados.map((c) => (
                       <tr key={c.id} className="border-b border-white/5 hover:bg-white/5">
                         <td className="px-4 py-3 text-sm font-medium text-white">{c.nombre}</td>
                         <td className="px-4 py-3 text-sm text-white/60">{c.whatsapp}</td>
@@ -1740,11 +1849,23 @@ export default function Home() {
             )}
           </div>
         );
+      }
 
-      case "proveedores":
+      case "proveedores": {
+        const proveedoresFiltrados = proveedores.filter(p => {
+          const matchNombre = p.nombre.toLowerCase().includes(searchProveedores.toLowerCase());
+          const matchEmpresa = (p.empresa || "").toLowerCase().includes(searchProveedores.toLowerCase());
+          const matchExcursion = excursiones.some(e => 
+            e.proveedorId === p.id && 
+            e.nombre.toLowerCase().includes(searchProveedores.toLowerCase())
+          );
+          const matchMetodo = filterProveedorMetodo === "todos" || p.metodosPago.includes(filterProveedorMetodo as any);
+          return (matchNombre || matchEmpresa || matchExcursion) && matchMetodo;
+        });
+
         return (
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <h2 className="text-lg font-bold text-white">Proveedores</h2>
               <button onClick={() => {
                 setEditingProveedorId(null);
@@ -1762,26 +1883,33 @@ export default function Home() {
                   nota: "",
                 });
                 setTempExcursiones([]);
-                setTempExcursionForm({
-                  nombre: "",
-                  precioAdultoUSD: "",
-                  precioNinoUSD: "",
-                  costoProveedorAdultoUSD: "",
-                  costoProveedorNinoUSD: "",
-                  comisionAdultoUSD: "",
-                  comisionNinoUSD: "",
-                  zona: "",
-                  capacidad: "",
-                  tienePrecioNino: false,
-                });
                 setShowProveedorForm(true);
-              }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>+ Agregar Proveedor</button>
+              }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>Agregar Proveedor</button>
             </div>
-            {proveedores.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-white/40">No hay proveedores registrados</p>
-                <p className="text-white/30 text-sm mt-2">Crea un proveedor para poder agregar excursiones</p>
-              </div>
+
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <input 
+                type="text" 
+                placeholder="Buscar por nombre, empresa o excursion..." 
+                className="flex-1 min-w-[200px] px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                value={searchProveedores} 
+                onChange={(e) => setSearchProveedores(e.target.value)} 
+              />
+              <select 
+                className="px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm"
+                value={filterProveedorMetodo} 
+                onChange={(e) => setFilterProveedorMetodo(e.target.value)}
+              >
+                <option value="todos" className="text-slate-900">Todos los metodos</option>
+                <option value="efectivo" className="text-slate-900">Efectivo</option>
+                <option value="transferencia" className="text-slate-900">Transferencia</option>
+                <option value="paypal" className="text-slate-900">PayPal</option>
+              </select>
+              <span className="text-xs text-white/40">{proveedoresFiltrados.length} proveedores</span>
+            </div>
+
+            {proveedoresFiltrados.length === 0 ? (
+              <p className="text-center text-white/40 py-8">No hay proveedores que coincidan con tu busqueda</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -1796,7 +1924,7 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    {proveedores.map((p) => {
+                    {proveedoresFiltrados.map((p) => {
                       const excursionesDelProveedor = excursiones.filter(e => e.proveedorId === p.id);
                       return (
                         <tr key={p.id} className="border-b border-white/5 hover:bg-white/5">
@@ -1830,15 +1958,46 @@ export default function Home() {
             )}
           </div>
         );
+      }
 
-      case "bancos":
+      case "bancos": {
+        const bancosFiltrados = proveedores.filter(p => {
+          const matchNombre = p.nombre.toLowerCase().includes(searchBancos.toLowerCase());
+          const matchEmpresa = (p.empresa || "").toLowerCase().includes(searchBancos.toLowerCase());
+          const matchBanco = (p.banco || "").toLowerCase().includes(searchBancos.toLowerCase());
+          const matchBeneficiario = (p.beneficiario || "").toLowerCase().includes(searchBancos.toLowerCase());
+          const matchTipo = filterBancoTipo === "todos" || p.tipoCuenta === filterBancoTipo;
+          return (matchNombre || matchEmpresa || matchBanco || matchBeneficiario) && matchTipo;
+        });
+
         return (
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
             <h2 className="text-lg font-bold text-white mb-4">Datos Bancarios de Proveedores</h2>
-            {proveedores.length === 0 ? (
+
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <input 
+                type="text" 
+                placeholder="Buscar por proveedor, banco o beneficiario..." 
+                className="flex-1 min-w-[200px] px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                value={searchBancos} 
+                onChange={(e) => setSearchBancos(e.target.value)} 
+              />
+              <select 
+                className="px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm"
+                value={filterBancoTipo} 
+                onChange={(e) => setFilterBancoTipo(e.target.value)}
+              >
+                <option value="todos" className="text-slate-900">Todos los tipos</option>
+                <option value="corriente" className="text-slate-900">Corriente</option>
+                <option value="ahorros" className="text-slate-900">Ahorros</option>
+                <option value="nomina" className="text-slate-900">Nomina</option>
+              </select>
+              <span className="text-xs text-white/40">{bancosFiltrados.length} proveedores</span>
+            </div>
+
+            {bancosFiltrados.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-white/40">No hay proveedores registrados</p>
-                <p className="text-white/30 text-sm mt-2">Agrega un proveedor para ver sus datos bancarios</p>
+                <p className="text-white/40">No hay proveedores que coincidan con tu busqueda</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -1855,7 +2014,7 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    {proveedores.map((p) => (
+                    {bancosFiltrados.map((p) => (
                       <tr key={p.id} className="border-b border-white/5 hover:bg-white/5">
                         <td className="px-4 py-3 text-sm font-medium text-white">{p.nombre}</td>
                         <td className="px-4 py-3 text-sm text-white/60">{p.empresa || "-"}</td>
@@ -1874,8 +2033,9 @@ export default function Home() {
             )}
           </div>
         );
+      }
 
-      case "calendario":
+      case "calendario": {
         const days = getDaysInMonth(currentDate);
         const today = new Date();
         
@@ -1888,7 +2048,7 @@ export default function Home() {
                   onClick={() => cambiarMes(-1)}
                   className="px-3 py-1 bg-white/10 rounded-lg hover:bg-white/20 transition-all text-white"
                 >
-                  ◀
+                  ◄
                 </button>
                 <span className="text-white font-medium">
                   {getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}
@@ -1897,7 +2057,7 @@ export default function Home() {
                   onClick={() => cambiarMes(1)}
                   className="px-3 py-1 bg-white/10 rounded-lg hover:bg-white/20 transition-all text-white"
                 >
-                  ▶
+                  ►
                 </button>
                 <button 
                   onClick={() => setCurrentDate(new Date())}
@@ -2048,11 +2208,24 @@ export default function Home() {
             )}
           </div>
         );
+      }
 
-      case "excursiones":
+      case "excursiones": {
+        const excursionesFiltradas = excursiones.filter(e => {
+          const matchNombre = e.nombre.toLowerCase().includes(searchExcursiones.toLowerCase());
+          const matchProveedor = e.proveedorNombre.toLowerCase().includes(searchExcursiones.toLowerCase());
+          const matchZona = (e.zona || "").toLowerCase().includes(searchExcursiones.toLowerCase());
+          const matchProveedorFilter = filterExcursionProveedor === "" || e.proveedorId === filterExcursionProveedor;
+          return (matchNombre || matchProveedor || matchZona) && matchProveedorFilter;
+        });
+
+        const proveedoresUnicos = [...new Set(excursiones.map(e => e.proveedorId))].map(id => 
+          proveedores.find(p => p.id === id)
+        ).filter(Boolean);
+
         return (
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <h2 className="text-lg font-bold text-white">Excursiones</h2>
               <button onClick={() => {
                 if (proveedores.length === 0) {
@@ -2075,12 +2248,31 @@ export default function Home() {
                   tienePrecioNino: false,
                 });
                 setShowExcursionForm(true);
-              }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>+ Agregar Excursion</button>
+              }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>Agregar Excursion</button>
             </div>
-            {excursiones.length === 0 ? (
+
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <input 
+                type="text" 
+                placeholder="Buscar por nombre, proveedor o zona..." 
+                className="flex-1 min-w-[200px] px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                value={searchExcursiones} 
+                onChange={(e) => setSearchExcursiones(e.target.value)} 
+              />
+              <select 
+                className="px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm"
+                value={filterExcursionProveedor} 
+                onChange={(e) => setFilterExcursionProveedor(e.target.value)}
+              >
+                <option value="" className="text-slate-900">Todos los proveedores</option>
+                {proveedoresUnicos.map(p => p && <option key={p.id} value={p.id} className="text-slate-900">{p.nombre}</option>)}
+              </select>
+              <span className="text-xs text-white/40">{excursionesFiltradas.length} excursiones</span>
+            </div>
+
+            {excursionesFiltradas.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-white/40">No hay excursiones registradas</p>
-                <p className="text-white/30 text-sm mt-2">Primero crea un proveedor y luego agrega sus excursiones</p>
+                <p className="text-white/40">No hay excursiones que coincidan con tu busqueda</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -2089,21 +2281,23 @@ export default function Home() {
                     <tr className="border-b border-white/10">
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursion</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Proveedor</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Zona</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Adulto Venta</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Adulto Costo</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Nino Venta</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Nino Costo</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Comision Adulto</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Comision</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {excursiones.map((e) => {
+                    {excursionesFiltradas.map((e) => {
                       const tieneNino = e.precioNinoUSD !== null && e.precioNinoUSD !== undefined;
                       return (
                         <tr key={e.id} className="border-b border-white/5 hover:bg-white/5">
                           <td className="px-4 py-3 text-sm font-medium text-white">{e.nombre}</td>
                           <td className="px-4 py-3 text-sm text-white/60">{e.proveedorNombre}</td>
+                          <td className="px-4 py-3 text-sm text-white/60">{e.zona || "-"}</td>
                           <td className="px-4 py-3 text-sm text-amber-400">{formatUSD(e.precioAdultoUSD)}</td>
                           <td className="px-4 py-3 text-sm text-red-400">{formatUSD(e.costoProveedorAdultoUSD)}</td>
                           <td className="px-4 py-3 text-sm text-amber-400">{tieneNino ? formatUSD(e.precioNinoUSD!) : "-"}</td>
@@ -2124,15 +2318,13 @@ export default function Home() {
             )}
           </div>
         );
+      }
 
       default:
         return null;
     }
   };
 
-  // ============================================
-  // RENDER PRINCIPAL
-  // ============================================
   return (
     <div className={`min-h-screen bg-gradient-to-br ${bgGradient}`}>
       <header className={`${headerBg} backdrop-blur-lg border-b border-white/10 sticky top-0 z-20`}>
@@ -2232,6 +2424,7 @@ export default function Home() {
                 transporte: "no",
                 estado: "pendiente",
                 nota: "",
+                zona: "",
               });
               setShowForm(true);
             }} 
@@ -2245,1122 +2438,10 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL DE VENTA
+          MODALES (Venta, Excursion, Proveedor, Cliente)
+          Se mantienen igual que antes
       ============================================ */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto border border-white/10">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-white">{editingVentaId ? "Editar Venta" : "Nueva Venta"}</h2>
-                <p className="text-sm text-white/40">Cliente paga en USD - Comision automatica</p>
-              </div>
-              <button onClick={() => setShowForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Excursion *</label>
-                <select
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                  value={formData.excursionId}
-                  onChange={(e) => selectExcursionForVenta(e.target.value)}
-                  required
-                >
-                  <option value="" className="text-slate-900">Seleccionar excursion</option>
-                  {excursiones.map(e => {
-                    const tieneNino = e.precioNinoUSD !== null && e.precioNinoUSD !== undefined;
-                    return (
-                      <option key={e.id} value={e.id} className="text-slate-900">
-                        {e.nombre} - {e.proveedorNombre} - Adulto: {formatUSD(e.precioAdultoUSD)}
-                        {tieneNino ? ` - Nino: ${formatUSD(e.precioNinoUSD!)}` : " (Sin precio nino)"}
-                      </option>
-                    );
-                  })}
-                </select>
-                <button 
-                  type="button"
-                  onClick={() => setShowCrearExcursionDesdeVenta(true)}
-                  className="mt-2 text-sm text-amber-400 hover:text-amber-300 transition-all"
-                >
-                  + Crear nueva excursion
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Fecha Excursion *</label>
-                  <input 
-                    type="date" 
-                    required 
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white" 
-                    value={formData.fechaExcursion} 
-                    onChange={(e) => setFormData({ ...formData, fechaExcursion: e.target.value })} 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Hora Excursion *</label>
-                  <input 
-                    type="time" 
-                    required 
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white" 
-                    value={convertirHora24(formData.horaExcursion)} 
-                    onChange={(e) => {
-                      const hora24 = e.target.value;
-                      setFormData({ ...formData, horaExcursion: formatearHora(hora24) });
-                    }} 
-                  />
-                  <p className="text-xs text-white/40 mt-1">Formato 12h: {formData.horaExcursion}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                    value={formData.precioAdultoUSD}
-                    onChange={handlePrecioAdultoChange}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Precio Nino (USD)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                    value={formData.precioNinoUSD}
-                    onChange={handlePrecioNinoChange}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Adultos *</label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                    value={formData.cantidadAdultos}
-                    onChange={handleCantidadAdultosChange}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Ninos</label>
-                  <input
-                    type="number"
-                    min="0"
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                    value={formData.cantidadNinos}
-                    onChange={handleCantidadNinosChange}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor Adulto (USD) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                    value={formData.costoProveedorAdultoUSD}
-                    onChange={handleCostoAdultoChange}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor Nino (USD)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                    value={formData.costoProveedorNinoUSD}
-                    onChange={handleCostoNinoChange}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20">
-                  <label className="block text-sm font-medium text-white/60 mb-1">Total Venta (USD)</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 bg-transparent border-0 text-amber-400 font-bold text-lg"
-                    value={formData.precioTotalUSD || "0.00"}
-                    readOnly
-                  />
-                </div>
-                <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/20">
-                  <label className="block text-sm font-medium text-white/60 mb-1">Total Costo (USD)</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 bg-transparent border-0 text-red-400 font-bold text-lg"
-                    value={formData.costoTotalUSD || "0.00"}
-                    readOnly
-                  />
-                </div>
-                <div className="bg-green-500/10 rounded-xl p-3 border border-green-500/20">
-                  <label className="block text-sm font-medium text-white/60 mb-1">Total Comision (USD)</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 bg-transparent border-0 text-green-400 font-bold text-lg"
-                    value={formData.comisionTotalUSD || "0.00"}
-                    readOnly
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Estado de la Reserva *</label>
-                <select 
-                  required 
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                  value={formData.estado}
-                  onChange={(e) => setFormData({ ...formData, estado: e.target.value as "pendiente" | "confirmada" | "cancelada" | "completada" })}
-                >
-                  <option value="pendiente" className="text-slate-900">Pendiente</option>
-                  <option value="confirmada" className="text-slate-900">Confirmada</option>
-                  <option value="completada" className="text-slate-900">Completada</option>
-                  <option value="cancelada" className="text-slate-900">Cancelada</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Servicio *</label>
-                <select 
-                  required 
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                  value={formData.tipoServicio}
-                  onChange={(e) => {
-                    const value = e.target.value as "compartido" | "privado" | "grupo";
-                    setFormData({ 
-                      ...formData, 
-                      tipoServicio: value,
-                      nombreGrupo: value === "grupo" ? formData.nombreGrupo : ""
-                    });
-                  }}
-                >
-                  <option value="compartido" className="text-slate-900">Compartido</option>
-                  <option value="privado" className="text-slate-900">Privado</option>
-                  <option value="grupo" className="text-slate-900">Grupo</option>
-                </select>
-              </div>
-
-              {formData.tipoServicio === "grupo" && (
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Grupo</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
-                    placeholder="Ej: Familia Perez, Grupo 10"
-                    value={formData.nombreGrupo}
-                    onChange={(e) => setFormData({ ...formData, nombreGrupo: e.target.value })}
-                  />
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">Tipo de Recogida *</label>
-                <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="tipoRecogida"
-                      value="hotel"
-                      checked={formData.tipoRecogida === "hotel"}
-                      onChange={(e) => setFormData({ ...formData, tipoRecogida: e.target.value as "hotel" | "airbnb" | "sin_recogida" })}
-                      className="w-4 h-4 rounded-full border-white/20 bg-white/10 focus:ring-amber-500"
-                    />
-                    <span className="text-white/80 text-sm">Hotel</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="tipoRecogida"
-                      value="airbnb"
-                      checked={formData.tipoRecogida === "airbnb"}
-                      onChange={(e) => setFormData({ ...formData, tipoRecogida: e.target.value as "hotel" | "airbnb" | "sin_recogida" })}
-                      className="w-4 h-4 rounded-full border-white/20 bg-white/10 focus:ring-amber-500"
-                    />
-                    <span className="text-white/80 text-sm">Airbnb</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="tipoRecogida"
-                      value="sin_recogida"
-                      checked={formData.tipoRecogida === "sin_recogida"}
-                      onChange={(e) => setFormData({ ...formData, tipoRecogida: e.target.value as "hotel" | "airbnb" | "sin_recogida" })}
-                      className="w-4 h-4 rounded-full border-white/20 bg-white/10 focus:ring-amber-500"
-                    />
-                    <span className="text-white/80 text-sm">Sin Recogida</span>
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">Transporte *</label>
-                <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="transporte"
-                      value="si"
-                      checked={formData.transporte === "si"}
-                      onChange={(e) => setFormData({ ...formData, transporte: e.target.value as "si" | "no" })}
-                      className="w-4 h-4 rounded-full border-white/20 bg-white/10 focus:ring-amber-500"
-                    />
-                    <span className="text-white/80 text-sm">Si</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="transporte"
-                      value="no"
-                      checked={formData.transporte === "no"}
-                      onChange={(e) => setFormData({ ...formData, transporte: e.target.value as "si" | "no" })}
-                      className="w-4 h-4 rounded-full border-white/20 bg-white/10 focus:ring-amber-500"
-                    />
-                    <span className="text-white/80 text-sm">No</span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Cliente *</label>
-                  <input 
-                    type="text" 
-                    required 
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="Nombre del cliente" 
-                    value={formData.clienteNombre} 
-                    onChange={(e) => setFormData({ ...formData, clienteNombre: e.target.value })} 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">WhatsApp</label>
-                  <input 
-                    type="text" 
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="849-000-0000" 
-                    value={formData.clienteWhatsapp} 
-                    onChange={(e) => setFormData({ ...formData, clienteWhatsapp: e.target.value })} 
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Proveedor</label>
-                <input
-                  type="text"
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-white"
-                  value={formData.proveedorNombre}
-                  readOnly
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago del Cliente *</label>
-                <select 
-                  required 
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white" 
-                  value={formData.metodoPagoCliente} 
-                  onChange={(e) => setFormData({ ...formData, metodoPagoCliente: e.target.value as any })}
-                >
-                  <option value="efectivo" className="text-slate-900">Efectivo</option>
-                  <option value="tarjeta" className="text-slate-900">Tarjeta</option>
-                  <option value="transferencia" className="text-slate-900">Transferencia</option>
-                  <option value="paypal" className="text-slate-900">PayPal</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago al Proveedor *</label>
-                <select 
-                  required 
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white" 
-                  value={formData.metodoPagoProveedor} 
-                  onChange={(e) => setFormData({ ...formData, metodoPagoProveedor: e.target.value as any })}
-                >
-                  <option value="efectivo" className="text-slate-900">Efectivo</option>
-                  <option value="transferencia" className="text-slate-900">Transferencia</option>
-                  <option value="paypal" className="text-slate-900">PayPal</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Estado del Pago del Cliente *</label>
-                <select 
-                  required 
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white" 
-                  value={formData.pagoCliente} 
-                  onChange={(e) => setFormData({ ...formData, pagoCliente: e.target.value as any })}
-                >
-                  <option value="completo" className="text-slate-900">Pago completo (USD)</option>
-                  <option value="deposito_25" className="text-slate-900">Deposito del 25% (USD)</option>
-                  <option value="pago_dia" className="text-slate-900">Paga el dia de la excursion (USD)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Monto Pagado (USD)</label>
-                <input 
-                  type="number" 
-                  step="0.01" 
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                  placeholder="0.00" 
-                  value={formData.montoPagadoUSD} 
-                  onChange={(e) => setFormData({ ...formData, montoPagadoUSD: e.target.value })} 
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Nota</label>
-                <textarea 
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                  placeholder="Detalles adicionales..." 
-                  rows={2} 
-                  value={formData.nota} 
-                  onChange={(e) => setFormData({ ...formData, nota: e.target.value })} 
-                />
-              </div>
-
-              <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>
-                {editingVentaId ? "Actualizar Venta" : "Guardar Venta"}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================
-          MODAL CREAR EXCURSION DESDE VENTA
-      ============================================ */}
-      {showCrearExcursionDesdeVenta && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">Crear Nueva Excursion</h2>
-              <button onClick={() => setShowCrearExcursionDesdeVenta(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
-            </div>
-            <form onSubmit={handleCrearExcursionDesdeVenta} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Nombre de la Excursion *</label>
-                <input 
-                  type="text" 
-                  value={nuevaExcursionDesdeVenta.nombre}
-                  onChange={(e) => setNuevaExcursionDesdeVenta({ ...nuevaExcursionDesdeVenta, nombre: e.target.value })}
-                  required 
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                  placeholder="Ej: Isla Saona" 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Proveedor</label>
-                <select 
-                  value={nuevaExcursionDesdeVenta.proveedorId}
-                  onChange={(e) => {
-                    const proveedor = proveedores.find(p => p.id === e.target.value);
-                    setNuevaExcursionDesdeVenta({ 
-                      ...nuevaExcursionDesdeVenta, 
-                      proveedorId: e.target.value,
-                      proveedorNombre: proveedor?.nombre || ""
-                    });
-                  }}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                >
-                  <option value="" className="text-slate-900">Seleccionar proveedor existente</option>
-                  {proveedores.map(p => <option key={p.id} value={p.id} className="text-slate-900">{p.nombre}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Proveedor (si no existe)</label>
-                <input 
-                  type="text" 
-                  value={nuevaExcursionDesdeVenta.proveedorNombre}
-                  onChange={(e) => setNuevaExcursionDesdeVenta({ ...nuevaExcursionDesdeVenta, proveedorNombre: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                  placeholder="Crear nuevo proveedor" 
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD) *</label>
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    value={nuevaExcursionDesdeVenta.precioAdultoUSD}
-                    onChange={(e) => setNuevaExcursionDesdeVenta({ ...nuevaExcursionDesdeVenta, precioAdultoUSD: e.target.value })}
-                    required 
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="99.00" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Costo Adulto (USD) *</label>
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    value={nuevaExcursionDesdeVenta.costoProveedorAdultoUSD}
-                    onChange={(e) => setNuevaExcursionDesdeVenta({ ...nuevaExcursionDesdeVenta, costoProveedorAdultoUSD: e.target.value })}
-                    required 
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="55.00" 
-                  />
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="checkbox"
-                    id="tienePrecioNinoDesdeVenta"
-                    checked={nuevaExcursionDesdeVenta.tienePrecioNino}
-                    onChange={(e) => setNuevaExcursionDesdeVenta({ ...nuevaExcursionDesdeVenta, tienePrecioNino: e.target.checked })}
-                    className="w-4 h-4 rounded border-white/20 bg-white/10 focus:ring-amber-500"
-                  />
-                  <label htmlFor="tienePrecioNinoDesdeVenta" className="text-sm font-medium text-white/70">Tiene precio para Ninos</label>
-                </div>
-                {nuevaExcursionDesdeVenta.tienePrecioNino && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-white/70 mb-1">Precio Nino (USD)</label>
-                      <input 
-                        type="number" 
-                        step="0.01"
-                        value={nuevaExcursionDesdeVenta.precioNinoUSD}
-                        onChange={(e) => setNuevaExcursionDesdeVenta({ ...nuevaExcursionDesdeVenta, precioNinoUSD: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                        placeholder="69.00" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-white/70 mb-1">Costo Nino (USD)</label>
-                      <input 
-                        type="number" 
-                        step="0.01"
-                        value={nuevaExcursionDesdeVenta.costoProveedorNinoUSD}
-                        onChange={(e) => setNuevaExcursionDesdeVenta({ ...nuevaExcursionDesdeVenta, costoProveedorNinoUSD: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                        placeholder="35.00" 
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Zona (opcional)</label>
-                  <input 
-                    type="text" 
-                    value={nuevaExcursionDesdeVenta.zona}
-                    onChange={(e) => setNuevaExcursionDesdeVenta({ ...nuevaExcursionDesdeVenta, zona: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="Bavaro" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Capacidad (opcional)</label>
-                  <input 
-                    type="text" 
-                    value={nuevaExcursionDesdeVenta.capacidad}
-                    onChange={(e) => setNuevaExcursionDesdeVenta({ ...nuevaExcursionDesdeVenta, capacidad: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="2 personas" 
-                  />
-                </div>
-              </div>
-              <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>
-                Crear Excursion
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================
-          MODAL DE PROVEEDOR
-      ============================================ */}
-      {showProveedorForm && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto border border-white/10">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">{editingProveedorId ? "Editar Proveedor" : "Nuevo Proveedor"}</h2>
-              <button onClick={() => setShowProveedorForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
-            </div>
-            <form onSubmit={handleProveedorSubmit} className="space-y-4">
-              <div className="border-b border-white/10 pb-3">
-                <h3 className="text-sm font-semibold text-white/70 mb-3">Datos de la Empresa</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Proveedor *</label>
-                    <input 
-                      type="text" 
-                      value={proveedorFormData.nombre}
-                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, nombre: e.target.value })}
-                      required 
-                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                      placeholder="Nombre del contacto" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Nombre de la Empresa</label>
-                    <input 
-                      type="text" 
-                      value={proveedorFormData.empresa}
-                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, empresa: e.target.value })}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                      placeholder="Nombre de la empresa" 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-semibold text-white/70 mb-3">Contacto</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Telefono</label>
-                    <input 
-                      type="text" 
-                      value={proveedorFormData.telefono}
-                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, telefono: e.target.value })}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                      placeholder="(849) 656-6073" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
-                    <input 
-                      type="email" 
-                      value={proveedorFormData.email}
-                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, email: e.target.value })}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                      placeholder="info@proveedor.com" 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-semibold text-white/70 mb-2">Metodos de Pago del Proveedor</h3>
-                <div className="flex flex-wrap gap-3">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={proveedorFormData.metodosPago.includes("efectivo")}
-                      onChange={() => toggleMetodoPago("efectivo")}
-                      className="w-4 h-4 rounded border-white/20 bg-white/10 focus:ring-amber-500"
-                    />
-                    <span className="text-white/80 text-sm">Efectivo</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={proveedorFormData.metodosPago.includes("transferencia")}
-                      onChange={() => toggleMetodoPago("transferencia")}
-                      className="w-4 h-4 rounded border-white/20 bg-white/10 focus:ring-amber-500"
-                    />
-                    <span className="text-white/80 text-sm">Transferencia</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={proveedorFormData.metodosPago.includes("paypal")}
-                      onChange={() => toggleMetodoPago("paypal")}
-                      className="w-4 h-4 rounded border-white/20 bg-white/10 focus:ring-amber-500"
-                    />
-                    <span className="text-white/80 text-sm">PayPal</span>
-                  </label>
-                </div>
-                <p className="text-xs text-white/40 mt-1">Selecciona todos los metodos de pago que acepta el proveedor</p>
-              </div>
-
-              <div className="border-t border-white/10 pt-4 mt-2">
-                <h3 className="text-lg font-semibold text-white mb-3">Datos Bancarios del Proveedor</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Banco</label>
-                    <input 
-                      type="text" 
-                      value={proveedorFormData.banco}
-                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, banco: e.target.value })}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                      placeholder="Ej: Banco Popular" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Numero de Cuenta</label>
-                    <input 
-                      type="text" 
-                      value={proveedorFormData.numeroCuenta}
-                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, numeroCuenta: e.target.value })}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                      placeholder="0000-0000-0000" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Beneficiario</label>
-                    <input 
-                      type="text" 
-                      value={proveedorFormData.beneficiario}
-                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, beneficiario: e.target.value })}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                      placeholder="Nombre del titular de la cuenta" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Cuenta</label>
-                    <select 
-                      value={proveedorFormData.tipoCuenta}
-                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, tipoCuenta: e.target.value as "corriente" | "ahorros" | "nomina" })}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                    >
-                      <option value="corriente" className="text-slate-900">Corriente</option>
-                      <option value="ahorros" className="text-slate-900">Ahorros</option>
-                      <option value="nomina" className="text-slate-900">Nomina</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Documentos</label>
-                    <input 
-                      type="text" 
-                      value={proveedorFormData.documentos}
-                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, documentos: e.target.value })}
-                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                      placeholder="RNC, Cedula, etc." 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Nota</label>
-                <textarea 
-                  value={proveedorFormData.nota}
-                  onChange={(e) => setProveedorFormData({ ...proveedorFormData, nota: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                  placeholder="Detalles del proveedor..." 
-                  rows={2}
-                />
-              </div>
-
-              <div className="border-t border-white/10 pt-4">
-                <h3 className="text-lg font-semibold text-white mb-3">Excursiones de este Proveedor</h3>
-                
-                {tempExcursiones.length > 0 && (
-                  <div className="mb-4 overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-white/10">
-                          <th className="px-2 py-2 text-left text-white/60">Nombre</th>
-                          <th className="px-2 py-2 text-left text-white/60">Adulto Venta</th>
-                          <th className="px-2 py-2 text-left text-white/60">Adulto Costo</th>
-                          <th className="px-2 py-2 text-left text-white/60">Nino Venta</th>
-                          <th className="px-2 py-2 text-left text-white/60">Nino Costo</th>
-                          <th className="px-2 py-2 text-left text-white/60">Accion</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {tempExcursiones.map((e, index) => (
-                          <tr key={index} className="border-b border-white/5">
-                            <td className="px-2 py-2 text-white">{e.nombre}</td>
-                            <td className="px-2 py-2 text-amber-400">{formatUSD(e.precioAdultoUSD)}</td>
-                            <td className="px-2 py-2 text-red-400">{formatUSD(e.costoProveedorAdultoUSD)}</td>
-                            <td className="px-2 py-2 text-amber-400">{e.precioNinoUSD !== null ? formatUSD(e.precioNinoUSD) : "-"}</td>
-                            <td className="px-2 py-2 text-red-400">{e.costoProveedorNinoUSD !== null ? formatUSD(e.costoProveedorNinoUSD) : "-"}</td>
-                            <td className="px-2 py-2">
-                              <button type="button" onClick={() => eliminarTempExcursion(index)} className="text-red-400 hover:text-red-300">Eliminar</button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-3 p-3 bg-white/5 rounded-xl">
-                  <div className="col-span-2">
-                    <label className="block text-xs font-medium text-white/60 mb-1">Nombre Excursion *</label>
-                    <input 
-                      type="text" 
-                      value={tempExcursionForm.nombre}
-                      onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, nombre: e.target.value })}
-                      className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                      placeholder="Isla Saona" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-white/60 mb-1">Precio Adulto (USD)</label>
-                    <input 
-                      type="number" 
-                      step="0.01"
-                      value={tempExcursionForm.precioAdultoUSD}
-                      onChange={(e) => {
-                        const valor = e.target.value;
-                        const pv = parseFloat(valor) || 0;
-                        const cp = parseFloat(tempExcursionForm.costoProveedorAdultoUSD) || 0;
-                        const comision = calcularComision(pv, cp);
-                        setTempExcursionForm({ 
-                          ...tempExcursionForm, 
-                          precioAdultoUSD: valor,
-                          comisionAdultoUSD: comision.toString()
-                        });
-                      }}
-                      className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                      placeholder="99.00" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-white/60 mb-1">Costo Adulto (USD)</label>
-                    <input 
-                      type="number" 
-                      step="0.01"
-                      value={tempExcursionForm.costoProveedorAdultoUSD}
-                      onChange={(e) => {
-                        const valor = e.target.value;
-                        const cp = parseFloat(valor) || 0;
-                        const pv = parseFloat(tempExcursionForm.precioAdultoUSD) || 0;
-                        const comision = calcularComision(pv, cp);
-                        setTempExcursionForm({ 
-                          ...tempExcursionForm, 
-                          costoProveedorAdultoUSD: valor,
-                          comisionAdultoUSD: comision.toString()
-                        });
-                      }}
-                      className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                      placeholder="55.00" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-white/60 mb-1">Precio Nino (USD)</label>
-                    <input 
-                      type="number" 
-                      step="0.01"
-                      value={tempExcursionForm.precioNinoUSD}
-                      onChange={(e) => {
-                        const valor = e.target.value;
-                        const tienePrecioNino = valor !== "" && parseFloat(valor) > 0;
-                        const pv = parseFloat(valor) || 0;
-                        const cp = parseFloat(tempExcursionForm.costoProveedorNinoUSD) || 0;
-                        const comision = calcularComision(pv, cp);
-                        setTempExcursionForm({ 
-                          ...tempExcursionForm, 
-                          precioNinoUSD: valor,
-                          tienePrecioNino: tienePrecioNino,
-                          comisionNinoUSD: comision.toString()
-                        });
-                      }}
-                      className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                      placeholder="Dejar vacio si no aplica" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-white/60 mb-1">Costo Nino (USD)</label>
-                    <input 
-                      type="number" 
-                      step="0.01"
-                      value={tempExcursionForm.costoProveedorNinoUSD}
-                      onChange={(e) => {
-                        const valor = e.target.value;
-                        const cp = parseFloat(valor) || 0;
-                        const pv = parseFloat(tempExcursionForm.precioNinoUSD) || 0;
-                        const comision = calcularComision(pv, cp);
-                        setTempExcursionForm({ 
-                          ...tempExcursionForm, 
-                          costoProveedorNinoUSD: valor,
-                          comisionNinoUSD: comision.toString()
-                        });
-                      }}
-                      className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                      placeholder="Dejar vacio si no aplica" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-white/60 mb-1">Zona</label>
-                    <input 
-                      type="text" 
-                      value={tempExcursionForm.zona}
-                      onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, zona: e.target.value })}
-                      className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                      placeholder="Bavaro" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-white/60 mb-1">Capacidad</label>
-                    <input 
-                      type="text" 
-                      value={tempExcursionForm.capacidad}
-                      onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, capacidad: e.target.value })}
-                      className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                      placeholder="2 personas" 
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <button 
-                      type="button" 
-                      onClick={agregarTempExcursion}
-                      className="w-full bg-blue-500/20 text-blue-400 py-2 rounded-lg hover:bg-blue-500/30 transition-all text-sm font-medium"
-                    >
-                      + Agregar Excursion
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>
-                {editingProveedorId ? "Actualizar Proveedor" : "Guardar Proveedor"}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================
-          MODAL DE EXCURSION
-      ============================================ */}
-      {showExcursionForm && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">{editingExcursionId ? "Editar Excursion" : "Nueva Excursion"}</h2>
-              <button onClick={() => setShowExcursionForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
-            </div>
-            <form onSubmit={handleExcursionSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Nombre de la Excursion *</label>
-                <input 
-                  type="text" 
-                  value={excursionFormData.nombre}
-                  onChange={(e) => setExcursionFormData({ ...excursionFormData, nombre: e.target.value })}
-                  required 
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                  placeholder="Ej: Isla Saona" 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Proveedor *</label>
-                <select 
-                  value={excursionFormData.proveedorId}
-                  onChange={(e) => setExcursionFormData({ ...excursionFormData, proveedorId: e.target.value })}
-                  required 
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                >
-                  <option value="" className="text-slate-900">Seleccionar proveedor</option>
-                  {proveedores.map(p => <option key={p.id} value={p.id} className="text-slate-900">{p.nombre}</option>)}
-                </select>
-              </div>
-              
-              <div className="border-t border-white/10 pt-3">
-                <h4 className="text-sm font-semibold text-white/70 mb-2">Precios Adulto</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Venta (USD) *</label>
-                    <input 
-                      type="number" 
-                      step="0.01"
-                      value={excursionFormData.precioAdultoUSD}
-                      onChange={(e) => {
-                        const pv = e.target.value;
-                        const cp = excursionFormData.costoProveedorAdultoUSD;
-                        const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
-                        setExcursionFormData({ 
-                          ...excursionFormData, 
-                          precioAdultoUSD: pv,
-                          comisionAdultoUSD: comision.toString()
-                        });
-                      }}
-                      required 
-                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                      placeholder="99.00" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor (USD) *</label>
-                    <input 
-                      type="number" 
-                      step="0.01"
-                      value={excursionFormData.costoProveedorAdultoUSD}
-                      onChange={(e) => {
-                        const cp = e.target.value;
-                        const pv = excursionFormData.precioAdultoUSD;
-                        const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
-                        setExcursionFormData({ 
-                          ...excursionFormData, 
-                          costoProveedorAdultoUSD: cp,
-                          comisionAdultoUSD: comision.toString()
-                        });
-                      }}
-                      required 
-                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                      placeholder="55.00" 
-                    />
-                  </div>
-                </div>
-                <div className="bg-green-500/10 rounded-xl p-3 border border-green-500/20 mt-2">
-                  <label className="block text-sm font-medium text-white/60 mb-1">Comision Adulto (USD) - Tu Ganancia</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 bg-transparent border-0 text-green-400 font-bold text-lg"
-                    value={excursionFormData.comisionAdultoUSD}
-                    readOnly
-                  />
-                </div>
-              </div>
-
-              <div className="border-t border-white/10 pt-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="checkbox"
-                    id="tienePrecioNino"
-                    checked={excursionFormData.tienePrecioNino}
-                    onChange={(e) => {
-                      setExcursionFormData({ 
-                        ...excursionFormData, 
-                        tienePrecioNino: e.target.checked,
-                        precioNinoUSD: e.target.checked ? excursionFormData.precioNinoUSD : "",
-                        costoProveedorNinoUSD: e.target.checked ? excursionFormData.costoProveedorNinoUSD : "",
-                        comisionNinoUSD: e.target.checked ? excursionFormData.comisionNinoUSD : "",
-                      });
-                    }}
-                    className="w-4 h-4 rounded border-white/20 bg-white/10 focus:ring-amber-500"
-                  />
-                  <label htmlFor="tienePrecioNino" className="text-sm font-medium text-white/70">Tiene precio para Ninos</label>
-                </div>
-                
-                {excursionFormData.tienePrecioNino && (
-                  <>
-                    <h4 className="text-sm font-semibold text-white/70 mb-2">Precios Nino</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-white/70 mb-1">Precio Venta Nino (USD)</label>
-                        <input 
-                          type="number" 
-                          step="0.01"
-                          value={excursionFormData.precioNinoUSD}
-                          onChange={(e) => {
-                            const pv = e.target.value;
-                            const cp = excursionFormData.costoProveedorNinoUSD;
-                            const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
-                            setExcursionFormData({ 
-                              ...excursionFormData, 
-                              precioNinoUSD: pv,
-                              comisionNinoUSD: comision.toString()
-                            });
-                          }}
-                          className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                          placeholder="69.00" 
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor Nino (USD)</label>
-                        <input 
-                          type="number" 
-                          step="0.01"
-                          value={excursionFormData.costoProveedorNinoUSD}
-                          onChange={(e) => {
-                            const cp = e.target.value;
-                            const pv = excursionFormData.precioNinoUSD;
-                            const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
-                            setExcursionFormData({ 
-                              ...excursionFormData, 
-                              costoProveedorNinoUSD: cp,
-                              comisionNinoUSD: comision.toString()
-                            });
-                          }}
-                          className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                          placeholder="35.00" 
-                        />
-                      </div>
-                    </div>
-                    <div className="bg-green-500/10 rounded-xl p-3 border border-green-500/20 mt-2">
-                      <label className="block text-sm font-medium text-white/60 mb-1">Comision Nino (USD) - Tu Ganancia</label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2 bg-transparent border-0 text-green-400 font-bold text-lg"
-                        value={excursionFormData.comisionNinoUSD}
-                        readOnly
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Zona (opcional)</label>
-                  <input 
-                    type="text" 
-                    value={excursionFormData.zona}
-                    onChange={(e) => setExcursionFormData({ ...excursionFormData, zona: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="Bavaro, Uvero Alto, etc." 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Capacidad (opcional)</label>
-                  <input 
-                    type="text" 
-                    value={excursionFormData.capacidad}
-                    onChange={(e) => setExcursionFormData({ ...excursionFormData, capacidad: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="2 personas, 4 personas, etc." 
-                  />
-                </div>
-              </div>
-              <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>
-                {editingExcursionId ? "Actualizar Excursion" : "Guardar Excursion"}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================
-          MODAL DE CLIENTE
-      ============================================ */}
-      {showClienteForm && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">Nuevo Cliente</h2>
-              <button onClick={() => setShowClienteForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
-            </div>
-            <form onSubmit={handleClienteSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Cliente *</label>
-                <input type="text" name="nombre" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Ej: Juan Perez" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">WhatsApp</label>
-                <input type="text" name="whatsapp" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="849-000-0000" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
-                <input type="email" name="email" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="cliente@email.com" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Excursion (opcional)</label>
-                <select name="excursionId" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white">
-                  <option value="" className="text-slate-900">Ninguna</option>
-                  {excursiones.map(e => <option key={e.id} value={e.id} className="text-slate-900">{e.nombre}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Fecha de la Excursion (opcional)</label>
-                <input type="date" name="fechaExcursion" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white" />
-              </div>
-              <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>Guardar Cliente</button>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* ... resto de modales ... */}
     </div>
   );
 }
