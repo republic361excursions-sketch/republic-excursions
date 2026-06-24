@@ -25,7 +25,7 @@ interface Proveedor {
   nombre: string;
   telefono: string;
   email: string;
-  metodoPago: "efectivo" | "transferencia" | "paypal";
+  metodosPago: ("efectivo" | "transferencia" | "paypal")[]; // Array de metodos de pago
   banco: string;
   numeroCuenta: string;
   beneficiario: string;
@@ -154,7 +154,7 @@ export default function Home() {
     nombre: "",
     telefono: "",
     email: "",
-    metodoPago: "efectivo" as "efectivo" | "transferencia" | "paypal",
+    metodosPago: [] as ("efectivo" | "transferencia" | "paypal")[],
     banco: "",
     numeroCuenta: "",
     beneficiario: "",
@@ -193,10 +193,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v13");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v13");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v13");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v13");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v14");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v14");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v14");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v14");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -206,22 +206,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v13", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v14", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v13", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v14", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v13", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v14", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v13", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v14", JSON.stringify(data));
   };
 
   // ============================================
@@ -242,7 +242,19 @@ export default function Home() {
     if (editingProveedorId) {
       const updated = proveedores.map(p => 
         p.id === editingProveedorId 
-          ? { ...p, ...proveedorFormData }
+          ? { 
+              ...p, 
+              nombre: proveedorFormData.nombre,
+              telefono: proveedorFormData.telefono,
+              email: proveedorFormData.email,
+              metodosPago: proveedorFormData.metodosPago,
+              banco: proveedorFormData.banco,
+              numeroCuenta: proveedorFormData.numeroCuenta,
+              beneficiario: proveedorFormData.beneficiario,
+              tipoCuenta: proveedorFormData.tipoCuenta,
+              documentos: proveedorFormData.documentos,
+              nota: proveedorFormData.nota,
+            }
           : p
       );
       saveProveedores(updated);
@@ -285,7 +297,7 @@ export default function Home() {
       nombre: "",
       telefono: "",
       email: "",
-      metodoPago: "efectivo",
+      metodosPago: [],
       banco: "",
       numeroCuenta: "",
       beneficiario: "",
@@ -314,7 +326,7 @@ export default function Home() {
       nombre: proveedor.nombre,
       telefono: proveedor.telefono,
       email: proveedor.email,
-      metodoPago: proveedor.metodoPago,
+      metodosPago: proveedor.metodosPago,
       banco: proveedor.banco,
       numeroCuenta: proveedor.numeroCuenta,
       beneficiario: proveedor.beneficiario,
@@ -345,6 +357,20 @@ export default function Home() {
     saveProveedores(updated);
     const excursionesActualizadas = excursiones.filter(e => e.proveedorId !== id);
     saveExcursiones(excursionesActualizadas);
+  };
+
+  // ============================================
+  // MANEJAR METODOS DE PAGO DEL PROVEEDOR
+  // ============================================
+  const toggleMetodoPago = (metodo: "efectivo" | "transferencia" | "paypal") => {
+    setProveedorFormData(prev => {
+      const metodos = prev.metodosPago;
+      if (metodos.includes(metodo)) {
+        return { ...prev, metodosPago: metodos.filter(m => m !== metodo) };
+      } else {
+        return { ...prev, metodosPago: [...metodos, metodo] };
+      }
+    });
   };
 
   // ============================================
@@ -1327,7 +1353,7 @@ export default function Home() {
                   nombre: "",
                   telefono: "",
                   email: "",
-                  metodoPago: "efectivo",
+                  metodosPago: [],
                   banco: "",
                   numeroCuenta: "",
                   beneficiario: "",
@@ -1364,7 +1390,7 @@ export default function Home() {
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Nombre</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Telefono</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Email</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Metodo</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Metodos Pago</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Banco</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursiones</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
@@ -1378,7 +1404,13 @@ export default function Home() {
                           <td className="px-4 py-3 text-sm font-medium text-white">{p.nombre}</td>
                           <td className="px-4 py-3 text-sm text-white/60">{p.telefono}</td>
                           <td className="px-4 py-3 text-sm text-white/60">{p.email}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">{p.metodoPago}</td>
+                          <td className="px-4 py-3 text-sm text-white/60">
+                            {p.metodosPago.map(m => (
+                              <span key={m} className="text-xs bg-white/10 px-2 py-1 rounded-full mr-1">
+                                {m === 'efectivo' ? 'Efectivo' : m === 'transferencia' ? 'Transferencia' : 'PayPal'}
+                              </span>
+                            ))}
+                          </td>
                           <td className="px-4 py-3 text-sm text-white/60">{p.banco || "-"}</td>
                           <td className="px-4 py-3 text-sm text-white/60">
                             <span className="text-xs bg-white/10 px-2 py-1 rounded-full">
@@ -1761,7 +1793,7 @@ export default function Home() {
       )}
 
       {/* ============================================
-          MODAL DE PROVEEDOR CON DATOS BANCARIOS
+          MODAL DE PROVEEDOR CON METODOS DE PAGO MULTIPLES
       ============================================ */}
       {showProveedorForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
@@ -1791,7 +1823,7 @@ export default function Home() {
                     value={proveedorFormData.telefono}
                     onChange={(e) => setProveedorFormData({ ...proveedorFormData, telefono: e.target.value })}
                     className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="809-000-0000" 
+                    placeholder="(849) 656-6073" 
                   />
                 </div>
                 <div>
@@ -1806,22 +1838,43 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Metodo de Pago del Proveedor */}
+              {/* Metodos de Pago del Proveedor - MULTIPLE SELECT */}
               <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago del Proveedor</label>
-                <select 
-                  value={proveedorFormData.metodoPago}
-                  onChange={(e) => setProveedorFormData({ ...proveedorFormData, metodoPago: e.target.value as "efectivo" | "transferencia" | "paypal" })}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                >
-                  <option value="efectivo" className="text-slate-900">Efectivo</option>
-                  <option value="transferencia" className="text-slate-900">Transferencia</option>
-                  <option value="paypal" className="text-slate-900">PayPal</option>
-                </select>
+                <label className="block text-sm font-medium text-white/70 mb-2">Metodos de Pago del Proveedor</label>
+                <div className="flex flex-wrap gap-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={proveedorFormData.metodosPago.includes("efectivo")}
+                      onChange={() => toggleMetodoPago("efectivo")}
+                      className="w-4 h-4 rounded border-white/20 bg-white/10 focus:ring-amber-500"
+                    />
+                    <span className="text-white/80 text-sm">Efectivo</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={proveedorFormData.metodosPago.includes("transferencia")}
+                      onChange={() => toggleMetodoPago("transferencia")}
+                      className="w-4 h-4 rounded border-white/20 bg-white/10 focus:ring-amber-500"
+                    />
+                    <span className="text-white/80 text-sm">Transferencia</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={proveedorFormData.metodosPago.includes("paypal")}
+                      onChange={() => toggleMetodoPago("paypal")}
+                      className="w-4 h-4 rounded border-white/20 bg-white/10 focus:ring-amber-500"
+                    />
+                    <span className="text-white/80 text-sm">PayPal</span>
+                  </label>
+                </div>
+                <p className="text-xs text-white/40 mt-1">Selecciona todos los metodos de pago que acepta el proveedor</p>
               </div>
 
-              {/* Datos Bancarios */}
-              <div className="border-t border-white/10 pt-4">
+              {/* Datos Bancarios - SECCION SEPARADA */}
+              <div className="border-t border-white/10 pt-4 mt-2">
                 <h3 className="text-lg font-semibold text-white mb-3">Datos Bancarios del Proveedor</h3>
                 <div className="space-y-3">
                   <div>
