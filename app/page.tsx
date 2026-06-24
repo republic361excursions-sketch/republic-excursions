@@ -25,7 +25,7 @@ interface Proveedor {
   nombre: string;
   telefono: string;
   email: string;
-  metodosPago: ("efectivo" | "transferencia" | "paypal")[]; // Array de metodos de pago
+  metodosPago: ("efectivo" | "transferencia" | "paypal")[];
   banco: string;
   numeroCuenta: string;
   beneficiario: string;
@@ -193,10 +193,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v14");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v14");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v14");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v14");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v15");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v15");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v15");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v15");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -206,22 +206,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v14", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v15", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v14", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v15", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v14", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v15", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v14", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v15", JSON.stringify(data));
   };
 
   // ============================================
@@ -1017,7 +1017,7 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation */}
+        {/* Navigation - SIN EL BOTON DE NUEVA VENTA */}
         <div className={`flex flex-wrap gap-2 mb-8 ${cardBg} backdrop-blur-lg rounded-2xl p-2 border border-white/10`}>
           {["dashboard", "ventas", "clientes", "proveedores", "excursiones"].map((tab) => {
             const labels: any = {
@@ -1042,6 +1042,7 @@ export default function Home() {
             );
           })}
           <div className="flex-1"></div>
+          {/* BOTON DE NUEVA VENTA MOVIDO A LA DERECHA */}
           <button 
             onClick={() => {
               setEditingVentaId(null);
@@ -1342,7 +1343,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* PROVEEDORES */}
+        {/* PROVEEDORES - CON DATOS BANCARIOS EN LA TABLA */}
         {viewMode === "proveedores" && (
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
             <div className="flex justify-between items-center mb-4">
@@ -1389,9 +1390,12 @@ export default function Home() {
                     <tr className="border-b border-white/10">
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Nombre</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Telefono</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Email</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Metodos Pago</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Banco</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Cuenta</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Beneficiario</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Tipo</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Documentos</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursiones</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
                     </tr>
@@ -1403,7 +1407,6 @@ export default function Home() {
                         <tr key={p.id} className="border-b border-white/5 hover:bg-white/5">
                           <td className="px-4 py-3 text-sm font-medium text-white">{p.nombre}</td>
                           <td className="px-4 py-3 text-sm text-white/60">{p.telefono}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">{p.email}</td>
                           <td className="px-4 py-3 text-sm text-white/60">
                             {p.metodosPago.map(m => (
                               <span key={m} className="text-xs bg-white/10 px-2 py-1 rounded-full mr-1">
@@ -1412,6 +1415,12 @@ export default function Home() {
                             ))}
                           </td>
                           <td className="px-4 py-3 text-sm text-white/60">{p.banco || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-white/60">{p.numeroCuenta || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-white/60">{p.beneficiario || "-"}</td>
+                          <td className="px-4 py-3 text-sm text-white/60">
+                            {p.tipoCuenta === 'corriente' ? 'Corriente' : p.tipoCuenta === 'ahorros' ? 'Ahorros' : 'Nomina'}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-white/60">{p.documentos || "-"}</td>
                           <td className="px-4 py-3 text-sm text-white/60">
                             <span className="text-xs bg-white/10 px-2 py-1 rounded-full">
                               {excursionesDelProveedor.length} excursiones
@@ -1511,8 +1520,10 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL DE VENTA
+          MODALES - (VENTA, PROVEEDOR, EXCURSION, CLIENTE)
+          ... el resto del código es igual que antes ...
       ============================================ */}
+      {/* Modal de Venta */}
       {showForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto border border-white/10">
@@ -1792,9 +1803,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ============================================
-          MODAL DE PROVEEDOR CON METODOS DE PAGO MULTIPLES
-      ============================================ */}
+      {/* Modal de Proveedor */}
       {showProveedorForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto border border-white/10">
@@ -1803,7 +1812,6 @@ export default function Home() {
               <button onClick={() => setShowProveedorForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
             </div>
             <form onSubmit={handleProveedorSubmit} className="space-y-4">
-              {/* Datos del Proveedor */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Proveedor *</label>
                 <input 
@@ -2117,9 +2125,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ============================================
-          MODAL DE EXCURSION
-      ============================================ */}
+      {/* Modal de Excursion */}
       {showExcursionForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
@@ -2317,9 +2323,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ============================================
-          MODAL DE CLIENTE
-      ============================================ */}
+      {/* Modal de Cliente */}
       {showClienteForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
