@@ -23,6 +23,7 @@ interface Excursion {
 interface Proveedor {
   id: string;
   nombre: string;
+  empresa: string;
   telefono: string;
   email: string;
   metodosPago: ("efectivo" | "transferencia" | "paypal")[];
@@ -63,10 +64,10 @@ interface Venta {
   proveedorNombre: string;
   proveedorPagado: "pendiente" | "pagado";
   metodoPagoProveedor: "efectivo" | "transferencia" | "paypal";
-  tipoCliente: "adulto" | "nino";
-  tipoServicio: "compartido" | "privado";
-  grupoPrivado?: number;
-  cantidadPersonas: number;
+  cantidadAdultos: number;
+  cantidadNinos: number;
+  tipoServicio: "compartido" | "privado" | "grupo";
+  nombreGrupo?: string;
   nota: string;
 }
 
@@ -117,9 +118,17 @@ export default function Home() {
     excursionId: "",
     excursionNombre: "",
     fechaExcursion: "",
-    precioVentaUSD: "",
-    costoProveedorUSD: "",
-    comisionUSD: "",
+    precioAdultoUSD: "",
+    precioNinoUSD: "",
+    costoProveedorAdultoUSD: "",
+    costoProveedorNinoUSD: "",
+    comisionAdultoUSD: "",
+    comisionNinoUSD: "",
+    cantidadAdultos: 1,
+    cantidadNinos: 0,
+    precioTotalUSD: "",
+    costoTotalUSD: "",
+    comisionTotalUSD: "",
     pagoCliente: "completo" as "completo" | "deposito_25" | "pago_dia",
     montoPagadoUSD: "",
     saldoPendienteUSD: "",
@@ -128,10 +137,8 @@ export default function Home() {
     proveedorNombre: "",
     proveedorPagado: "pendiente" as "pendiente" | "pagado",
     metodoPagoProveedor: "efectivo" as "efectivo" | "transferencia" | "paypal",
-    tipoCliente: "adulto" as "adulto" | "nino",
-    tipoServicio: "compartido" as "compartido" | "privado",
-    grupoPrivado: "",
-    cantidadPersonas: 1,
+    tipoServicio: "compartido" as "compartido" | "privado" | "grupo",
+    nombreGrupo: "",
     nota: "",
   });
 
@@ -152,6 +159,7 @@ export default function Home() {
 
   const [proveedorFormData, setProveedorFormData] = useState({
     nombre: "",
+    empresa: "",
     telefono: "",
     email: "",
     metodosPago: [] as ("efectivo" | "transferencia" | "paypal")[],
@@ -193,10 +201,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v18");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v18");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v18");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v18");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v20");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v20");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v20");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v20");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -206,22 +214,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v18", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v20", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v18", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v20", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v18", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v20", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v18", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v20", JSON.stringify(data));
   };
 
   // ============================================
@@ -229,6 +237,24 @@ export default function Home() {
   // ============================================
   const calcularComision = (precioVenta: number, costoProveedor: number) => {
     return precioVenta - costoProveedor;
+  };
+
+  // ============================================
+  // CALCULAR TOTALES DE VENTA
+  // ============================================
+  const calcularTotalesVenta = () => {
+    const precioAdulto = parseFloat(formData.precioAdultoUSD) || 0;
+    const precioNino = parseFloat(formData.precioNinoUSD) || 0;
+    const costoAdulto = parseFloat(formData.costoProveedorAdultoUSD) || 0;
+    const costoNino = parseFloat(formData.costoProveedorNinoUSD) || 0;
+    const cantAdultos = formData.cantidadAdultos || 0;
+    const cantNinos = formData.cantidadNinos || 0;
+    
+    const precioTotal = (precioAdulto * cantAdultos) + (precioNino * cantNinos);
+    const costoTotal = (costoAdulto * cantAdultos) + (costoNino * cantNinos);
+    const comisionTotal = precioTotal - costoTotal;
+    
+    return { precioTotal, costoTotal, comisionTotal };
   };
 
   // ============================================
@@ -245,6 +271,7 @@ export default function Home() {
           ? { 
               ...p, 
               nombre: proveedorFormData.nombre,
+              empresa: proveedorFormData.empresa,
               telefono: proveedorFormData.telefono,
               email: proveedorFormData.email,
               metodosPago: proveedorFormData.metodosPago,
@@ -295,6 +322,7 @@ export default function Home() {
     setEditingProveedorId(null);
     setProveedorFormData({
       nombre: "",
+      empresa: "",
       telefono: "",
       email: "",
       metodosPago: [],
@@ -324,6 +352,7 @@ export default function Home() {
     setEditingProveedorId(proveedor.id);
     setProveedorFormData({
       nombre: proveedor.nombre,
+      empresa: proveedor.empresa || "",
       telefono: proveedor.telefono,
       email: proveedor.email,
       metodosPago: proveedor.metodosPago,
@@ -571,16 +600,9 @@ export default function Home() {
   // ============================================
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const precioVentaUSD = parseFloat(formData.precioVentaUSD) || 0;
-    const costoProveedorUSD = parseFloat(formData.costoProveedorUSD) || 0;
-    const comisionUSD = calcularComision(precioVentaUSD, costoProveedorUSD);
-    const montoPagadoUSD = parseFloat(formData.montoPagadoUSD) || 0;
-    const cantidad = parseInt(formData.cantidadPersonas.toString()) || 1;
-    const grupoPrivado = formData.tipoServicio === "privado" ? parseInt(formData.grupoPrivado) || 0 : undefined;
     
-    const precioTotal = precioVentaUSD * cantidad;
-    const costoTotal = costoProveedorUSD * cantidad;
-    const comisionTotal = comisionUSD * cantidad;
+    const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
+    const montoPagadoUSD = parseFloat(formData.montoPagadoUSD) || 0;
     
     let saldoPendienteUSD = 0;
     if (formData.pagoCliente === "completo") {
@@ -610,10 +632,10 @@ export default function Home() {
       proveedorNombre: formData.proveedorNombre,
       proveedorPagado: formData.proveedorPagado,
       metodoPagoProveedor: formData.metodoPagoProveedor,
-      tipoCliente: formData.tipoCliente,
+      cantidadAdultos: formData.cantidadAdultos,
+      cantidadNinos: formData.cantidadNinos,
       tipoServicio: formData.tipoServicio,
-      grupoPrivado: grupoPrivado,
-      cantidadPersonas: cantidad,
+      nombreGrupo: formData.tipoServicio === "grupo" ? formData.nombreGrupo : undefined,
       nota: formData.nota,
     };
 
@@ -636,9 +658,17 @@ export default function Home() {
       excursionId: "",
       excursionNombre: "",
       fechaExcursion: "",
-      precioVentaUSD: "",
-      costoProveedorUSD: "",
-      comisionUSD: "",
+      precioAdultoUSD: "",
+      precioNinoUSD: "",
+      costoProveedorAdultoUSD: "",
+      costoProveedorNinoUSD: "",
+      comisionAdultoUSD: "",
+      comisionNinoUSD: "",
+      cantidadAdultos: 1,
+      cantidadNinos: 0,
+      precioTotalUSD: "",
+      costoTotalUSD: "",
+      comisionTotalUSD: "",
       pagoCliente: "completo",
       montoPagadoUSD: "",
       saldoPendienteUSD: "",
@@ -647,10 +677,8 @@ export default function Home() {
       proveedorNombre: "",
       proveedorPagado: "pendiente",
       metodoPagoProveedor: "efectivo",
-      tipoCliente: "adulto",
       tipoServicio: "compartido",
-      grupoPrivado: "",
-      cantidadPersonas: 1,
+      nombreGrupo: "",
       nota: "",
     });
     setShowForm(false);
@@ -666,25 +694,23 @@ export default function Home() {
     if (excursion) {
       setSelectedExcursionForVenta(excursion);
       
-      const esNino = formData.tipoCliente === "nino";
-      const tienePrecioNino = excursion.precioNinoUSD !== null && excursion.precioNinoUSD !== undefined;
-      
-      const precio = esNino && tienePrecioNino ? excursion.precioNinoUSD! : excursion.precioAdultoUSD;
-      const costo = esNino && tienePrecioNino ? excursion.costoProveedorNinoUSD! : excursion.costoProveedorAdultoUSD;
-      const comision = esNino && tienePrecioNino ? excursion.comisionNinoUSD! : excursion.comisionAdultoUSD;
-      
-      const cantidad = parseInt(formData.cantidadPersonas.toString()) || 1;
-      const precioTotal = precio * cantidad;
-      const costoTotal = costo * cantidad;
-      const comisionTotal = comision * cantidad;
+      const precioAdulto = excursion.precioAdultoUSD;
+      const precioNino = excursion.precioNinoUSD || 0;
+      const costoAdulto = excursion.costoProveedorAdultoUSD;
+      const costoNino = excursion.costoProveedorNinoUSD || 0;
+      const comisionAdulto = excursion.comisionAdultoUSD;
+      const comisionNino = excursion.comisionNinoUSD || 0;
       
       setFormData({
         ...formData,
         excursionId: excursion.id,
         excursionNombre: excursion.nombre,
-        precioVentaUSD: precioTotal.toString(),
-        costoProveedorUSD: costoTotal.toString(),
-        comisionUSD: comisionTotal.toString(),
+        precioAdultoUSD: precioAdulto.toString(),
+        precioNinoUSD: precioNino.toString(),
+        costoProveedorAdultoUSD: costoAdulto.toString(),
+        costoProveedorNinoUSD: costoNino.toString(),
+        comisionAdultoUSD: comisionAdulto.toString(),
+        comisionNinoUSD: comisionNino.toString(),
         proveedorId: excursion.proveedorId,
         proveedorNombre: excursion.proveedorNombre,
       });
@@ -692,96 +718,21 @@ export default function Home() {
   };
 
   // ============================================
-  // CAMBIAR TIPO DE CLIENTE
+  // ACTUALIZAR CANTIDADES Y TOTALES
   // ============================================
-  const cambiarTipoCliente = (tipo: "adulto" | "nino") => {
-    if (!selectedExcursionForVenta) {
-      setFormData(prev => ({ ...prev, tipoCliente: tipo }));
-      return;
-    }
-    
-    const excursion = selectedExcursionForVenta;
-    const esNino = tipo === "nino";
-    const tienePrecioNino = excursion.precioNinoUSD !== null && excursion.precioNinoUSD !== undefined;
-    
-    if (esNino && !tienePrecioNino) {
-      alert("Esta excursion no tiene precio para ninos. Se usara el precio de adulto.");
-      setFormData(prev => ({ ...prev, tipoCliente: "adulto" }));
-      return;
-    }
-    
-    const precio = esNino && tienePrecioNino ? excursion.precioNinoUSD! : excursion.precioAdultoUSD;
-    const costo = esNino && tienePrecioNino ? excursion.costoProveedorNinoUSD! : excursion.costoProveedorAdultoUSD;
-    const comision = esNino && tienePrecioNino ? excursion.comisionNinoUSD! : excursion.comisionAdultoUSD;
-    
-    const cantidad = parseInt(formData.cantidadPersonas.toString()) || 1;
-    const precioTotal = precio * cantidad;
-    const costoTotal = costo * cantidad;
-    const comisionTotal = comision * cantidad;
-    
-    setFormData(prev => ({
-      ...prev,
-      tipoCliente: tipo,
-      precioVentaUSD: precioTotal.toString(),
-      costoProveedorUSD: costoTotal.toString(),
-      comisionUSD: comisionTotal.toString(),
-    }));
-  };
-
-  // ============================================
-  // ACTUALIZAR CANTIDAD
-  // ============================================
-  const updateCantidadPersonas = (cantidad: number) => {
-    if (selectedExcursionForVenta) {
-      const excursion = selectedExcursionForVenta;
-      const esNino = formData.tipoCliente === "nino";
-      const tienePrecioNino = excursion.precioNinoUSD !== null && excursion.precioNinoUSD !== undefined;
-      
-      const precio = esNino && tienePrecioNino ? excursion.precioNinoUSD! : excursion.precioAdultoUSD;
-      const costo = esNino && tienePrecioNino ? excursion.costoProveedorNinoUSD! : excursion.costoProveedorAdultoUSD;
-      const comision = esNino && tienePrecioNino ? excursion.comisionNinoUSD! : excursion.comisionAdultoUSD;
-      
-      const precioTotal = precio * cantidad;
-      const costoTotal = costo * cantidad;
-      const comisionTotal = comision * cantidad;
-      
-      setFormData({
-        ...formData,
-        cantidadPersonas: cantidad,
-        precioVentaUSD: precioTotal.toString(),
-        costoProveedorUSD: costoTotal.toString(),
-        comisionUSD: comisionTotal.toString(),
-      });
-    } else {
-      setFormData({
-        ...formData,
-        cantidadPersonas: cantidad,
-      });
-    }
-  };
-
-  const handleVentaPrecioChange = (valor: string) => {
-    const pv = parseFloat(valor) || 0;
-    const cp = parseFloat(formData.costoProveedorUSD) || 0;
-    const comision = calcularComision(pv, cp);
+  const updateCantidades = () => {
+    const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
     setFormData({
       ...formData,
-      precioVentaUSD: valor,
-      comisionUSD: comision.toString()
+      precioTotalUSD: precioTotal.toString(),
+      costoTotalUSD: costoTotal.toString(),
+      comisionTotalUSD: comisionTotal.toString(),
     });
   };
 
-  const handleVentaCostoChange = (valor: string) => {
-    const pv = parseFloat(formData.precioVentaUSD) || 0;
-    const cp = parseFloat(valor) || 0;
-    const comision = calcularComision(pv, cp);
-    setFormData({
-      ...formData,
-      costoProveedorUSD: valor,
-      comisionUSD: comision.toString()
-    });
-  };
-
+  // ============================================
+  // HANDLE VENTA EDIT
+  // ============================================
   const editVenta = (venta: Venta) => {
     setEditingVentaId(venta.id);
     setFormData({
@@ -791,9 +742,17 @@ export default function Home() {
       excursionId: venta.excursionId,
       excursionNombre: venta.excursionNombre,
       fechaExcursion: venta.fechaExcursion,
-      precioVentaUSD: venta.precioVentaUSD.toString(),
-      costoProveedorUSD: venta.costoProveedorUSD.toString(),
-      comisionUSD: venta.comisionUSD.toString(),
+      precioAdultoUSD: (venta.precioVentaUSD / (venta.cantidadAdultos + venta.cantidadNinos || 1)).toString(),
+      precioNinoUSD: (venta.precioVentaUSD / (venta.cantidadAdultos + venta.cantidadNinos || 1)).toString(),
+      costoProveedorAdultoUSD: (venta.costoProveedorUSD / (venta.cantidadAdultos + venta.cantidadNinos || 1)).toString(),
+      costoProveedorNinoUSD: (venta.costoProveedorUSD / (venta.cantidadAdultos + venta.cantidadNinos || 1)).toString(),
+      comisionAdultoUSD: (venta.comisionUSD / (venta.cantidadAdultos + venta.cantidadNinos || 1)).toString(),
+      comisionNinoUSD: (venta.comisionUSD / (venta.cantidadAdultos + venta.cantidadNinos || 1)).toString(),
+      cantidadAdultos: venta.cantidadAdultos,
+      cantidadNinos: venta.cantidadNinos,
+      precioTotalUSD: venta.precioVentaUSD.toString(),
+      costoTotalUSD: venta.costoProveedorUSD.toString(),
+      comisionTotalUSD: venta.comisionUSD.toString(),
       pagoCliente: venta.pagoCliente,
       montoPagadoUSD: venta.montoPagadoUSD.toString(),
       saldoPendienteUSD: venta.saldoPendienteUSD.toString(),
@@ -802,10 +761,8 @@ export default function Home() {
       proveedorNombre: venta.proveedorNombre,
       proveedorPagado: venta.proveedorPagado,
       metodoPagoProveedor: venta.metodoPagoProveedor,
-      tipoCliente: venta.tipoCliente,
       tipoServicio: venta.tipoServicio,
-      grupoPrivado: venta.grupoPrivado?.toString() || "",
-      cantidadPersonas: venta.cantidadPersonas,
+      nombreGrupo: venta.nombreGrupo || "",
       nota: venta.nota,
     });
     setShowForm(true);
@@ -891,9 +848,9 @@ export default function Home() {
 
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Cliente,Excursion,Cantidad,Tipo,Servicio,Grupo Privado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago Cliente,Proveedor,Metodo Pago Proveedor,Pago Proveedor,Nota\n";
+    let csv = "Fecha,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
     ventas.forEach(v => {
-      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadPersonas},"${v.tipoCliente}","${v.tipoServicio}",${v.grupoPrivado || 0},${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.metodoPagoProveedor}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -1028,9 +985,17 @@ export default function Home() {
                       excursionId: "",
                       excursionNombre: "",
                       fechaExcursion: "",
-                      precioVentaUSD: "",
-                      costoProveedorUSD: "",
-                      comisionUSD: "",
+                      precioAdultoUSD: "",
+                      precioNinoUSD: "",
+                      costoProveedorAdultoUSD: "",
+                      costoProveedorNinoUSD: "",
+                      comisionAdultoUSD: "",
+                      comisionNinoUSD: "",
+                      cantidadAdultos: 1,
+                      cantidadNinos: 0,
+                      precioTotalUSD: "",
+                      costoTotalUSD: "",
+                      comisionTotalUSD: "",
                       pagoCliente: "completo",
                       montoPagadoUSD: "",
                       saldoPendienteUSD: "",
@@ -1039,10 +1004,8 @@ export default function Home() {
                       proveedorNombre: "",
                       proveedorPagado: "pendiente",
                       metodoPagoProveedor: "efectivo",
-                      tipoCliente: "adulto",
                       tipoServicio: "compartido",
-                      grupoPrivado: "",
-                      cantidadPersonas: 1,
+                      nombreGrupo: "",
                       nota: "",
                     });
                     setShowForm(true);
@@ -1053,14 +1016,11 @@ export default function Home() {
                   <div key={v.id} className="flex flex-wrap items-center justify-between py-3 border-b border-white/5 last:border-0">
                     <div>
                       <p className="font-medium text-white">{v.clienteNombre}</p>
-                      <p className="text-sm text-white/40">{v.excursionNombre} - {v.cantidadPersonas} personas - {new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</p>
+                      <p className="text-sm text-white/40">{v.excursionNombre} - {v.cantidadAdultos + v.cantidadNinos} personas - {new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-4">
-                      <span className={`text-xs px-2 py-1 rounded-full ${v.tipoCliente === 'adulto' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
-                        {v.tipoCliente === 'adulto' ? 'Adulto' : 'Nino'}
-                      </span>
-                      <span className={`text-xs px-2 py-1 rounded-full ${v.tipoServicio === 'compartido' ? 'bg-purple-500/20 text-purple-400' : 'bg-orange-500/20 text-orange-400'}`}>
-                        {v.tipoServicio === 'compartido' ? 'Compartido' : 'Privado'}
+                      <span className={`text-xs px-2 py-1 rounded-full ${v.tipoServicio === 'compartido' ? 'bg-purple-500/20 text-purple-400' : v.tipoServicio === 'privado' ? 'bg-orange-500/20 text-orange-400' : 'bg-green-500/20 text-green-400'}`}>
+                        {v.tipoServicio === 'compartido' ? 'Compartido' : v.tipoServicio === 'privado' ? 'Privado' : 'Grupo'}
                       </span>
                       <span className={`text-xs px-2 py-1 rounded-full ${v.pagoCliente === 'completo' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
                         {getPagoClienteText(v.pagoCliente)}
@@ -1102,9 +1062,17 @@ export default function Home() {
                     excursionId: "",
                     excursionNombre: "",
                     fechaExcursion: "",
-                    precioVentaUSD: "",
-                    costoProveedorUSD: "",
-                    comisionUSD: "",
+                    precioAdultoUSD: "",
+                    precioNinoUSD: "",
+                    costoProveedorAdultoUSD: "",
+                    costoProveedorNinoUSD: "",
+                    comisionAdultoUSD: "",
+                    comisionNinoUSD: "",
+                    cantidadAdultos: 1,
+                    cantidadNinos: 0,
+                    precioTotalUSD: "",
+                    costoTotalUSD: "",
+                    comisionTotalUSD: "",
                     pagoCliente: "completo",
                     montoPagadoUSD: "",
                     saldoPendienteUSD: "",
@@ -1113,10 +1081,8 @@ export default function Home() {
                     proveedorNombre: "",
                     proveedorPagado: "pendiente",
                     metodoPagoProveedor: "efectivo",
-                    tipoCliente: "adulto",
                     tipoServicio: "compartido",
-                    grupoPrivado: "",
-                    cantidadPersonas: 1,
+                    nombreGrupo: "",
                     nota: "",
                   });
                   setShowForm(true);
@@ -1153,8 +1119,8 @@ export default function Home() {
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Fecha</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Cliente</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursion</th>
-                                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Cant</th>
-                                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Tipo</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Adultos</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Ninos</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Servicio</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Venta</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Comision</th>
@@ -1167,15 +1133,11 @@ export default function Home() {
                                     <td className="px-4 py-3 text-sm text-white/60">{new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</td>
                                     <td className="px-4 py-3 text-sm font-medium text-white">{v.clienteNombre}</td>
                                     <td className="px-4 py-3 text-sm text-white/60">{v.excursionNombre}</td>
-                                    <td className="px-4 py-3 text-sm text-white/60">{v.cantidadPersonas}</td>
+                                    <td className="px-4 py-3 text-sm text-white/60">{v.cantidadAdultos}</td>
+                                    <td className="px-4 py-3 text-sm text-white/60">{v.cantidadNinos}</td>
                                     <td className="px-4 py-3 text-sm">
-                                      <span className={`text-xs px-2 py-1 rounded-full ${v.tipoCliente === 'adulto' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
-                                        {v.tipoCliente === 'adulto' ? 'Adulto' : 'Nino'}
-                                      </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-sm">
-                                      <span className={`text-xs px-2 py-1 rounded-full ${v.tipoServicio === 'compartido' ? 'bg-purple-500/20 text-purple-400' : 'bg-orange-500/20 text-orange-400'}`}>
-                                        {v.tipoServicio === 'compartido' ? 'Compartido' : 'Privado'}
+                                      <span className={`text-xs px-2 py-1 rounded-full ${v.tipoServicio === 'compartido' ? 'bg-purple-500/20 text-purple-400' : v.tipoServicio === 'privado' ? 'bg-orange-500/20 text-orange-400' : 'bg-green-500/20 text-green-400'}`}>
+                                        {v.tipoServicio === 'compartido' ? 'Compartido' : v.tipoServicio === 'privado' ? 'Privado' : 'Grupo'}
                                       </span>
                                     </td>
                                     <td className={`px-4 py-3 text-sm font-bold ${isRaul ? 'text-amber-400' : 'text-pink-300'}`}>{formatUSD(v.precioVentaUSD)}</td>
@@ -1260,6 +1222,7 @@ export default function Home() {
                 setEditingProveedorId(null);
                 setProveedorFormData({
                   nombre: "",
+                  empresa: "",
                   telefono: "",
                   email: "",
                   metodosPago: [],
@@ -1297,6 +1260,7 @@ export default function Home() {
                   <thead>
                     <tr className="border-b border-white/10">
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Nombre</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Empresa</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Telefono</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Metodos Pago</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursiones</th>
@@ -1309,6 +1273,7 @@ export default function Home() {
                       return (
                         <tr key={p.id} className="border-b border-white/5 hover:bg-white/5">
                           <td className="px-4 py-3 text-sm font-medium text-white">{p.nombre}</td>
+                          <td className="px-4 py-3 text-sm text-white/60">{p.empresa || "-"}</td>
                           <td className="px-4 py-3 text-sm text-white/60">{p.telefono}</td>
                           <td className="px-4 py-3 text-sm text-white/60">
                             {p.metodosPago.map(m => (
@@ -1353,6 +1318,7 @@ export default function Home() {
                   <thead>
                     <tr className="border-b border-white/10">
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Proveedor</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Empresa</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Banco</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Numero de Cuenta</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Beneficiario</th>
@@ -1364,6 +1330,7 @@ export default function Home() {
                     {proveedores.map((p) => (
                       <tr key={p.id} className="border-b border-white/5 hover:bg-white/5">
                         <td className="px-4 py-3 text-sm font-medium text-white">{p.nombre}</td>
+                        <td className="px-4 py-3 text-sm text-white/60">{p.empresa || "-"}</td>
                         <td className="px-4 py-3 text-sm text-white/60">{p.banco || "-"}</td>
                         <td className="px-4 py-3 text-sm text-white/60">{p.numeroCuenta || "-"}</td>
                         <td className="px-4 py-3 text-sm text-white/60">{p.beneficiario || "-"}</td>
@@ -1424,7 +1391,7 @@ export default function Home() {
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Adulto Costo</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Nino Venta</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Nino Costo</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Comision</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Comision Adulto</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
                     </tr>
                   </thead>
@@ -1532,9 +1499,17 @@ export default function Home() {
                 excursionId: "",
                 excursionNombre: "",
                 fechaExcursion: "",
-                precioVentaUSD: "",
-                costoProveedorUSD: "",
-                comisionUSD: "",
+                precioAdultoUSD: "",
+                precioNinoUSD: "",
+                costoProveedorAdultoUSD: "",
+                costoProveedorNinoUSD: "",
+                comisionAdultoUSD: "",
+                comisionNinoUSD: "",
+                cantidadAdultos: 1,
+                cantidadNinos: 0,
+                precioTotalUSD: "",
+                costoTotalUSD: "",
+                comisionTotalUSD: "",
                 pagoCliente: "completo",
                 montoPagadoUSD: "",
                 saldoPendienteUSD: "",
@@ -1543,10 +1518,8 @@ export default function Home() {
                 proveedorNombre: "",
                 proveedorPagado: "pendiente",
                 metodoPagoProveedor: "efectivo",
-                tipoCliente: "adulto",
                 tipoServicio: "compartido",
-                grupoPrivado: "",
-                cantidadPersonas: 1,
+                nombreGrupo: "",
                 nota: "",
               });
               setShowForm(true);
@@ -1561,7 +1534,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL DE VENTA
+          MODAL DE VENTA - ACTUALIZADO
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
@@ -1575,6 +1548,7 @@ export default function Home() {
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Excursion */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Excursion *</label>
                 <select
@@ -1596,121 +1570,150 @@ export default function Home() {
                 </select>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Cantidad Personas *</label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                    value={formData.cantidadPersonas}
-                    onChange={(e) => updateCantidadPersonas(parseInt(e.target.value) || 1)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Precio Venta (USD) *</label>
-                  <input
-                    type="number"
-                    required
-                    step="0.01"
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
-                    placeholder="0.00"
-                    value={formData.precioVentaUSD}
-                    onChange={(e) => handleVentaPrecioChange(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor (USD) *</label>
-                  <input
-                    type="number"
-                    required
-                    step="0.01"
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
-                    placeholder="0.00"
-                    value={formData.costoProveedorUSD}
-                    onChange={(e) => handleVentaCostoChange(e.target.value)}
-                  />
-                </div>
-              </div>
-
+              {/* Precios */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-green-500/10 rounded-xl p-3 border border-green-500/20">
-                  <label className="block text-sm font-medium text-white/60 mb-1">Comision (USD) - Tu Ganancia</label>
+                <div className="bg-blue-500/10 rounded-xl p-3 border border-blue-500/20">
+                  <label className="block text-sm font-medium text-white/60 mb-1">Precio Adulto (USD)</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2 bg-transparent border-0 text-green-400 font-bold text-lg"
-                    value={formData.comisionUSD}
+                    className="w-full px-4 py-2 bg-transparent border-0 text-blue-400 font-bold text-lg"
+                    value={formData.precioAdultoUSD}
                     readOnly
                   />
                 </div>
                 <div className="bg-blue-500/10 rounded-xl p-3 border border-blue-500/20">
-                  <label className="block text-sm font-medium text-white/60 mb-1">% Comision</label>
+                  <label className="block text-sm font-medium text-white/60 mb-1">Precio Nino (USD)</label>
                   <input
                     type="text"
                     className="w-full px-4 py-2 bg-transparent border-0 text-blue-400 font-bold text-lg"
-                    value={(() => {
-                      const pv = parseFloat(formData.precioVentaUSD) || 0;
-                      const cp = parseFloat(formData.costoProveedorUSD) || 0;
-                      if (pv === 0) return "0%";
-                      return ((pv - cp) / pv * 100).toFixed(2) + "%";
-                    })()}
+                    value={formData.precioNinoUSD || "0"}
                     readOnly
                   />
                 </div>
               </div>
 
+              {/* Cantidad Adultos y Ninos */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Cliente *</label>
-                  <select 
-                    required 
+                  <label className="block text-sm font-medium text-white/70 mb-1">Adultos *</label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
                     className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                    value={formData.tipoCliente}
-                    onChange={(e) => cambiarTipoCliente(e.target.value as "adulto" | "nino")}
-                  >
-                    <option value="adulto" className="text-slate-900">Adulto</option>
-                    <option value="nino" className="text-slate-900">Nino</option>
-                  </select>
-                  {selectedExcursionForVenta && selectedExcursionForVenta.precioNinoUSD === null && formData.tipoCliente === "nino" && (
-                    <p className="text-xs text-yellow-400 mt-1">Esta excursion no tiene precio para ninos. Se usara precio de adulto.</p>
-                  )}
+                    value={formData.cantidadAdultos}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 0;
+                      setFormData({ ...formData, cantidadAdultos: val });
+                      setTimeout(updateCantidades, 10);
+                    }}
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Servicio *</label>
-                  <select 
-                    required 
+                  <label className="block text-sm font-medium text-white/70 mb-1">Ninos</label>
+                  <input
+                    type="number"
+                    min="0"
                     className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                    value={formData.tipoServicio}
+                    value={formData.cantidadNinos}
                     onChange={(e) => {
-                      const value = e.target.value as "compartido" | "privado";
-                      setFormData({ 
-                        ...formData, 
-                        tipoServicio: value,
-                        grupoPrivado: value === "privado" ? formData.grupoPrivado : ""
-                      });
+                      const val = parseInt(e.target.value) || 0;
+                      setFormData({ ...formData, cantidadNinos: val });
+                      setTimeout(updateCantidades, 10);
                     }}
-                  >
-                    <option value="compartido" className="text-slate-900">Compartido</option>
-                    <option value="privado" className="text-slate-900">Privado</option>
-                  </select>
+                  />
                 </div>
               </div>
 
-              {formData.tipoServicio === "privado" && (
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Grupo Privado (capacidad)</label>
+              {/* Costos y Comisiones */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/20">
+                  <label className="block text-sm font-medium text-white/60 mb-1">Costo Proveedor Adulto (USD)</label>
                   <input
-                    type="number"
-                    min="1"
+                    type="text"
+                    className="w-full px-4 py-2 bg-transparent border-0 text-red-400 font-bold text-lg"
+                    value={formData.costoProveedorAdultoUSD}
+                    readOnly
+                  />
+                </div>
+                <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/20">
+                  <label className="block text-sm font-medium text-white/60 mb-1">Costo Proveedor Nino (USD)</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 bg-transparent border-0 text-red-400 font-bold text-lg"
+                    value={formData.costoProveedorNinoUSD || "0"}
+                    readOnly
+                  />
+                </div>
+              </div>
+
+              {/* Totales */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20">
+                  <label className="block text-sm font-medium text-white/60 mb-1">Total Venta (USD)</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 bg-transparent border-0 text-amber-400 font-bold text-lg"
+                    value={formData.precioTotalUSD || "0.00"}
+                    readOnly
+                  />
+                </div>
+                <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/20">
+                  <label className="block text-sm font-medium text-white/60 mb-1">Total Costo (USD)</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 bg-transparent border-0 text-red-400 font-bold text-lg"
+                    value={formData.costoTotalUSD || "0.00"}
+                    readOnly
+                  />
+                </div>
+                <div className="bg-green-500/10 rounded-xl p-3 border border-green-500/20">
+                  <label className="block text-sm font-medium text-white/60 mb-1">Total Comision (USD)</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 bg-transparent border-0 text-green-400 font-bold text-lg"
+                    value={formData.comisionTotalUSD || "0.00"}
+                    readOnly
+                  />
+                </div>
+              </div>
+
+              {/* Tipo de Servicio */}
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Servicio *</label>
+                <select 
+                  required 
+                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
+                  value={formData.tipoServicio}
+                  onChange={(e) => {
+                    const value = e.target.value as "compartido" | "privado" | "grupo";
+                    setFormData({ 
+                      ...formData, 
+                      tipoServicio: value,
+                      nombreGrupo: value === "grupo" ? formData.nombreGrupo : ""
+                    });
+                  }}
+                >
+                  <option value="compartido" className="text-slate-900">Compartido</option>
+                  <option value="privado" className="text-slate-900">Privado</option>
+                  <option value="grupo" className="text-slate-900">Grupo</option>
+                </select>
+              </div>
+
+              {formData.tipoServicio === "grupo" && (
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Grupo</label>
+                  <input
+                    type="text"
                     className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
-                    placeholder="Numero de personas en el grupo privado"
-                    value={formData.grupoPrivado}
-                    onChange={(e) => setFormData({ ...formData, grupoPrivado: e.target.value })}
+                    placeholder="Ej: Familia Perez, Grupo 10"
+                    value={formData.nombreGrupo}
+                    onChange={(e) => setFormData({ ...formData, nombreGrupo: e.target.value })}
                   />
                 </div>
               )}
 
+              {/* Cliente */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Cliente *</label>
@@ -1735,6 +1738,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Fecha y Proveedor */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Fecha Excursion *</label>
@@ -1757,6 +1761,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Metodo de Pago del Cliente */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago del Cliente *</label>
                 <select 
@@ -1772,6 +1777,7 @@ export default function Home() {
                 </select>
               </div>
 
+              {/* Metodo de Pago al Proveedor */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago al Proveedor *</label>
                 <select 
@@ -1786,6 +1792,7 @@ export default function Home() {
                 </select>
               </div>
 
+              {/* Estado del Pago */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Estado del Pago del Cliente *</label>
                 <select 
@@ -1800,6 +1807,7 @@ export default function Home() {
                 </select>
               </div>
 
+              {/* Monto Pagado */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Monto Pagado (USD)</label>
                 <input 
@@ -1812,6 +1820,7 @@ export default function Home() {
                 />
               </div>
 
+              {/* Nota */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Nota</label>
                 <textarea 
@@ -1842,42 +1851,64 @@ export default function Home() {
               <button onClick={() => setShowProveedorForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
             </div>
             <form onSubmit={handleProveedorSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Proveedor *</label>
-                <input 
-                  type="text" 
-                  value={proveedorFormData.nombre}
-                  onChange={(e) => setProveedorFormData({ ...proveedorFormData, nombre: e.target.value })}
-                  required 
-                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                  placeholder="Ej: Dominican Way Travel" 
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Telefono</label>
-                  <input 
-                    type="text" 
-                    value={proveedorFormData.telefono}
-                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, telefono: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="(849) 656-6073" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
-                  <input 
-                    type="email" 
-                    value={proveedorFormData.email}
-                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="info@proveedor.com" 
-                  />
+              {/* Datos de la Empresa */}
+              <div className="border-b border-white/10 pb-3">
+                <h3 className="text-sm font-semibold text-white/70 mb-3">Datos de la Empresa</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Proveedor *</label>
+                    <input 
+                      type="text" 
+                      value={proveedorFormData.nombre}
+                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, nombre: e.target.value })}
+                      required 
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                      placeholder="Nombre del contacto" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Nombre de la Empresa</label>
+                    <input 
+                      type="text" 
+                      value={proveedorFormData.empresa}
+                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, empresa: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                      placeholder="Nombre de la empresa" 
+                    />
+                  </div>
                 </div>
               </div>
 
+              {/* Contacto */}
               <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">Metodos de Pago del Proveedor</label>
+                <h3 className="text-sm font-semibold text-white/70 mb-3">Contacto</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Telefono</label>
+                    <input 
+                      type="text" 
+                      value={proveedorFormData.telefono}
+                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, telefono: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                      placeholder="(849) 656-6073" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
+                    <input 
+                      type="email" 
+                      value={proveedorFormData.email}
+                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, email: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                      placeholder="info@proveedor.com" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Metodos de Pago */}
+              <div>
+                <h3 className="text-sm font-semibold text-white/70 mb-2">Metodos de Pago del Proveedor</h3>
                 <div className="flex flex-wrap gap-3">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -1910,7 +1941,7 @@ export default function Home() {
                 <p className="text-xs text-white/40 mt-1">Selecciona todos los metodos de pago que acepta el proveedor</p>
               </div>
 
-              {/* Datos Bancarios - SECCION SEPARADA */}
+              {/* Datos Bancarios */}
               <div className="border-t border-white/10 pt-4 mt-2">
                 <h3 className="text-lg font-semibold text-white mb-3">Datos Bancarios del Proveedor</h3>
                 <div className="space-y-3">
