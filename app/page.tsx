@@ -68,6 +68,8 @@ interface Venta {
   cantidadNinos: number;
   tipoServicio: "compartido" | "privado" | "grupo";
   nombreGrupo?: string;
+  tipoRecogida: "hotel" | "airbnb" | "sin_recogida";
+  transporte: "si" | "no";
   nota: string;
 }
 
@@ -139,6 +141,8 @@ export default function Home() {
     metodoPagoProveedor: "efectivo" as "efectivo" | "transferencia" | "paypal",
     tipoServicio: "compartido" as "compartido" | "privado" | "grupo",
     nombreGrupo: "",
+    tipoRecogida: "sin_recogida" as "hotel" | "airbnb" | "sin_recogida",
+    transporte: "no" as "si" | "no",
     nota: "",
   });
 
@@ -201,10 +205,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v20");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v20");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v20");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v20");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v21");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v21");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v21");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v21");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -214,22 +218,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v20", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v21", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v20", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v21", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v20", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v21", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v20", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v21", JSON.stringify(data));
   };
 
   // ============================================
@@ -636,6 +640,8 @@ export default function Home() {
       cantidadNinos: formData.cantidadNinos,
       tipoServicio: formData.tipoServicio,
       nombreGrupo: formData.tipoServicio === "grupo" ? formData.nombreGrupo : undefined,
+      tipoRecogida: formData.tipoRecogida,
+      transporte: formData.transporte,
       nota: formData.nota,
     };
 
@@ -679,6 +685,8 @@ export default function Home() {
       metodoPagoProveedor: "efectivo",
       tipoServicio: "compartido",
       nombreGrupo: "",
+      tipoRecogida: "sin_recogida",
+      transporte: "no",
       nota: "",
     });
     setShowForm(false);
@@ -714,6 +722,9 @@ export default function Home() {
         proveedorId: excursion.proveedorId,
         proveedorNombre: excursion.proveedorNombre,
       });
+      
+      // Actualizar totales después de cargar la excursión
+      setTimeout(updateCantidades, 50);
     }
   };
 
@@ -722,12 +733,27 @@ export default function Home() {
   // ============================================
   const updateCantidades = () => {
     const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
-    setFormData({
-      ...formData,
-      precioTotalUSD: precioTotal.toString(),
-      costoTotalUSD: costoTotal.toString(),
-      comisionTotalUSD: comisionTotal.toString(),
-    });
+    setFormData(prev => ({
+      ...prev,
+      precioTotalUSD: precioTotal.toFixed(2),
+      costoTotalUSD: costoTotal.toFixed(2),
+      comisionTotalUSD: comisionTotal.toFixed(2),
+    }));
+  };
+
+  // ============================================
+  // HANDLE CAMBIOS EN ADULTOS Y NINOS
+  // ============================================
+  const handleCantidadAdultosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value) || 0;
+    setFormData(prev => ({ ...prev, cantidadAdultos: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handleCantidadNinosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value) || 0;
+    setFormData(prev => ({ ...prev, cantidadNinos: val }));
+    setTimeout(updateCantidades, 10);
   };
 
   // ============================================
@@ -735,6 +761,9 @@ export default function Home() {
   // ============================================
   const editVenta = (venta: Venta) => {
     setEditingVentaId(venta.id);
+    // Buscar la excursión para obtener los precios unitarios
+    const excursion = excursiones.find(e => e.id === venta.excursionId);
+    
     setFormData({
       clienteNombre: venta.clienteNombre,
       clienteWhatsapp: venta.clienteWhatsapp,
@@ -742,17 +771,17 @@ export default function Home() {
       excursionId: venta.excursionId,
       excursionNombre: venta.excursionNombre,
       fechaExcursion: venta.fechaExcursion,
-      precioAdultoUSD: (venta.precioVentaUSD / (venta.cantidadAdultos + venta.cantidadNinos || 1)).toString(),
-      precioNinoUSD: (venta.precioVentaUSD / (venta.cantidadAdultos + venta.cantidadNinos || 1)).toString(),
-      costoProveedorAdultoUSD: (venta.costoProveedorUSD / (venta.cantidadAdultos + venta.cantidadNinos || 1)).toString(),
-      costoProveedorNinoUSD: (venta.costoProveedorUSD / (venta.cantidadAdultos + venta.cantidadNinos || 1)).toString(),
-      comisionAdultoUSD: (venta.comisionUSD / (venta.cantidadAdultos + venta.cantidadNinos || 1)).toString(),
-      comisionNinoUSD: (venta.comisionUSD / (venta.cantidadAdultos + venta.cantidadNinos || 1)).toString(),
+      precioAdultoUSD: excursion?.precioAdultoUSD?.toString() || "0",
+      precioNinoUSD: excursion?.precioNinoUSD?.toString() || "0",
+      costoProveedorAdultoUSD: excursion?.costoProveedorAdultoUSD?.toString() || "0",
+      costoProveedorNinoUSD: excursion?.costoProveedorNinoUSD?.toString() || "0",
+      comisionAdultoUSD: excursion?.comisionAdultoUSD?.toString() || "0",
+      comisionNinoUSD: excursion?.comisionNinoUSD?.toString() || "0",
       cantidadAdultos: venta.cantidadAdultos,
       cantidadNinos: venta.cantidadNinos,
-      precioTotalUSD: venta.precioVentaUSD.toString(),
-      costoTotalUSD: venta.costoProveedorUSD.toString(),
-      comisionTotalUSD: venta.comisionUSD.toString(),
+      precioTotalUSD: venta.precioVentaUSD.toFixed(2),
+      costoTotalUSD: venta.costoProveedorUSD.toFixed(2),
+      comisionTotalUSD: venta.comisionUSD.toFixed(2),
       pagoCliente: venta.pagoCliente,
       montoPagadoUSD: venta.montoPagadoUSD.toString(),
       saldoPendienteUSD: venta.saldoPendienteUSD.toString(),
@@ -763,6 +792,8 @@ export default function Home() {
       metodoPagoProveedor: venta.metodoPagoProveedor,
       tipoServicio: venta.tipoServicio,
       nombreGrupo: venta.nombreGrupo || "",
+      tipoRecogida: venta.tipoRecogida,
+      transporte: venta.transporte,
       nota: venta.nota,
     });
     setShowForm(true);
@@ -846,11 +877,24 @@ export default function Home() {
     return map[tipo] || tipo;
   };
 
+  const getTipoRecogidaText = (tipo: string) => {
+    const map: any = {
+      hotel: "Hotel",
+      airbnb: "Airbnb",
+      sin_recogida: "Sin recogida"
+    };
+    return map[tipo] || tipo;
+  };
+
+  const getTransporteText = (valor: string) => {
+    return valor === "si" ? "Si" : "No";
+  };
+
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
+    let csv = "Fecha,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Recogida,Transporte,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
     ventas.forEach(v => {
-      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -1006,6 +1050,8 @@ export default function Home() {
                       metodoPagoProveedor: "efectivo",
                       tipoServicio: "compartido",
                       nombreGrupo: "",
+                      tipoRecogida: "sin_recogida",
+                      transporte: "no",
                       nota: "",
                     });
                     setShowForm(true);
@@ -1083,6 +1129,8 @@ export default function Home() {
                     metodoPagoProveedor: "efectivo",
                     tipoServicio: "compartido",
                     nombreGrupo: "",
+                    tipoRecogida: "sin_recogida",
+                    transporte: "no",
                     nota: "",
                   });
                   setShowForm(true);
@@ -1520,6 +1568,8 @@ export default function Home() {
                 metodoPagoProveedor: "efectivo",
                 tipoServicio: "compartido",
                 nombreGrupo: "",
+                tipoRecogida: "sin_recogida",
+                transporte: "no",
                 nota: "",
               });
               setShowForm(true);
@@ -1534,7 +1584,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL DE VENTA - ACTUALIZADO
+          MODAL DE VENTA - ACTUALIZADO CON RECOGIDA Y TRANSPORTE
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
@@ -1592,7 +1642,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Cantidad Adultos y Ninos */}
+              {/* Cantidad Adultos y Ninos - CORREGIDO */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Adultos *</label>
@@ -1602,11 +1652,7 @@ export default function Home() {
                     min="0"
                     className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
                     value={formData.cantidadAdultos}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value) || 0;
-                      setFormData({ ...formData, cantidadAdultos: val });
-                      setTimeout(updateCantidades, 10);
-                    }}
+                    onChange={handleCantidadAdultosChange}
                   />
                 </div>
                 <div>
@@ -1616,11 +1662,7 @@ export default function Home() {
                     min="0"
                     className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
                     value={formData.cantidadNinos}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value) || 0;
-                      setFormData({ ...formData, cantidadNinos: val });
-                      setTimeout(updateCantidades, 10);
-                    }}
+                    onChange={handleCantidadNinosChange}
                   />
                 </div>
               </div>
@@ -1712,6 +1754,75 @@ export default function Home() {
                   />
                 </div>
               )}
+
+              {/* TIPO DE RECOGIDA - NUEVO */}
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">Tipo de Recogida *</label>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="tipoRecogida"
+                      value="hotel"
+                      checked={formData.tipoRecogida === "hotel"}
+                      onChange={(e) => setFormData({ ...formData, tipoRecogida: e.target.value as "hotel" | "airbnb" | "sin_recogida" })}
+                      className="w-4 h-4 rounded-full border-white/20 bg-white/10 focus:ring-amber-500"
+                    />
+                    <span className="text-white/80 text-sm">Hotel</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="tipoRecogida"
+                      value="airbnb"
+                      checked={formData.tipoRecogida === "airbnb"}
+                      onChange={(e) => setFormData({ ...formData, tipoRecogida: e.target.value as "hotel" | "airbnb" | "sin_recogida" })}
+                      className="w-4 h-4 rounded-full border-white/20 bg-white/10 focus:ring-amber-500"
+                    />
+                    <span className="text-white/80 text-sm">Airbnb</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="tipoRecogida"
+                      value="sin_recogida"
+                      checked={formData.tipoRecogida === "sin_recogida"}
+                      onChange={(e) => setFormData({ ...formData, tipoRecogida: e.target.value as "hotel" | "airbnb" | "sin_recogida" })}
+                      className="w-4 h-4 rounded-full border-white/20 bg-white/10 focus:ring-amber-500"
+                    />
+                    <span className="text-white/80 text-sm">Sin Recogida</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* TRANSPORTE - NUEVO */}
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">Transporte *</label>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="transporte"
+                      value="si"
+                      checked={formData.transporte === "si"}
+                      onChange={(e) => setFormData({ ...formData, transporte: e.target.value as "si" | "no" })}
+                      className="w-4 h-4 rounded-full border-white/20 bg-white/10 focus:ring-amber-500"
+                    />
+                    <span className="text-white/80 text-sm">Si</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="transporte"
+                      value="no"
+                      checked={formData.transporte === "no"}
+                      onChange={(e) => setFormData({ ...formData, transporte: e.target.value as "si" | "no" })}
+                      className="w-4 h-4 rounded-full border-white/20 bg-white/10 focus:ring-amber-500"
+                    />
+                    <span className="text-white/80 text-sm">No</span>
+                  </label>
+                </div>
+              </div>
 
               {/* Cliente */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
