@@ -377,10 +377,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v29");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v29");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v29");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v29");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v30");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v30");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v30");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v30");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -390,22 +390,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v29", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v30", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v29", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v30", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v29", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v30", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v29", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v30", JSON.stringify(data));
   };
 
   // ============================================
@@ -1302,7 +1302,6 @@ export default function Home() {
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-900 relative overflow-hidden">
-        {/* Efectos decorativos de fondo */}
         <div className="absolute inset-0">
           <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] bg-amber-500/10 rounded-full blur-[120px]"></div>
           <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px]"></div>
@@ -1415,14 +1414,16 @@ export default function Home() {
   }
 
   // ============================================
-  // CONFIGURACION DE ESTILOS POR USUARIO
+  // ESTILOS DIFERENCIADOS POR USUARIO - DISEÑO UNICO
   // ============================================
   const isAdmin = currentUser === "republic";
   const isRaul = currentUser === "raul";
   const isGabrielle = currentUser === "gabrielle";
   
-  const colors = {
+  // Cada usuario tiene su propio tema de colores completamente diferente
+  const themes = {
     admin: {
+      // Republic - Estilo Corporativo/Dorado
       bg: "from-slate-900 via-slate-800 to-slate-900",
       accent: "amber",
       accentLight: "amber-400",
@@ -1433,9 +1434,12 @@ export default function Home() {
       border: "border-amber-500/30",
       text: "text-amber-400",
       bgHover: "hover:bg-amber-500/10",
+      glow: "shadow-amber-500/20",
+      cardBorder: "border-amber-500/20",
     },
     raul: {
-      bg: "from-slate-900 via-blue-950 to-slate-900",
+      // Raul - Estilo Ejecutivo/Azul
+      bg: "from-slate-900 via-blue-950 to-indigo-950",
       accent: "blue",
       accentLight: "blue-400",
       gradient: "from-blue-500 to-cyan-600",
@@ -1445,9 +1449,12 @@ export default function Home() {
       border: "border-blue-500/30",
       text: "text-blue-400",
       bgHover: "hover:bg-blue-500/10",
+      glow: "shadow-blue-500/20",
+      cardBorder: "border-blue-500/20",
     },
     gabrielle: {
-      bg: "from-rose-950 via-pink-950 to-purple-950",
+      // Gabrielle - Estilo Moderno/Rosa
+      bg: "from-rose-950 via-pink-950 to-fuchsia-950",
       accent: "pink",
       accentLight: "pink-400",
       gradient: "from-pink-500 to-rose-500",
@@ -1457,24 +1464,34 @@ export default function Home() {
       border: "border-pink-500/30",
       text: "text-pink-400",
       bgHover: "hover:bg-pink-500/10",
+      glow: "shadow-pink-500/20",
+      cardBorder: "border-pink-500/20",
     }
   };
 
-  const userColors = isAdmin ? colors.admin : isRaul ? colors.raul : colors.gabrielle;
-  const bgGradient = userColors.bg;
-  const accentColor = userColors.accent;
-  const accentLight = userColors.accentLight;
-  const headerBg = userColors.header;
-  const cardBg = userColors.card;
-  const buttonGradient = userColors.gradient;
-  const shadowColor = userColors.shadow;
-  const accentText = userColors.text;
+  const theme = isAdmin ? themes.admin : isRaul ? themes.raul : themes.gabrielle;
+  const bgGradient = theme.bg;
+  const accentColor = theme.accent;
+  const accentLight = theme.accentLight;
+  const headerBg = theme.header;
+  const cardBg = theme.card;
+  const buttonGradient = theme.gradient;
+  const shadowColor = theme.shadow;
+  const accentText = theme.text;
+  const cardBorder = theme.cardBorder;
 
   const getUserRole = () => {
     if (isAdmin) return "Administrador";
     if (isRaul) return "Vendedor";
     if (isGabrielle) return "Vendedora";
     return "Usuario";
+  };
+
+  const getUserEmoji = () => {
+    if (isAdmin) return "👑";
+    if (isRaul) return "💼";
+    if (isGabrielle) return "✨";
+    return "👤";
   };
 
   // ============================================
@@ -1495,7 +1512,7 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER DASHBOARD - NUEVO DISEÑO
+  // RENDER DASHBOARD
   // ============================================
   const renderDashboard = () => {
     const totalVentas = ventas.reduce((sum, v) => sum + v.precioVentaUSD, 0);
@@ -1518,10 +1535,10 @@ export default function Home() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">Dashboard</h2>
-            <p className="text-white/40 text-sm">Bienvenido de vuelta, {currentUser}</p>
+            <p className="text-white/40 text-sm">{getUserEmoji()} Bienvenido de vuelta, {currentUser}</p>
           </div>
-          <div className="text-right">
-            <div className="text-white/60 text-sm font-mono">
+          <div className={`bg-${accentColor}-500/10 border ${cardBorder} rounded-2xl px-6 py-3 text-right`}>
+            <div className={`text-${accentLight} text-sm font-mono font-bold`}>
               {currentTime.toLocaleTimeString("es-DO", { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </div>
             <div className="text-white/30 text-xs">
@@ -1531,7 +1548,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 transition-all ${userColors.bgHover}`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} transition-all ${theme.bgHover}`}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Total Ventas</p>
@@ -1541,7 +1558,7 @@ export default function Home() {
             </div>
           </div>
           
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 transition-all ${userColors.bgHover}`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} transition-all ${theme.bgHover}`}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Comisiones</p>
@@ -1551,7 +1568,7 @@ export default function Home() {
             </div>
           </div>
           
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 transition-all ${userColors.bgHover}`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} transition-all ${theme.bgHover}`}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Por Cobrar</p>
@@ -1561,7 +1578,7 @@ export default function Home() {
             </div>
           </div>
           
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 transition-all ${userColors.bgHover}`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} transition-all ${theme.bgHover}`}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Clientes</p>
@@ -1573,7 +1590,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder}`}>
             <h3 className={`text-sm font-semibold ${accentText} mb-3`}>Resumen de Ventas</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
@@ -1595,7 +1612,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder}`}>
             <h3 className={`text-sm font-semibold ${accentText} mb-3`}>Resumen General</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
@@ -1613,7 +1630,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder}`}>
             <h3 className={`text-sm font-semibold ${accentText} mb-3`}>Últimas Ventas</h3>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {ventas.slice(-4).reverse().map(v => (
@@ -1630,7 +1647,7 @@ export default function Home() {
         </div>
 
         {ventas.length === 0 && (
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-12 border-2 border-dashed border-white/10 text-center`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-12 border-2 border-dashed ${cardBorder} text-center`}>
             <div className="text-5xl mb-4">🚀</div>
             <h3 className="text-white text-xl font-semibold mb-2">Comienza tu primera venta</h3>
             <p className="text-white/40 text-sm">Haz clic en "Nueva Venta" para registrar tu primera excursión</p>
@@ -1673,15 +1690,15 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
             <p className="text-white/40 text-sm">Total Ventas</p>
             <p className="text-white text-2xl font-bold">{formatUSD(totalVentasUSD)}</p>
           </div>
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
             <p className="text-white/40 text-sm">Comisión Total</p>
             <p className="text-green-400 text-2xl font-bold">{formatUSD(totalComision)}</p>
           </div>
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
             <p className="text-white/40 text-sm">Pendiente Cobrar</p>
             <p className="text-yellow-400 text-2xl font-bold">{formatUSD(totalPendienteUSD)}</p>
           </div>
@@ -1689,12 +1706,12 @@ export default function Home() {
 
         <div className="space-y-2">
           {groupedArray.length === 0 ? (
-            <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-12 border border-white/10 text-center`}>
+            <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-12 border ${cardBorder} text-center`}>
               <p className="text-white/40">No hay ventas registradas</p>
             </div>
           ) : (
             groupedArray.map((group: any) => (
-              <div key={group.key} className={`${cardBg} backdrop-blur-lg rounded-2xl border border-white/10 overflow-hidden`}>
+              <div key={group.key} className={`${cardBg} backdrop-blur-lg rounded-2xl border ${cardBorder} overflow-hidden`}>
                 <button onClick={() => toggleMonth(group.key)} className="w-full px-6 py-4 flex flex-wrap items-center justify-between hover:bg-white/5 transition-all">
                   <div className="flex items-center gap-4">
                     <span className="text-white font-semibold text-lg">{getMonthName(group.month - 1)} {group.year}</span>
@@ -1806,21 +1823,21 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
             <p className="text-white/40 text-sm">Total Reservas</p>
             <p className="text-white text-2xl font-bold">{reservasFiltradas.length}</p>
           </div>
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
             <p className="text-white/40 text-sm">Monto Total</p>
             <p className="text-white text-2xl font-bold">{formatUSD(reservasFiltradas.reduce((s, v) => s + v.precioVentaUSD, 0))}</p>
           </div>
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
             <p className="text-white/40 text-sm">Pendientes</p>
             <p className="text-yellow-400 text-2xl font-bold">{reservasFiltradas.filter(v => v.estado === "pendiente").length}</p>
           </div>
         </div>
 
-        <div className={`${cardBg} backdrop-blur-lg rounded-2xl border border-white/10 overflow-x-auto`}>
+        <div className={`${cardBg} backdrop-blur-lg rounded-2xl border ${cardBorder} overflow-x-auto`}>
           <table className="w-full text-sm">
             <thead>
               <tr className="text-white/40 border-b border-white/10">
@@ -1903,7 +1920,7 @@ export default function Home() {
           </button>
         </div>
 
-        <div className={`${cardBg} backdrop-blur-lg rounded-2xl border border-white/10 overflow-x-auto`}>
+        <div className={`${cardBg} backdrop-blur-lg rounded-2xl border ${cardBorder} overflow-x-auto`}>
           <table className="w-full text-sm">
             <thead>
               <tr className="text-white/40 border-b border-white/10">
@@ -1982,7 +1999,7 @@ export default function Home() {
             <div className="col-span-full text-center py-12 text-white/40">No hay proveedores registrados</div>
           ) : (
             proveedoresFiltrados.map(p => (
-              <div key={p.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
+              <div key={p.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} hover:border-${accentColor}-500/30 transition-all`}>
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-white font-semibold">{p.nombre}</h3>
@@ -2062,7 +2079,7 @@ export default function Home() {
             <div className="col-span-full text-center py-12 text-white/40">No hay información bancaria registrada</div>
           ) : (
             bancosFiltrados.map(p => (
-              <div key={p.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
+              <div key={p.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} hover:border-${accentColor}-500/30 transition-all`}>
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-white font-semibold">{p.nombre}</h3>
@@ -2110,7 +2127,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className={`${cardBg} backdrop-blur-lg rounded-2xl border border-white/10 overflow-hidden`}>
+        <div className={`${cardBg} backdrop-blur-lg rounded-2xl border ${cardBorder} overflow-hidden`}>
           <div className="grid grid-cols-7 gap-1 p-4">
             {["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(day => <div key={day} className="text-center text-white/40 text-sm py-2 font-medium">{day}</div>)}
             {days.map((day, index) => {
@@ -2127,7 +2144,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
+        <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
           <h3 className={`text-${accentLight} font-semibold mb-3`}>Eventos del día</h3>
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {getVentasDelDia(currentDate).length === 0 ? <p className="text-white/40 text-sm text-center py-4">No hay ventas para este día</p> :
@@ -2184,7 +2201,7 @@ export default function Home() {
             <div className="col-span-full text-center py-12 text-white/40">No hay excursiones registradas</div>
           ) : (
             excursionesFiltradas.map(e => (
-              <div key={e.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
+              <div key={e.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} hover:border-${accentColor}-500/30 transition-all`}>
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-white font-semibold">{e.nombre}</h3>
@@ -2791,7 +2808,7 @@ export default function Home() {
               <div>
                 <h1 className="text-xl font-bold text-white tracking-tight">Republic Excursions</h1>
                 <p className={`text-xs text-${accentLight}/80`}>
-                  {currentUser === "republic" ? "Administrador" : currentUser === "raul" ? "Vendedor" : "Vendedora"} - {getUserRole()}
+                  {currentUser === "republic" ? "Administrador" : currentUser === "raul" ? "Vendedor" : "Vendedora"} - {getUserRole()} {getUserEmoji()}
                 </p>
               </div>
             </div>
@@ -2811,7 +2828,7 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className={`flex flex-wrap gap-2 mb-8 ${cardBg} backdrop-blur-lg rounded-2xl p-2 border border-white/10`}>
+        <div className={`flex flex-wrap gap-2 mb-8 ${cardBg} backdrop-blur-lg rounded-2xl p-2 border ${cardBorder}`}>
           {["dashboard", "ventas", "reservas", "clientes", "proveedores", "bancos", "calendario", "excursiones"].map((tab) => {
             const labels: any = {
               dashboard: "Dashboard",
