@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 // ============================================
 interface Excursion {
   id: string;
-  nombre: string;
+  nombre: string; 
   proveedorId: string;
   proveedorNombre: string;
   precioAdultoUSD: number;
@@ -720,7 +720,7 @@ export default function Home() {
   };
 
   // ============================================
-  // HANDLE CLIENTE - CON EXCURSION OPCIONAL
+  // HANDLE CLIENTE
   // ============================================
   const handleClienteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -901,7 +901,7 @@ export default function Home() {
   };
 
   // ============================================
-  // HANDLE CAMBIOS EN PRECIOS (EDITABLES)
+  // HANDLE CAMBIOS EN PRECIOS
   // ============================================
   const handlePrecioAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -1160,18 +1160,44 @@ export default function Home() {
   };
 
   // ============================================
-  // COMPONENTE DE LOGIN
+  // COMPONENTE DE LOGIN MEJORADO
   // ============================================
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
-        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 max-w-md w-full border border-white/20 shadow-2xl">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Fondo decorativo */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-10 w-64 h-64 bg-amber-400 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 w-80 h-80 bg-blue-500 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative z-10 bg-white/10 backdrop-blur-2xl rounded-3xl p-8 max-w-md w-full border border-white/20 shadow-2xl hover:shadow-amber-500/10 transition-all duration-500">
+          {/* Reloj y Fecha */}
+          <div className="text-center mb-6 pb-6 border-b border-white/10">
+            <div className="text-4xl font-bold text-white font-mono tracking-wider">
+              {currentTime.toLocaleTimeString("es-DO", { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+              })}
+            </div>
+            <div className="text-sm text-white/50 mt-1">
+              {currentTime.toLocaleDateString("es-DO", { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+              })}
+            </div>
+          </div>
+
           <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/25">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/25 animate-pulse">
               <span className="text-3xl text-slate-900 font-bold">RE</span>
             </div>
-            <h1 className="text-2xl font-bold text-white mt-4">Republic Excursions</h1>
-            <p className="text-white/40">Inicia sesion para continuar</p>
+            <h1 className="text-2xl font-bold text-white mt-4 tracking-tight">Republic Excursions</h1>
+            <p className="text-white/40 text-sm mt-1">Sistema de Gestión de Excursiones</p>
           </div>
 
           <form onSubmit={(e) => {
@@ -1183,42 +1209,69 @@ export default function Home() {
           }} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-white/70 mb-1">Usuario</label>
-              <input
-                type="text"
-                name="username"
-                required
-                className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
-                placeholder="Ingresa tu usuario"
-              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30">👤</span>
+                <input
+                  type="text"
+                  name="username"
+                  required
+                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 transition-all"
+                  placeholder="Ingresa tu usuario"
+                />
+              </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-1">Contrasena</label>
-              <input
-                type="password"
-                name="password"
-                required
-                className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
-                placeholder="Ingresa tu contrasena"
-              />
+              <label className="block text-sm font-medium text-white/70 mb-1">Contraseña</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30">🔒</span>
+                <input
+                  type="password"
+                  name="password"
+                  required
+                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 transition-all"
+                  placeholder="Ingresa tu contraseña"
+                />
+              </div>
             </div>
             {loginError && (
-              <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm text-center">
-                {loginError}
+              <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm text-center animate-shake">
+                ❌ {loginError}
               </div>
             )}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all shadow-lg shadow-amber-500/25"
+              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl hover:scale-[1.02] transition-all shadow-lg shadow-amber-500/25"
             >
-              Iniciar Sesion
+              Iniciar Sesión
             </button>
           </form>
 
-          <div className="mt-6 text-center text-xs text-white/30">
-            <p>Usuarios: Raul | Gabrielle</p>
-            <p>Contrasena: Republ1c$$</p>
+          <div className="mt-6 text-center">
+            <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+              <p className="text-xs text-white/30">
+                <span className="text-amber-400/50">👤</span> Usuarios: <span className="text-white/50 font-medium">Raul</span> <span className="text-white/30">|</span> <span className="text-white/50 font-medium">Gabrielle</span>
+              </p>
+              <p className="text-xs text-white/30 mt-1">
+                <span className="text-amber-400/50">🔑</span> Contraseña: <span className="text-white/50 font-mono">Republ1c$$</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 text-center">
+            <p className="text-[10px] text-white/20">v2.4.0 • Republic Excursions © 2026</p>
           </div>
         </div>
+
+        <style>{`
+          @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+          }
+          .animate-shake {
+            animation: shake 0.5s ease-in-out;
+          }
+        `}</style>
       </div>
     );
   }
@@ -1238,7 +1291,7 @@ export default function Home() {
     : "from-pink-500 to-purple-500";
 
   // ============================================
-  // FUNCION PARA RENDERIZAR CADA VISTA
+  // RENDER DE VISTAS
   // ============================================
   const renderView = () => {
     switch(viewMode) {
@@ -2077,6 +2130,9 @@ export default function Home() {
     }
   };
 
+  // ============================================
+  // RENDER PRINCIPAL
+  // ============================================
   return (
     <div className={`min-h-screen bg-gradient-to-br ${bgGradient}`}>
       <header className={`${headerBg} backdrop-blur-lg border-b border-white/10 sticky top-0 z-20`}>
@@ -2189,7 +2245,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL DE VENTA - CON HORA AM/PM
+          MODAL DE VENTA
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
@@ -2203,7 +2259,6 @@ export default function Home() {
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Excursion */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Excursion *</label>
                 <select
@@ -2232,7 +2287,6 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Fecha y Hora con AM/PM */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Fecha Excursion *</label>
@@ -2260,7 +2314,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Precios EDITABLES */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD) *</label>
@@ -2285,7 +2338,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Cantidades */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Adultos *</label>
@@ -2310,7 +2362,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Costos EDITABLES */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor Adulto (USD) *</label>
@@ -2335,7 +2386,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Totales (automaticos) */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20">
                   <label className="block text-sm font-medium text-white/60 mb-1">Total Venta (USD)</label>
@@ -2366,7 +2416,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Estado de la Reserva */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Estado de la Reserva *</label>
                 <select 
@@ -2382,7 +2431,6 @@ export default function Home() {
                 </select>
               </div>
 
-              {/* Tipo de Servicio */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Servicio *</label>
                 <select 
@@ -2417,7 +2465,6 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Tipo de Recogida */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">Tipo de Recogida *</label>
                 <div className="flex flex-wrap gap-4">
@@ -2457,7 +2504,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Transporte */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">Transporte *</label>
                 <div className="flex flex-wrap gap-4">
@@ -2486,7 +2532,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Cliente */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Cliente *</label>
@@ -2521,7 +2566,6 @@ export default function Home() {
                 />
               </div>
 
-              {/* Metodo de Pago del Cliente */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago del Cliente *</label>
                 <select 
@@ -2537,7 +2581,6 @@ export default function Home() {
                 </select>
               </div>
 
-              {/* Metodo de Pago al Proveedor */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago al Proveedor *</label>
                 <select 
@@ -2552,7 +2595,6 @@ export default function Home() {
                 </select>
               </div>
 
-              {/* Estado del Pago */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Estado del Pago del Cliente *</label>
                 <select 
@@ -2567,7 +2609,6 @@ export default function Home() {
                 </select>
               </div>
 
-              {/* Monto Pagado */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Monto Pagado (USD)</label>
                 <input 
@@ -2580,7 +2621,6 @@ export default function Home() {
                 />
               </div>
 
-              {/* Nota */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Nota</label>
                 <textarea 
@@ -3283,7 +3323,7 @@ export default function Home() {
       )}
 
       {/* ============================================
-          MODAL DE CLIENTE - CON EXCURSION OPCIONAL
+          MODAL DE CLIENTE
       ============================================ */}
       {showClienteForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
