@@ -10,9 +10,12 @@ interface Receipt {
   description: string;
   month: number;
   year: number;
-  fileData?: string; // Para guardar la imagen/PDF en base64
+  fileData?: string;
   fileName?: string;
   fileType?: string;
+  category?: string;
+  itbis?: number;
+  rnc?: string;
 }
 
 export default function Home() {
@@ -20,21 +23,28 @@ export default function Home() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
-  const [filterMonth, setFilterMonth] = useState<string>("");
+  const [filterYear, setFilterYear] = useState<string>("");
+  const [filterCategory, setFilterCategory] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [viewMode, setViewMode] = useState<"dashboard" | "lista">("dashboard");
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0);
 
   const [formData, setFormData] = useState({
     title: "",
     amount: "",
     date: "",
     description: "",
+    category: "",
+    itbis: "",
+    rnc: "",
   });
 
-  // Cargar recibos guardados
+  // Cargar recibos
   useEffect(() => {
-    const saved = localStorage.getItem("receipts_v2");
+    const saved = localStorage.getItem("receipts_pro");
     if (saved) {
       try {
         setReceipts(JSON.parse(saved));
@@ -44,19 +54,15 @@ export default function Home() {
     }
   }, []);
 
-  // Guardar en localStorage
   const saveReceipts = (updatedReceipts: Receipt[]) => {
     setReceipts(updatedReceipts);
-    localStorage.setItem("receipts_v2", JSON.stringify(updatedReceipts));
+    localStorage.setItem("receipts_pro", JSON.stringify(updatedReceipts));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
     setSelectedFile(file);
-    
-    // Crear preview
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
@@ -66,7 +72,6 @@ export default function Home() {
     reader.readAsDataURL(file);
   };
 
-  // Guardar recibo
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.amount || !formData.date) {
@@ -75,93 +80,44 @@ export default function Home() {
     }
 
     const dateObj = new Date(formData.date);
+    const itbisValue = formData.itbis ? parseFloat(formData.itbis) : 0;
     
-    // Leer archivo si existe
-    let fileData = "";
-    let fileName = "";
-    let fileType = "";
-    
-    if (selectedFile) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const result = event.target.result as string;
-          saveReceiptWithFile(result, selectedFile.name, selectedFile.type);
-        }
-      };
-      reader.readAsDataURL(selectedFile);
-      return; // Esperar a que termine
-    }
-
-    // Guardar sin archivo
-    const newReceipt: Receipt = {
-      id: Date.now().toString(),
+    const receiptData = {
       title: formData.title,
       amount: parseFloat(formData.amount),
       date: formData.date,
-      description: formData.description,
+      description: formData.description || "",
       month: dateObj.getMonth() + 1,
       year: dateObj.getFullYear(),
-      fileData: "",
-      fileName: "",
-      fileType: "",
+      category: formData.category || "",
+      itbis: itbisValue,
+      rnc: formData.rnc || "",
     };
 
-    const updated = [...receipts, newReceipt];
-    saveReceipts(updated);
-    resetForm();
-    alert("✅ Recibo guardado");
-  };
-
-  const saveReceiptWithFile = (fileData: string, fileName: string, fileType: string) => {
-    const dateObj = new Date(formData.date);
-    
     if (editingId) {
-      // Editar existente
       const updated = receipts.map(r => 
-        r.id === editingId ? { 
-          ...r, 
-          ...formData, 
-          amount: parseFloat(formData.amount),
-          date: formData.date,
-          month: dateObj.getMonth() + 1,
-          year: dateObj.getFullYear(),
-          fileData, 
-          fileName, 
-          fileType 
-        } : r
+        r.id === editingId ? { ...r, ...receiptData } : r
       );
       saveReceipts(updated);
     } else {
-      // Nuevo
       const newReceipt: Receipt = {
         id: Date.now().toString(),
-        title: formData.title,
-        amount: parseFloat(formData.amount),
-        date: formData.date,
-        description: formData.description,
-        month: dateObj.getMonth() + 1,
-        year: dateObj.getFullYear(),
-        fileData,
-        fileName,
-        fileType,
+        ...receiptData,
       };
-      const updated = [...receipts, newReceipt];
-      saveReceipts(updated);
+      saveReceipts([...receipts, newReceipt]);
     }
     resetForm();
     alert("✅ Recibo guardado");
   };
 
   const resetForm = () => {
-    setFormData({ title: "", amount: "", date: "", description: "" });
+    setFormData({ title: "", amount: "", date: "", description: "", category: "", itbis: "", rnc: "" });
     setSelectedFile(null);
     setPreviewUrl("");
     setShowForm(false);
     setEditingId(null);
   };
 
-  // Editar recibo
   const editReceipt = (receipt: Receipt) => {
     setEditingId(receipt.id);
     setFormData({
@@ -169,6 +125,9 @@ export default function Home() {
       amount: receipt.amount.toString(),
       date: receipt.date,
       description: receipt.description || "",
+      category: receipt.category || "",
+      itbis: receipt.itbis?.toString() || "",
+      rnc: receipt.rnc || "",
     });
     if (receipt.fileData) {
       setPreviewUrl(receipt.fileData);
@@ -176,20 +135,18 @@ export default function Home() {
     setShowForm(true);
   };
 
-  // Eliminar recibo
   const deleteReceipt = (id: string) => {
     if (!confirm("¿Eliminar este recibo?")) return;
     const updated = receipts.filter((r) => r.id !== id);
     saveReceipts(updated);
   };
 
-  // Eliminar todo
   const deleteAll = () => {
-    if (!confirm("¿Eliminar TODOS los recibos? Esta acción no se puede deshacer.")) return;
+    if (!confirm("¿Eliminar TODOS los recibos?")) return;
     saveReceipts([]);
   };
 
-  // Agrupar por mes
+  // Agrupar
   const grouped = receipts.reduce((acc: any, receipt) => {
     const key = `${receipt.year}-${String(receipt.month).padStart(2, "0")}`;
     if (!acc[key]) {
@@ -200,26 +157,53 @@ export default function Home() {
     return acc;
   }, {});
 
-  let groupedArray = Object.entries(grouped)
+  // Filtros
+  let filtered = receipts;
+  if (filterYear) {
+    filtered = filtered.filter(r => r.year.toString() === filterYear);
+  }
+  if (filterCategory) {
+    filtered = filtered.filter(r => r.category === filterCategory);
+  }
+  if (searchTerm) {
+    filtered = filtered.filter(r => 
+      r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (r.description && r.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }
+
+  const filteredGrouped = filtered.reduce((acc: any, receipt) => {
+    const key = `${receipt.year}-${String(receipt.month).padStart(2, "0")}`;
+    if (!acc[key]) {
+      acc[key] = { year: receipt.year, month: receipt.month, total: 0, receipts: [] };
+    }
+    acc[key].total += receipt.amount;
+    acc[key].receipts.push(receipt);
+    return acc;
+  }, {});
+
+  let groupedArray = Object.entries(filteredGrouped)
     .map(([key, value]: [string, any]) => ({ ...value, key }))
     .sort((a, b) => {
       if (a.year !== b.year) return b.year - a.year;
       return b.month - a.month;
     });
 
-  // Filtrar por mes
-  if (filterMonth) {
-    groupedArray = groupedArray.filter(g => g.key === filterMonth);
-  }
+  // Resumen anual
+  const annualSummary = receipts.reduce((acc: any, r) => {
+    if (!acc[r.year]) {
+      acc[r.year] = { year: r.year, total: 0, count: 0, months: {} };
+    }
+    acc[r.year].total += r.amount;
+    acc[r.year].count += 1;
+    if (!acc[r.year].months[r.month]) {
+      acc[r.year].months[r.month] = 0;
+    }
+    acc[r.year].months[r.month] += r.amount;
+    return acc;
+  }, {});
 
-  // Buscar
-  const filteredReceipts = receipts.filter(r => 
-    r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (r.description && r.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  // Calcular totales
-  const totalGeneral = receipts.reduce((sum, r) => sum + r.amount, 0);
+  const totalGeneral = filtered.reduce((sum, r) => sum + r.amount, 0);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("es-DO", {
@@ -237,18 +221,13 @@ export default function Home() {
     setExpandedMonth(expandedMonth === key ? null : key);
   };
 
-  // Exportar a CSV
+  // Exportar CSV
   const exportCSV = () => {
-    if (receipts.length === 0) {
-      alert("No hay recibos para exportar");
-      return;
-    }
-    
-    let csv = "Fecha,Título,Monto,Descripción,Mes,Año\n";
+    if (receipts.length === 0) { alert("No hay recibos"); return; }
+    let csv = "Fecha,Título,Monto,Descripción,Categoría,ITBIS,RNC,Mes,Año\n";
     receipts.forEach(r => {
-      csv += `"${r.date}","${r.title}",${r.amount},"${r.description || ""}",${getMonthName(r.month)},${r.year}\n`;
+      csv += `"${r.date}","${r.title}",${r.amount},"${r.description || ""}","${r.category || ""}",${r.itbis || 0},"${r.rnc || ""}","${getMonthName(r.month)}",${r.year}\n`;
     });
-    
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -258,61 +237,52 @@ export default function Home() {
     window.URL.revokeObjectURL(url);
   };
 
+  const categories = [...new Set(receipts.map(r => r.category).filter(Boolean))];
+  const years = [...new Set(receipts.map(r => r.year.toString()))].sort().reverse();
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      {/* Header */}
-      <header className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
+      {/* HEADER MEJORADO */}
+      <header className="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center justify-between gap-3 py-4">
             <div className="flex items-center gap-3">
-              <span className="text-3xl">📄</span>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Mis Recibos
-              </h1>
-              <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                {receipts.length} recibos
-              </span>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <span className="text-xl text-white">📄</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-800">Recibos Pro</h1>
+                <p className="text-xs text-gray-400">Gestión de ingresos</p>
+              </div>
             </div>
             
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Buscador */}
-              <input
-                type="text"
-                placeholder="🔍 Buscar..."
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm w-40 sm:w-60"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              
-              {/* Filtro por mes */}
-              <select
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                value={filterMonth}
-                onChange={(e) => setFilterMonth(e.target.value)}
-              >
-                <option value="">Todos los meses</option>
-                {Object.keys(grouped).sort().reverse().map(key => {
-                  const [year, month] = key.split('-');
-                  return (
-                    <option key={key} value={key}>
-                      {getMonthName(parseInt(month))} {year}
-                    </option>
-                  );
-                })}
-              </select>
-              
+            <div className="flex flex-wrap items-center gap-2">
               <button
-                onClick={exportCSV}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 text-sm"
+                onClick={() => setViewMode("dashboard")}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                  viewMode === "dashboard" 
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25" 
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
-                📊 Exportar
+                📊 Dashboard
+              </button>
+              <button
+                onClick={() => setViewMode("lista")}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                  viewMode === "lista" 
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25" 
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                📋 Recibos
               </button>
               
               <button
                 onClick={() => setShowForm(true)}
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2 rounded-lg hover:shadow-lg transition-all flex items-center gap-2"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 text-sm font-medium shadow-lg shadow-blue-500/25"
               >
-                <span>+</span> Subir Recibo
+                <span className="text-lg leading-none">+</span> Nuevo
               </button>
             </div>
           </div>
@@ -320,250 +290,325 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Total general */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <p className="text-sm text-gray-500">💰 Total de Ingresos</p>
-            <p className="text-3xl font-bold text-gray-900">{formatCurrency(totalGeneral)}</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <p className="text-sm text-gray-500">📄 Total Recibos</p>
-            <p className="text-3xl font-bold text-gray-900">{receipts.length}</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <p className="text-sm text-gray-500">📆 Meses registrados</p>
-            <p className="text-3xl font-bold text-gray-900">{Object.keys(grouped).length}</p>
-          </div>
-        </div>
+        {/* DASHBOARD MEJORADO */}
+        {viewMode === "dashboard" && (
+          <>
+            {/* Tarjetas con gradientes */}
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-xl shadow-blue-500/20">
+                <p className="text-sm opacity-80">💰 Total</p>
+                <p className="text-2xl font-bold">{formatCurrency(totalGeneral)}</p>
+              </div>
+              <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl p-6 text-white shadow-xl shadow-indigo-500/20">
+                <p className="text-sm opacity-80">📄 Recibos</p>
+                <p className="text-2xl font-bold">{receipts.length}</p>
+              </div>
+              <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-xl shadow-purple-500/20">
+                <p className="text-sm opacity-80">📆 Meses</p>
+                <p className="text-2xl font-bold">{Object.keys(grouped).length}</p>
+              </div>
+              <div className="bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl p-6 text-white shadow-xl shadow-pink-500/20">
+                <p className="text-sm opacity-80">📊 Promedio</p>
+                <p className="text-2xl font-bold">{receipts.length > 0 ? formatCurrency(totalGeneral / receipts.length) : formatCurrency(0)}</p>
+              </div>
+              <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-xl shadow-green-500/20">
+                <p className="text-sm opacity-80">🏷️ Categorías</p>
+                <p className="text-2xl font-bold">{categories.length}</p>
+              </div>
+            </div>
 
-        {/* Lista por meses */}
-        {groupedArray.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-xl p-16 text-center border-2 border-dashed border-gray-300">
-            <div className="text-8xl mb-6">📭</div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-3">No hay recibos aún</h3>
-            <p className="text-gray-500 mb-6">Sube tu primer recibo de pago</p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl hover:shadow-xl transition-all text-lg font-semibold"
-            >
-              + Subir Recibo
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {groupedArray.map((group) => {
-              const isExpanded = expandedMonth === group.key;
-              const monthTotal = group.receipts.reduce((sum: number, r: Receipt) => sum + r.amount, 0);
-              
-              return (
-                <div key={group.key} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            {/* Resumen Anual */}
+            {Object.keys(annualSummary).length > 0 && (
+              <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-bold text-gray-800">📊 Resumen Anual</h2>
                   <button
-                    onClick={() => toggleMonth(group.key)}
-                    className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50 transition-colors"
+                    onClick={exportCSV}
+                    className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                   >
-                    <div className="flex items-center gap-4">
-                      <span className="text-3xl">📆</span>
-                      <div className="text-left">
-                        <h3 className="text-xl font-bold text-gray-800">
-                          {getMonthName(group.month)} {group.year}
-                        </h3>
-                        <p className="text-sm text-gray-500">{group.receipts.length} recibos</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-xl font-bold text-indigo-600">
-                        {formatCurrency(monthTotal)}
-                      </span>
-                      <span className="text-gray-400 text-2xl">{isExpanded ? "▼" : "▶"}</span>
-                    </div>
+                    📥 Exportar
                   </button>
-
-                  {isExpanded && (
-                    <div className="border-t border-gray-200">
-                      <div className="overflow-x-auto p-4">
-                        <table className="w-full">
-                          <thead className="bg-gray-50 rounded-lg">
-                            <tr>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Título</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Monto</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Archivo</th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-200">
-                            {group.receipts.map((receipt: Receipt) => (
-                              <tr key={receipt.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-4 py-3 text-sm text-gray-600">
-                                  {new Date(receipt.date).toLocaleDateString("es-DO")}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-900">
-                                  <div className="font-medium">{receipt.title}</div>
-                                  {receipt.description && (
-                                    <div className="text-xs text-gray-500">{receipt.description}</div>
-                                  )}
-                                </td>
-                                <td className="px-4 py-3 text-sm font-bold text-gray-900">
-                                  {formatCurrency(receipt.amount)}
-                                </td>
-                                <td className="px-4 py-3 text-sm">
-                                  {receipt.fileData ? (
-                                    <a
-                                      href={receipt.fileData}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-indigo-600 hover:text-indigo-800 font-medium"
-                                    >
-                                      📎 Ver archivo
-                                    </a>
-                                  ) : (
-                                    <span className="text-gray-400 text-xs">Sin archivo</span>
-                                  )}
-                                </td>
-                                <td className="px-4 py-3 text-sm">
-                                  <div className="flex items-center gap-2">
-                                    <button
-                                      onClick={() => editReceipt(receipt)}
-                                      className="text-blue-600 hover:text-blue-800"
-                                      title="Editar"
-                                    >
-                                      ✏️
-                                    </button>
-                                    <button
-                                      onClick={() => deleteReceipt(receipt.id)}
-                                      className="text-red-600 hover:text-red-800"
-                                      title="Eliminar"
-                                    >
-                                      🗑️
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.values(annualSummary).map((s: any) => (
+                    <div key={s.year} className="bg-gradient-to-br from-gray-50 to-blue-50/50 rounded-xl p-4 border border-gray-100">
+                      <h3 className="font-bold text-gray-800">📅 {s.year}</h3>
+                      <p className="text-2xl font-bold text-blue-600">{formatCurrency(s.total)}</p>
+                      <p className="text-sm text-gray-500">{s.count} recibos</p>
+                      <div className="mt-2 text-sm space-y-1">
+                        {Object.entries(s.months).map(([month, total]: [string, any]) => (
+                          <div key={month} className="flex justify-between border-b border-gray-100 pb-1">
+                            <span className="text-gray-600">{getMonthName(parseInt(month))}</span>
+                            <span className="font-medium">{formatCurrency(total)}</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-              );
-            })}
-            
-            {/* Botón Eliminar todo */}
-            {receipts.length > 0 && (
-              <div className="flex justify-end mt-6">
-                <button
-                  onClick={deleteAll}
-                  className="text-red-600 hover:text-red-800 text-sm font-medium"
-                >
-                  🗑️ Eliminar todos los recibos
-                </button>
               </div>
             )}
-          </div>
+
+            {/* Últimos recibos */}
+            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+              <h2 className="text-lg font-bold text-gray-800 mb-4">📋 Últimos recibos</h2>
+              {receipts.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">📭</div>
+                  <p className="text-gray-400">No hay recibos aún</p>
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all"
+                  >
+                    + Subir tu primer recibo
+                  </button>
+                </div>
+              ) : (
+                receipts.slice(0, 5).map((r) => (
+                  <div key={r.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                    <div>
+                      <p className="font-medium text-gray-800">{r.title}</p>
+                      <p className="text-sm text-gray-400">{new Date(r.date).toLocaleDateString("es-DO")}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600">{r.category || "Sin categoría"}</span>
+                      <span className="font-bold text-blue-600">{formatCurrency(r.amount)}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        )}
+
+        {/* VISTA DE RECIBOS MEJORADA */}
+        {viewMode === "lista" && (
+          <>
+            {/* Barra de filtros */}
+            <div className="bg-white rounded-2xl shadow-xl p-4 mb-6 border border-gray-100">
+              <div className="flex flex-wrap items-center gap-3">
+                <input
+                  type="text"
+                  placeholder="🔍 Buscar recibos..."
+                  className="flex-1 min-w-[200px] px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <select
+                  className="px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  value={filterYear}
+                  onChange={(e) => setFilterYear(e.target.value)}
+                >
+                  <option value="">Todos los años</option>
+                  {years.map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+                {categories.length > 0 && (
+                  <select
+                    className="px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                  >
+                    <option value="">Todas las categorías</option>
+                    {categories.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                )}
+                <button
+                  onClick={exportCSV}
+                  className="bg-green-500 text-white px-4 py-2 rounded-xl hover:bg-green-600 transition-all flex items-center gap-2 text-sm"
+                >
+                  📊 CSV
+                </button>
+              </div>
+            </div>
+
+            {/* Lista de recibos */}
+            {groupedArray.length === 0 ? (
+              <div className="bg-white rounded-2xl shadow-xl p-16 text-center border-2 border-dashed border-gray-300">
+                <div className="text-6xl mb-4">📭</div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">No hay recibos</h3>
+                <p className="text-gray-400 mb-4">Sube tu primer recibo</p>
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all"
+                >
+                  + Subir Recibo
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {groupedArray.map((group) => {
+                  const isExpanded = expandedMonth === group.key;
+                  return (
+                    <div key={group.key} className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                      <button
+                        onClick={() => toggleMonth(group.key)}
+                        className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-4">
+                          <span className="text-2xl">📆</span>
+                          <div className="text-left">
+                            <h3 className="text-lg font-bold text-gray-800">
+                              {getMonthName(group.month)} {group.year}
+                            </h3>
+                            <p className="text-sm text-gray-400">{group.receipts.length} recibos</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="text-lg font-bold text-blue-600">
+                            {formatCurrency(group.total)}
+                          </span>
+                          <span className="text-gray-400 text-xl">{isExpanded ? "▼" : "▶"}</span>
+                        </div>
+                      </button>
+
+                      {isExpanded && (
+                        <div className="border-t border-gray-100">
+                          <div className="overflow-x-auto p-4">
+                            <table className="w-full">
+                              <thead>
+                                <tr>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Fecha</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Título</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Categoría</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Monto</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Archivo</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Acciones</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-100">
+                                {group.receipts.map((receipt: Receipt) => (
+                                  <tr key={receipt.id} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-4 py-3 text-sm text-gray-600">
+                                      {new Date(receipt.date).toLocaleDateString("es-DO")}
+                                    </td>
+                                    <td className="px-4 py-3 text-sm">
+                                      <div className="font-medium text-gray-800">{receipt.title}</div>
+                                      {receipt.description && (
+                                        <div className="text-xs text-gray-400">{receipt.description}</div>
+                                      )}
+                                    </td>
+                                    <td className="px-4 py-3 text-sm">
+                                      <span className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
+                                        {receipt.category || "Sin categoría"}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-sm font-bold text-blue-600">
+                                      {formatCurrency(receipt.amount)}
+                                    </td>
+                                    <td className="px-4 py-3 text-sm">
+                                      {receipt.fileData ? (
+                                        <a href={receipt.fileData} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">📎 Ver</a>
+                                      ) : (
+                                        <span className="text-gray-300 text-xs">Sin archivo</span>
+                                      )}
+                                    </td>
+                                    <td className="px-4 py-3 text-sm">
+                                      <div className="flex items-center gap-2">
+                                        <button onClick={() => editReceipt(receipt)} className="text-blue-600 hover:text-blue-800">✏️</button>
+                                        <button onClick={() => deleteReceipt(receipt.id)} className="text-red-500 hover:text-red-700">🗑️</button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                
+                {receipts.length > 0 && (
+                  <div className="flex justify-end">
+                    <button onClick={deleteAll} className="text-red-400 hover:text-red-600 text-sm font-medium">
+                      🗑️ Eliminar todos
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
       </main>
 
-      {/* Modal para subir recibo */}
+      {/* Modal mejorado */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">
-                {editingId ? "✏️ Editar Recibo" : "📤 Subir Recibo"}
-              </h2>
-              <button
-                onClick={() => setShowForm(false)}
-                className="text-gray-400 hover:text-gray-600 text-3xl leading-none"
-              >
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {editingId ? "✏️ Editar Recibo" : "📤 Nuevo Recibo"}
+                </h2>
+                <p className="text-sm text-gray-400">
+                  {editingId ? "Actualiza los datos" : "Ingresa los datos del recibo"}
+                </p>
+              </div>
+              <button onClick={() => setShowForm(false)} className="text-gray-300 hover:text-gray-600 text-3xl leading-none">
                 ×
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Título *
-                </label>
-                <input
-                  type="text"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder="Ej: Pago Cliente XYZ"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                />
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
+                  <input type="text" required className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ej: Pago Cliente" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Monto (DOP) *</label>
+                  <input type="number" required step="0.01" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1000.00" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} />
+                </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Monto (DOP) *
-                </label>
-                <input
-                  type="number"
-                  required
-                  step="0.01"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder="1000.00"
-                  value={formData.amount}
-                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
+                <input type="date" required className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                  <select className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })}>
+                    <option value="">Seleccionar</option>
+                    <option value="Servicios">Servicios</option>
+                    <option value="Ventas">Ventas</option>
+                    <option value="Honorarios">Honorarios</option>
+                    <option value="Alquileres">Alquileres</option>
+                    <option value="Otros">Otros</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">ITBIS</label>
+                  <input type="number" step="0.01" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0.00" value={formData.itbis} onChange={(e) => setFormData({ ...formData, itbis: e.target.value })} />
+                </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fecha *
-                </label>
-                <input
-                  type="date"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                <textarea className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Detalles adicionales..." rows={2} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Descripción
-                </label>
-                <textarea
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder="Detalles adicionales..."
-                  rows={3}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  📎 Subir archivo (PDF, JPG, PNG)
-                </label>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png,.gif"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
-                  onChange={handleFileChange}
-                />
-                {previewUrl && selectedFile && (
+                <label className="block text-sm font-medium text-gray-700 mb-1">📎 Archivo (PDF, JPG, PNG)</label>
+                <input type="file" accept=".pdf,.jpg,.jpeg,.png,.gif" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" onChange={handleFileChange} />
+                {previewUrl && (
                   <div className="mt-3">
-                    <p className="text-sm text-gray-600">✅ Archivo seleccionado: {selectedFile.name}</p>
-                    {selectedFile.type.startsWith('image/') && (
-                      <img src={previewUrl} alt="Vista previa" className="mt-2 max-h-40 rounded-lg border" />
+                    {selectedFile && <p className="text-sm text-gray-600">✅ {selectedFile.name}</p>}
+                    {selectedFile?.type.startsWith('image/') && (
+                      <img src={previewUrl} alt="Vista previa" className="mt-2 max-h-40 rounded-lg border shadow-sm" />
                     )}
                   </div>
                 )}
-                {previewUrl && !selectedFile && (
-                  <p className="text-sm text-gray-600">✅ Archivo adjunto</p>
-                )}
               </div>
               
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-xl font-semibold hover:shadow-xl transition-all text-lg"
-              >
-                {editingId ? "💾 Actualizar Recibo" : "💾 Guardar Recibo"}
+              <button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-semibold hover:shadow-xl transition-all">
+                {editingId ? "💾 Actualizar" : "💾 Guardar Recibo"}
               </button>
             </form>
           </div>
