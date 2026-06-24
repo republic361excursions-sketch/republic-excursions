@@ -26,6 +26,11 @@ interface Proveedor {
   telefono: string;
   email: string;
   metodoPago: "efectivo" | "transferencia" | "paypal";
+  banco: string;
+  numeroCuenta: string;
+  beneficiario: string;
+  tipoCuenta: "corriente" | "ahorros" | "nomina";
+  documentos: string;
   nota: string;
 }
 
@@ -150,6 +155,11 @@ export default function Home() {
     telefono: "",
     email: "",
     metodoPago: "efectivo" as "efectivo" | "transferencia" | "paypal",
+    banco: "",
+    numeroCuenta: "",
+    beneficiario: "",
+    tipoCuenta: "corriente" as "corriente" | "ahorros" | "nomina",
+    documentos: "",
     nota: "",
   });
 
@@ -183,10 +193,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v12");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v12");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v12");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v12");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v13");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v13");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v13");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v13");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -196,22 +206,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v12", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v13", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v12", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v13", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v12", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v13", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v12", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v13", JSON.stringify(data));
   };
 
   // ============================================
@@ -276,6 +286,11 @@ export default function Home() {
       telefono: "",
       email: "",
       metodoPago: "efectivo",
+      banco: "",
+      numeroCuenta: "",
+      beneficiario: "",
+      tipoCuenta: "corriente",
+      documentos: "",
       nota: "",
     });
     setTempExcursiones([]);
@@ -300,6 +315,11 @@ export default function Home() {
       telefono: proveedor.telefono,
       email: proveedor.email,
       metodoPago: proveedor.metodoPago,
+      banco: proveedor.banco,
+      numeroCuenta: proveedor.numeroCuenta,
+      beneficiario: proveedor.beneficiario,
+      tipoCuenta: proveedor.tipoCuenta,
+      documentos: proveedor.documentos,
       nota: proveedor.nota,
     });
     
@@ -328,7 +348,7 @@ export default function Home() {
   };
 
   // ============================================
-  // MANEJAR EXCURSIONES TEMPORALES DEL PROVEEDOR
+  // MANEJAR EXCURSIONES TEMPORALES
   // ============================================
   const agregarTempExcursion = () => {
     if (!tempExcursionForm.nombre) {
@@ -646,7 +666,7 @@ export default function Home() {
   };
 
   // ============================================
-  // CAMBIAR TIPO DE CLIENTE EN VENTA
+  // CAMBIAR TIPO DE CLIENTE
   // ============================================
   const cambiarTipoCliente = (tipo: "adulto" | "nino") => {
     if (!selectedExcursionForVenta) {
@@ -683,7 +703,7 @@ export default function Home() {
   };
 
   // ============================================
-  // ACTUALIZAR CANTIDAD DE PERSONAS
+  // ACTUALIZAR CANTIDAD
   // ============================================
   const updateCantidadPersonas = (cantidad: number) => {
     if (selectedExcursionForVenta) {
@@ -845,9 +865,9 @@ export default function Home() {
 
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Cliente,Excursion,Cantidad,Tipo,Servicio,Grupo Privado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
+    let csv = "Fecha,Cliente,Excursion,Cantidad,Tipo,Servicio,Grupo Privado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago Cliente,Proveedor,Metodo Pago Proveedor,Pago Proveedor,Nota\n";
     ventas.forEach(v => {
-      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadPersonas},"${v.tipoCliente}","${v.tipoServicio}",${v.grupoPrivado || 0},${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadPersonas},"${v.tipoCliente}","${v.tipoServicio}",${v.grupoPrivado || 0},${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.metodoPagoProveedor}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -1308,6 +1328,11 @@ export default function Home() {
                   telefono: "",
                   email: "",
                   metodoPago: "efectivo",
+                  banco: "",
+                  numeroCuenta: "",
+                  beneficiario: "",
+                  tipoCuenta: "corriente",
+                  documentos: "",
                   nota: "",
                 });
                 setTempExcursiones([]);
@@ -1340,6 +1365,7 @@ export default function Home() {
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Telefono</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Email</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Metodo</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Banco</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursiones</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
                     </tr>
@@ -1353,6 +1379,7 @@ export default function Home() {
                           <td className="px-4 py-3 text-sm text-white/60">{p.telefono}</td>
                           <td className="px-4 py-3 text-sm text-white/60">{p.email}</td>
                           <td className="px-4 py-3 text-sm text-white/60">{p.metodoPago}</td>
+                          <td className="px-4 py-3 text-sm text-white/60">{p.banco || "-"}</td>
                           <td className="px-4 py-3 text-sm text-white/60">
                             <span className="text-xs bg-white/10 px-2 py-1 rounded-full">
                               {excursionesDelProveedor.length} excursiones
@@ -1452,7 +1479,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL DE VENTA - COMPLETO Y FUNCIONAL
+          MODAL DE VENTA
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
@@ -1654,7 +1681,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Metodo de Pago */}
+              {/* Metodo de Pago del Cliente */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago del Cliente *</label>
                 <select 
@@ -1665,6 +1692,21 @@ export default function Home() {
                 >
                   <option value="efectivo" className="text-slate-900">Efectivo</option>
                   <option value="tarjeta" className="text-slate-900">Tarjeta</option>
+                  <option value="transferencia" className="text-slate-900">Transferencia</option>
+                  <option value="paypal" className="text-slate-900">PayPal</option>
+                </select>
+              </div>
+
+              {/* Metodo de Pago al Proveedor */}
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago al Proveedor *</label>
+                <select 
+                  required 
+                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white" 
+                  value={formData.metodoPagoProveedor} 
+                  onChange={(e) => setFormData({ ...formData, metodoPagoProveedor: e.target.value as any })}
+                >
+                  <option value="efectivo" className="text-slate-900">Efectivo</option>
                   <option value="transferencia" className="text-slate-900">Transferencia</option>
                   <option value="paypal" className="text-slate-900">PayPal</option>
                 </select>
@@ -1718,7 +1760,9 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL DE PROVEEDOR */}
+      {/* ============================================
+          MODAL DE PROVEEDOR CON DATOS BANCARIOS
+      ============================================ */}
       {showProveedorForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto border border-white/10">
@@ -1727,6 +1771,7 @@ export default function Home() {
               <button onClick={() => setShowProveedorForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
             </div>
             <form onSubmit={handleProveedorSubmit} className="space-y-4">
+              {/* Datos del Proveedor */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Proveedor *</label>
                 <input 
@@ -1760,8 +1805,10 @@ export default function Home() {
                   />
                 </div>
               </div>
+
+              {/* Metodo de Pago del Proveedor */}
               <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago</label>
+                <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago del Proveedor</label>
                 <select 
                   value={proveedorFormData.metodoPago}
                   onChange={(e) => setProveedorFormData({ ...proveedorFormData, metodoPago: e.target.value as "efectivo" | "transferencia" | "paypal" })}
@@ -1772,6 +1819,67 @@ export default function Home() {
                   <option value="paypal" className="text-slate-900">PayPal</option>
                 </select>
               </div>
+
+              {/* Datos Bancarios */}
+              <div className="border-t border-white/10 pt-4">
+                <h3 className="text-lg font-semibold text-white mb-3">Datos Bancarios del Proveedor</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Banco</label>
+                    <input 
+                      type="text" 
+                      value={proveedorFormData.banco}
+                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, banco: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                      placeholder="Ej: Banco Popular" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Numero de Cuenta</label>
+                    <input 
+                      type="text" 
+                      value={proveedorFormData.numeroCuenta}
+                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, numeroCuenta: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                      placeholder="0000-0000-0000" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Beneficiario</label>
+                    <input 
+                      type="text" 
+                      value={proveedorFormData.beneficiario}
+                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, beneficiario: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                      placeholder="Nombre del titular de la cuenta" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Cuenta</label>
+                    <select 
+                      value={proveedorFormData.tipoCuenta}
+                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, tipoCuenta: e.target.value as "corriente" | "ahorros" | "nomina" })}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
+                    >
+                      <option value="corriente" className="text-slate-900">Corriente</option>
+                      <option value="ahorros" className="text-slate-900">Ahorros</option>
+                      <option value="nomina" className="text-slate-900">Nomina</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Documentos</label>
+                    <input 
+                      type="text" 
+                      value={proveedorFormData.documentos}
+                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, documentos: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                      placeholder="RNC, Cedula, etc." 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Nota */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Nota</label>
                 <textarea 
@@ -1827,7 +1935,7 @@ export default function Home() {
                       value={tempExcursionForm.nombre}
                       onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, nombre: e.target.value })}
                       className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                      placeholder="Isla Saona - Bavaro" 
+                      placeholder="Isla Saona" 
                     />
                   </div>
                   <div>
@@ -1956,7 +2064,9 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL DE EXCURSION */}
+      {/* ============================================
+          MODAL DE EXCURSION
+      ============================================ */}
       {showExcursionForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
@@ -1973,7 +2083,7 @@ export default function Home() {
                   onChange={(e) => setExcursionFormData({ ...excursionFormData, nombre: e.target.value })}
                   required 
                   className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                  placeholder="Ej: Isla Saona - Bavaro" 
+                  placeholder="Ej: Isla Saona" 
                 />
               </div>
               <div>
@@ -2154,7 +2264,9 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL DE CLIENTE */}
+      {/* ============================================
+          MODAL DE CLIENTE
+      ============================================ */}
       {showClienteForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
