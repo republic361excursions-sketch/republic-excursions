@@ -82,7 +82,7 @@ interface Venta {
 }
 
 // ============================================
-// LISTA DE ZONAS
+// LISTAS
 // ============================================
 const ZONAS = [
   "Bavaro", "Punta Cana Village", "Cap Cana", "Uvero Alto",
@@ -92,9 +92,6 @@ const ZONAS = [
   "San Juan", "Veron", "La Otra Banda", "Playa Bavaro"
 ];
 
-// ============================================
-// LISTA DE BANCOS
-// ============================================
 const BANCOS = [
   "Banco BHD", "Banreservas", "Banco Popular Dominicano",
   "Scotiabank", "Banco Santa Cruz", "Banco Vimenca",
@@ -103,9 +100,6 @@ const BANCOS = [
   "Banco Promerica", "Banco Lafise", "Banesco"
 ];
 
-// ============================================
-// HORAS DISPONIBLES
-// ============================================
 const HORAS = [
   "06:00 AM", "06:30 AM", "07:00 AM", "07:30 AM",
   "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
@@ -148,7 +142,6 @@ export default function Home() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Buscadores y filtros
   const [searchClientes, setSearchClientes] = useState("");
   const [filterClienteExcursion, setFilterClienteExcursion] = useState("");
 
@@ -166,7 +159,6 @@ export default function Home() {
   const [filterReservaEstado, setFilterReservaEstado] = useState("todas");
   const [filterReservaFecha, setFilterReservaFecha] = useState("");
 
-  // Reloj en tiempo real
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -385,10 +377,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v28");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v28");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v28");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v28");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v29");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v29");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v29");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v29");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -398,22 +390,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v28", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v29", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v28", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v29", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v28", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v29", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v28", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v29", JSON.stringify(data));
   };
 
   // ============================================
@@ -674,7 +666,7 @@ export default function Home() {
   };
 
   // ============================================
-  // MANEJAR METODOS DE PAGO DEL PROVEEDOR
+  // MANEJAR METODOS DE PAGO
   // ============================================
   const toggleMetodoPago = (metodo: "efectivo" | "transferencia" | "paypal") => {
     setProveedorFormData(prev => {
@@ -687,9 +679,6 @@ export default function Home() {
     });
   };
 
-  // ============================================
-  // MANEJAR TIPO DE CUENTA
-  // ============================================
   const toggleTipoCuenta = (tipo: "corriente" | "ahorros") => {
     setProveedorFormData(prev => {
       const tipos = prev.tipoCuenta;
@@ -1048,7 +1037,7 @@ export default function Home() {
   };
 
   // ============================================
-  // HANDLE CAMBIOS EN PRECIOS
+  // HANDLE CAMBIOS
   // ============================================
   const handlePrecioAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -1308,103 +1297,117 @@ export default function Home() {
   };
 
   // ============================================
-  // COMPONENTE DE LOGIN
+  // NUEVO LOGIN MODERNO
   // ============================================
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-10 w-64 h-64 bg-amber-400 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-80 h-80 bg-blue-500 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500 rounded-full blur-3xl"></div>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-900 relative overflow-hidden">
+        {/* Efectos decorativos de fondo */}
+        <div className="absolute inset-0">
+          <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] bg-amber-500/10 rounded-full blur-[120px]"></div>
+          <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px]"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[100px]"></div>
         </div>
 
-        <div className="relative z-10 bg-white/10 backdrop-blur-2xl rounded-3xl p-8 max-w-md w-full border border-white/20 shadow-2xl hover:shadow-amber-500/10 transition-all duration-500">
-          <div className="text-center mb-6 pb-6 border-b border-white/10">
-            <div className="text-4xl font-bold text-white font-mono tracking-wider">
-              {currentTime.toLocaleTimeString("es-DO", { 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit' 
-              })}
+        <div className="relative z-10 w-full max-w-md">
+          <div className="bg-white/5 backdrop-blur-2xl rounded-3xl p-8 border border-white/10 shadow-2xl shadow-black/30">
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/30">
+                <span className="text-3xl font-bold text-slate-900">RE</span>
+              </div>
+              <h1 className="text-2xl font-bold text-white mt-4 tracking-tight">Republic Excursions</h1>
+              <p className="text-white/40 text-sm mt-1">Sistema de Gestión de Excursiones</p>
             </div>
-            <div className="text-sm text-white/50 mt-1">
-              {currentTime.toLocaleDateString("es-DO", { 
-                weekday: 'long', 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
-              })}
-            </div>
-          </div>
 
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/25 animate-pulse">
-              <span className="text-3xl text-slate-900 font-bold">RE</span>
-            </div>
-            <h1 className="text-2xl font-bold text-white mt-4 tracking-tight">Republic Excursions</h1>
-            <p className="text-white/40 text-sm mt-1">Sistema de Gestion de Excursiones</p>
-          </div>
-
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            const formData = new FormData(e.currentTarget);
-            const username = formData.get("username") as string;
-            const password = formData.get("password") as string;
-            handleLogin(username, password);
-          }} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-white/70 mb-1">Usuario</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30">👤</span>
-                <input
-                  type="text"
-                  name="username"
-                  required
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 transition-all"
-                  placeholder="Ingresa tu usuario"
-                />
+            <div className="grid grid-cols-3 gap-3 mb-6 bg-white/5 rounded-2xl p-2 border border-white/5">
+              <div className="text-center p-2 rounded-xl bg-white/5">
+                <div className="text-white/50 text-xs">Hora</div>
+                <div className="text-white font-mono text-sm font-bold">
+                  {currentTime.toLocaleTimeString("es-DO", { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+              <div className="text-center p-2 rounded-xl bg-white/5">
+                <div className="text-white/50 text-xs">Fecha</div>
+                <div className="text-white text-sm font-medium">
+                  {currentTime.toLocaleDateString("es-DO", { day: '2-digit', month: 'short' })}
+                </div>
+              </div>
+              <div className="text-center p-2 rounded-xl bg-white/5">
+                <div className="text-white/50 text-xs">Día</div>
+                <div className="text-white text-sm font-medium">
+                  {currentTime.toLocaleDateString("es-DO", { weekday: 'short' })}
+                </div>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-white/70 mb-1">Contrasena</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30">🔒</span>
-                <input
-                  type="password"
-                  name="password"
-                  required
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 transition-all"
-                  placeholder="Ingresa tu contrasena"
-                />
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const username = formData.get("username") as string;
+              const password = formData.get("password") as string;
+              handleLogin(username, password);
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-white/60 mb-1.5">Usuario</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30">👤</span>
+                  <input
+                    type="text"
+                    name="username"
+                    required
+                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/30 transition-all"
+                    placeholder="Ingresa tu usuario"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-white/60 mb-1.5">Contraseña</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30">🔒</span>
+                  <input
+                    type="password"
+                    name="password"
+                    required
+                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/30 transition-all"
+                    placeholder="Ingresa tu contraseña"
+                  />
+                </div>
+              </div>
+              {loginError && (
+                <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm text-center">
+                  {loginError}
+                </div>
+              )}
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 py-3.5 rounded-xl font-semibold hover:shadow-xl hover:scale-[1.02] transition-all shadow-lg shadow-amber-500/25"
+              >
+                Iniciar Sesión
+              </button>
+            </form>
+
+            <div className="mt-6 p-3 bg-white/5 rounded-xl border border-white/5">
+              <div className="flex flex-wrap justify-center gap-2 text-xs text-white/30">
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                  Republic
+                </span>
+                <span className="text-white/20">•</span>
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                  Raul
+                </span>
+                <span className="text-white/20">•</span>
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-pink-400"></span>
+                  Gabrielle
+                </span>
               </div>
             </div>
-            {loginError && (
-              <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm text-center">
-                {loginError}
-              </div>
-            )}
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl hover:scale-[1.02] transition-all shadow-lg shadow-amber-500/25"
-            >
-              Iniciar Sesion
-            </button>
-          </form>
 
-          <div className="mt-6 text-center">
-            <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-              <p className="text-xs text-white/30">
-                Usuarios: <span className="text-white/50 font-medium">Republic</span> <span className="text-white/30">|</span> <span className="text-white/50 font-medium">Raul</span> <span className="text-white/30">|</span> <span className="text-white/50 font-medium">Gabrielle</span>
-              </p>
-              <p className="text-xs text-white/30 mt-1">
-                Contrasena: <span className="text-white/50 font-mono">Admin2026</span> <span className="text-white/30">|</span> <span className="text-white/50 font-mono">Republ1c$$</span>
-              </p>
+            <div className="mt-4 text-center">
+              <p className="text-[10px] text-white/20">v3.0 • Republic Excursions © 2026</p>
             </div>
-          </div>
-
-          <div className="mt-4 text-center">
-            <p className="text-[10px] text-white/20">v2.7.0 • Republic Excursions © 2026</p>
           </div>
         </div>
       </div>
@@ -1418,7 +1421,6 @@ export default function Home() {
   const isRaul = currentUser === "raul";
   const isGabrielle = currentUser === "gabrielle";
   
-  // Colores por usuario
   const colors = {
     admin: {
       bg: "from-slate-900 via-slate-800 to-slate-900",
@@ -1429,19 +1431,23 @@ export default function Home() {
       card: "bg-white/5",
       shadow: "shadow-amber-500/25",
       border: "border-amber-500/30",
+      text: "text-amber-400",
+      bgHover: "hover:bg-amber-500/10",
     },
     raul: {
-      bg: "from-slate-900 via-indigo-950 to-slate-900",
+      bg: "from-slate-900 via-blue-950 to-slate-900",
       accent: "blue",
       accentLight: "blue-400",
-      gradient: "from-blue-500 to-indigo-600",
+      gradient: "from-blue-500 to-cyan-600",
       header: "bg-white/5",
       card: "bg-white/5",
       shadow: "shadow-blue-500/25",
       border: "border-blue-500/30",
+      text: "text-blue-400",
+      bgHover: "hover:bg-blue-500/10",
     },
     gabrielle: {
-      bg: "from-rose-950 via-pink-900 to-purple-950",
+      bg: "from-rose-950 via-pink-950 to-purple-950",
       accent: "pink",
       accentLight: "pink-400",
       gradient: "from-pink-500 to-rose-500",
@@ -1449,6 +1455,8 @@ export default function Home() {
       card: "bg-white/10",
       shadow: "shadow-pink-500/25",
       border: "border-pink-500/30",
+      text: "text-pink-400",
+      bgHover: "hover:bg-pink-500/10",
     }
   };
 
@@ -1460,6 +1468,7 @@ export default function Home() {
   const cardBg = userColors.card;
   const buttonGradient = userColors.gradient;
   const shadowColor = userColors.shadow;
+  const accentText = userColors.text;
 
   const getUserRole = () => {
     if (isAdmin) return "Administrador";
@@ -1469,33 +1478,24 @@ export default function Home() {
   };
 
   // ============================================
-  // FUNCION PARA RENDERIZAR CADA VISTA
+  // FUNCION PARA RENDERIZAR VISTAS
   // ============================================
   const renderView = () => {
     switch(viewMode) {
-      case "dashboard":
-        return renderDashboard();
-      case "ventas":
-        return renderVentas();
-      case "reservas":
-        return renderReservas();
-      case "clientes":
-        return renderClientes();
-      case "proveedores":
-        return renderProveedores();
-      case "bancos":
-        return renderBancos();
-      case "calendario":
-        return renderCalendario();
-      case "excursiones":
-        return renderExcursiones();
-      default:
-        return renderDashboard();
+      case "dashboard": return renderDashboard();
+      case "ventas": return renderVentas();
+      case "reservas": return renderReservas();
+      case "clientes": return renderClientes();
+      case "proveedores": return renderProveedores();
+      case "bancos": return renderBancos();
+      case "calendario": return renderCalendario();
+      case "excursiones": return renderExcursiones();
+      default: return renderDashboard();
     }
   };
 
   // ============================================
-  // RENDER DASHBOARD
+  // RENDER DASHBOARD - NUEVO DISEÑO
   // ============================================
   const renderDashboard = () => {
     const totalVentas = ventas.reduce((sum, v) => sum + v.precioVentaUSD, 0);
@@ -1512,71 +1512,69 @@ export default function Home() {
              fechaV.getMonth() === hoy.getMonth() &&
              fechaV.getFullYear() === hoy.getFullYear();
     });
-    
-    const ventasPendientes = ventas.filter(v => v.estado === "pendiente");
-    const ventasConfirmadas = ventas.filter(v => v.estado === "confirmada");
-    const ventasCompletadas = ventas.filter(v => v.estado === "completada");
-
-    const fechaActual = currentTime.toLocaleDateString("es-DO", {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-    
-    const horaActual = currentTime.toLocaleTimeString("es-DO", {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
 
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
-            <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 rounded-xl bg-${accentColor}-500/20 flex items-center justify-center text-2xl`}>$</div>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-white">Dashboard</h2>
+            <p className="text-white/40 text-sm">Bienvenido de vuelta, {currentUser}</p>
+          </div>
+          <div className="text-right">
+            <div className="text-white/60 text-sm font-mono">
+              {currentTime.toLocaleTimeString("es-DO", { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </div>
+            <div className="text-white/30 text-xs">
+              {currentTime.toLocaleDateString("es-DO", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 transition-all ${userColors.bgHover}`}>
+            <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Total Ventas</p>
-                <p className={`text-white font-bold text-xl`}>{formatUSD(totalVentas)}</p>
+                <p className="text-white text-2xl font-bold">{formatUSD(totalVentas)}</p>
               </div>
+              <div className={`w-12 h-12 rounded-xl bg-${accentColor}-500/20 flex items-center justify-center text-2xl`}>$</div>
             </div>
           </div>
           
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center text-2xl">%</div>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 transition-all ${userColors.bgHover}`}>
+            <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Comisiones</p>
-                <p className="text-white font-bold text-xl">{formatUSD(totalComisiones)}</p>
+                <p className="text-white text-2xl font-bold">{formatUSD(totalComisiones)}</p>
               </div>
+              <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center text-2xl">%</div>
             </div>
           </div>
           
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center text-2xl">!</div>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 transition-all ${userColors.bgHover}`}>
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/40 text-sm">Pendiente Cobrar</p>
-                <p className="text-white font-bold text-xl">{formatUSD(totalPendiente)}</p>
+                <p className="text-white/40 text-sm">Por Cobrar</p>
+                <p className="text-white text-2xl font-bold">{formatUSD(totalPendiente)}</p>
               </div>
+              <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center text-2xl">!</div>
             </div>
           </div>
           
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-2xl">👥</div>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 transition-all ${userColors.bgHover}`}>
+            <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Clientes</p>
-                <p className="text-white font-bold text-xl">{totalClientes}</p>
+                <p className="text-white text-2xl font-bold">{totalClientes}</p>
               </div>
+              <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-2xl">👥</div>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
-            <h3 className={`text-${accentLight} font-semibold mb-3`}>Resumen de Ventas</h3>
+            <h3 className={`text-sm font-semibold ${accentText} mb-3`}>Resumen de Ventas</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-white/60">Hoy</span>
@@ -1584,24 +1582,24 @@ export default function Home() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-white/60">Pendientes</span>
-                <span className="text-yellow-400 font-medium">{ventasPendientes.length}</span>
+                <span className="text-yellow-400">{ventas.filter(v => v.estado === "pendiente").length}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-white/60">Confirmadas</span>
-                <span className="text-blue-400 font-medium">{ventasConfirmadas.length}</span>
+                <span className="text-blue-400">{ventas.filter(v => v.estado === "confirmada").length}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-white/60">Completadas</span>
-                <span className="text-green-400 font-medium">{ventasCompletadas.length}</span>
+                <span className="text-green-400">{ventas.filter(v => v.estado === "completada").length}</span>
               </div>
             </div>
           </div>
 
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
-            <h3 className={`text-${accentLight} font-semibold mb-3`}>Excursiones</h3>
+            <h3 className={`text-sm font-semibold ${accentText} mb-3`}>Resumen General</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-white/60">Total Excursiones</span>
+                <span className="text-white/60">Excursiones</span>
                 <span className="text-white font-medium">{totalExcursiones}</span>
               </div>
               <div className="flex justify-between text-sm">
@@ -1616,16 +1614,16 @@ export default function Home() {
           </div>
 
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
-            <h3 className={`text-${accentLight} font-semibold mb-3`}>Ultimas Ventas</h3>
+            <h3 className={`text-sm font-semibold ${accentText} mb-3`}>Últimas Ventas</h3>
             <div className="space-y-2 max-h-40 overflow-y-auto">
-              {ventas.slice(-5).reverse().map(v => (
+              {ventas.slice(-4).reverse().map(v => (
                 <div key={v.id} className="flex justify-between text-sm border-b border-white/5 pb-1">
-                  <span className="text-white/60 truncate">{v.clienteNombre}</span>
+                  <span className="text-white/60 truncate max-w-[120px]">{v.clienteNombre}</span>
                   <span className="text-white font-medium">{formatUSD(v.precioVentaUSD)}</span>
                 </div>
               ))}
               {ventas.length === 0 && (
-                <p className="text-white/40 text-sm text-center">No hay ventas registradas</p>
+                <p className="text-white/40 text-sm text-center py-2">No hay ventas registradas</p>
               )}
             </div>
           </div>
@@ -1633,9 +1631,9 @@ export default function Home() {
 
         {ventas.length === 0 && (
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-12 border-2 border-dashed border-white/10 text-center`}>
-            <div className="text-6xl mb-4">🚀</div>
-            <h3 className="text-white text-xl font-semibold mb-2">Comienza tu primera venta!</h3>
-            <p className="text-white/40">Haz clic en "Nueva Venta" para registrar tu primera excursion</p>
+            <div className="text-5xl mb-4">🚀</div>
+            <h3 className="text-white text-xl font-semibold mb-2">Comienza tu primera venta</h3>
+            <p className="text-white/40 text-sm">Haz clic en "Nueva Venta" para registrar tu primera excursión</p>
           </div>
         )}
       </div>
@@ -1655,36 +1653,23 @@ export default function Home() {
               placeholder="Buscar ventas..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500"
+              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
             />
           </div>
-          <div className="flex gap-2">
-            <select
-              value={filterYear}
-              onChange={(e) => setFilterYear(e.target.value)}
-              className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
-            >
-              <option value="">Todos los años</option>
-              {years.map(y => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-            <button
-              onClick={() => {
-                setSearchTerm("");
-                setFilterYear("");
-              }}
-              className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all"
-            >
-              Limpiar
-            </button>
-            <button
-              onClick={exportCSV}
-              className="px-4 py-2 bg-green-500/20 text-green-400 rounded-xl hover:bg-green-500/30 transition-all"
-            >
-              Exportar CSV
-            </button>
-          </div>
+          <select
+            value={filterYear}
+            onChange={(e) => setFilterYear(e.target.value)}
+            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
+          >
+            <option value="">Todos los años</option>
+            {years.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+          <button onClick={() => { setSearchTerm(""); setFilterYear(""); }} className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
+            Limpiar
+          </button>
+          <button onClick={exportCSV} className="px-4 py-2.5 bg-green-500/20 text-green-400 rounded-xl hover:bg-green-500/30 transition-all">
+            Exportar CSV
+          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -1693,7 +1678,7 @@ export default function Home() {
             <p className="text-white text-2xl font-bold">{formatUSD(totalVentasUSD)}</p>
           </div>
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
-            <p className="text-white/40 text-sm">Comision Total</p>
+            <p className="text-white/40 text-sm">Comisión Total</p>
             <p className="text-green-400 text-2xl font-bold">{formatUSD(totalComision)}</p>
           </div>
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
@@ -1710,27 +1695,17 @@ export default function Home() {
           ) : (
             groupedArray.map((group: any) => (
               <div key={group.key} className={`${cardBg} backdrop-blur-lg rounded-2xl border border-white/10 overflow-hidden`}>
-                <button
-                  onClick={() => toggleMonth(group.key)}
-                  className="w-full px-6 py-4 flex flex-wrap items-center justify-between hover:bg-white/5 transition-all"
-                >
+                <button onClick={() => toggleMonth(group.key)} className="w-full px-6 py-4 flex flex-wrap items-center justify-between hover:bg-white/5 transition-all">
                   <div className="flex items-center gap-4">
-                    <span className="text-white font-semibold text-lg">
-                      {getMonthName(group.month - 1)} {group.year}
-                    </span>
-                    <span className="text-white/40 text-sm">
-                      {group.ventas.length} ventas
-                    </span>
+                    <span className="text-white font-semibold text-lg">{getMonthName(group.month - 1)} {group.year}</span>
+                    <span className="text-white/40 text-sm">{group.ventas.length} ventas</span>
                   </div>
                   <div className="flex items-center gap-6">
                     <span className="text-white font-bold">{formatUSD(group.totalUSD)}</span>
                     <span className="text-green-400 text-sm">{formatUSD(group.totalComision)}</span>
-                    <span className={`transform transition-transform ${expandedMonth === group.key ? 'rotate-180' : ''}`}>
-                      ▼
-                    </span>
+                    <span className={`transform transition-transform ${expandedMonth === group.key ? 'rotate-180' : ''}`}>▼</span>
                   </div>
                 </button>
-                
                 {expandedMonth === group.key && (
                   <div className="px-6 pb-4 overflow-x-auto">
                     <table className="w-full text-sm">
@@ -1739,11 +1714,11 @@ export default function Home() {
                           <th className="text-left py-2 px-2">Fecha</th>
                           <th className="text-left py-2 px-2">Hora</th>
                           <th className="text-left py-2 px-2">Cliente</th>
-                          <th className="text-left py-2 px-2">Excursion</th>
+                          <th className="text-left py-2 px-2">Excursión</th>
                           <th className="text-left py-2 px-2">Adultos</th>
-                          <th className="text-left py-2 px-2">Ninos</th>
+                          <th className="text-left py-2 px-2">Niños</th>
                           <th className="text-right py-2 px-2">Precio</th>
-                          <th className="text-right py-2 px-2">Comision</th>
+                          <th className="text-right py-2 px-2">Comisión</th>
                           <th className="text-left py-2 px-2">Estado</th>
                           <th className="text-left py-2 px-2">Acciones</th>
                         </tr>
@@ -1751,22 +1726,14 @@ export default function Home() {
                       <tbody>
                         {group.ventas.map((venta: Venta) => (
                           <tr key={venta.id} className="border-b border-white/5 hover:bg-white/5">
-                            <td className="py-2 px-2 text-white/60 text-xs">
-                              {new Date(venta.fechaExcursion).toLocaleDateString("es-DO")}
-                            </td>
+                            <td className="py-2 px-2 text-white/60 text-xs">{new Date(venta.fechaExcursion).toLocaleDateString("es-DO")}</td>
                             <td className="py-2 px-2 text-white/60 text-xs">{venta.horaExcursion}</td>
                             <td className="py-2 px-2 text-white">{venta.clienteNombre}</td>
-                            <td className="py-2 px-2 text-white/80 text-xs max-w-[100px] truncate">
-                              {venta.excursionNombre}
-                            </td>
+                            <td className="py-2 px-2 text-white/80 text-xs max-w-[100px] truncate">{venta.excursionNombre}</td>
                             <td className="py-2 px-2 text-white/60">{venta.cantidadAdultos}</td>
                             <td className="py-2 px-2 text-white/60">{venta.cantidadNinos || 0}</td>
-                            <td className="py-2 px-2 text-right text-white font-medium">
-                              {formatUSD(venta.precioVentaUSD)}
-                            </td>
-                            <td className="py-2 px-2 text-right text-green-400">
-                              {formatUSD(venta.comisionUSD)}
-                            </td>
+                            <td className="py-2 px-2 text-right text-white font-medium">{formatUSD(venta.precioVentaUSD)}</td>
+                            <td className="py-2 px-2 text-right text-green-400">{formatUSD(venta.comisionUSD)}</td>
                             <td className="py-2 px-2">
                               <span className={`px-2 py-1 rounded-lg text-xs ${getEstadoColor(venta.estado)}`}>
                                 {getEstadoText(venta.estado)}
@@ -1774,18 +1741,8 @@ export default function Home() {
                             </td>
                             <td className="py-2 px-2">
                               <div className="flex gap-1">
-                                <button
-                                  onClick={() => editVenta(venta)}
-                                  className={`px-2 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}
-                                >
-                                  Editar
-                                </button>
-                                <button
-                                  onClick={() => deleteVenta(venta.id)}
-                                  className="px-2 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all"
-                                >
-                                  Eliminar
-                                </button>
+                                <button onClick={() => editVenta(venta)} className={`px-2 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}>Editar</button>
+                                <button onClick={() => deleteVenta(venta.id)} className="px-2 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all">Eliminar</button>
                               </div>
                             </td>
                           </tr>
@@ -1814,9 +1771,6 @@ export default function Home() {
       return matchesSearch && matchesEstado && matchesFecha;
     });
 
-    const totalReservas = reservasFiltradas.length;
-    const totalMonto = reservasFiltradas.reduce((s, v) => s + v.precioVentaUSD, 0);
-
     return (
       <div className="space-y-4">
         <div className="flex flex-wrap gap-3 items-center">
@@ -1826,13 +1780,13 @@ export default function Home() {
               placeholder="Buscar reservas..."
               value={searchReservas}
               onChange={(e) => setSearchReservas(e.target.value)}
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500"
+              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500"
             />
           </div>
           <select
             value={filterReservaEstado}
             onChange={(e) => setFilterReservaEstado(e.target.value)}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
           >
             <option value="todas">Todos los estados</option>
             <option value="pendiente">Pendiente</option>
@@ -1844,16 +1798,9 @@ export default function Home() {
             type="date"
             value={filterReservaFecha}
             onChange={(e) => setFilterReservaFecha(e.target.value)}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
           />
-          <button
-            onClick={() => {
-              setSearchReservas("");
-              setFilterReservaEstado("todas");
-              setFilterReservaFecha("");
-            }}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white"
-          >
+          <button onClick={() => { setSearchReservas(""); setFilterReservaEstado("todas"); setFilterReservaFecha(""); }} className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
             Limpiar
           </button>
         </div>
@@ -1861,17 +1808,15 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
             <p className="text-white/40 text-sm">Total Reservas</p>
-            <p className="text-white text-2xl font-bold">{totalReservas}</p>
+            <p className="text-white text-2xl font-bold">{reservasFiltradas.length}</p>
           </div>
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
             <p className="text-white/40 text-sm">Monto Total</p>
-            <p className="text-white text-2xl font-bold">{formatUSD(totalMonto)}</p>
+            <p className="text-white text-2xl font-bold">{formatUSD(reservasFiltradas.reduce((s, v) => s + v.precioVentaUSD, 0))}</p>
           </div>
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
             <p className="text-white/40 text-sm">Pendientes</p>
-            <p className="text-yellow-400 text-2xl font-bold">
-              {reservasFiltradas.filter(v => v.estado === "pendiente").length}
-            </p>
+            <p className="text-yellow-400 text-2xl font-bold">{reservasFiltradas.filter(v => v.estado === "pendiente").length}</p>
           </div>
         </div>
 
@@ -1882,7 +1827,7 @@ export default function Home() {
                 <th className="text-left py-3 px-4">Fecha</th>
                 <th className="text-left py-3 px-4">Hora</th>
                 <th className="text-left py-3 px-4">Cliente</th>
-                <th className="text-left py-3 px-4">Excursion</th>
+                <th className="text-left py-3 px-4">Excursión</th>
                 <th className="text-left py-3 px-4">Contacto</th>
                 <th className="text-right py-3 px-4">Monto</th>
                 <th className="text-left py-3 px-4">Estado</th>
@@ -1891,41 +1836,26 @@ export default function Home() {
             </thead>
             <tbody>
               {reservasFiltradas.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="text-center py-8 text-white/40">
-                    No hay reservas
-                  </td>
-                </tr>
+                <tr><td colSpan={8} className="text-center py-8 text-white/40">No hay reservas</td></tr>
               ) : (
                 reservasFiltradas.map(v => (
                   <tr key={v.id} className="border-b border-white/5 hover:bg-white/5">
-                    <td className="py-3 px-4 text-white/60 text-xs">
-                      {new Date(v.fechaExcursion).toLocaleDateString("es-DO")}
-                    </td>
+                    <td className="py-3 px-4 text-white/60 text-xs">{new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</td>
                     <td className="py-3 px-4 text-white/60 text-xs">{v.horaExcursion}</td>
                     <td className="py-3 px-4 text-white font-medium">{v.clienteNombre}</td>
-                    <td className="py-3 px-4 text-white/80 max-w-[150px] truncate">
-                      {v.excursionNombre}
-                    </td>
+                    <td className="py-3 px-4 text-white/80 max-w-[150px] truncate">{v.excursionNombre}</td>
                     <td className="py-3 px-4 text-white/60 text-xs">
                       <div>{v.clienteWhatsapp}</div>
                       <div className="text-xs text-white/40">{v.clienteEmail}</div>
                     </td>
-                    <td className="py-3 px-4 text-right text-white font-medium">
-                      {formatUSD(v.precioVentaUSD)}
-                    </td>
+                    <td className="py-3 px-4 text-right text-white font-medium">{formatUSD(v.precioVentaUSD)}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 rounded-lg text-xs ${getEstadoColor(v.estado)}`}>
                         {getEstadoText(v.estado)}
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <button
-                        onClick={() => editVenta(v)}
-                        className={`px-3 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}
-                      >
-                        Editar
-                      </button>
+                      <button onClick={() => editVenta(v)} className={`px-3 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}>Editar</button>
                     </td>
                   </tr>
                 ))
@@ -1957,23 +1887,18 @@ export default function Home() {
               placeholder="Buscar clientes..."
               value={searchClientes}
               onChange={(e) => setSearchClientes(e.target.value)}
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500"
+              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500"
             />
           </div>
           <select
             value={filterClienteExcursion}
             onChange={(e) => setFilterClienteExcursion(e.target.value)}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
           >
             <option value="">Todas las excursiones</option>
-            {excursiones.map(e => (
-              <option key={e.id} value={e.id}>{e.nombre}</option>
-            ))}
+            {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
           </select>
-          <button
-            onClick={() => setShowClienteForm(true)}
-            className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 ${shadowColor}`}
-          >
+          <button onClick={() => setShowClienteForm(true)} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 ${shadowColor}`}>
             <span className="text-lg leading-none">+</span> Nuevo Cliente
           </button>
         </div>
@@ -1985,37 +1910,24 @@ export default function Home() {
                 <th className="text-left py-3 px-4">Nombre</th>
                 <th className="text-left py-3 px-4">WhatsApp</th>
                 <th className="text-left py-3 px-4">Email</th>
-                <th className="text-left py-3 px-4">Excursion</th>
+                <th className="text-left py-3 px-4">Excursión</th>
                 <th className="text-left py-3 px-4">Fecha</th>
                 <th className="text-left py-3 px-4">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {clientesFiltrados.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-8 text-white/40">
-                    No hay clientes registrados
-                  </td>
-                </tr>
+                <tr><td colSpan={6} className="text-center py-8 text-white/40">No hay clientes registrados</td></tr>
               ) : (
                 clientesFiltrados.map(c => (
                   <tr key={c.id} className="border-b border-white/5 hover:bg-white/5">
                     <td className="py-3 px-4 text-white font-medium">{c.nombre}</td>
                     <td className="py-3 px-4 text-white/60">{c.whatsapp}</td>
                     <td className="py-3 px-4 text-white/60 text-xs">{c.email}</td>
-                    <td className="py-3 px-4 text-white/80 max-w-[120px] truncate">
-                      {c.excursionNombre}
-                    </td>
-                    <td className="py-3 px-4 text-white/60 text-xs">
-                      {c.fechaExcursion ? new Date(c.fechaExcursion).toLocaleDateString("es-DO") : "-"}
-                    </td>
+                    <td className="py-3 px-4 text-white/80 max-w-[120px] truncate">{c.excursionNombre}</td>
+                    <td className="py-3 px-4 text-white/60 text-xs">{c.fechaExcursion ? new Date(c.fechaExcursion).toLocaleDateString("es-DO") : "-"}</td>
                     <td className="py-3 px-4">
-                      <button
-                        onClick={() => deleteCliente(c.id)}
-                        className="px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all"
-                      >
-                        Eliminar
-                      </button>
+                      <button onClick={() => deleteCliente(c.id)} className="px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all">Eliminar</button>
                     </td>
                   </tr>
                 ))
@@ -2034,8 +1946,7 @@ export default function Home() {
     const proveedoresFiltrados = proveedores.filter(p => {
       const matchesSearch = p.nombre.toLowerCase().includes(searchProveedores.toLowerCase()) ||
                             p.empresa.toLowerCase().includes(searchProveedores.toLowerCase());
-      const matchesMetodo = filterProveedorMetodo === "todos" || 
-                            p.metodosPago.includes(filterProveedorMetodo as any);
+      const matchesMetodo = filterProveedorMetodo === "todos" || p.metodosPago.includes(filterProveedorMetodo as any);
       return matchesSearch && matchesMetodo;
     });
 
@@ -2048,51 +1959,27 @@ export default function Home() {
               placeholder="Buscar proveedores..."
               value={searchProveedores}
               onChange={(e) => setSearchProveedores(e.target.value)}
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500"
+              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500"
             />
           </div>
           <select
             value={filterProveedorMetodo}
             onChange={(e) => setFilterProveedorMetodo(e.target.value)}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
           >
-            <option value="todos">Todos los metodos</option>
+            <option value="todos">Todos los métodos</option>
             <option value="efectivo">Efectivo</option>
             <option value="transferencia">Transferencia</option>
             <option value="paypal">PayPal</option>
           </select>
-          <button
-            onClick={() => {
-              setEditingProveedorId(null);
-              setProveedorFormData({
-                nombre: "",
-                empresa: "",
-                telefono: "",
-                email: "",
-                metodosPago: [],
-                banco: "",
-                numeroCuenta: "",
-                monedaCuenta: "RD$",
-                tipoCuenta: [],
-                tipoBeneficiario: "personal",
-                beneficiario: "",
-                rncCedula: "",
-                tipoDocumento: "cedula",
-              });
-              setTempExcursiones([]);
-              setShowProveedorForm(true);
-            }}
-            className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 ${shadowColor}`}
-          >
+          <button onClick={() => { setEditingProveedorId(null); setProveedorFormData({ nombre: "", empresa: "", telefono: "", email: "", metodosPago: [], banco: "", numeroCuenta: "", monedaCuenta: "RD$", tipoCuenta: [], tipoBeneficiario: "personal", beneficiario: "", rncCedula: "", tipoDocumento: "cedula" }); setTempExcursiones([]); setShowProveedorForm(true); }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 ${shadowColor}`}>
             <span className="text-lg leading-none">+</span> Nuevo Proveedor
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {proveedoresFiltrados.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-white/40">
-              No hay proveedores registrados
-            </div>
+            <div className="col-span-full text-center py-12 text-white/40">No hay proveedores registrados</div>
           ) : (
             proveedoresFiltrados.map(p => (
               <div key={p.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
@@ -2102,36 +1989,16 @@ export default function Home() {
                     <p className="text-white/40 text-sm">{p.empresa || "Sin empresa"}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => editProveedor(p)}
-                      className={`px-3 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => deleteProveedor(p.id)}
-                      className="px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all"
-                    >
-                      Eliminar
-                    </button>
+                    <button onClick={() => editProveedor(p)} className={`px-3 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}>Editar</button>
+                    <button onClick={() => deleteProveedor(p.id)} className="px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all">Eliminar</button>
                   </div>
                 </div>
                 <div className="mt-3 space-y-1 text-sm">
-                  <div className="flex items-center gap-2 text-white/60">
-                    <span>Telefono</span> {p.telefono || "Sin telefono"}
-                  </div>
-                  <div className="flex items-center gap-2 text-white/60">
-                    <span>Email</span> {p.email || "Sin email"}
-                  </div>
-                  <div className="flex items-center gap-2 text-white/60">
-                    <span>RNC/Cedula</span> {p.rncCedula || "Sin documento"}
-                  </div>
+                  <div className="flex items-center gap-2 text-white/60"><span>Teléfono</span> {p.telefono || "Sin teléfono"}</div>
+                  <div className="flex items-center gap-2 text-white/60"><span>Email</span> {p.email || "Sin email"}</div>
+                  <div className="flex items-center gap-2 text-white/60"><span>RNC/Cédula</span> {p.rncCedula || "Sin documento"}</div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.metodosPago.map(m => (
-                      <span key={m} className="px-2 py-1 bg-white/10 rounded-lg text-white/60 text-xs">
-                        {m === "efectivo" ? "Efectivo" : m === "transferencia" ? "Transferencia" : "PayPal"}
-                      </span>
-                    ))}
+                    {p.metodosPago.map(m => <span key={m} className="px-2 py-1 bg-white/10 rounded-lg text-white/60 text-xs">{m === "efectivo" ? "Efectivo" : m === "transferencia" ? "Transferencia" : "PayPal"}</span>)}
                   </div>
                 </div>
                 <div className="mt-3 text-xs text-white/40 border-t border-white/5 pt-2">
@@ -2167,13 +2034,13 @@ export default function Home() {
               placeholder="Buscar bancos..."
               value={searchBancos}
               onChange={(e) => setSearchBancos(e.target.value)}
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500"
+              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500"
             />
           </div>
           <select
             value={filterBancoTipo}
             onChange={(e) => setFilterBancoTipo(e.target.value)}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
           >
             <option value="todos">Todos los tipos</option>
             <option value="corriente">Corriente</option>
@@ -2182,7 +2049,7 @@ export default function Home() {
           <select
             value={filterBancoMoneda}
             onChange={(e) => setFilterBancoMoneda(e.target.value)}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
           >
             <option value="todas">Todas las monedas</option>
             <option value="USD">USD</option>
@@ -2192,9 +2059,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {bancosFiltrados.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-white/40">
-              No hay informacion bancaria registrada
-            </div>
+            <div className="col-span-full text-center py-12 text-white/40">No hay información bancaria registrada</div>
           ) : (
             bancosFiltrados.map(p => (
               <div key={p.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
@@ -2203,34 +2068,18 @@ export default function Home() {
                     <h3 className="text-white font-semibold">{p.nombre}</h3>
                     <p className="text-white/40 text-sm">{p.empresa || "Proveedor"}</p>
                   </div>
-                  <span className={`px-3 py-1 rounded-lg text-xs ${
-                    p.tipoBeneficiario === "personal" ? "bg-blue-500/20 text-blue-400" : "bg-purple-500/20 text-purple-400"
-                  }`}>
+                  <span className={`px-3 py-1 rounded-lg text-xs ${p.tipoBeneficiario === "personal" ? "bg-blue-500/20 text-blue-400" : "bg-purple-500/20 text-purple-400"}`}>
                     {p.tipoBeneficiario === "personal" ? "Personal" : "Empresarial"}
                   </span>
                 </div>
                 <div className="mt-4 space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-white/60">
-                    <span>Banco</span> {p.banco || "Sin banco"}
-                  </div>
-                  <div className="flex items-center gap-2 text-white/60">
-                    <span>Cuenta</span> {p.numeroCuenta || "Sin cuenta"}
-                  </div>
-                  <div className="flex items-center gap-2 text-white/60">
-                    <span>Moneda</span> {p.monedaCuenta || "RD$"}
-                  </div>
-                  <div className="flex items-center gap-2 text-white/60">
-                    <span>Beneficiario</span> {p.beneficiario || "Sin beneficiario"}
-                  </div>
-                  <div className="flex items-center gap-2 text-white/60">
-                    <span>RNC/Cedula</span> {p.rncCedula || "Sin documento"}
-                  </div>
+                  <div className="flex items-center gap-2 text-white/60"><span>Banco</span> {p.banco || "Sin banco"}</div>
+                  <div className="flex items-center gap-2 text-white/60"><span>Cuenta</span> {p.numeroCuenta || "Sin cuenta"}</div>
+                  <div className="flex items-center gap-2 text-white/60"><span>Moneda</span> {p.monedaCuenta || "RD$"}</div>
+                  <div className="flex items-center gap-2 text-white/60"><span>Beneficiario</span> {p.beneficiario || "Sin beneficiario"}</div>
+                  <div className="flex items-center gap-2 text-white/60"><span>RNC/Cédula</span> {p.rncCedula || "Sin documento"}</div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.tipoCuenta.map(t => (
-                      <span key={t} className="px-2 py-1 bg-white/10 rounded-lg text-white/60 text-xs">
-                        {t === "corriente" ? "Corriente" : "Ahorros"}
-                      </span>
-                    ))}
+                    {p.tipoCuenta.map(t => <span key={t} className="px-2 py-1 bg-white/10 rounded-lg text-white/60 text-xs">{t === "corriente" ? "Corriente" : "Ahorros"}</span>)}
                   </div>
                 </div>
               </div>
@@ -2246,83 +2095,32 @@ export default function Home() {
   // ============================================
   const renderCalendario = () => {
     const days = getDaysInMonth(currentDate);
-    const monthName = getMonthName(currentDate.getMonth());
-    const year = currentDate.getFullYear();
 
     return (
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => cambiarMes(-1)}
-              className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all"
-            >
-              ◀
-            </button>
-            <h2 className="text-white text-xl font-bold">{monthName} {year}</h2>
-            <button
-              onClick={() => cambiarMes(1)}
-              className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all"
-            >
-              ▶
-            </button>
-            <button
-              onClick={() => setCurrentDate(new Date())}
-              className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all text-sm"
-            >
-              Hoy
-            </button>
+            <button onClick={() => cambiarMes(-1)} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all">◀</button>
+            <h2 className="text-white text-xl font-bold">{getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}</h2>
+            <button onClick={() => cambiarMes(1)} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all">▶</button>
+            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all text-sm">Hoy</button>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={() => setCalendarioView("mes")}
-              className={`px-4 py-2 rounded-xl text-sm transition-all ${
-                calendarioView === "mes" 
-                  ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` 
-                  : "text-white/60 hover:text-white"
-              }`}
-            >
-              Mes
-            </button>
+            <button onClick={() => setCalendarioView("mes")} className={`px-4 py-2 rounded-xl text-sm transition-all ${calendarioView === "mes" ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : "text-white/60 hover:text-white"}`}>Mes</button>
           </div>
         </div>
 
         <div className={`${cardBg} backdrop-blur-lg rounded-2xl border border-white/10 overflow-hidden`}>
           <div className="grid grid-cols-7 gap-1 p-4">
-            {["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(day => (
-              <div key={day} className="text-center text-white/40 text-sm py-2 font-medium">
-                {day}
-              </div>
-            ))}
+            {["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(day => <div key={day} className="text-center text-white/40 text-sm py-2 font-medium">{day}</div>)}
             {days.map((day, index) => {
               const ventasDelDia = getVentasDelDia(day.date);
               const hasVentas = ventasDelDia.length > 0;
               const isToday = new Date().toDateString() === day.date.toDateString();
-              
               return (
-                <div
-                  key={index}
-                  className={`min-h-[80px] p-2 rounded-xl border transition-all ${
-                    day.isCurrentMonth 
-                      ? isToday 
-                        ? `border-${accentColor}-500/50 bg-${accentColor}-500/10`
-                        : "border-white/5 hover:border-white/20 bg-white/5"
-                      : "border-white/5 bg-white/5 opacity-40"
-                  }`}
-                >
-                  <div className="text-xs text-white/60 text-right">
-                    {day.date.getDate()}
-                  </div>
-                  {hasVentas && (
-                    <div className="mt-1 space-y-1">
-                      <div className="text-[10px] text-green-400 font-medium">
-                        {formatUSD(ventasDelDia.reduce((s, v) => s + v.precioVentaUSD, 0))}
-                      </div>
-                      <div className="text-[10px] text-white/40">
-                        {ventasDelDia.length} {ventasDelDia.length === 1 ? "venta" : "ventas"}
-                      </div>
-                    </div>
-                  )}
+                <div key={index} className={`min-h-[80px] p-2 rounded-xl border transition-all ${day.isCurrentMonth ? isToday ? `border-${accentColor}-500/50 bg-${accentColor}-500/10` : "border-white/5 hover:border-white/20 bg-white/5" : "border-white/5 bg-white/5 opacity-40"}`}>
+                  <div className="text-xs text-white/60 text-right">{day.date.getDate()}</div>
+                  {hasVentas && <div className="mt-1 space-y-1"><div className="text-[10px] text-green-400 font-medium">{formatUSD(ventasDelDia.reduce((s, v) => s + v.precioVentaUSD, 0))}</div><div className="text-[10px] text-white/40">{ventasDelDia.length} {ventasDelDia.length === 1 ? "venta" : "ventas"}</div></div>}
                 </div>
               );
             })}
@@ -2330,26 +2128,16 @@ export default function Home() {
         </div>
 
         <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
-          <h3 className={`text-${accentLight} font-semibold mb-3`}>Eventos del dia</h3>
+          <h3 className={`text-${accentLight} font-semibold mb-3`}>Eventos del día</h3>
           <div className="space-y-2 max-h-60 overflow-y-auto">
-            {getVentasDelDia(currentDate).length === 0 ? (
-              <p className="text-white/40 text-sm text-center py-4">No hay ventas para este dia</p>
-            ) : (
+            {getVentasDelDia(currentDate).length === 0 ? <p className="text-white/40 text-sm text-center py-4">No hay ventas para este día</p> :
               getVentasDelDia(currentDate).map(v => (
                 <div key={v.id} className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
-                  <div>
-                    <p className="text-white text-sm font-medium">{v.clienteNombre}</p>
-                    <p className="text-white/40 text-xs">{v.excursionNombre}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-white font-medium">{formatUSD(v.precioVentaUSD)}</p>
-                    <span className={`px-2 py-0.5 rounded-lg text-xs ${getEstadoColor(v.estado)}`}>
-                      {getEstadoText(v.estado)}
-                    </span>
-                  </div>
+                  <div><p className="text-white text-sm font-medium">{v.clienteNombre}</p><p className="text-white/40 text-xs">{v.excursionNombre}</p></div>
+                  <div className="text-right"><p className="text-white font-medium">{formatUSD(v.precioVentaUSD)}</p><span className={`px-2 py-0.5 rounded-lg text-xs ${getEstadoColor(v.estado)}`}>{getEstadoText(v.estado)}</span></div>
                 </div>
               ))
-            )}
+            }
           </div>
         </div>
       </div>
@@ -2375,49 +2163,25 @@ export default function Home() {
               placeholder="Buscar excursiones..."
               value={searchExcursiones}
               onChange={(e) => setSearchExcursiones(e.target.value)}
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500"
+              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500"
             />
           </div>
           <select
             value={filterExcursionProveedor}
             onChange={(e) => setFilterExcursionProveedor(e.target.value)}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
           >
             <option value="">Todos los proveedores</option>
-            {proveedores.map(p => (
-              <option key={p.id} value={p.id}>{p.nombre}</option>
-            ))}
+            {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
           </select>
-          <button
-            onClick={() => {
-              setEditingExcursionId(null);
-              setExcursionFormData({
-                nombre: "",
-                proveedorId: "",
-                proveedorNombre: "",
-                precioAdultoUSD: "",
-                precioNinoUSD: "",
-                costoProveedorAdultoUSD: "",
-                costoProveedorNinoUSD: "",
-                comisionAdultoUSD: "",
-                comisionNinoUSD: "",
-                zona: "",
-                capacidad: "",
-                tienePrecioNino: false,
-              });
-              setShowExcursionForm(true);
-            }}
-            className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 ${shadowColor}`}
-          >
-            <span className="text-lg leading-none">+</span> Nueva Excursion
+          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false }); setShowExcursionForm(true); }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 ${shadowColor}`}>
+            <span className="text-lg leading-none">+</span> Nueva Excursión
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {excursionesFiltradas.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-white/40">
-              No hay excursiones registradas
-            </div>
+            <div className="col-span-full text-center py-12 text-white/40">No hay excursiones registradas</div>
           ) : (
             excursionesFiltradas.map(e => (
               <div key={e.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
@@ -2427,49 +2191,17 @@ export default function Home() {
                     <p className="text-white/40 text-sm">{e.proveedorNombre}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => editExcursion(e)}
-                      className={`px-3 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => deleteExcursion(e.id)}
-                      className="px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all"
-                    >
-                      Eliminar
-                    </button>
+                    <button onClick={() => editExcursion(e)} className={`px-3 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}>Editar</button>
+                    <button onClick={() => deleteExcursion(e.id)} className="px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all">Eliminar</button>
                   </div>
                 </div>
                 <div className="mt-3 space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white/40">Adulto</span>
-                    <span className="text-white font-medium">{formatUSD(e.precioAdultoUSD)}</span>
-                  </div>
-                  {e.precioNinoUSD !== null && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-white/40">Nino</span>
-                      <span className="text-white font-medium">{formatUSD(e.precioNinoUSD)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-sm border-t border-white/5 pt-2 mt-2">
-                    <span className="text-white/40">Costo Proveedor</span>
-                    <span className="text-white/60">{formatUSD(e.costoProveedorAdultoUSD)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white/40">Comision</span>
-                    <span className="text-green-400">{formatUSD(e.comisionAdultoUSD)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white/40">Zona</span>
-                    <span className="text-white/60">{e.zona || "Sin zona"}</span>
-                  </div>
-                  {e.capacidad && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-white/40">Capacidad</span>
-                      <span className="text-white/60">{e.capacidad}</span>
-                    </div>
-                  )}
+                  <div className="flex justify-between text-sm"><span className="text-white/40">Adulto</span><span className="text-white font-medium">{formatUSD(e.precioAdultoUSD)}</span></div>
+                  {e.precioNinoUSD !== null && <div className="flex justify-between text-sm"><span className="text-white/40">Niño</span><span className="text-white font-medium">{formatUSD(e.precioNinoUSD)}</span></div>}
+                  <div className="flex justify-between text-sm border-t border-white/5 pt-2 mt-2"><span className="text-white/40">Costo Proveedor</span><span className="text-white/60">{formatUSD(e.costoProveedorAdultoUSD)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-white/40">Comisión</span><span className="text-green-400">{formatUSD(e.comisionAdultoUSD)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-white/40">Zona</span><span className="text-white/60">{e.zona || "Sin zona"}</span></div>
+                  {e.capacidad && <div className="flex justify-between text-sm"><span className="text-white/40">Capacidad</span><span className="text-white/60">{e.capacidad}</span></div>}
                 </div>
               </div>
             ))
@@ -2490,103 +2222,50 @@ export default function Home() {
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
             <div className={`${cardBg} backdrop-blur-2xl rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-white/20`}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">
-                  {editingVentaId ? "Editar Venta" : "Nueva Venta"}
-                </h2>
-                <button
-                  onClick={resetForm}
-                  className="text-white/40 hover:text-white transition-all text-2xl"
-                >
-                  ✕
-                </button>
+                <h2 className="text-2xl font-bold text-white">{editingVentaId ? "Editar Venta" : "Nueva Venta"}</h2>
+                <button onClick={resetForm} className="text-white/40 hover:text-white transition-all text-2xl">✕</button>
               </div>
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Cliente</label>
-                    <input
-                      type="text"
-                      value={formData.clienteNombre}
-                      onChange={(e) => setFormData(prev => ({ ...prev, clienteNombre: e.target.value }))}
-                      required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="text" value={formData.clienteNombre} onChange={(e) => setFormData(prev => ({ ...prev, clienteNombre: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">WhatsApp</label>
-                    <input
-                      type="text"
-                      value={formData.clienteWhatsapp}
-                      onChange={(e) => setFormData(prev => ({ ...prev, clienteWhatsapp: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="text" value={formData.clienteWhatsapp} onChange={(e) => setFormData(prev => ({ ...prev, clienteWhatsapp: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
-                    <input
-                      type="email"
-                      value={formData.clienteEmail}
-                      onChange={(e) => setFormData(prev => ({ ...prev, clienteEmail: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="email" value={formData.clienteEmail} onChange={(e) => setFormData(prev => ({ ...prev, clienteEmail: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Excursion</label>
-                    <select
-                      value={formData.excursionId}
-                      onChange={(e) => selectExcursionForVenta(e.target.value)}
-                      required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
-                      <option value="">Seleccionar excursion</option>
-                      {excursiones.map(e => (
-                        <option key={e.id} value={e.id}>{e.nombre}</option>
-                      ))}
+                    <label className="block text-sm font-medium text-white/70 mb-1">Excursión</label>
+                    <select value={formData.excursionId} onChange={(e) => selectExcursionForVenta(e.target.value)} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
+                      <option value="">Seleccionar excursión</option>
+                      {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
                     </select>
-                    <button
-                      type="button"
-                      onClick={() => setShowCrearExcursionDesdeVenta(true)}
-                      className={`mt-1 text-xs text-${accentColor}-400 hover:text-${accentColor}-300 transition-all`}
-                    >
-                      + Crear nueva excursion
-                    </button>
+                    <button type="button" onClick={() => setShowCrearExcursionDesdeVenta(true)} className={`mt-1 text-xs text-${accentColor}-400 hover:text-${accentColor}-300 transition-all`}>+ Crear nueva excursión</button>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Zona</label>
-                    <input
-                      type="text"
-                      value={formData.zona}
-                      readOnly
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 cursor-not-allowed"
-                    />
+                    <input type="text" value={formData.zona} readOnly className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/60 cursor-not-allowed" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Fecha de Excursion</label>
-                    <input
-                      type="date"
-                      value={formData.fechaExcursion}
-                      onChange={(e) => setFormData(prev => ({ ...prev, fechaExcursion: e.target.value }))}
-                      required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <label className="block text-sm font-medium text-white/70 mb-1">Fecha de Excursión</label>
+                    <input type="date" value={formData.fechaExcursion} onChange={(e) => setFormData(prev => ({ ...prev, fechaExcursion: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Hora</label>
-                    <select
-                      value={formData.horaExcursion}
-                      onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
-                      {HORAS.map(h => (
-                        <option key={h} value={h}>{h}</option>
-                      ))}
+                    <select value={formData.horaExcursion} onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
+                      {HORAS.map(h => <option key={h} value={h}>{h}</option>)}
                     </select>
                   </div>
                 </div>
@@ -2594,145 +2273,64 @@ export default function Home() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.precioAdultoUSD}
-                      onChange={handlePrecioAdultoChange}
-                      required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="number" step="0.01" value={formData.precioAdultoUSD} onChange={handlePrecioAdultoChange} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Nino (USD)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.precioNinoUSD}
-                      onChange={handlePrecioNinoChange}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Niño (USD)</label>
+                    <input type="number" step="0.01" value={formData.precioNinoUSD} onChange={handlePrecioNinoChange} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor (USD)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.costoProveedorAdultoUSD}
-                      onChange={handleCostoAdultoChange}
-                      required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="number" step="0.01" value={formData.costoProveedorAdultoUSD} onChange={handleCostoAdultoChange} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Comision (USD)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.comisionAdultoUSD}
-                      readOnly
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-green-400 font-medium cursor-not-allowed"
-                    />
+                    <label className="block text-sm font-medium text-white/70 mb-1">Comisión (USD)</label>
+                    <input type="number" step="0.01" value={formData.comisionAdultoUSD} readOnly className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-green-400 font-medium cursor-not-allowed" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Adultos</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.cantidadAdultos}
-                      onChange={handleCantidadAdultosChange}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="number" min="0" value={formData.cantidadAdultos} onChange={handleCantidadAdultosChange} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Ninos</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.cantidadNinos}
-                      onChange={handleCantidadNinosChange}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <label className="block text-sm font-medium text-white/70 mb-1">Niños</label>
+                    <input type="number" min="0" value={formData.cantidadNinos} onChange={handleCantidadNinosChange} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Precio Total</label>
-                    <input
-                      type="text"
-                      value={formData.precioTotalUSD}
-                      readOnly
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white font-bold cursor-not-allowed"
-                    />
+                    <input type="text" value={formData.precioTotalUSD} readOnly className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white font-bold cursor-not-allowed" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Comision Total</label>
-                    <input
-                      type="text"
-                      value={formData.comisionTotalUSD}
-                      readOnly
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-green-400 font-bold cursor-not-allowed"
-                    />
+                    <label className="block text-sm font-medium text-white/70 mb-1">Comisión Total</label>
+                    <input type="text" value={formData.comisionTotalUSD} readOnly className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-green-400 font-bold cursor-not-allowed" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Pago</label>
-                    <select
-                      value={formData.pagoCliente}
-                      onChange={(e) => {
-                        const val = e.target.value as "completo" | "deposito_25" | "pago_dia";
-                        setFormData(prev => ({ ...prev, pagoCliente: val }));
-                        setTimeout(() => {
-                          const { precioTotal } = calcularTotalesVenta();
-                          let saldo = 0;
-                          if (val === "completo") saldo = 0;
-                          else if (val === "deposito_25") saldo = precioTotal * 0.75;
-                          else if (val === "pago_dia") saldo = precioTotal;
-                          setFormData(prev => ({
-                            ...prev,
-                            saldoPendienteUSD: saldo.toFixed(2)
-                          }));
-                        }, 10);
-                      }}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
+                    <select value={formData.pagoCliente} onChange={(e) => { const val = e.target.value as "completo" | "deposito_25" | "pago_dia"; setFormData(prev => ({ ...prev, pagoCliente: val })); setTimeout(() => { const { precioTotal } = calcularTotalesVenta(); let saldo = 0; if (val === "completo") saldo = 0; else if (val === "deposito_25") saldo = precioTotal * 0.75; else if (val === "pago_dia") saldo = precioTotal; setFormData(prev => ({ ...prev, saldoPendienteUSD: saldo.toFixed(2) })); }, 10); }} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                       <option value="completo">Pago Completo</option>
-                      <option value="deposito_25">Deposito 25%</option>
-                      <option value="pago_dia">Pago el Dia</option>
+                      <option value="deposito_25">Depósito 25%</option>
+                      <option value="pago_dia">Pago el Día</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Monto Pagado (USD)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.montoPagadoUSD}
-                      onChange={(e) => setFormData(prev => ({ ...prev, montoPagadoUSD: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="number" step="0.01" value={formData.montoPagadoUSD} onChange={(e) => setFormData(prev => ({ ...prev, montoPagadoUSD: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Saldo Pendiente (USD)</label>
-                    <input
-                      type="text"
-                      value={formData.saldoPendienteUSD}
-                      readOnly
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-yellow-400 font-medium cursor-not-allowed"
-                    />
+                    <input type="text" value={formData.saldoPendienteUSD} readOnly className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-yellow-400 font-medium cursor-not-allowed" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Metodo Pago Cliente</label>
-                    <select
-                      value={formData.metodoPagoCliente}
-                      onChange={(e) => setFormData(prev => ({ ...prev, metodoPagoCliente: e.target.value as any }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
+                    <label className="block text-sm font-medium text-white/70 mb-1">Método Pago Cliente</label>
+                    <select value={formData.metodoPagoCliente} onChange={(e) => setFormData(prev => ({ ...prev, metodoPagoCliente: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                       <option value="efectivo">Efectivo</option>
                       <option value="tarjeta">Tarjeta</option>
                       <option value="transferencia">Transferencia</option>
@@ -2741,11 +2339,7 @@ export default function Home() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Estado</label>
-                    <select
-                      value={formData.estado}
-                      onChange={(e) => setFormData(prev => ({ ...prev, estado: e.target.value as any }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
+                    <select value={formData.estado} onChange={(e) => setFormData(prev => ({ ...prev, estado: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                       <option value="pendiente">Pendiente</option>
                       <option value="confirmada">Confirmada</option>
                       <option value="completada">Completada</option>
@@ -2754,23 +2348,14 @@ export default function Home() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Proveedor</label>
-                    <input
-                      type="text"
-                      value={formData.proveedorNombre}
-                      readOnly
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 cursor-not-allowed"
-                    />
+                    <input type="text" value={formData.proveedorNombre} readOnly className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/60 cursor-not-allowed" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Servicio</label>
-                    <select
-                      value={formData.tipoServicio}
-                      onChange={(e) => setFormData(prev => ({ ...prev, tipoServicio: e.target.value as any }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
+                    <select value={formData.tipoServicio} onChange={(e) => setFormData(prev => ({ ...prev, tipoServicio: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                       <option value="compartido">Compartido</option>
                       <option value="privado">Privado</option>
                       <option value="grupo">Grupo</option>
@@ -2778,21 +2363,11 @@ export default function Home() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Grupo</label>
-                    <input
-                      type="text"
-                      value={formData.nombreGrupo}
-                      onChange={(e) => setFormData(prev => ({ ...prev, nombreGrupo: e.target.value }))}
-                      disabled={formData.tipoServicio !== "grupo"}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 disabled:opacity-40"
-                    />
+                    <input type="text" value={formData.nombreGrupo} onChange={(e) => setFormData(prev => ({ ...prev, nombreGrupo: e.target.value }))} disabled={formData.tipoServicio !== "grupo"} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 disabled:opacity-40" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Recogida</label>
-                    <select
-                      value={formData.tipoRecogida}
-                      onChange={(e) => setFormData(prev => ({ ...prev, tipoRecogida: e.target.value as any }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
+                    <select value={formData.tipoRecogida} onChange={(e) => setFormData(prev => ({ ...prev, tipoRecogida: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                       <option value="hotel">Hotel</option>
                       <option value="airbnb">Airbnb</option>
                       <option value="sin_recogida">Sin Recogida</option>
@@ -2803,40 +2378,22 @@ export default function Home() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Transporte</label>
-                    <select
-                      value={formData.transporte}
-                      onChange={(e) => setFormData(prev => ({ ...prev, transporte: e.target.value as any }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
+                    <select value={formData.transporte} onChange={(e) => setFormData(prev => ({ ...prev, transporte: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                       <option value="no">No</option>
                       <option value="si">Si</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Nota</label>
-                    <input
-                      type="text"
-                      value={formData.nota}
-                      onChange={(e) => setFormData(prev => ({ ...prev, nota: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="text" value={formData.nota} onChange={(e) => setFormData(prev => ({ ...prev, nota: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                 </div>
 
                 <div className="flex gap-3 pt-4">
-                  <button
-                    type="submit"
-                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}
-                  >
+                  <button type="submit" className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}>
                     {editingVentaId ? "Actualizar Venta" : "Registrar Venta"}
                   </button>
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all"
-                  >
-                    Cancelar
-                  </button>
+                  <button type="button" onClick={resetForm} className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all">Cancelar</button>
                 </div>
               </form>
             </div>
@@ -2849,74 +2406,35 @@ export default function Home() {
             <div className={`${cardBg} backdrop-blur-2xl rounded-3xl p-8 max-w-lg w-full border border-white/20`}>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-white">Nuevo Cliente</h2>
-                <button
-                  onClick={() => setShowClienteForm(false)}
-                  className="text-white/40 hover:text-white transition-all text-2xl"
-                >
-                  ✕
-                </button>
+                <button onClick={() => setShowClienteForm(false)} className="text-white/40 hover:text-white transition-all text-2xl">✕</button>
               </div>
-              
               <form onSubmit={handleClienteSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Nombre</label>
-                  <input
-                    type="text"
-                    name="nombre"
-                    required
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                  />
+                  <input type="text" name="nombre" required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">WhatsApp</label>
-                  <input
-                    type="text"
-                    name="whatsapp"
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                  />
+                  <input type="text" name="whatsapp" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                  />
+                  <input type="email" name="email" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Excursion</label>
-                  <select
-                    name="excursionId"
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                  >
-                    <option value="">Seleccionar excursion</option>
-                    {excursiones.map(e => (
-                      <option key={e.id} value={e.id}>{e.nombre}</option>
-                    ))}
+                  <label className="block text-sm font-medium text-white/70 mb-1">Excursión</label>
+                  <select name="excursionId" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
+                    <option value="">Seleccionar excursión</option>
+                    {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Fecha Excursion</label>
-                  <input
-                    type="date"
-                    name="fechaExcursion"
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                  />
+                  <label className="block text-sm font-medium text-white/70 mb-1">Fecha Excursión</label>
+                  <input type="date" name="fechaExcursion" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                 </div>
                 <div className="flex gap-3 pt-4">
-                  <button
-                    type="submit"
-                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}
-                  >
-                    Agregar Cliente
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowClienteForm(false)}
-                    className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all"
-                  >
-                    Cancelar
-                  </button>
+                  <button type="submit" className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}>Agregar Cliente</button>
+                  <button type="button" onClick={() => setShowClienteForm(false)} className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all">Cancelar</button>
                 </div>
               </form>
             </div>
@@ -2928,80 +2446,38 @@ export default function Home() {
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
             <div className={`${cardBg} backdrop-blur-2xl rounded-3xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-white/20`}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">
-                  {editingProveedorId ? "Editar Proveedor" : "Nuevo Proveedor"}
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowProveedorForm(false);
-                    setEditingProveedorId(null);
-                  }}
-                  className="text-white/40 hover:text-white transition-all text-2xl"
-                >
-                  ✕
-                </button>
+                <h2 className="text-2xl font-bold text-white">{editingProveedorId ? "Editar Proveedor" : "Nuevo Proveedor"}</h2>
+                <button onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="text-white/40 hover:text-white transition-all text-2xl">✕</button>
               </div>
-              
               <form onSubmit={handleProveedorSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Nombre</label>
-                    <input
-                      type="text"
-                      value={proveedorFormData.nombre}
-                      onChange={(e) => setProveedorFormData(prev => ({ ...prev, nombre: e.target.value }))}
-                      required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="text" value={proveedorFormData.nombre} onChange={(e) => setProveedorFormData(prev => ({ ...prev, nombre: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Empresa</label>
-                    <input
-                      type="text"
-                      value={proveedorFormData.empresa}
-                      onChange={(e) => setProveedorFormData(prev => ({ ...prev, empresa: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="text" value={proveedorFormData.empresa} onChange={(e) => setProveedorFormData(prev => ({ ...prev, empresa: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Telefono</label>
-                    <input
-                      type="tel"
-                      value={proveedorFormData.telefono}
-                      onChange={manejarCambioTelefono}
-                      placeholder="(829) 537-4530"
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <label className="block text-sm font-medium text-white/70 mb-1">Teléfono</label>
+                    <input type="tel" value={proveedorFormData.telefono} onChange={manejarCambioTelefono} placeholder="(829) 537-4530" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                     <p className="text-[10px] text-white/30 mt-1">Formato: (809) 123-4567</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
-                    <input
-                      type="email"
-                      value={proveedorFormData.email}
-                      onChange={(e) => setProveedorFormData(prev => ({ ...prev, email: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="email" value={proveedorFormData.email} onChange={(e) => setProveedorFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">Metodos de Pago</label>
+                  <label className="block text-sm font-medium text-white/70 mb-2">Métodos de Pago</label>
                   <div className="flex flex-wrap gap-2">
                     {["efectivo", "transferencia", "paypal"].map(m => (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => toggleMetodoPago(m as any)}
-                        className={`px-4 py-2 rounded-xl text-sm transition-all ${
-                          proveedorFormData.metodosPago.includes(m as any)
-                            ? `bg-gradient-to-r ${buttonGradient} text-slate-900`
-                            : "bg-white/10 text-white/60 hover:bg-white/20"
-                        }`}
-                      >
+                      <button key={m} type="button" onClick={() => toggleMetodoPago(m as any)} className={`px-4 py-2 rounded-xl text-sm transition-all ${proveedorFormData.metodosPago.includes(m as any) ? `bg-gradient-to-r ${buttonGradient} text-slate-900` : "bg-white/10 text-white/60 hover:bg-white/20"}`}>
                         {m === "efectivo" ? "Efectivo" : m === "transferencia" ? "Transferencia" : "PayPal"}
                       </button>
                     ))}
@@ -3011,36 +2487,21 @@ export default function Home() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Banco</label>
-                    <select
-                      value={proveedorFormData.banco}
-                      onChange={(e) => setProveedorFormData(prev => ({ ...prev, banco: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
+                    <select value={proveedorFormData.banco} onChange={(e) => setProveedorFormData(prev => ({ ...prev, banco: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                       <option value="">Seleccionar banco</option>
-                      {BANCOS.map(b => (
-                        <option key={b} value={b}>{b}</option>
-                      ))}
+                      {BANCOS.map(b => <option key={b} value={b}>{b}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Numero de Cuenta</label>
-                    <input
-                      type="text"
-                      value={proveedorFormData.numeroCuenta}
-                      onChange={(e) => setProveedorFormData(prev => ({ ...prev, numeroCuenta: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <label className="block text-sm font-medium text-white/70 mb-1">Número de Cuenta</label>
+                    <input type="text" value={proveedorFormData.numeroCuenta} onChange={(e) => setProveedorFormData(prev => ({ ...prev, numeroCuenta: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Moneda</label>
-                    <select
-                      value={proveedorFormData.monedaCuenta}
-                      onChange={(e) => setProveedorFormData(prev => ({ ...prev, monedaCuenta: e.target.value as any }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
+                    <select value={proveedorFormData.monedaCuenta} onChange={(e) => setProveedorFormData(prev => ({ ...prev, monedaCuenta: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                       <option value="USD">USD</option>
                       <option value="RD$">RD$</option>
                     </select>
@@ -3049,16 +2510,7 @@ export default function Home() {
                     <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Cuenta</label>
                     <div className="flex gap-2">
                       {["corriente", "ahorros"].map(t => (
-                        <button
-                          key={t}
-                          type="button"
-                          onClick={() => toggleTipoCuenta(t as any)}
-                          className={`px-4 py-2 rounded-xl text-sm transition-all flex-1 ${
-                            proveedorFormData.tipoCuenta.includes(t as any)
-                              ? `bg-gradient-to-r ${buttonGradient} text-slate-900`
-                              : "bg-white/10 text-white/60 hover:bg-white/20"
-                          }`}
-                        >
+                        <button key={t} type="button" onClick={() => toggleTipoCuenta(t as any)} className={`px-4 py-2 rounded-xl text-sm transition-all flex-1 ${proveedorFormData.tipoCuenta.includes(t as any) ? `bg-gradient-to-r ${buttonGradient} text-slate-900` : "bg-white/10 text-white/60 hover:bg-white/20"}`}>
                           {t === "corriente" ? "Corriente" : "Ahorros"}
                         </button>
                       ))}
@@ -3069,65 +2521,33 @@ export default function Home() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Beneficiario</label>
-                    <select
-                      value={proveedorFormData.tipoBeneficiario}
-                      onChange={(e) => setProveedorFormData(prev => ({ ...prev, tipoBeneficiario: e.target.value as any }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
+                    <select value={proveedorFormData.tipoBeneficiario} onChange={(e) => setProveedorFormData(prev => ({ ...prev, tipoBeneficiario: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                       <option value="personal">Personal</option>
                       <option value="empresarial">Empresarial</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Beneficiario</label>
-                    <input
-                      type="text"
-                      value={proveedorFormData.beneficiario}
-                      onChange={(e) => setProveedorFormData(prev => ({ ...prev, beneficiario: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="text" value={proveedorFormData.beneficiario} onChange={(e) => setProveedorFormData(prev => ({ ...prev, beneficiario: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Documento</label>
-                    <select
-                      value={proveedorFormData.tipoDocumento}
-                      onChange={(e) => {
-                        const tipo = e.target.value as "rnc" | "cedula";
-                        setProveedorFormData(prev => ({ 
-                          ...prev, 
-                          tipoDocumento: tipo,
-                          rncCedula: "" 
-                        }));
-                      }}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
+                    <select value={proveedorFormData.tipoDocumento} onChange={(e) => { const tipo = e.target.value as "rnc" | "cedula"; setProveedorFormData(prev => ({ ...prev, tipoDocumento: tipo, rncCedula: "" })); }} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                       <option value="rnc">RNC</option>
-                      <option value="cedula">Cedula</option>
+                      <option value="cedula">Cédula</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">
-                      {proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cedula"}
-                    </label>
-                    <input
-                      type="text"
-                      value={proveedorFormData.rncCedula}
-                      onChange={manejarCambioRNCcedula}
-                      placeholder={proveedorFormData.tipoDocumento === "rnc" ? "XX-XXXXXXX-X" : "XXX-XXXXXXX-X"}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
-                    <p className="text-[10px] text-white/30 mt-1">
-                      {proveedorFormData.tipoDocumento === "rnc" 
-                        ? "Formato: XX-XXXXXXX-X (11 digitos)" 
-                        : "Formato: XXX-XXXXXXX-X (11 digitos)"}
-                    </p>
+                    <label className="block text-sm font-medium text-white/70 mb-1">{proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cédula"}</label>
+                    <input type="text" value={proveedorFormData.rncCedula} onChange={manejarCambioRNCcedula} placeholder={proveedorFormData.tipoDocumento === "rnc" ? "XX-XXXXXXX-X" : "XXX-XXXXXXX-X"} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
+                    <p className="text-[10px] text-white/30 mt-1">{proveedorFormData.tipoDocumento === "rnc" ? "Formato: XX-XXXXXXX-X (11 dígitos)" : "Formato: XXX-XXXXXXX-X (11 dígitos)"}</p>
                   </div>
                 </div>
 
-                {/* EXCURSIONES DEL PROVEEDOR - TEMPORALES */}
+                {/* Excursiones del Proveedor */}
                 <div className="border-t border-white/10 pt-4">
                   <h3 className={`text-${accentLight} font-semibold mb-3`}>Excursiones de este Proveedor</h3>
                   
@@ -3139,9 +2559,9 @@ export default function Home() {
                             <th className="px-2 py-2 text-left text-white/60">Nombre</th>
                             <th className="px-2 py-2 text-left text-white/60">Adulto Venta</th>
                             <th className="px-2 py-2 text-left text-white/60">Adulto Costo</th>
-                            <th className="px-2 py-2 text-left text-white/60">Nino Venta</th>
-                            <th className="px-2 py-2 text-left text-white/60">Nino Costo</th>
-                            <th className="px-2 py-2 text-left text-white/60">Accion</th>
+                            <th className="px-2 py-2 text-left text-white/60">Niño Venta</th>
+                            <th className="px-2 py-2 text-left text-white/60">Niño Costo</th>
+                            <th className="px-2 py-2 text-left text-white/60">Acción</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -3164,521 +2584,189 @@ export default function Home() {
 
                   <div className="grid grid-cols-2 gap-3 p-3 bg-white/5 rounded-xl">
                     <div className="col-span-2">
-                      <label className="block text-xs font-medium text-white/60 mb-1">Nombre Excursion</label>
-                      <input 
-                        type="text" 
-                        value={tempExcursionForm.nombre}
-                        onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, nombre: e.target.value })}
-                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                        placeholder="Isla Saona" 
-                      />
+                      <label className="block text-xs font-medium text-white/60 mb-1">Nombre Excursión</label>
+                      <input type="text" value={tempExcursionForm.nombre} onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, nombre: e.target.value })} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" placeholder="Isla Saona" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-white/60 mb-1">Precio Adulto (USD)</label>
-                      <input 
-                        type="number" 
-                        step="0.01"
-                        value={tempExcursionForm.precioAdultoUSD}
-                        onChange={(e) => {
-                          const valor = e.target.value;
-                          const pv = parseFloat(valor) || 0;
-                          const cp = parseFloat(tempExcursionForm.costoProveedorAdultoUSD) || 0;
-                          const comision = calcularComision(pv, cp);
-                          setTempExcursionForm({ 
-                            ...tempExcursionForm, 
-                            precioAdultoUSD: valor,
-                            comisionAdultoUSD: comision.toString()
-                          });
-                        }}
-                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                        placeholder="99.00" 
-                      />
+                      <input type="number" step="0.01" value={tempExcursionForm.precioAdultoUSD} onChange={(e) => { const valor = e.target.value; const pv = parseFloat(valor) || 0; const cp = parseFloat(tempExcursionForm.costoProveedorAdultoUSD) || 0; const comision = calcularComision(pv, cp); setTempExcursionForm({ ...tempExcursionForm, precioAdultoUSD: valor, comisionAdultoUSD: comision.toString() }); }} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" placeholder="99.00" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-white/60 mb-1">Costo Adulto (USD)</label>
-                      <input 
-                        type="number" 
-                        step="0.01"
-                        value={tempExcursionForm.costoProveedorAdultoUSD}
-                        onChange={(e) => {
-                          const valor = e.target.value;
-                          const cp = parseFloat(valor) || 0;
-                          const pv = parseFloat(tempExcursionForm.precioAdultoUSD) || 0;
-                          const comision = calcularComision(pv, cp);
-                          setTempExcursionForm({ 
-                            ...tempExcursionForm, 
-                            costoProveedorAdultoUSD: valor,
-                            comisionAdultoUSD: comision.toString()
-                          });
-                        }}
-                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                        placeholder="55.00" 
-                      />
+                      <input type="number" step="0.01" value={tempExcursionForm.costoProveedorAdultoUSD} onChange={(e) => { const valor = e.target.value; const cp = parseFloat(valor) || 0; const pv = parseFloat(tempExcursionForm.precioAdultoUSD) || 0; const comision = calcularComision(pv, cp); setTempExcursionForm({ ...tempExcursionForm, costoProveedorAdultoUSD: valor, comisionAdultoUSD: comision.toString() }); }} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" placeholder="55.00" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-white/60 mb-1">Precio Nino (USD)</label>
-                      <input 
-                        type="number" 
-                        step="0.01"
-                        value={tempExcursionForm.precioNinoUSD}
-                        onChange={(e) => {
-                          const valor = e.target.value;
-                          const tienePrecioNino = valor !== "" && parseFloat(valor) > 0;
-                          const pv = parseFloat(valor) || 0;
-                          const cp = parseFloat(tempExcursionForm.costoProveedorNinoUSD) || 0;
-                          const comision = calcularComision(pv, cp);
-                          setTempExcursionForm({ 
-                            ...tempExcursionForm, 
-                            precioNinoUSD: valor,
-                            tienePrecioNino: tienePrecioNino,
-                            comisionNinoUSD: comision.toString()
-                          });
-                        }}
-                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                        placeholder="Dejar vacio si no aplica" 
-                      />
+                      <label className="block text-xs font-medium text-white/60 mb-1">Precio Niño (USD)</label>
+                      <input type="number" step="0.01" value={tempExcursionForm.precioNinoUSD} onChange={(e) => { const valor = e.target.value; const tienePrecioNino = valor !== "" && parseFloat(valor) > 0; const pv = parseFloat(valor) || 0; const cp = parseFloat(tempExcursionForm.costoProveedorNinoUSD) || 0; const comision = calcularComision(pv, cp); setTempExcursionForm({ ...tempExcursionForm, precioNinoUSD: valor, tienePrecioNino: tienePrecioNino, comisionNinoUSD: comision.toString() }); }} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" placeholder="Dejar vacío si no aplica" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-white/60 mb-1">Costo Nino (USD)</label>
-                      <input 
-                        type="number" 
-                        step="0.01"
-                        value={tempExcursionForm.costoProveedorNinoUSD}
-                        onChange={(e) => {
-                          const valor = e.target.value;
-                          const cp = parseFloat(valor) || 0;
-                          const pv = parseFloat(tempExcursionForm.precioNinoUSD) || 0;
-                          const comision = calcularComision(pv, cp);
-                          setTempExcursionForm({ 
-                            ...tempExcursionForm, 
-                            costoProveedorNinoUSD: valor,
-                            comisionNinoUSD: comision.toString()
-                          });
-                        }}
-                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                        placeholder="Dejar vacio si no aplica" 
-                      />
+                      <label className="block text-xs font-medium text-white/60 mb-1">Costo Niño (USD)</label>
+                      <input type="number" step="0.01" value={tempExcursionForm.costoProveedorNinoUSD} onChange={(e) => { const valor = e.target.value; const cp = parseFloat(valor) || 0; const pv = parseFloat(tempExcursionForm.precioNinoUSD) || 0; const comision = calcularComision(pv, cp); setTempExcursionForm({ ...tempExcursionForm, costoProveedorNinoUSD: valor, comisionNinoUSD: comision.toString() }); }} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" placeholder="Dejar vacío si no aplica" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-white/60 mb-1">Zona</label>
-                      <select
-                        value={tempExcursionForm.zona}
-                        onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, zona: e.target.value })}
-                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm"
-                      >
+                      <select value={tempExcursionForm.zona} onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, zona: e.target.value })} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm">
                         <option value="">Seleccionar zona</option>
-                        {ZONAS.map(z => (
-                          <option key={z} value={z}>{z}</option>
-                        ))}
+                        {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
                       </select>
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-white/60 mb-1">Capacidad</label>
-                      <input 
-                        type="text" 
-                        value={tempExcursionForm.capacidad}
-                        onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, capacidad: e.target.value })}
-                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
-                        placeholder="2 personas" 
-                      />
+                      <input type="text" value={tempExcursionForm.capacidad} onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, capacidad: e.target.value })} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" placeholder="2 personas" />
                     </div>
                     <div className="col-span-2">
-                      <button 
-                        type="button" 
-                        onClick={agregarTempExcursion}
-                        className={`w-full bg-${accentColor}-500/20 text-${accentColor}-400 py-2 rounded-lg hover:bg-${accentColor}-500/30 transition-all text-sm font-medium`}
-                      >
-                        + Agregar Excursion
-                      </button>
+                      <button type="button" onClick={agregarTempExcursion} className={`w-full bg-${accentColor}-500/20 text-${accentColor}-400 py-2 rounded-lg hover:bg-${accentColor}-500/30 transition-all text-sm font-medium`}>+ Agregar Excursión</button>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex gap-3 pt-4">
-                  <button
-                    type="submit"
-                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}
-                  >
+                  <button type="submit" className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}>
                     {editingProveedorId ? "Actualizar Proveedor" : "Agregar Proveedor"}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowProveedorForm(false);
-                      setEditingProveedorId(null);
-                    }}
-                    className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all"
-                  >
-                    Cancelar
-                  </button>
+                  <button type="button" onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all">Cancelar</button>
                 </div>
               </form>
             </div>
           </div>
         )}
 
-        {/* Formulario de Excursion */}
+        {/* Formulario de Excursión */}
         {showExcursionForm && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
             <div className={`${cardBg} backdrop-blur-2xl rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/20`}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">
-                  {editingExcursionId ? "Editar Excursion" : "Nueva Excursion"}
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowExcursionForm(false);
-                    setEditingExcursionId(null);
-                  }}
-                  className="text-white/40 hover:text-white transition-all text-2xl"
-                >
-                  ✕
-                </button>
+                <h2 className="text-2xl font-bold text-white">{editingExcursionId ? "Editar Excursión" : "Nueva Excursión"}</h2>
+                <button onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="text-white/40 hover:text-white transition-all text-2xl">✕</button>
               </div>
-              
               <form onSubmit={handleExcursionSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Nombre</label>
-                  <input
-                    type="text"
-                    value={excursionFormData.nombre}
-                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, nombre: e.target.value }))}
-                    required
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                  />
+                  <input type="text" value={excursionFormData.nombre} onChange={(e) => setExcursionFormData(prev => ({ ...prev, nombre: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Proveedor</label>
-                  <select
-                    value={excursionFormData.proveedorId}
-                    onChange={(e) => {
-                      const id = e.target.value;
-                      const proveedor = proveedores.find(p => p.id === id);
-                      setExcursionFormData(prev => ({
-                        ...prev,
-                        proveedorId: id,
-                        proveedorNombre: proveedor?.nombre || ""
-                      }));
-                    }}
-                    required
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                  >
+                  <select value={excursionFormData.proveedorId} onChange={(e) => { const id = e.target.value; const proveedor = proveedores.find(p => p.id === id); setExcursionFormData(prev => ({ ...prev, proveedorId: id, proveedorNombre: proveedor?.nombre || "" })); }} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                     <option value="">Seleccionar proveedor</option>
-                    {proveedores.map(p => (
-                      <option key={p.id} value={p.id}>{p.nombre}</option>
-                    ))}
+                    {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
                   </select>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={excursionFormData.precioAdultoUSD}
-                      onChange={(e) => {
-                        const pv = e.target.value;
-                        const cp = excursionFormData.costoProveedorAdultoUSD;
-                        const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
-                        setExcursionFormData({ 
-                          ...excursionFormData, 
-                          precioAdultoUSD: pv,
-                          comisionAdultoUSD: comision.toString()
-                        });
-                      }}
-                      required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="number" step="0.01" value={excursionFormData.precioAdultoUSD} onChange={(e) => { const pv = e.target.value; const cp = excursionFormData.costoProveedorAdultoUSD; const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0); setExcursionFormData({ ...excursionFormData, precioAdultoUSD: pv, comisionAdultoUSD: comision.toString() }); }} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor Adulto (USD)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={excursionFormData.costoProveedorAdultoUSD}
-                      onChange={(e) => {
-                        const cp = e.target.value;
-                        const pv = excursionFormData.precioAdultoUSD;
-                        const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
-                        setExcursionFormData({ 
-                          ...excursionFormData, 
-                          costoProveedorAdultoUSD: cp,
-                          comisionAdultoUSD: comision.toString()
-                        });
-                      }}
-                      required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="number" step="0.01" value={excursionFormData.costoProveedorAdultoUSD} onChange={(e) => { const cp = e.target.value; const pv = excursionFormData.precioAdultoUSD; const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0); setExcursionFormData({ ...excursionFormData, costoProveedorAdultoUSD: cp, comisionAdultoUSD: comision.toString() }); }} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                 </div>
-
                 <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={excursionFormData.tienePrecioNino}
-                    onChange={(e) => setExcursionFormData(prev => ({
-                      ...prev,
-                      tienePrecioNino: e.target.checked
-                    }))}
-                    className="w-4 h-4 accent-amber-500"
-                  />
-                  <label className="text-white/70 text-sm">Tiene precio para ninos</label>
+                  <input type="checkbox" checked={excursionFormData.tienePrecioNino} onChange={(e) => setExcursionFormData(prev => ({ ...prev, tienePrecioNino: e.target.checked }))} className="w-4 h-4 accent-amber-500" />
+                  <label className="text-white/70 text-sm">Tiene precio para niños</label>
                 </div>
-
                 {excursionFormData.tienePrecioNino && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-white/70 mb-1">Precio Nino (USD)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={excursionFormData.precioNinoUSD}
-                        onChange={(e) => {
-                          const pv = e.target.value;
-                          const cp = excursionFormData.costoProveedorNinoUSD;
-                          const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
-                          setExcursionFormData({ 
-                            ...excursionFormData, 
-                            precioNinoUSD: pv,
-                            comisionNinoUSD: comision.toString()
-                          });
-                        }}
-                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                      />
+                      <label className="block text-sm font-medium text-white/70 mb-1">Precio Niño (USD)</label>
+                      <input type="number" step="0.01" value={excursionFormData.precioNinoUSD} onChange={(e) => { const pv = e.target.value; const cp = excursionFormData.costoProveedorNinoUSD; const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0); setExcursionFormData({ ...excursionFormData, precioNinoUSD: pv, comisionNinoUSD: comision.toString() }); }} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor Nino (USD)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={excursionFormData.costoProveedorNinoUSD}
-                        onChange={(e) => {
-                          const cp = e.target.value;
-                          const pv = excursionFormData.precioNinoUSD;
-                          const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
-                          setExcursionFormData({ 
-                            ...excursionFormData, 
-                            costoProveedorNinoUSD: cp,
-                            comisionNinoUSD: comision.toString()
-                          });
-                        }}
-                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                      />
+                      <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor Niño (USD)</label>
+                      <input type="number" step="0.01" value={excursionFormData.costoProveedorNinoUSD} onChange={(e) => { const cp = e.target.value; const pv = excursionFormData.precioNinoUSD; const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0); setExcursionFormData({ ...excursionFormData, costoProveedorNinoUSD: cp, comisionNinoUSD: comision.toString() }); }} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                     </div>
                   </div>
                 )}
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Zona</label>
-                    <select
-                      value={excursionFormData.zona}
-                      onChange={(e) => setExcursionFormData(prev => ({ ...prev, zona: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
+                    <select value={excursionFormData.zona} onChange={(e) => setExcursionFormData(prev => ({ ...prev, zona: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                       <option value="">Seleccionar zona</option>
-                      {ZONAS.map(z => (
-                        <option key={z} value={z}>{z}</option>
-                      ))}
+                      {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Capacidad</label>
-                    <input
-                      type="text"
-                      value={excursionFormData.capacidad}
-                      onChange={(e) => setExcursionFormData(prev => ({ ...prev, capacidad: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="text" value={excursionFormData.capacidad} onChange={(e) => setExcursionFormData(prev => ({ ...prev, capacidad: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                 </div>
-
                 <div className="flex gap-3 pt-4">
-                  <button
-                    type="submit"
-                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}
-                  >
-                    {editingExcursionId ? "Actualizar Excursion" : "Agregar Excursion"}
+                  <button type="submit" className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}>
+                    {editingExcursionId ? "Actualizar Excursión" : "Agregar Excursión"}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowExcursionForm(false);
-                      setEditingExcursionId(null);
-                    }}
-                    className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all"
-                  >
-                    Cancelar
-                  </button>
+                  <button type="button" onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all">Cancelar</button>
                 </div>
               </form>
             </div>
           </div>
         )}
 
-        {/* Modal para crear excursion desde venta */}
+        {/* Modal para crear excursión desde venta */}
         {showCrearExcursionDesdeVenta && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
             <div className={`${cardBg} backdrop-blur-2xl rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/20`}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">Crear Nueva Excursion</h2>
-                <button
-                  onClick={() => setShowCrearExcursionDesdeVenta(false)}
-                  className="text-white/40 hover:text-white transition-all text-2xl"
-                >
-                  ✕
-                </button>
+                <h2 className="text-2xl font-bold text-white">Crear Nueva Excursión</h2>
+                <button onClick={() => setShowCrearExcursionDesdeVenta(false)} className="text-white/40 hover:text-white transition-all text-2xl">✕</button>
               </div>
-              
               <form onSubmit={handleCrearExcursionDesdeVenta} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Nombre</label>
-                  <input
-                    type="text"
-                    value={nuevaExcursionDesdeVenta.nombre}
-                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, nombre: e.target.value }))}
-                    required
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                  />
+                  <input type="text" value={nuevaExcursionDesdeVenta.nombre} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, nombre: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Proveedor</label>
-                  <select
-                    value={nuevaExcursionDesdeVenta.proveedorId}
-                    onChange={(e) => {
-                      const id = e.target.value;
-                      const proveedor = proveedores.find(p => p.id === id);
-                      setNuevaExcursionDesdeVenta(prev => ({
-                        ...prev,
-                        proveedorId: id,
-                        proveedorNombre: proveedor?.nombre || ""
-                      }));
-                    }}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                  >
+                  <select value={nuevaExcursionDesdeVenta.proveedorId} onChange={(e) => { const id = e.target.value; const proveedor = proveedores.find(p => p.id === id); setNuevaExcursionDesdeVenta(prev => ({ ...prev, proveedorId: id, proveedorNombre: proveedor?.nombre || "" })); }} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                     <option value="">Seleccionar proveedor existente</option>
-                    {proveedores.map(p => (
-                      <option key={p.id} value={p.id}>{p.nombre}</option>
-                    ))}
+                    {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Proveedor (si no existe)</label>
-                  <input
-                    type="text"
-                    value={nuevaExcursionDesdeVenta.proveedorNombre}
-                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, proveedorNombre: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    placeholder="Crear nuevo proveedor"
-                  />
+                  <input type="text" value={nuevaExcursionDesdeVenta.proveedorNombre} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, proveedorNombre: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" placeholder="Crear nuevo proveedor" />
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={nuevaExcursionDesdeVenta.precioAdultoUSD}
-                      onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
-                      required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="number" step="0.01" value={nuevaExcursionDesdeVenta.precioAdultoUSD} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, precioAdultoUSD: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Costo Adulto (USD)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={nuevaExcursionDesdeVenta.costoProveedorAdultoUSD}
-                      onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
-                      required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="number" step="0.01" value={nuevaExcursionDesdeVenta.costoProveedorAdultoUSD} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                 </div>
-
                 <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={nuevaExcursionDesdeVenta.tienePrecioNino}
-                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({
-                      ...prev,
-                      tienePrecioNino: e.target.checked
-                    }))}
-                    className="w-4 h-4 accent-amber-500"
-                  />
-                  <label className="text-white/70 text-sm">Tiene precio para ninos</label>
+                  <input type="checkbox" checked={nuevaExcursionDesdeVenta.tienePrecioNino} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, tienePrecioNino: e.target.checked }))} className="w-4 h-4 accent-amber-500" />
+                  <label className="text-white/70 text-sm">Tiene precio para niños</label>
                 </div>
-
                 {nuevaExcursionDesdeVenta.tienePrecioNino && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-white/70 mb-1">Precio Nino (USD)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={nuevaExcursionDesdeVenta.precioNinoUSD}
-                        onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
-                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                      />
+                      <label className="block text-sm font-medium text-white/70 mb-1">Precio Niño (USD)</label>
+                      <input type="number" step="0.01" value={nuevaExcursionDesdeVenta.precioNinoUSD} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, precioNinoUSD: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-white/70 mb-1">Costo Nino (USD)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={nuevaExcursionDesdeVenta.costoProveedorNinoUSD}
-                        onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
-                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                      />
+                      <label className="block text-sm font-medium text-white/70 mb-1">Costo Niño (USD)</label>
+                      <input type="number" step="0.01" value={nuevaExcursionDesdeVenta.costoProveedorNinoUSD} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                     </div>
                   </div>
                 )}
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Zona</label>
-                    <select
-                      value={nuevaExcursionDesdeVenta.zona}
-                      onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, zona: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    >
+                    <select value={nuevaExcursionDesdeVenta.zona} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, zona: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
                       <option value="">Seleccionar zona</option>
-                      {ZONAS.map(z => (
-                        <option key={z} value={z}>{z}</option>
-                      ))}
+                      {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Capacidad</label>
-                    <input
-                      type="text"
-                      value={nuevaExcursionDesdeVenta.capacidad}
-                      onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, capacidad: e.target.value }))}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    <input type="text" value={nuevaExcursionDesdeVenta.capacidad} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, capacidad: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
                   </div>
                 </div>
-
                 <div className="flex gap-3 pt-4">
-                  <button
-                    type="submit"
-                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}
-                  >
-                    Crear Excursion
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowCrearExcursionDesdeVenta(false)}
-                    className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all"
-                  >
-                    Cancelar
-                  </button>
+                  <button type="submit" className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}>Crear Excursión</button>
+                  <button type="button" onClick={() => setShowCrearExcursionDesdeVenta(false)} className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all">Cancelar</button>
                 </div>
               </form>
             </div>
@@ -3714,11 +2802,8 @@ export default function Home() {
                   {isAdmin ? "Admin" : "Vendedor"}
                 </span>
               </div>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-all text-sm font-medium"
-              >
-                Cerrar Sesion
+              <button onClick={handleLogout} className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-all text-sm font-medium">
+                Cerrar Sesión
               </button>
             </div>
           </div>
@@ -3739,63 +2824,13 @@ export default function Home() {
               excursiones: "Excursiones"
             };
             return (
-              <button 
-                key={tab}
-                onClick={() => setViewMode(tab as any)} 
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  viewMode === tab 
-                    ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` 
-                    : "text-white/70 hover:text-white hover:bg-white/10"
-                }`}
-              >
+              <button key={tab} onClick={() => setViewMode(tab as any)} className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${viewMode === tab ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : "text-white/70 hover:text-white hover:bg-white/10"}`}>
                 {labels[tab]}
               </button>
             );
           })}
           <div className="flex-1"></div>
-          <button 
-            onClick={() => {
-              setEditingVentaId(null);
-              setSelectedExcursionForVenta(null);
-              setFormData({
-                clienteNombre: "",
-                clienteWhatsapp: "",
-                clienteEmail: "",
-                excursionId: "",
-                excursionNombre: "",
-                fechaExcursion: "",
-                horaExcursion: "02:00 PM",
-                precioAdultoUSD: "",
-                precioNinoUSD: "",
-                costoProveedorAdultoUSD: "",
-                costoProveedorNinoUSD: "",
-                comisionAdultoUSD: "",
-                comisionNinoUSD: "",
-                cantidadAdultos: 1,
-                cantidadNinos: 0,
-                precioTotalUSD: "",
-                costoTotalUSD: "",
-                comisionTotalUSD: "",
-                pagoCliente: "completo",
-                montoPagadoUSD: "",
-                saldoPendienteUSD: "",
-                metodoPagoCliente: "efectivo",
-                proveedorId: "",
-                proveedorNombre: "",
-                proveedorPagado: "pendiente",
-                metodoPagoProveedor: "efectivo",
-                tipoServicio: "compartido",
-                nombreGrupo: "",
-                tipoRecogida: "sin_recogida",
-                transporte: "no",
-                estado: "pendiente",
-                nota: "",
-                zona: "",
-              });
-              setShowForm(true);
-            }} 
-            className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 text-sm font-medium ${shadowColor}`}
-          >
+          <button onClick={() => { setEditingVentaId(null); setSelectedExcursionForVenta(null); setFormData({ clienteNombre: "", clienteWhatsapp: "", clienteEmail: "", excursionId: "", excursionNombre: "", fechaExcursion: "", horaExcursion: "02:00 PM", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", cantidadAdultos: 1, cantidadNinos: 0, precioTotalUSD: "", costoTotalUSD: "", comisionTotalUSD: "", pagoCliente: "completo", montoPagadoUSD: "", saldoPendienteUSD: "", metodoPagoCliente: "efectivo", proveedorId: "", proveedorNombre: "", proveedorPagado: "pendiente", metodoPagoProveedor: "efectivo", tipoServicio: "compartido", nombreGrupo: "", tipoRecogida: "sin_recogida", transporte: "no", estado: "pendiente", nota: "", zona: "" }); setShowForm(true); }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 text-sm font-medium ${shadowColor}`}>
             <span className="text-lg leading-none">+</span> Nueva Venta
           </button>
         </div>
