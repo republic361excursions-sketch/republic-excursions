@@ -8,10 +8,10 @@ import { useState, useEffect } from "react";
 interface Excursion {
   id: string;
   nombre: string;
-  precioProveedorRD: number;
-  precioClienteUSD: number;
-  gananciaUSD: number;
-  gananciaRD: number;
+  precioVentaUSD: number; // Lo que paga el cliente
+  comisionPorcentaje: number; // % que ganas tú
+  comisionUSD: number; // Tu ganancia en USD (calculado)
+  aFacturarUSD: number; // Lo que pagas al proveedor (calculado)
 }
 
 interface Proveedor {
@@ -20,7 +20,7 @@ interface Proveedor {
   telefono: string;
   excursionId: string;
   excursionNombre: string;
-  precioCompraRD: number;
+  comisionPorcentaje: number;
   metodoPago: "efectivo" | "transferencia" | "paypal";
   pagoStatus: "pendiente" | "pagado";
   nota: string;
@@ -44,10 +44,10 @@ interface Venta {
   excursionId: string;
   excursionNombre: string;
   fechaExcursion: string;
-  precioClienteUSD: number;
-  precioProveedorRD: number;
-  gananciaUSD: number;
-  gananciaRD: number;
+  precioVentaUSD: number;
+  comisionPorcentaje: number;
+  comisionUSD: number;
+  aFacturarUSD: number;
   pagoCliente: "completo" | "deposito_25" | "pago_dia";
   montoPagadoUSD: number;
   saldoPendienteUSD: number;
@@ -85,10 +85,10 @@ export default function Home() {
     excursionId: "",
     excursionNombre: "",
     fechaExcursion: "",
-    precioClienteUSD: "",
-    precioProveedorRD: "",
-    gananciaUSD: "",
-    gananciaRD: "",
+    precioVentaUSD: "",
+    comisionPorcentaje: "",
+    comisionUSD: "",
+    aFacturarUSD: "",
     pagoCliente: "completo" as "completo" | "deposito_25" | "pago_dia",
     montoPagadoUSD: "",
     saldoPendienteUSD: "",
@@ -101,10 +101,10 @@ export default function Home() {
   });
 
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v3");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v3");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v3");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v3");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v4");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v4");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v4");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v4");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -114,39 +114,55 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v3", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v4", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v3", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v4", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v3", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v4", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v3", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v4", JSON.stringify(data));
   };
 
+  // ============================================
+  // CALCULAR COMISIÓN Y A FACTURAR
+  // ============================================
+  const calcularComision = (precio: string, porcentaje: string) => {
+    const p = parseFloat(precio) || 0;
+    const porc = parseFloat(porcentaje) || 0;
+    const comision = p * (porc / 100);
+    const aFacturar = p - comision;
+    return { comision, aFacturar };
+  };
+
+  // ============================================
+  // HANDLE EXCURSIÓN
+  // ============================================
   const handleExcursionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const data = new FormData(form);
     
-    const precioProveedorRD = parseFloat(data.get("precioProveedorRD") as string);
-    const precioClienteUSD = parseFloat(data.get("precioClienteUSD") as string);
+    const precioVentaUSD = parseFloat(data.get("precioVentaUSD") as string);
+    const comisionPorcentaje = parseFloat(data.get("comisionPorcentaje") as string);
+    const comisionUSD = precioVentaUSD * (comisionPorcentaje / 100);
+    const aFacturarUSD = precioVentaUSD - comisionUSD;
     
     const nuevaExcursion: Excursion = {
       id: Date.now().toString(),
       nombre: data.get("nombre") as string,
-      precioProveedorRD,
-      precioClienteUSD,
-      gananciaUSD: precioClienteUSD,
-      gananciaRD: -precioProveedorRD,
+      precioVentaUSD,
+      comisionPorcentaje,
+      comisionUSD,
+      aFacturarUSD,
     };
     
     saveExcursiones([...excursiones, nuevaExcursion]);
@@ -154,21 +170,57 @@ export default function Home() {
     alert("Excursión agregada correctamente");
   };
 
+  // ============================================
+  // HANDLE PROVEEDOR
+  // ============================================
   const handleProveedorSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const data = new FormData(form);
     
     const excursionId = data.get("excursionId") as string;
-    const excursion = excursiones.find(e => e.id === excursionId);
+    const excursionNueva = data.get("excursionNueva") as string;
+    const comisionPorcentaje = parseFloat(data.get("comisionPorcentaje") as string) || 0;
+    const precioVentaUSD = parseFloat(data.get("precioVentaUSD") as string) || 0;
+    
+    let excursionNombre = "";
+    let excursionIdFinal = excursionId;
+    let comisionPorc = comisionPorcentaje;
+    let precioVenta = precioVentaUSD;
+    
+    // Si escribió una nueva excursión
+    if (excursionNueva && excursionNueva.trim() !== "") {
+      excursionNombre = excursionNueva.trim();
+      const comisionUSD = precioVenta * (comisionPorc / 100);
+      const aFacturarUSD = precioVenta - comisionUSD;
+      
+      const nuevaExcursion: Excursion = {
+        id: Date.now().toString(),
+        nombre: excursionNombre,
+        precioVentaUSD: precioVenta,
+        comisionPorcentaje: comisionPorc,
+        comisionUSD,
+        aFacturarUSD,
+      };
+      saveExcursiones([...excursiones, nuevaExcursion]);
+      excursionIdFinal = nuevaExcursion.id;
+    } else if (excursionId) {
+      const excursion = excursiones.find(e => e.id === excursionId);
+      excursionNombre = excursion?.nombre || "";
+      comisionPorc = excursion?.comisionPorcentaje || 0;
+      precioVenta = excursion?.precioVentaUSD || 0;
+    } else {
+      alert("Debes seleccionar o escribir una excursión");
+      return;
+    }
     
     const nuevoProveedor: Proveedor = {
       id: Date.now().toString(),
       nombre: data.get("nombre") as string,
       telefono: data.get("telefono") as string,
-      excursionId,
-      excursionNombre: excursion?.nombre || "",
-      precioCompraRD: excursion?.precioProveedorRD || 0,
+      excursionId: excursionIdFinal,
+      excursionNombre: excursionNombre,
+      comisionPorcentaje: comisionPorc,
       metodoPago: data.get("metodoPago") as "efectivo" | "transferencia" | "paypal",
       pagoStatus: "pendiente",
       nota: data.get("nota") as string || "",
@@ -179,6 +231,9 @@ export default function Home() {
     alert("Proveedor agregado correctamente");
   };
 
+  // ============================================
+  // HANDLE CLIENTE
+  // ============================================
   const handleClienteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -202,25 +257,24 @@ export default function Home() {
     alert("Cliente agregado correctamente");
   };
 
-  const calcularGanancia = (usd: string, rd: string) => {
-    const u = parseFloat(usd) || 0;
-    const r = parseFloat(rd) || 0;
-    return { gananciaUSD: u.toString(), gananciaRD: r.toString() };
-  };
-
+  // ============================================
+  // HANDLE VENTA
+  // ============================================
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const precioClienteUSD = parseFloat(formData.precioClienteUSD);
-    const precioProveedorRD = parseFloat(formData.precioProveedorRD);
+    const precioVentaUSD = parseFloat(formData.precioVentaUSD);
+    const comisionPorcentaje = parseFloat(formData.comisionPorcentaje);
+    const comisionUSD = precioVentaUSD * (comisionPorcentaje / 100);
+    const aFacturarUSD = precioVentaUSD - comisionUSD;
     const montoPagadoUSD = parseFloat(formData.montoPagadoUSD) || 0;
     
     let saldoPendienteUSD = 0;
     if (formData.pagoCliente === "completo") {
       saldoPendienteUSD = 0;
     } else if (formData.pagoCliente === "deposito_25") {
-      saldoPendienteUSD = precioClienteUSD * 0.75;
+      saldoPendienteUSD = precioVentaUSD * 0.75;
     } else if (formData.pagoCliente === "pago_dia") {
-      saldoPendienteUSD = precioClienteUSD;
+      saldoPendienteUSD = precioVentaUSD;
     }
 
     const nuevaVenta: Venta = {
@@ -231,10 +285,10 @@ export default function Home() {
       excursionId: formData.excursionId,
       excursionNombre: formData.excursionNombre,
       fechaExcursion: formData.fechaExcursion,
-      precioClienteUSD,
-      precioProveedorRD,
-      gananciaUSD: precioClienteUSD,
-      gananciaRD: -precioProveedorRD,
+      precioVentaUSD,
+      comisionPorcentaje,
+      comisionUSD,
+      aFacturarUSD,
       pagoCliente: formData.pagoCliente,
       montoPagadoUSD,
       saldoPendienteUSD,
@@ -265,10 +319,10 @@ export default function Home() {
       excursionId: "",
       excursionNombre: "",
       fechaExcursion: "",
-      precioClienteUSD: "",
-      precioProveedorRD: "",
-      gananciaUSD: "",
-      gananciaRD: "",
+      precioVentaUSD: "",
+      comisionPorcentaje: "",
+      comisionUSD: "",
+      aFacturarUSD: "",
       pagoCliente: "completo",
       montoPagadoUSD: "",
       saldoPendienteUSD: "",
@@ -283,6 +337,9 @@ export default function Home() {
     setEditingId(null);
   };
 
+  // ============================================
+  // SELECCIONAR EXCURSIÓN
+  // ============================================
   const selectExcursion = (excursionId: string) => {
     const excursion = excursiones.find(e => e.id === excursionId);
     if (excursion) {
@@ -292,23 +349,26 @@ export default function Home() {
         ...formData,
         excursionId: excursion.id,
         excursionNombre: excursion.nombre,
-        precioClienteUSD: excursion.precioClienteUSD.toString(),
-        precioProveedorRD: excursion.precioProveedorRD.toString(),
-        gananciaUSD: excursion.precioClienteUSD.toString(),
-        gananciaRD: excursion.precioProveedorRD.toString(),
+        precioVentaUSD: excursion.precioVentaUSD.toString(),
+        comisionPorcentaje: excursion.comisionPorcentaje.toString(),
+        comisionUSD: excursion.comisionUSD.toString(),
+        aFacturarUSD: excursion.aFacturarUSD.toString(),
         proveedorId: proveedor?.id || "",
         proveedorNombre: proveedor?.nombre || "",
       });
     }
   };
 
-  const handlePrecioChange = (campo: "precioClienteUSD" | "precioProveedorRD", valor: string) => {
+  // ============================================
+  // CALCULAR COMISIÓN AL CAMBIAR PRECIO O %
+  // ============================================
+  const handleComisionChange = (campo: "precioVentaUSD" | "comisionPorcentaje", valor: string) => {
     const newFormData = { ...formData, [campo]: valor };
-    const usd = campo === "precioClienteUSD" ? valor : formData.precioClienteUSD;
-    const rd = campo === "precioProveedorRD" ? valor : formData.precioProveedorRD;
-    const ganancias = calcularGanancia(usd, rd);
-    newFormData.gananciaUSD = ganancias.gananciaUSD;
-    newFormData.gananciaRD = ganancias.gananciaRD;
+    const precio = campo === "precioVentaUSD" ? valor : formData.precioVentaUSD;
+    const porcentaje = campo === "comisionPorcentaje" ? valor : formData.comisionPorcentaje;
+    const { comision, aFacturar } = calcularComision(precio, porcentaje);
+    newFormData.comisionUSD = comision.toString();
+    newFormData.aFacturarUSD = aFacturar.toString();
     setFormData(newFormData);
   };
 
@@ -321,10 +381,10 @@ export default function Home() {
       excursionId: venta.excursionId,
       excursionNombre: venta.excursionNombre,
       fechaExcursion: venta.fechaExcursion,
-      precioClienteUSD: venta.precioClienteUSD.toString(),
-      precioProveedorRD: venta.precioProveedorRD.toString(),
-      gananciaUSD: venta.gananciaUSD.toString(),
-      gananciaRD: venta.gananciaRD.toString(),
+      precioVentaUSD: venta.precioVentaUSD.toString(),
+      comisionPorcentaje: venta.comisionPorcentaje.toString(),
+      comisionUSD: venta.comisionUSD.toString(),
+      aFacturarUSD: venta.aFacturarUSD.toString(),
       pagoCliente: venta.pagoCliente,
       montoPagadoUSD: venta.montoPagadoUSD.toString(),
       saldoPendienteUSD: venta.saldoPendienteUSD.toString(),
@@ -381,10 +441,11 @@ export default function Home() {
     const key = `${year}-${String(month).padStart(2, "0")}`;
     
     if (!acc[key]) {
-      acc[key] = { year, month, totalUSD: 0, totalRD: 0, ventas: [] };
+      acc[key] = { year, month, totalUSD: 0, totalComision: 0, totalAFacturar: 0, ventas: [] };
     }
-    acc[key].totalUSD += venta.precioClienteUSD;
-    acc[key].totalRD += venta.precioProveedorRD;
+    acc[key].totalUSD += venta.precioVentaUSD;
+    acc[key].totalComision += venta.comisionUSD;
+    acc[key].totalAFacturar += venta.aFacturarUSD;
     acc[key].ventas.push(venta);
     return acc;
   }, {});
@@ -396,8 +457,9 @@ export default function Home() {
       return b.month - a.month;
     });
 
-  const totalVentasUSD = filtered.reduce((sum, v) => sum + v.precioClienteUSD, 0);
-  const totalGastosRD = filtered.reduce((sum, v) => sum + v.precioProveedorRD, 0);
+  const totalVentasUSD = filtered.reduce((sum, v) => sum + v.precioVentaUSD, 0);
+  const totalComision = filtered.reduce((sum, v) => sum + v.comisionUSD, 0);
+  const totalAFacturar = filtered.reduce((sum, v) => sum + v.aFacturarUSD, 0);
   const totalPendienteUSD = filtered.reduce((sum, v) => sum + v.saldoPendienteUSD, 0);
   const proveedoresPendientes = proveedores.filter(p => p.pagoStatus === "pendiente").length;
   
@@ -407,15 +469,6 @@ export default function Home() {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
-
-  const formatRD = (amount: number) => {
-    return new Intl.NumberFormat("es-DO", {
-      style: "currency",
-      currency: "DOP",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount);
@@ -445,9 +498,9 @@ export default function Home() {
 
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Cliente,Excursión,Precio Cliente (USD),Precio Proveedor (RD$),Pago Cliente,Saldo Pendiente (USD),Método Pago,Proveedor,Pago Proveedor,Nota\n";
+    let csv = "Fecha,Cliente,Excursión,Precio Venta (USD),% Comisión,Comisión (USD),A Facturar (USD),Pago Cliente,Saldo Pendiente (USD),Método Pago,Proveedor,Pago Proveedor,Nota\n";
     ventas.forEach(v => {
-      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.precioClienteUSD},${v.precioProveedorRD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.precioVentaUSD},${v.comisionPorcentaje}%,${v.comisionUSD},${v.aFacturarUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -460,7 +513,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* HEADER CORPORATIVO */}
       <header className="bg-white/10 backdrop-blur-lg border-b border-white/10 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3 py-4">
@@ -470,7 +522,7 @@ export default function Home() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white tracking-tight">Republic Excursions</h1>
-                <p className="text-xs text-amber-400/80">USD / RD$ • Gestión de viajes</p>
+                <p className="text-xs text-amber-400/80">Comisión • USD</p>
               </div>
             </div>
             
@@ -492,31 +544,26 @@ export default function Home() {
         {/* DASHBOARD */}
         {viewMode === "dashboard" && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
                 <p className="text-sm text-white/60">Total Ventas (USD)</p>
                 <p className="text-2xl font-bold text-amber-400">{formatUSD(totalVentasUSD)}</p>
                 <p className="text-xs text-white/40">{ventas.length} ventas</p>
               </div>
               <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
-                <p className="text-sm text-white/60">Total Gastos (RD$)</p>
-                <p className="text-2xl font-bold text-red-400">{formatRD(totalGastosRD)}</p>
-                <p className="text-xs text-white/40">Pagos a proveedores</p>
+                <p className="text-sm text-white/60">Total Comisión (USD)</p>
+                <p className="text-2xl font-bold text-green-400">{formatUSD(totalComision)}</p>
+                <p className="text-xs text-white/40">Tu ganancia</p>
+              </div>
+              <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
+                <p className="text-sm text-white/60">Total A Facturar (USD)</p>
+                <p className="text-2xl font-bold text-red-400">{formatUSD(totalAFacturar)}</p>
+                <p className="text-xs text-white/40">Pago a proveedores</p>
               </div>
               <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
                 <p className="text-sm text-white/60">Por Cobrar (USD)</p>
                 <p className="text-2xl font-bold text-orange-400">{formatUSD(totalPendienteUSD)}</p>
                 <p className="text-xs text-white/40">Saldo de clientes</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
-                <p className="text-sm text-white/60">Excursiones</p>
-                <p className="text-2xl font-bold text-blue-400">{excursiones.length}</p>
-                <p className="text-xs text-white/40">Productos activos</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all">
-                <p className="text-sm text-white/60">Proveedores</p>
-                <p className="text-2xl font-bold text-red-400">{proveedoresPendientes}</p>
-                <p className="text-xs text-white/40">Pagos pendientes</p>
               </div>
             </div>
 
@@ -538,8 +585,9 @@ export default function Home() {
                       <span className={`text-xs px-2 py-1 rounded-full ${v.pagoCliente === 'completo' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
                         {getPagoClienteText(v.pagoCliente)}
                       </span>
-                      <span className="text-sm font-bold text-amber-400">{formatUSD(v.precioClienteUSD)}</span>
-                      <span className="text-xs text-red-400">{formatRD(v.precioProveedorRD)}</span>
+                      <span className="text-sm font-bold text-amber-400">{formatUSD(v.precioVentaUSD)}</span>
+                      <span className="text-xs text-green-400">+{formatUSD(v.comisionUSD)}</span>
+                      <span className="text-xs text-red-400">-{formatUSD(v.aFacturarUSD)}</span>
                     </div>
                   </div>
                 ))
@@ -563,8 +611,10 @@ export default function Home() {
                   <thead>
                     <tr className="border-b border-white/10">
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursión</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Precio Cliente (USD)</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Precio Proveedor (RD$)</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Precio Venta (USD)</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">% Comisión</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Comisión (USD)</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">A Facturar (USD)</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
                     </tr>
                   </thead>
@@ -572,8 +622,10 @@ export default function Home() {
                     {excursiones.map((e) => (
                       <tr key={e.id} className="border-b border-white/5 hover:bg-white/5">
                         <td className="px-4 py-3 text-sm font-medium text-white">{e.nombre}</td>
-                        <td className="px-4 py-3 text-sm text-amber-400 font-medium">{formatUSD(e.precioClienteUSD)}</td>
-                        <td className="px-4 py-3 text-sm text-red-400 font-medium">{formatRD(e.precioProveedorRD)}</td>
+                        <td className="px-4 py-3 text-sm text-amber-400 font-medium">{formatUSD(e.precioVentaUSD)}</td>
+                        <td className="px-4 py-3 text-sm text-white/60">{e.comisionPorcentaje}%</td>
+                        <td className="px-4 py-3 text-sm text-green-400 font-medium">{formatUSD(e.comisionUSD)}</td>
+                        <td className="px-4 py-3 text-sm text-red-400 font-medium">{formatUSD(e.aFacturarUSD)}</td>
                         <td className="px-4 py-3 text-sm">
                           <button onClick={() => deleteExcursion(e.id)} className="text-red-400 hover:text-red-300">Eliminar</button>
                         </td>
@@ -643,9 +695,8 @@ export default function Home() {
                   <thead>
                     <tr className="border-b border-white/10">
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Nombre</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Teléfono</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursión</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Precio (RD$)</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">% Comisión</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Método</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Estado</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
@@ -655,9 +706,8 @@ export default function Home() {
                     {proveedores.map((p) => (
                       <tr key={p.id} className="border-b border-white/5 hover:bg-white/5">
                         <td className="px-4 py-3 text-sm font-medium text-white">{p.nombre}</td>
-                        <td className="px-4 py-3 text-sm text-white/60">{p.telefono}</td>
                         <td className="px-4 py-3 text-sm text-white/60">{p.excursionNombre}</td>
-                        <td className="px-4 py-3 text-sm font-bold text-red-400">{formatRD(p.precioCompraRD)}</td>
+                        <td className="px-4 py-3 text-sm text-white/60">{p.comisionPorcentaje}%</td>
                         <td className="px-4 py-3 text-sm text-white/60">{p.metodoPago}</td>
                         <td className="px-4 py-3 text-sm">
                           <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(p.pagoStatus)}`}>
@@ -711,7 +761,8 @@ export default function Home() {
                         </div>
                         <div className="flex items-center gap-4">
                           <span className="text-sm font-bold text-amber-400">{formatUSD(group.totalUSD)}</span>
-                          <span className="text-sm text-red-400">{formatRD(group.totalRD)}</span>
+                          <span className="text-sm text-green-400">+{formatUSD(group.totalComision)}</span>
+                          <span className="text-sm text-red-400">-{formatUSD(group.totalAFacturar)}</span>
                           <span className="text-white/40 text-xl">{isExpanded ? "▼" : "▶"}</span>
                         </div>
                       </button>
@@ -725,9 +776,10 @@ export default function Home() {
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Fecha</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Cliente</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursión</th>
-                                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Pago</th>
-                                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">USD</th>
-                                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">RD$</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Venta (USD)</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">% Comisión</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Comisión (USD)</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">A Facturar (USD)</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
                                 </tr>
                               </thead>
@@ -737,13 +789,10 @@ export default function Home() {
                                     <td className="px-4 py-3 text-sm text-white/60">{new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</td>
                                     <td className="px-4 py-3 text-sm font-medium text-white">{v.clienteNombre}</td>
                                     <td className="px-4 py-3 text-sm text-white/60">{v.excursionNombre}</td>
-                                    <td className="px-4 py-3 text-sm">
-                                      <span className={`text-xs px-2 py-1 rounded-full ${v.pagoCliente === 'completo' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
-                                        {getPagoClienteText(v.pagoCliente)}
-                                      </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-sm font-bold text-amber-400">{formatUSD(v.precioClienteUSD)}</td>
-                                    <td className="px-4 py-3 text-sm font-bold text-red-400">{formatRD(v.precioProveedorRD)}</td>
+                                    <td className="px-4 py-3 text-sm font-bold text-amber-400">{formatUSD(v.precioVentaUSD)}</td>
+                                    <td className="px-4 py-3 text-sm text-white/60">{v.comisionPorcentaje}%</td>
+                                    <td className="px-4 py-3 text-sm font-bold text-green-400">{formatUSD(v.comisionUSD)}</td>
+                                    <td className="px-4 py-3 text-sm font-bold text-red-400">{formatUSD(v.aFacturarUSD)}</td>
                                     <td className="px-4 py-3 text-sm">
                                       <div className="flex items-center gap-2">
                                         <button onClick={() => editVenta(v)} className="text-amber-400 hover:text-amber-300">Editar</button>
@@ -755,9 +804,11 @@ export default function Home() {
                               </tbody>
                               <tfoot className="bg-white/5">
                                 <tr>
-                                  <td colSpan={4} className="px-4 py-3 text-right font-medium text-white/60">Totales del mes:</td>
+                                  <td colSpan={3} className="px-4 py-3 text-right font-medium text-white/60">Totales del mes:</td>
                                   <td className="px-4 py-3 font-bold text-amber-400">{formatUSD(group.totalUSD)}</td>
-                                  <td className="px-4 py-3 font-bold text-red-400">{formatRD(group.totalRD)}</td>
+                                  <td></td>
+                                  <td className="px-4 py-3 font-bold text-green-400">{formatUSD(group.totalComision)}</td>
+                                  <td className="px-4 py-3 font-bold text-red-400">{formatUSD(group.totalAFacturar)}</td>
                                   <td></td>
                                 </tr>
                               </tfoot>
@@ -774,14 +825,16 @@ export default function Home() {
         )}
       </main>
 
-      {/* MODAL DE VENTA */}
+      {/* ============================================
+          MODAL DE VENTA
+      ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto border border-white/10">
+          <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto border border-white/10">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-white">{editingId ? "Editar Venta" : "Nueva Venta"}</h2>
-                <p className="text-sm text-white/40">Cliente paga en USD • Proveedor cobra en RD$</p>
+                <p className="text-sm text-white/40">Cliente paga en USD • Comisión automática</p>
               </div>
               <button onClick={() => setShowForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
             </div>
@@ -798,7 +851,7 @@ export default function Home() {
                     <option value="" className="text-slate-900">Seleccionar excursión</option>
                     {excursiones.map(e => (
                       <option key={e.id} value={e.id} className="text-slate-900">
-                        {e.nombre} - USD {e.precioClienteUSD} / RD$ {e.precioProveedorRD}
+                        {e.nombre} - ${e.precioVentaUSD} | {e.comisionPorcentaje}%
                       </option>
                     ))}
                   </select>
@@ -812,52 +865,50 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Precio Cliente (USD) *</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Precio Venta (USD) *</label>
                   <input
                     type="number"
                     required
                     step="0.01"
                     className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
                     placeholder="0.00"
-                    value={formData.precioClienteUSD}
-                    onChange={(e) => handlePrecioChange("precioClienteUSD", e.target.value)}
+                    value={formData.precioVentaUSD}
+                    onChange={(e) => handleComisionChange("precioVentaUSD", e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Precio Proveedor (RD$) *</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">% Comisión *</label>
                   <input
                     type="number"
                     required
                     step="0.01"
                     className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
-                    placeholder="0.00"
-                    value={formData.precioProveedorRD}
-                    onChange={(e) => handlePrecioChange("precioProveedorRD", e.target.value)}
+                    placeholder="0"
+                    value={formData.comisionPorcentaje}
+                    onChange={(e) => handleComisionChange("comisionPorcentaje", e.target.value)}
+                  />
+                </div>
+                <div className="bg-green-500/10 rounded-xl p-3 border border-green-500/20">
+                  <label className="block text-sm font-medium text-white/60 mb-1">Comisión (USD)</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 bg-transparent border-0 text-green-400 font-bold text-lg"
+                    value={formData.comisionUSD}
+                    readOnly
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20">
-                  <label className="block text-sm font-medium text-white/60 mb-1">Ingreso (USD)</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 bg-transparent border-0 text-amber-400 font-bold text-lg"
-                    value={formData.gananciaUSD}
-                    readOnly
-                  />
-                </div>
-                <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/20">
-                  <label className="block text-sm font-medium text-white/60 mb-1">Gasto (RD$)</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 bg-transparent border-0 text-red-400 font-bold text-lg"
-                    value={formData.gananciaRD}
-                    readOnly
-                  />
-                </div>
+              <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/20">
+                <label className="block text-sm font-medium text-white/60 mb-1">A Facturar (USD) - Pago al Proveedor</label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 bg-transparent border-0 text-red-400 font-bold text-lg"
+                  value={formData.aFacturarUSD}
+                  readOnly
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -922,7 +973,9 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL EXCURSIÓN */}
+      {/* ============================================
+          MODAL DE EXCURSIÓN
+      ============================================ */}
       {showExcursionForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
@@ -933,15 +986,15 @@ export default function Home() {
             <form onSubmit={handleExcursionSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Nombre de la Excursión *</label>
-                <input type="text" name="nombre" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Ej: Tour Samaná" />
+                <input type="text" name="nombre" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Ej: LA HACIENDA" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Precio Cliente (USD) *</label>
-                <input type="number" name="precioClienteUSD" required step="0.01" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="85.00" />
+                <label className="block text-sm font-medium text-white/70 mb-1">Precio Venta (USD) *</label>
+                <input type="number" name="precioVentaUSD" required step="0.01" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="99.00" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">Precio Proveedor (RD$) *</label>
-                <input type="number" name="precioProveedorRD" required step="0.01" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="4000.00" />
+                <label className="block text-sm font-medium text-white/70 mb-1">% Comisión *</label>
+                <input type="number" name="comisionPorcentaje" required step="0.01" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="25" />
               </div>
               <button type="submit" className="w-full bg-amber-500 text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all">Guardar Excursión</button>
             </form>
@@ -949,7 +1002,9 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL PROVEEDOR */}
+      {/* ============================================
+          MODAL DE PROVEEDOR
+      ============================================ */}
       {showProveedorForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
@@ -960,19 +1015,36 @@ export default function Home() {
             <form onSubmit={handleProveedorSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Proveedor *</label>
-                <input type="text" name="nombre" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Ej: Samaná Tours" />
+                <input type="text" name="nombre" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Ej: Hacienda Tours" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Teléfono</label>
                 <input type="text" name="telefono" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="809-000-0000" />
               </div>
+              
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Excursión *</label>
-                <select name="excursionId" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white">
-                  <option value="" className="text-slate-900">Seleccionar excursión</option>
-                  {excursiones.map(e => <option key={e.id} value={e.id} className="text-slate-900">{e.nombre} - RD$ {e.precioProveedorRD}</option>)}
-                </select>
+                <div className="flex gap-2">
+                  <select 
+                    name="excursionId" 
+                    className="flex-1 px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
+                  >
+                    <option value="" className="text-slate-900">Seleccionar existente</option>
+                    {excursiones.map(e => (
+                      <option key={e.id} value={e.id} className="text-slate-900">
+                        {e.nombre} - {e.comisionPorcentaje}%
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    name="excursionNueva"
+                    placeholder="O escribe nueva"
+                    className="flex-1 px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
+                  />
+                </div>
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Método de Pago</label>
                 <select name="metodoPago" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white">
@@ -991,7 +1063,9 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL CLIENTE */}
+      {/* ============================================
+          MODAL DE CLIENTE
+      ============================================ */}
       {showClienteForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
@@ -1016,7 +1090,7 @@ export default function Home() {
                 <label className="block text-sm font-medium text-white/70 mb-1">Excursión *</label>
                 <select name="excursionId" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white">
                   <option value="" className="text-slate-900">Seleccionar excursión</option>
-                  {excursiones.map(e => <option key={e.id} value={e.id} className="text-slate-900">{e.nombre} - USD {e.precioClienteUSD}</option>)}
+                  {excursiones.map(e => <option key={e.id} value={e.id} className="text-slate-900">{e.nombre} - ${e.precioVentaUSD}</option>)}
                 </select>
               </div>
               <div>
