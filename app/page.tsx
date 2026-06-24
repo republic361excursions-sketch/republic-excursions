@@ -2387,7 +2387,7 @@ export default function Home() {
         </main>
       </div>
 
-      {/* MODALES - Formulario de Venta */}
+      {/* MODALES - Formulario de Venta con Hora y Comisión */}
       {showForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className={`${cardBg} rounded-3xl border ${cardBorder} max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6`}>
@@ -2396,6 +2396,7 @@ export default function Home() {
               <button onClick={resetForm} className="text-white/40 hover:text-white text-2xl">×</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Cliente y WhatsApp */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-white/60 text-sm block mb-1">Cliente</label>
@@ -2403,7 +2404,7 @@ export default function Home() {
                     type="text"
                     value={formData.clienteNombre}
                     onChange={(e) => setFormData(prev => ({ ...prev, clienteNombre: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     placeholder="Nombre del cliente"
                     required
                   />
@@ -2414,18 +2415,20 @@ export default function Home() {
                     type="text"
                     value={formData.clienteWhatsapp}
                     onChange={(e) => setFormData(prev => ({ ...prev, clienteWhatsapp: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     placeholder="WhatsApp"
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {/* Excursión, Fecha y Hora */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-white/60 text-sm block mb-1">Excursión</label>
                   <select
                     value={formData.excursionId}
                     onChange={(e) => selectExcursionForVenta(e.target.value)}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     required
                   >
                     <option value="">Seleccionar excursión</option>
@@ -2438,11 +2441,23 @@ export default function Home() {
                     type="date"
                     value={formData.fechaExcursion}
                     onChange={(e) => setFormData(prev => ({ ...prev, fechaExcursion: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     required
                   />
                 </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Hora</label>
+                  <select
+                    value={formData.horaExcursion}
+                    onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                  >
+                    {HORAS.map(h => <option key={h} value={h}>{h}</option>)}
+                  </select>
+                </div>
               </div>
+
+              {/* Adultos, Niños y Estado */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="text-white/60 text-sm block mb-1">Adultos</label>
@@ -2451,7 +2466,7 @@ export default function Home() {
                     min="0"
                     value={formData.cantidadAdultos}
                     onChange={handleCantidadAdultosChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
@@ -2461,7 +2476,7 @@ export default function Home() {
                     min="0"
                     value={formData.cantidadNinos}
                     onChange={handleCantidadNinosChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
@@ -2469,7 +2484,7 @@ export default function Home() {
                   <select
                     value={formData.estado}
                     onChange={(e) => setFormData(prev => ({ ...prev, estado: e.target.value as any }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   >
                     <option value="pendiente">Pendiente</option>
                     <option value="confirmada">Confirmada</option>
@@ -2478,7 +2493,9 @@ export default function Home() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+
+              {/* Precios y Costos */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
                   <label className="text-white/60 text-sm block mb-1">Precio Adulto (USD)</label>
                   <input
@@ -2486,7 +2503,17 @@ export default function Home() {
                     step="0.01"
                     value={formData.precioAdultoUSD}
                     onChange={handlePrecioAdultoChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Costo Adulto (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.costoProveedorAdultoUSD}
+                    onChange={handleCostoAdultoChange}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
@@ -2496,19 +2523,52 @@ export default function Home() {
                     step="0.01"
                     value={formData.precioNinoUSD}
                     onChange={handlePrecioNinoChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Total</label>
+                  <label className="text-white/60 text-sm block mb-1">Costo Niño (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.costoProveedorNinoUSD}
+                    onChange={handleCostoNinoChange}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Totales */}
+              <div className="grid grid-cols-3 gap-4 bg-white/5 rounded-2xl p-4 border border-white/5">
+                <div>
+                  <label className="text-white/40 text-sm block mb-1">Total Venta</label>
                   <input
                     type="text"
                     value={formData.precioTotalUSD}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white font-bold"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white font-bold text-lg"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label className="text-white/40 text-sm block mb-1">Costo Proveedor</label>
+                  <input
+                    type="text"
+                    value={formData.costoTotalUSD}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-orange-400 font-bold text-lg"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label className="text-white/40 text-sm block mb-1">Comisión</label>
+                  <input
+                    type="text"
+                    value={formData.comisionTotalUSD}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-green-400 font-bold text-lg"
                     disabled
                   />
                 </div>
               </div>
+
               <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
                 <button type="button" onClick={resetForm} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
                   Cancelar
@@ -2533,26 +2593,26 @@ export default function Home() {
             <form onSubmit={handleClienteSubmit} className="space-y-4">
               <div>
                 <label className="text-white/60 text-sm block mb-1">Nombre</label>
-                <input type="text" name="nombre" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white" required />
+                <input type="text" name="nombre" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" required />
               </div>
               <div>
                 <label className="text-white/60 text-sm block mb-1">WhatsApp</label>
-                <input type="text" name="whatsapp" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white" />
+                <input type="text" name="whatsapp" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" />
               </div>
               <div>
                 <label className="text-white/60 text-sm block mb-1">Email</label>
-                <input type="email" name="email" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white" />
+                <input type="email" name="email" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" />
               </div>
               <div>
                 <label className="text-white/60 text-sm block mb-1">Excursión</label>
-                <select name="excursionId" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white">
+                <select name="excursionId" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all">
                   <option value="">Seleccionar excursión</option>
                   {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
                 </select>
               </div>
               <div>
                 <label className="text-white/60 text-sm block mb-1">Fecha</label>
-                <input type="date" name="fechaExcursion" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white" />
+                <input type="date" name="fechaExcursion" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" />
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
                 <button type="button" onClick={() => setShowClienteForm(false)} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
@@ -2567,7 +2627,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODALES - Formulario de Proveedor */}
+      {/* MODALES - Formulario de Proveedor con RNC/Cédula */}
       {showProveedorForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className={`${cardBg} rounded-3xl border ${cardBorder} max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6`}>
@@ -2583,7 +2643,7 @@ export default function Home() {
                     type="text"
                     value={proveedorFormData.nombre}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, nombre: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     required
                   />
                 </div>
@@ -2593,7 +2653,7 @@ export default function Home() {
                     type="text"
                     value={proveedorFormData.empresa}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, empresa: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
@@ -2604,7 +2664,7 @@ export default function Home() {
                     type="text"
                     value={proveedorFormData.telefono}
                     onChange={manejarCambioTelefono}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     placeholder="(XXX) XXX-XXXX"
                   />
                 </div>
@@ -2614,10 +2674,42 @@ export default function Home() {
                     type="email"
                     value={proveedorFormData.email}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
+
+              {/* Tipo de Documento - RNC o Cédula */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Tipo de Documento</label>
+                  <select
+                    value={proveedorFormData.tipoDocumento}
+                    onChange={(e) => {
+                      setProveedorFormData(prev => ({ 
+                        ...prev, 
+                        tipoDocumento: e.target.value as "rnc" | "cedula",
+                        rncCedula: ""
+                      }));
+                    }}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                  >
+                    <option value="cedula">Cédula</option>
+                    <option value="rnc">RNC</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">{proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cédula"}</label>
+                  <input
+                    type="text"
+                    value={proveedorFormData.rncCedula}
+                    onChange={manejarCambioRNCcedula}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                    placeholder={proveedorFormData.tipoDocumento === "rnc" ? "XX-XXXXXXX-X" : "XXX-XXXXXXX-X"}
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="text-white/60 text-sm block mb-2">Métodos de Pago</label>
                 <div className="flex gap-4 flex-wrap">
@@ -2638,7 +2730,7 @@ export default function Home() {
                   <select
                     value={proveedorFormData.banco}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, banco: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   >
                     <option value="">Seleccionar banco</option>
                     {BANCOS.map(b => <option key={b} value={b}>{b}</option>)}
@@ -2650,7 +2742,7 @@ export default function Home() {
                     type="text"
                     value={proveedorFormData.numeroCuenta}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, numeroCuenta: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
@@ -2660,7 +2752,7 @@ export default function Home() {
                   <select
                     value={proveedorFormData.monedaCuenta}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, monedaCuenta: e.target.value as "USD" | "RD$" }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   >
                     <option value="RD$">RD$</option>
                     <option value="USD">USD</option>
@@ -2684,7 +2776,7 @@ export default function Home() {
                   <select
                     value={proveedorFormData.tipoBeneficiario}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, tipoBeneficiario: e.target.value as "personal" | "empresarial" }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   >
                     <option value="personal">Personal</option>
                     <option value="empresarial">Empresarial</option>
@@ -2696,34 +2788,12 @@ export default function Home() {
                     type="text"
                     value={proveedorFormData.beneficiario}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, beneficiario: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-white/60 text-sm block mb-1">Tipo de Documento</label>
-                  <select
-                    value={proveedorFormData.tipoDocumento}
-                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, tipoDocumento: e.target.value as "rnc" | "cedula" }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
-                  >
-                    <option value="cedula">Cédula</option>
-                    <option value="rnc">RNC</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-white/60 text-sm block mb-1">{proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cédula"}</label>
-                  <input
-                    type="text"
-                    value={proveedorFormData.rncCedula}
-                    onChange={manejarCambioRNCcedula}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
-                    placeholder={proveedorFormData.tipoDocumento === "rnc" ? "XX-XXXXXXX-X" : "XXX-XXXXXXX-X"}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
+              {/* Excursiones temporales */}
               <div className="border-t border-white/10 pt-4 mt-4">
                 <h4 className="text-white font-semibold mb-3">Excursiones del Proveedor</h4>
                 <div className="space-y-2 mb-3">
@@ -2731,8 +2801,8 @@ export default function Home() {
                     <div key={i} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2">
                       <div>
                         <span className="text-white">{e.nombre}</span>
-                        <span className="text-white/40 text-sm ml-2">Adulto: {formatUSD(e.precioAdultoUSD)}</span>
-                        {e.precioNinoUSD !== null && <span className="text-white/40 text-sm ml-2">Niño: {formatUSD(e.precioNinoUSD)}</span>}
+                        <span className="text-white/40 text-sm ml-2">Precio Adulto: {formatUSD(e.precioAdultoUSD)}</span>
+                        {e.precioNinoUSD !== null && <span className="text-white/40 text-sm ml-2">Precio Niño: {formatUSD(e.precioNinoUSD)}</span>}
                       </div>
                       <button type="button" onClick={() => eliminarTempExcursion(i)} className="text-red-400 hover:text-red-300">×</button>
                     </div>
@@ -2743,7 +2813,7 @@ export default function Home() {
                     type="text"
                     value={tempExcursionForm.nombre}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, nombre: e.target.value }))}
-                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     placeholder="Nombre de excursión"
                   />
                   <div className="flex gap-2">
@@ -2752,7 +2822,7 @@ export default function Home() {
                       step="0.01"
                       value={tempExcursionForm.precioAdultoUSD}
                       onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
-                      className="w-1/2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                      className="w-1/2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                       placeholder="Precio Adulto"
                     />
                     <input
@@ -2760,7 +2830,7 @@ export default function Home() {
                       step="0.01"
                       value={tempExcursionForm.precioNinoUSD}
                       onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
-                      className="w-1/2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                      className="w-1/2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                       placeholder="Precio Niño"
                     />
                   </div>
@@ -2771,7 +2841,7 @@ export default function Home() {
                     step="0.01"
                     value={tempExcursionForm.costoProveedorAdultoUSD}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
-                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     placeholder="Costo Adulto"
                   />
                   <input
@@ -2779,7 +2849,7 @@ export default function Home() {
                     step="0.01"
                     value={tempExcursionForm.costoProveedorNinoUSD}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
-                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     placeholder="Costo Niño"
                   />
                 </div>
@@ -2827,7 +2897,7 @@ export default function Home() {
                     type="text"
                     value={excursionFormData.nombre}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, nombre: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     required
                   />
                 </div>
@@ -2843,7 +2913,7 @@ export default function Home() {
                         proveedorNombre: proveedor?.nombre || ""
                       }));
                     }}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     required
                   >
                     <option value="">Seleccionar proveedor</option>
@@ -2859,7 +2929,7 @@ export default function Home() {
                     step="0.01"
                     value={excursionFormData.precioAdultoUSD}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     required
                   />
                 </div>
@@ -2870,7 +2940,7 @@ export default function Home() {
                     step="0.01"
                     value={excursionFormData.precioNinoUSD}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
@@ -2882,7 +2952,7 @@ export default function Home() {
                     step="0.01"
                     value={excursionFormData.costoProveedorAdultoUSD}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     required
                   />
                 </div>
@@ -2893,7 +2963,7 @@ export default function Home() {
                     step="0.01"
                     value={excursionFormData.costoProveedorNinoUSD}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
@@ -2903,7 +2973,7 @@ export default function Home() {
                   <select
                     value={excursionFormData.zona}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, zona: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   >
                     <option value="">Seleccionar zona</option>
                     {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
@@ -2915,7 +2985,7 @@ export default function Home() {
                     type="text"
                     value={excursionFormData.capacidad}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, capacidad: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     placeholder="Ej: 20 personas"
                   />
                 </div>
