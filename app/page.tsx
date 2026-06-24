@@ -8,9 +8,10 @@ import { useState, useEffect } from "react";
 interface Excursion {
   id: string;
   nombre: string;
-  precioProveedor: number; // En DÓLARES
-  precioCliente: number; // En DÓLARES
-  ganancia: number;
+  precioProveedorRD: number; // Precio en PESOS para el proveedor
+  precioClienteUSD: number; // Precio en DÓLARES para el cliente
+  gananciaUSD: number;
+  gananciaRD: number;
 }
 
 interface Proveedor {
@@ -19,7 +20,7 @@ interface Proveedor {
   telefono: string;
   excursionId: string;
   excursionNombre: string;
-  precioCompra: number;
+  precioCompraRD: number; // En PESOS
   metodoPago: "efectivo" | "transferencia" | "paypal";
   pagoStatus: "pendiente" | "pagado";
   nota: string;
@@ -43,12 +44,13 @@ interface Venta {
   excursionId: string;
   excursionNombre: string;
   fechaExcursion: string;
-  precioVenta: number; // En DÓLARES
-  precioCompra: number; // En DÓLARES
-  ganancia: number; // En DÓLARES
+  precioClienteUSD: number; // Cliente paga en DÓLARES
+  precioProveedorRD: number; // Proveedor cobra en PESOS
+  gananciaUSD: number;
+  gananciaRD: number;
   pagoCliente: "completo" | "deposito_25" | "pago_dia";
-  montoPagado: number;
-  saldoPendiente: number;
+  montoPagadoUSD: number;
+  saldoPendienteUSD: number;
   metodoPagoCliente: "efectivo" | "tarjeta" | "transferencia" | "paypal";
   proveedorId: string;
   proveedorNombre: string;
@@ -77,7 +79,7 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones">("dashboard");
 
   // ============================================
-  // FORMULARIO - TODOS LOS CAMPOS EDITABLES
+  // FORMULARIO
   // ============================================
   const [formData, setFormData] = useState({
     clienteNombre: "",
@@ -86,11 +88,13 @@ export default function Home() {
     excursionId: "",
     excursionNombre: "",
     fechaExcursion: "",
-    precioVenta: "",
-    precioCompra: "",
-    ganancia: "",
+    precioClienteUSD: "", // Cliente paga en DÓLARES
+    precioProveedorRD: "", // Proveedor cobra en PESOS
+    gananciaUSD: "",
+    gananciaRD: "",
     pagoCliente: "completo" as "completo" | "deposito_25" | "pago_dia",
-    montoPagado: "",
+    montoPagadoUSD: "",
+    saldoPendienteUSD: "",
     metodoPagoCliente: "efectivo" as "efectivo" | "tarjeta" | "transferencia" | "paypal",
     proveedorId: "",
     proveedorNombre: "",
@@ -103,10 +107,10 @@ export default function Home() {
   // CARGAR DATOS
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas");
-    const savedClientes = localStorage.getItem("excursiones_clientes");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v3");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v3");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v3");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v3");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -119,22 +123,22 @@ export default function Home() {
   // ============================================
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v3", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v3", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v3", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v3", JSON.stringify(data));
   };
 
   // ============================================
@@ -145,15 +149,16 @@ export default function Home() {
     const form = e.target as HTMLFormElement;
     const data = new FormData(form);
     
-    const precioProveedor = parseFloat(data.get("precioProveedor") as string);
-    const precioCliente = parseFloat(data.get("precioCliente") as string);
+    const precioProveedorRD = parseFloat(data.get("precioProveedorRD") as string);
+    const precioClienteUSD = parseFloat(data.get("precioClienteUSD") as string);
     
     const nuevaExcursion: Excursion = {
       id: Date.now().toString(),
       nombre: data.get("nombre") as string,
-      precioProveedor,
-      precioCliente,
-      ganancia: precioCliente - precioProveedor,
+      precioProveedorRD,
+      precioClienteUSD,
+      gananciaUSD: precioClienteUSD,
+      gananciaRD: -precioProveedorRD,
     };
     
     saveExcursiones([...excursiones, nuevaExcursion]);
@@ -178,7 +183,7 @@ export default function Home() {
       telefono: data.get("telefono") as string,
       excursionId,
       excursionNombre: excursion?.nombre || "",
-      precioCompra: excursion?.precioProveedor || 0,
+      precioCompraRD: excursion?.precioProveedorRD || 0,
       metodoPago: data.get("metodoPago") as "efectivo" | "transferencia" | "paypal",
       pagoStatus: "pendiente",
       nota: data.get("nota") as string || "",
@@ -216,12 +221,12 @@ export default function Home() {
   };
 
   // ============================================
-  // CALCULAR GANANCIA AUTOMÁTICAMENTE
+  // CALCULAR GANANCIA
   // ============================================
-  const calcularGanancia = (venta: string, compra: string) => {
-    const v = parseFloat(venta) || 0;
-    const c = parseFloat(compra) || 0;
-    return (v - c).toString();
+  const calcularGanancia = (usd: string, rd: string) => {
+    const u = parseFloat(usd) || 0;
+    const r = parseFloat(rd) || 0;
+    return { gananciaUSD: u.toString(), gananciaRD: r.toString() };
   };
 
   // ============================================
@@ -229,18 +234,17 @@ export default function Home() {
   // ============================================
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const precioVenta = parseFloat(formData.precioVenta);
-    const precioCompra = parseFloat(formData.precioCompra);
-    const ganancia = precioVenta - precioCompra;
-    const montoPagado = parseFloat(formData.montoPagado) || 0;
+    const precioClienteUSD = parseFloat(formData.precioClienteUSD);
+    const precioProveedorRD = parseFloat(formData.precioProveedorRD);
+    const montoPagadoUSD = parseFloat(formData.montoPagadoUSD) || 0;
     
-    let saldoPendiente = 0;
+    let saldoPendienteUSD = 0;
     if (formData.pagoCliente === "completo") {
-      saldoPendiente = 0;
+      saldoPendienteUSD = 0;
     } else if (formData.pagoCliente === "deposito_25") {
-      saldoPendiente = precioVenta * 0.75;
+      saldoPendienteUSD = precioClienteUSD * 0.75;
     } else if (formData.pagoCliente === "pago_dia") {
-      saldoPendiente = precioVenta;
+      saldoPendienteUSD = precioClienteUSD;
     }
 
     const nuevaVenta: Venta = {
@@ -251,12 +255,13 @@ export default function Home() {
       excursionId: formData.excursionId,
       excursionNombre: formData.excursionNombre,
       fechaExcursion: formData.fechaExcursion,
-      precioVenta,
-      precioCompra,
-      ganancia,
+      precioClienteUSD,
+      precioProveedorRD,
+      gananciaUSD: precioClienteUSD,
+      gananciaRD: -precioProveedorRD,
       pagoCliente: formData.pagoCliente,
-      montoPagado,
-      saldoPendiente,
+      montoPagadoUSD,
+      saldoPendienteUSD,
       metodoPagoCliente: formData.metodoPagoCliente,
       proveedorId: formData.proveedorId,
       proveedorNombre: formData.proveedorNombre,
@@ -284,11 +289,13 @@ export default function Home() {
       excursionId: "",
       excursionNombre: "",
       fechaExcursion: "",
-      precioVenta: "",
-      precioCompra: "",
-      ganancia: "",
+      precioClienteUSD: "",
+      precioProveedorRD: "",
+      gananciaUSD: "",
+      gananciaRD: "",
       pagoCliente: "completo",
-      montoPagado: "",
+      montoPagadoUSD: "",
+      saldoPendienteUSD: "",
       metodoPagoCliente: "efectivo",
       proveedorId: "",
       proveedorNombre: "",
@@ -301,7 +308,7 @@ export default function Home() {
   };
 
   // ============================================
-  // SELECCIONAR EXCURSIÓN - CARGA AUTOMÁTICA
+  // SELECCIONAR EXCURSIÓN
   // ============================================
   const selectExcursion = (excursionId: string) => {
     const excursion = excursiones.find(e => e.id === excursionId);
@@ -312,23 +319,23 @@ export default function Home() {
         ...formData,
         excursionId: excursion.id,
         excursionNombre: excursion.nombre,
-        precioVenta: excursion.precioCliente.toString(),
-        precioCompra: excursion.precioProveedor.toString(),
-        ganancia: (excursion.precioCliente - excursion.precioProveedor).toString(),
+        precioClienteUSD: excursion.precioClienteUSD.toString(),
+        precioProveedorRD: excursion.precioProveedorRD.toString(),
+        gananciaUSD: excursion.precioClienteUSD.toString(),
+        gananciaRD: excursion.precioProveedorRD.toString(),
         proveedorId: proveedor?.id || "",
         proveedorNombre: proveedor?.nombre || "",
       });
     }
   };
 
-  // ============================================
-  // MANEJAR CAMBIOS EN PRECIOS - CALCULAR GANANCIA
-  // ============================================
-  const handlePrecioChange = (campo: "precioVenta" | "precioCompra", valor: string) => {
+  const handlePrecioChange = (campo: "precioClienteUSD" | "precioProveedorRD", valor: string) => {
     const newFormData = { ...formData, [campo]: valor };
-    const venta = campo === "precioVenta" ? valor : formData.precioVenta;
-    const compra = campo === "precioCompra" ? valor : formData.precioCompra;
-    newFormData.ganancia = calcularGanancia(venta, compra);
+    const usd = campo === "precioClienteUSD" ? valor : formData.precioClienteUSD;
+    const rd = campo === "precioProveedorRD" ? valor : formData.precioProveedorRD;
+    const ganancias = calcularGanancia(usd, rd);
+    newFormData.gananciaUSD = ganancias.gananciaUSD;
+    newFormData.gananciaRD = ganancias.gananciaRD;
     setFormData(newFormData);
   };
 
@@ -341,11 +348,13 @@ export default function Home() {
       excursionId: venta.excursionId,
       excursionNombre: venta.excursionNombre,
       fechaExcursion: venta.fechaExcursion,
-      precioVenta: venta.precioVenta.toString(),
-      precioCompra: venta.precioCompra.toString(),
-      ganancia: venta.ganancia.toString(),
+      precioClienteUSD: venta.precioClienteUSD.toString(),
+      precioProveedorRD: venta.precioProveedorRD.toString(),
+      gananciaUSD: venta.gananciaUSD.toString(),
+      gananciaRD: venta.gananciaRD.toString(),
       pagoCliente: venta.pagoCliente,
-      montoPagado: venta.montoPagado.toString(),
+      montoPagadoUSD: venta.montoPagadoUSD.toString(),
+      saldoPendienteUSD: venta.saldoPendienteUSD.toString(),
       metodoPagoCliente: venta.metodoPagoCliente,
       proveedorId: venta.proveedorId,
       proveedorNombre: venta.proveedorNombre,
@@ -405,10 +414,10 @@ export default function Home() {
     const key = `${year}-${String(month).padStart(2, "0")}`;
     
     if (!acc[key]) {
-      acc[key] = { year, month, total: 0, ventas: [], ganancias: 0 };
+      acc[key] = { year, month, totalUSD: 0, totalRD: 0, ventas: [] };
     }
-    acc[key].total += venta.precioVenta;
-    acc[key].ganancias += venta.ganancia;
+    acc[key].totalUSD += venta.precioClienteUSD;
+    acc[key].totalRD += venta.precioProveedorRD;
     acc[key].ventas.push(venta);
     return acc;
   }, {});
@@ -423,17 +432,31 @@ export default function Home() {
   // ============================================
   // CÁLCULOS
   // ============================================
-  const totalVentas = filtered.reduce((sum, v) => sum + v.precioVenta, 0);
-  const totalGanancia = filtered.reduce((sum, v) => sum + v.ganancia, 0);
-  const totalPendiente = filtered.reduce((sum, v) => sum + v.saldoPendiente, 0);
+  const totalVentasUSD = filtered.reduce((sum, v) => sum + v.precioClienteUSD, 0);
+  const totalGastosRD = filtered.reduce((sum, v) => sum + v.precioProveedorRD, 0);
+  const totalPendienteUSD = filtered.reduce((sum, v) => sum + v.saldoPendienteUSD, 0);
   const proveedoresPendientes = proveedores.filter(p => p.pagoStatus === "pendiente").length;
   
   const years = [...new Set(ventas.map(v => new Date(v.fechaExcursion).getFullYear().toString()))].sort().reverse();
 
-  const formatCurrency = (amount: number) => {
+  // ============================================
+  // FORMATO DE MONEDA
+  // ============================================
+  const formatUSD = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
+
+  const formatRD = (amount: number) => {
+    return new Intl.NumberFormat("es-DO", {
+      style: "currency",
+      currency: "DOP",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
@@ -448,9 +471,9 @@ export default function Home() {
 
   const getPagoClienteText = (tipo: string) => {
     const map: any = {
-      completo: "✅ Pago completo",
-      deposito_25: "🏦 Depósito 25%",
-      pago_dia: "📅 Pago el día"
+      completo: "✅ Pago completo (USD)",
+      deposito_25: "🏦 Depósito 25% (USD)",
+      pago_dia: "📅 Pago el día (USD)"
     };
     return map[tipo] || tipo;
   };
@@ -461,9 +484,9 @@ export default function Home() {
 
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Cliente,Excursión,Precio Venta (USD),Precio Compra (USD),Ganancia (USD),Pago Cliente,Saldo Pendiente,Método Pago,Proveedor,Pago Proveedor,Nota\n";
+    let csv = "Fecha,Cliente,Excursión,Precio Cliente (USD),Precio Proveedor (RD$),Pago Cliente,Saldo Pendiente (USD),Método Pago,Proveedor,Pago Proveedor,Nota\n";
     ventas.forEach(v => {
-      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.precioVenta},${v.precioCompra},${v.ganancia},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendiente},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.precioClienteUSD},${v.precioProveedorRD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -475,7 +498,7 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER - FORMULARIO MODIFICADO
+  // RENDER
   // ============================================
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -488,7 +511,7 @@ export default function Home() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-800">Republic Excursions</h1>
-                <p className="text-xs text-gray-400">Clientes • Proveedores • Ganancias</p>
+                <p className="text-xs text-gray-400">Cliente paga en USD • Proveedor cobra en RD$</p>
               </div>
             </div>
             
@@ -510,18 +533,18 @@ export default function Home() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
               <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                <p className="text-sm text-gray-400">💰 Total Ventas</p>
-                <p className="text-2xl font-bold text-blue-600">{formatCurrency(totalVentas)}</p>
+                <p className="text-sm text-gray-400">💰 Total Ventas (USD)</p>
+                <p className="text-2xl font-bold text-blue-600">{formatUSD(totalVentasUSD)}</p>
                 <p className="text-xs text-gray-400">{ventas.length} ventas</p>
               </div>
               <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                <p className="text-sm text-gray-400">📈 Ganancia Total</p>
-                <p className="text-2xl font-bold text-green-600">{formatCurrency(totalGanancia)}</p>
-                <p className="text-xs text-gray-400">Venta - Costo</p>
+                <p className="text-sm text-gray-400">💸 Total Gastos (RD$)</p>
+                <p className="text-2xl font-bold text-red-600">{formatRD(totalGastosRD)}</p>
+                <p className="text-xs text-gray-400">Pagos a proveedores</p>
               </div>
               <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                <p className="text-sm text-gray-400">⏳ Por Cobrar</p>
-                <p className="text-2xl font-bold text-orange-600">{formatCurrency(totalPendiente)}</p>
+                <p className="text-sm text-gray-400">⏳ Por Cobrar (USD)</p>
+                <p className="text-2xl font-bold text-orange-600">{formatUSD(totalPendienteUSD)}</p>
                 <p className="text-xs text-gray-400">Saldo de clientes</p>
               </div>
               <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
@@ -534,6 +557,33 @@ export default function Home() {
                 <p className="text-2xl font-bold text-red-600">{proveedoresPendientes}</p>
                 <p className="text-xs text-gray-400">Pagos pendientes</p>
               </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+              <h2 className="text-lg font-bold text-gray-800 mb-4">📋 Últimas ventas</h2>
+              {ventas.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">🏝️</div>
+                  <p className="text-gray-400">No hay ventas registradas</p>
+                  <button onClick={() => setShowForm(true)} className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all">+ Registrar primera venta</button>
+                </div>
+              ) : (
+                ventas.slice(0, 5).map((v) => (
+                  <div key={v.id} className="flex flex-wrap items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                    <div>
+                      <p className="font-medium text-gray-800">{v.clienteNombre}</p>
+                      <p className="text-sm text-gray-400">{v.excursionNombre} • {new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-4">
+                      <span className={`text-xs px-2 py-1 rounded-full ${v.pagoCliente === 'completo' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                        {getPagoClienteText(v.pagoCliente)}
+                      </span>
+                      <span className="text-sm font-bold text-blue-600">{formatUSD(v.precioClienteUSD)}</span>
+                      <span className="text-xs text-red-600">{formatRD(v.precioProveedorRD)}</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </>
         )}
@@ -553,9 +603,8 @@ export default function Home() {
                   <thead>
                     <tr className="border-b border-gray-200">
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Excursión</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Precio Proveedor</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Precio Cliente</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">💰 Ganancia</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Precio Cliente (USD)</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Precio Proveedor (RD$)</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Acciones</th>
                     </tr>
                   </thead>
@@ -563,9 +612,8 @@ export default function Home() {
                     {excursiones.map((e) => (
                       <tr key={e.id} className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="px-4 py-3 text-sm font-medium text-gray-800">{e.nombre}</td>
-                        <td className="px-4 py-3 text-sm text-red-600 font-medium">{formatCurrency(e.precioProveedor)}</td>
-                        <td className="px-4 py-3 text-sm text-blue-600 font-medium">{formatCurrency(e.precioCliente)}</td>
-                        <td className="px-4 py-3 text-sm text-green-600 font-bold">{formatCurrency(e.ganancia)}</td>
+                        <td className="px-4 py-3 text-sm text-blue-600 font-medium">{formatUSD(e.precioClienteUSD)}</td>
+                        <td className="px-4 py-3 text-sm text-red-600 font-medium">{formatRD(e.precioProveedorRD)}</td>
                         <td className="px-4 py-3 text-sm">
                           <button onClick={() => deleteExcursion(e.id)} className="text-red-500 hover:text-red-700">🗑️</button>
                         </td>
@@ -637,7 +685,7 @@ export default function Home() {
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Nombre</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Teléfono</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Excursión</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Precio</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Precio (RD$)</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Método</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Estado</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Acciones</th>
@@ -649,7 +697,7 @@ export default function Home() {
                         <td className="px-4 py-3 text-sm font-medium text-gray-800">{p.nombre}</td>
                         <td className="px-4 py-3 text-sm text-gray-600">{p.telefono}</td>
                         <td className="px-4 py-3 text-sm text-gray-600">{p.excursionNombre}</td>
-                        <td className="px-4 py-3 text-sm font-bold text-red-600">{formatCurrency(p.precioCompra)}</td>
+                        <td className="px-4 py-3 text-sm font-bold text-red-600">{formatRD(p.precioCompraRD)}</td>
                         <td className="px-4 py-3 text-sm text-gray-600">{p.metodoPago}</td>
                         <td className="px-4 py-3 text-sm">
                           <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(p.pagoStatus)}`}>
@@ -703,8 +751,8 @@ export default function Home() {
                           </div>
                         </div>
                         <div className="flex items-center gap-4">
-                          <span className="text-sm font-bold text-blue-600">{formatCurrency(group.total)}</span>
-                          <span className="text-sm text-green-600">+{formatCurrency(group.ganancias)}</span>
+                          <span className="text-sm font-bold text-blue-600">{formatUSD(group.totalUSD)}</span>
+                          <span className="text-sm text-red-600">{formatRD(group.totalRD)}</span>
                           <span className="text-gray-400 text-xl">{isExpanded ? "▼" : "▶"}</span>
                         </div>
                       </button>
@@ -719,8 +767,8 @@ export default function Home() {
                                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Cliente</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Excursión</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Pago</th>
-                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Venta</th>
-                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Ganancia</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">USD</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">RD$</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Acciones</th>
                                 </tr>
                               </thead>
@@ -735,8 +783,8 @@ export default function Home() {
                                         {getPagoClienteText(v.pagoCliente)}
                                       </span>
                                     </td>
-                                    <td className="px-4 py-3 text-sm font-bold text-blue-600">{formatCurrency(v.precioVenta)}</td>
-                                    <td className="px-4 py-3 text-sm font-bold text-green-600">+{formatCurrency(v.ganancia)}</td>
+                                    <td className="px-4 py-3 text-sm font-bold text-blue-600">{formatUSD(v.precioClienteUSD)}</td>
+                                    <td className="px-4 py-3 text-sm font-bold text-red-600">{formatRD(v.precioProveedorRD)}</td>
                                     <td className="px-4 py-3 text-sm">
                                       <div className="flex items-center gap-2">
                                         <button onClick={() => editVenta(v)} className="text-blue-600 hover:text-blue-800">✏️</button>
@@ -749,8 +797,8 @@ export default function Home() {
                               <tfoot className="bg-gray-50">
                                 <tr>
                                   <td colSpan={4} className="px-4 py-3 text-right font-medium text-gray-700">Totales del mes:</td>
-                                  <td className="px-4 py-3 font-bold text-blue-600">{formatCurrency(group.total)}</td>
-                                  <td className="px-4 py-3 font-bold text-green-600">+{formatCurrency(group.ganancias)}</td>
+                                  <td className="px-4 py-3 font-bold text-blue-600">{formatUSD(group.totalUSD)}</td>
+                                  <td className="px-4 py-3 font-bold text-red-600">{formatRD(group.totalRD)}</td>
                                   <td></td>
                                 </tr>
                               </tfoot>
@@ -768,7 +816,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL DE VENTA - TODOS LOS CAMPOS EDITABLES
+          MODAL DE VENTA
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -776,13 +824,13 @@ export default function Home() {
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800">{editingId ? "✏️ Editar Venta" : "📝 Nueva Venta"}</h2>
-                <p className="text-sm text-gray-400">Registra una venta de excursión</p>
+                <p className="text-sm text-gray-400">Cliente paga en USD • Proveedor cobra en RD$</p>
               </div>
               <button onClick={() => setShowForm(false)} className="text-gray-300 hover:text-gray-600 text-3xl leading-none">×</button>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Excursión - SELECCIONAR O ESCRIBIR */}
+              {/* Excursión */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">🏝️ Excursión *</label>
                 <div className="flex gap-2">
@@ -794,7 +842,7 @@ export default function Home() {
                     <option value="">Seleccionar excursión</option>
                     {excursiones.map(e => (
                       <option key={e.id} value={e.id}>
-                        {e.nombre} - ${e.precioCliente}
+                        {e.nombre} - USD {e.precioClienteUSD} / RD$ {e.precioProveedorRD}
                       </option>
                     ))}
                   </select>
@@ -808,37 +856,51 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Precios - TODOS EDITABLES */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Precios - DUAL MONEDA */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">💰 Precio Venta (USD) *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">🇺🇸 Precio Cliente (USD) *</label>
                   <input
                     type="number"
                     required
                     step="0.01"
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="0.00"
-                    value={formData.precioVenta}
-                    onChange={(e) => handlePrecioChange("precioVenta", e.target.value)}
+                    value={formData.precioClienteUSD}
+                    onChange={(e) => handlePrecioChange("precioClienteUSD", e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">💸 Precio Compra (USD)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">🇩🇴 Precio Proveedor (RD$) *</label>
                   <input
                     type="number"
+                    required
                     step="0.01"
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="0.00"
-                    value={formData.precioCompra}
-                    onChange={(e) => handlePrecioChange("precioCompra", e.target.value)}
+                    value={formData.precioProveedorRD}
+                    onChange={(e) => handlePrecioChange("precioProveedorRD", e.target.value)}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">📈 Ganancia (USD)</label>
+              </div>
+
+              {/* Resumen de Ganancias */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-blue-50 rounded-xl p-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">💰 Ingreso (USD)</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-green-50 text-green-600 font-bold"
-                    value={formData.ganancia}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl bg-white font-bold text-blue-600"
+                    value={formData.gananciaUSD}
+                    readOnly
+                  />
+                </div>
+                <div className="bg-red-50 rounded-xl p-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">💸 Gasto (RD$)</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl bg-white font-bold text-red-600"
+                    value={formData.gananciaRD}
                     readOnly
                   />
                 </div>
@@ -886,16 +948,16 @@ export default function Home() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">📋 Estado del Pago del Cliente *</label>
                 <select required className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" value={formData.pagoCliente} onChange={(e) => setFormData({ ...formData, pagoCliente: e.target.value as any })}>
-                  <option value="completo">✅ Pago completo (todo hoy)</option>
-                  <option value="deposito_25">🏦 Depósito del 25% (reserva)</option>
-                  <option value="pago_dia">📅 Paga el día de la excursión</option>
+                  <option value="completo">✅ Pago completo (USD)</option>
+                  <option value="deposito_25">🏦 Depósito del 25% (USD)</option>
+                  <option value="pago_dia">📅 Paga el día de la excursión (USD)</option>
                 </select>
               </div>
 
               {/* Monto Pagado */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">💵 Monto Pagado (USD)</label>
-                <input type="number" step="0.01" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" placeholder="0.00" value={formData.montoPagado} onChange={(e) => setFormData({ ...formData, montoPagado: e.target.value })} />
+                <input type="number" step="0.01" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" placeholder="0.00" value={formData.montoPagadoUSD} onChange={(e) => setFormData({ ...formData, montoPagadoUSD: e.target.value })} />
               </div>
 
               {/* Nota */}
@@ -926,12 +988,12 @@ export default function Home() {
                 <input type="text" name="nombre" required className="w-full px-4 py-3 border border-gray-200 rounded-xl" placeholder="Ej: Tour Samaná" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">💰 Precio al Proveedor (USD) *</label>
-                <input type="number" name="precioProveedor" required step="0.01" className="w-full px-4 py-3 border border-gray-200 rounded-xl" placeholder="70.00" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">🇺🇸 Precio Cliente (USD) *</label>
+                <input type="number" name="precioClienteUSD" required step="0.01" className="w-full px-4 py-3 border border-gray-200 rounded-xl" placeholder="85.00" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">💰 Precio al Cliente (USD) *</label>
-                <input type="number" name="precioCliente" required step="0.01" className="w-full px-4 py-3 border border-gray-200 rounded-xl" placeholder="85.00" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">🇩🇴 Precio Proveedor (RD$) *</label>
+                <input type="number" name="precioProveedorRD" required step="0.01" className="w-full px-4 py-3 border border-gray-200 rounded-xl" placeholder="4000.00" />
               </div>
               <button type="submit" className="w-full bg-purple-600 text-white py-4 rounded-xl font-semibold hover:bg-purple-700 transition-all">💾 Guardar Excursión</button>
             </form>
@@ -960,7 +1022,7 @@ export default function Home() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">🏝️ Excursión *</label>
                 <select name="excursionId" required className="w-full px-4 py-3 border border-gray-200 rounded-xl">
                   <option value="">Seleccionar excursión</option>
-                  {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - ${e.precioProveedor}</option>)}
+                  {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - RD$ {e.precioProveedorRD}</option>)}
                 </select>
               </div>
               <div>
@@ -1006,7 +1068,7 @@ export default function Home() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">🏝️ Excursión *</label>
                 <select name="excursionId" required className="w-full px-4 py-3 border border-gray-200 rounded-xl">
                   <option value="">Seleccionar excursión</option>
-                  {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - ${e.precioCliente}</option>)}
+                  {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - USD {e.precioClienteUSD}</option>)}
                 </select>
               </div>
               <div>
