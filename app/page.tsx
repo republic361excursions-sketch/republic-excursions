@@ -1415,7 +1415,7 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER DASHBOARD
+  // RENDER DASHBOARD - CON FECHA Y HORA
   // ============================================
   const renderDashboard = () => {
     const totalVentas = ventas.reduce((sum, v) => sum + v.precioVentaUSD, 0);
@@ -1437,8 +1437,32 @@ export default function Home() {
     const ventasConfirmadas = ventas.filter(v => v.estado === "confirmada");
     const ventasCompletadas = ventas.filter(v => v.estado === "completada");
 
+    // Fecha y hora actual
+    const fechaActual = currentTime.toLocaleDateString("es-DO", {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+    
+    const horaActual = currentTime.toLocaleTimeString("es-DO", {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+
     return (
       <div className="space-y-6">
+        {/* Reloj y Fecha en el Dashboard */}
+        <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 text-center`}>
+          <div className="text-4xl font-bold text-white font-mono tracking-wider">
+            {horaActual}
+          </div>
+          <div className="text-sm text-white/50 mt-1">
+            {fechaActual}
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
             <div className="flex items-center gap-3">
@@ -1716,7 +1740,7 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER RESERVAS
+  // RENDER RESERVAS - CORREGIDO
   // ============================================
   const renderReservas = () => {
     const reservasFiltradas = ventas.filter(v => {
