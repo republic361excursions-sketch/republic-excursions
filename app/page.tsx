@@ -138,7 +138,6 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones" | "bancos" | "calendario" | "reservas">("dashboard");
   const [selectedExcursionForVenta, setSelectedExcursionForVenta] = useState<Excursion | null>(null);
-  const [calendarioView, setCalendarioView] = useState<"dia" | "semana" | "mes">("mes");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -380,10 +379,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v31");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v31");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v31");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v31");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v32");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v32");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v32");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v32");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -393,22 +392,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v31", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v32", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v31", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v32", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v31", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v32", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v31", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v32", JSON.stringify(data));
   };
 
   // ============================================
@@ -2278,33 +2277,45 @@ export default function Home() {
                 </div>
                 <div className="mt-3 space-y-1 text-sm">
                   <div className="flex justify-between text-white/60">
-                    <span>Precio Venta Adulto</span>
+                    <span>💰 Precio Venta Adulto</span>
                     <span className="text-white font-medium">{formatUSD(e.precioAdultoUSD)}</span>
                   </div>
                   <div className="flex justify-between text-white/60">
-                    <span>Costo Proveedor Adulto</span>
+                    <span>🏷️ Costo Proveedor Adulto</span>
                     <span className="text-orange-400 font-medium">{formatUSD(e.costoProveedorAdultoUSD)}</span>
                   </div>
                   {e.precioNinoUSD !== null && (
                     <>
                       <div className="flex justify-between text-white/60">
-                        <span>Precio Venta Niño</span>
+                        <span>💰 Precio Venta Niño</span>
                         <span className="text-white font-medium">{formatUSD(e.precioNinoUSD)}</span>
                       </div>
                       <div className="flex justify-between text-white/60">
-                        <span>Costo Proveedor Niño</span>
+                        <span>🏷️ Costo Proveedor Niño</span>
                         <span className="text-orange-400 font-medium">{formatUSD(e.costoProveedorNinoUSD || 0)}</span>
                       </div>
                     </>
                   )}
                   <div className="flex justify-between text-white/60">
-                    <span>Comision Adulto</span>
+                    <span>📈 Comision Adulto</span>
                     <span className="text-green-400">{formatUSD(e.comisionAdultoUSD)}</span>
                   </div>
+                  {e.comisionNinoUSD !== null && (
+                    <div className="flex justify-between text-white/60">
+                      <span>📈 Comision Niño</span>
+                      <span className="text-green-400">{formatUSD(e.comisionNinoUSD)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-white/60 text-xs">
-                    <span>Zona</span>
+                    <span>📍 Zona</span>
                     <span>{e.zona || "Sin zona"}</span>
                   </div>
+                  {e.capacidad && (
+                    <div className="flex justify-between text-white/60 text-xs">
+                      <span>👥 Capacidad</span>
+                      <span>{e.capacidad}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
@@ -2519,7 +2530,7 @@ export default function Home() {
               {/* Precios y Costos - TODOS EDITABLES */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Precio Venta Adulto (USD)</label>
+                  <label className="text-white/60 text-sm block mb-1">💰 Precio Venta Adulto (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2529,7 +2540,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Costo Proveedor Adulto (USD)</label>
+                  <label className="text-white/60 text-sm block mb-1">🏷️ Costo Proveedor Adulto (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2539,7 +2550,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Precio Venta Niño (USD)</label>
+                  <label className="text-white/60 text-sm block mb-1">💰 Precio Venta Niño (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2549,7 +2560,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
+                  <label className="text-white/60 text-sm block mb-1">🏷️ Costo Proveedor Niño (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2823,8 +2834,9 @@ export default function Home() {
                     <div key={i} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2">
                       <div>
                         <span className="text-white">{e.nombre}</span>
-                        <span className="text-white/40 text-sm ml-2">Precio Adulto: {formatUSD(e.precioAdultoUSD)}</span>
-                        {e.precioNinoUSD !== null && <span className="text-white/40 text-sm ml-2">Precio Niño: {formatUSD(e.precioNinoUSD)}</span>}
+                        <span className="text-white/40 text-sm ml-2">💰 Precio Venta Adulto: {formatUSD(e.precioAdultoUSD)}</span>
+                        {e.precioNinoUSD !== null && <span className="text-white/40 text-sm ml-2">💰 Precio Venta Niño: {formatUSD(e.precioNinoUSD)}</span>}
+                        <span className="text-orange-400/60 text-sm ml-2">🏷️ Costo: {formatUSD(e.costoProveedorAdultoUSD)}</span>
                       </div>
                       <button type="button" onClick={() => eliminarTempExcursion(i)} className="text-red-400 hover:text-red-300">×</button>
                     </div>
@@ -2845,7 +2857,7 @@ export default function Home() {
                       value={tempExcursionForm.precioAdultoUSD}
                       onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
                       className="w-1/2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
-                      placeholder="Precio Adulto"
+                      placeholder="💰 Precio Venta"
                     />
                     <input
                       type="number"
@@ -2853,7 +2865,7 @@ export default function Home() {
                       value={tempExcursionForm.precioNinoUSD}
                       onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
                       className="w-1/2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
-                      placeholder="Precio Niño"
+                      placeholder="💰 Precio Niño"
                     />
                   </div>
                 </div>
@@ -2864,7 +2876,7 @@ export default function Home() {
                     value={tempExcursionForm.costoProveedorAdultoUSD}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
                     className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
-                    placeholder="Costo Adulto"
+                    placeholder="🏷️ Costo Proveedor"
                   />
                   <input
                     type="number"
@@ -2872,7 +2884,7 @@ export default function Home() {
                     value={tempExcursionForm.costoProveedorNinoUSD}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
                     className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
-                    placeholder="Costo Niño"
+                    placeholder="🏷️ Costo Niño"
                   />
                 </div>
                 <div className="flex gap-4 mt-2 items-center">
@@ -2945,7 +2957,7 @@ export default function Home() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Precio Venta Adulto (USD)</label>
+                  <label className="text-white/60 text-sm block mb-1">💰 Precio Venta Adulto (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2956,7 +2968,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Precio Venta Niño (USD)</label>
+                  <label className="text-white/60 text-sm block mb-1">💰 Precio Venta Niño (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2968,7 +2980,7 @@ export default function Home() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Costo Proveedor Adulto (USD)</label>
+                  <label className="text-white/60 text-sm block mb-1">🏷️ Costo Proveedor Adulto (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2979,7 +2991,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
+                  <label className="text-white/60 text-sm block mb-1">🏷️ Costo Proveedor Niño (USD)</label>
                   <input
                     type="number"
                     step="0.01"
