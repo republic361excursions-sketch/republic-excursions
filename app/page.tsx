@@ -837,7 +837,8 @@ export default function Home() {
               zona: excursionFormData.zona || "Bavaro",
               capacidad: excursionFormData.capacidad || undefined,
             }
-          : e      );
+          : e
+      );
       saveExcursiones(updated);
       alert("Excursion actualizada correctamente");
     } else {
@@ -2269,11 +2270,6 @@ export default function Home() {
                       </span>
                     ))}
                   </div>
-                  {p.nota && (
-                    <div className="text-xs text-white/40 mt-1">
-                      Nota: {p.nota}
-                    </div>
-                  )}
                 </div>
               </div>
             ))
