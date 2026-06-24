@@ -70,6 +70,10 @@ interface Venta {
   nombreGrupo?: string;
   tipoRecogida: "hotel" | "airbnb" | "sin_recogida";
   transporte: "si" | "no";
+  precioAdultoPersonalizado: number;
+  precioNinoPersonalizado: number;
+  costoAdultoPersonalizado: number;
+  costoNinoPersonalizado: number;
   nota: string;
 }
 
@@ -96,8 +100,10 @@ export default function Home() {
   const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
   const [filterYear, setFilterYear] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones" | "bancos">("dashboard");
+  const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones" | "bancos" | "calendario">("dashboard");
   const [selectedExcursionForVenta, setSelectedExcursionForVenta] = useState<Excursion | null>(null);
+  const [calendarioView, setCalendarioView] = useState<"dia" | "semana" | "mes">("mes");
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const [tempExcursiones, setTempExcursiones] = useState<any[]>([]);
   const [tempExcursionForm, setTempExcursionForm] = useState({
@@ -205,10 +211,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v21");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v21");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v21");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v21");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v22");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v22");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v22");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v22");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -218,22 +224,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v21", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v22", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v21", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v22", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v21", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v22", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v21", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v22", JSON.stringify(data));
   };
 
   // ============================================
@@ -642,6 +648,10 @@ export default function Home() {
       nombreGrupo: formData.tipoServicio === "grupo" ? formData.nombreGrupo : undefined,
       tipoRecogida: formData.tipoRecogida,
       transporte: formData.transporte,
+      precioAdultoPersonalizado: parseFloat(formData.precioAdultoUSD) || 0,
+      precioNinoPersonalizado: parseFloat(formData.precioNinoUSD) || 0,
+      costoAdultoPersonalizado: parseFloat(formData.costoProveedorAdultoUSD) || 0,
+      costoNinoPersonalizado: parseFloat(formData.costoProveedorNinoUSD) || 0,
       nota: formData.nota,
     };
 
@@ -723,7 +733,6 @@ export default function Home() {
         proveedorNombre: excursion.proveedorNombre,
       });
       
-      // Actualizar totales después de cargar la excursión
       setTimeout(updateCantidades, 50);
     }
   };
@@ -742,8 +751,32 @@ export default function Home() {
   };
 
   // ============================================
-  // HANDLE CAMBIOS EN ADULTOS Y NINOS
+  // HANDLE CAMBIOS EN PRECIOS (EDITABLES)
   // ============================================
+  const handlePrecioAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, precioAdultoUSD: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handlePrecioNinoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, precioNinoUSD: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handleCostoAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, costoProveedorAdultoUSD: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handleCostoNinoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, costoProveedorNinoUSD: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
   const handleCantidadAdultosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value) || 0;
     setFormData(prev => ({ ...prev, cantidadAdultos: val }));
@@ -761,7 +794,6 @@ export default function Home() {
   // ============================================
   const editVenta = (venta: Venta) => {
     setEditingVentaId(venta.id);
-    // Buscar la excursión para obtener los precios unitarios
     const excursion = excursiones.find(e => e.id === venta.excursionId);
     
     setFormData({
@@ -771,10 +803,10 @@ export default function Home() {
       excursionId: venta.excursionId,
       excursionNombre: venta.excursionNombre,
       fechaExcursion: venta.fechaExcursion,
-      precioAdultoUSD: excursion?.precioAdultoUSD?.toString() || "0",
-      precioNinoUSD: excursion?.precioNinoUSD?.toString() || "0",
-      costoProveedorAdultoUSD: excursion?.costoProveedorAdultoUSD?.toString() || "0",
-      costoProveedorNinoUSD: excursion?.costoProveedorNinoUSD?.toString() || "0",
+      precioAdultoUSD: venta.precioAdultoPersonalizado?.toString() || excursion?.precioAdultoUSD?.toString() || "0",
+      precioNinoUSD: venta.precioNinoPersonalizado?.toString() || excursion?.precioNinoUSD?.toString() || "0",
+      costoProveedorAdultoUSD: venta.costoAdultoPersonalizado?.toString() || excursion?.costoProveedorAdultoUSD?.toString() || "0",
+      costoProveedorNinoUSD: venta.costoNinoPersonalizado?.toString() || excursion?.costoProveedorNinoUSD?.toString() || "0",
       comisionAdultoUSD: excursion?.comisionAdultoUSD?.toString() || "0",
       comisionNinoUSD: excursion?.comisionNinoUSD?.toString() || "0",
       cantidadAdultos: venta.cantidadAdultos,
@@ -803,6 +835,64 @@ export default function Home() {
     if (!confirm("Eliminar esta venta?")) return;
     const updated = ventas.filter(v => v.id !== id);
     saveVentas(updated);
+  };
+
+  // ============================================
+  // FUNCIONES DEL CALENDARIO
+  // ============================================
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const days = [];
+    
+    // Dias del mes anterior para completar la primera semana
+    const startDay = firstDay.getDay();
+    for (let i = startDay - 1; i >= 0; i--) {
+      const d = new Date(year, month, -i);
+      days.push({ date: d, isCurrentMonth: false });
+    }
+    
+    // Dias del mes actual
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      const d = new Date(year, month, i);
+      days.push({ date: d, isCurrentMonth: true });
+    }
+    
+    // Dias del mes siguiente para completar la ultima semana
+    const remaining = 42 - days.length;
+    for (let i = 1; i <= remaining; i++) {
+      const d = new Date(year, month + 1, i);
+      days.push({ date: d, isCurrentMonth: false });
+    }
+    
+    return days;
+  };
+
+  const getVentasDelDia = (date: Date) => {
+    return ventas.filter(v => {
+      const vDate = new Date(v.fechaExcursion);
+      return vDate.getDate() === date.getDate() &&
+             vDate.getMonth() === date.getMonth() &&
+             vDate.getFullYear() === date.getFullYear();
+    });
+  };
+
+  const cambiarMes = (delta: number) => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(newDate.getMonth() + delta);
+    setCurrentDate(newDate);
+  };
+
+  const getMonthName = (month: number) => {
+    const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    return months[month];
+  };
+
+  const getDayName = (day: number) => {
+    const days = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
+    return days[day];
   };
 
   // ============================================
@@ -857,11 +947,6 @@ export default function Home() {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount);
-  };
-
-  const getMonthName = (month: number) => {
-    const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    return months[month - 1];
   };
 
   const toggleMonth = (key: string) => {
@@ -1395,6 +1480,172 @@ export default function Home() {
           </div>
         );
 
+      case "calendario":
+        const days = getDaysInMonth(currentDate);
+        const today = new Date();
+        
+        return (
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-bold text-white">Calendario de Reservas</h2>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => cambiarMes(-1)}
+                  className="px-3 py-1 bg-white/10 rounded-lg hover:bg-white/20 transition-all text-white"
+                >
+                  ◀
+                </button>
+                <span className="text-white font-medium">
+                  {getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}
+                </span>
+                <button 
+                  onClick={() => cambiarMes(1)}
+                  className="px-3 py-1 bg-white/10 rounded-lg hover:bg-white/20 transition-all text-white"
+                >
+                  ▶
+                </button>
+                <button 
+                  onClick={() => setCurrentDate(new Date())}
+                  className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-lg hover:bg-amber-500/30 transition-all text-sm"
+                >
+                  Hoy
+                </button>
+              </div>
+            </div>
+
+            {/* Vista: Dia / Semana / Mes */}
+            <div className="flex gap-2 mb-4">
+              <button 
+                onClick={() => setCalendarioView("dia")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${calendarioView === "dia" ? `bg-gradient-to-r ${buttonGradient} text-slate-900` : "bg-white/10 text-white/70 hover:bg-white/20"}`}
+              >
+                Dia
+              </button>
+              <button 
+                onClick={() => setCalendarioView("semana")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${calendarioView === "semana" ? `bg-gradient-to-r ${buttonGradient} text-slate-900` : "bg-white/10 text-white/70 hover:bg-white/20"}`}
+              >
+                Semana
+              </button>
+              <button 
+                onClick={() => setCalendarioView("mes")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${calendarioView === "mes" ? `bg-gradient-to-r ${buttonGradient} text-slate-900` : "bg-white/10 text-white/70 hover:bg-white/20"}`}
+              >
+                Mes
+              </button>
+            </div>
+
+            {/* Vista Mes */}
+            {calendarioView === "mes" && (
+              <div className="grid grid-cols-7 gap-1">
+                {["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map((day) => (
+                  <div key={day} className="text-center text-xs font-medium text-white/40 py-2">
+                    {day}
+                  </div>
+                ))}
+                {days.map((day, index) => {
+                  const ventasDelDia = getVentasDelDia(day.date);
+                  const isToday = day.date.getDate() === today.getDate() && 
+                                  day.date.getMonth() === today.getMonth() && 
+                                  day.date.getFullYear() === today.getFullYear();
+                  const tieneVentas = ventasDelDia.length > 0;
+                  
+                  return (
+                    <div 
+                      key={index} 
+                      className={`min-h-[60px] p-1 rounded-lg border ${day.isCurrentMonth ? 'border-white/10' : 'border-white/5'} ${isToday ? 'bg-amber-500/20 border-amber-500/30' : ''} ${tieneVentas ? 'bg-green-500/10' : ''}`}
+                    >
+                      <div className={`text-xs text-right ${day.isCurrentMonth ? 'text-white/80' : 'text-white/30'} ${isToday ? 'font-bold text-amber-400' : ''}`}>
+                        {day.date.getDate()}
+                      </div>
+                      {ventasDelDia.slice(0, 3).map((v) => (
+                        <div key={v.id} className="text-[8px] truncate text-white/60 px-1">
+                          {v.clienteNombre} - {v.excursionNombre}
+                        </div>
+                      ))}
+                      {ventasDelDia.length > 3 && (
+                        <div className="text-[8px] text-white/40 px-1">
+                          +{ventasDelDia.length - 3} mas
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Vista Dia */}
+            {calendarioView === "dia" && (
+              <div className="space-y-3">
+                <p className="text-white/60 text-sm">
+                  Reservas para el {currentDate.toLocaleDateString("es-DO", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+                {(() => {
+                  const ventasDelDia = getVentasDelDia(currentDate);
+                  if (ventasDelDia.length === 0) {
+                    return <p className="text-white/40 text-center py-8">No hay reservas para este dia</p>;
+                  }
+                  return ventasDelDia.map((v) => (
+                    <div key={v.id} className="bg-white/5 rounded-xl p-3 border border-white/10">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-medium text-white">{v.clienteNombre}</p>
+                          <p className="text-sm text-white/60">{v.excursionNombre}</p>
+                          <p className="text-xs text-white/40">
+                            {v.cantidadAdultos} Adultos, {v.cantidadNinos} Ninos • {v.tipoServicio === 'compartido' ? 'Compartido' : v.tipoServicio === 'privado' ? 'Privado' : 'Grupo'}
+                            {v.nombreGrupo && ` • ${v.nombreGrupo}`}
+                          </p>
+                          <p className="text-xs text-white/40">
+                            Recogida: {getTipoRecogidaText(v.tipoRecogida)} • Transporte: {getTransporteText(v.transporte)}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-amber-400">{formatUSD(v.precioVentaUSD)}</p>
+                          <p className="text-xs text-green-400">+{formatUSD(v.comisionUSD)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ));
+                })()}
+              </div>
+            )}
+
+            {/* Vista Semana */}
+            {calendarioView === "semana" && (
+              <div className="grid grid-cols-7 gap-2">
+                {[0, 1, 2, 3, 4, 5, 6].map((offset) => {
+                  const d = new Date(currentDate);
+                  d.setDate(d.getDate() - d.getDay() + offset);
+                  const ventasDelDia = getVentasDelDia(d);
+                  const isToday = d.getDate() === today.getDate() && 
+                                  d.getMonth() === today.getMonth() && 
+                                  d.getFullYear() === today.getFullYear();
+                  
+                  return (
+                    <div key={offset} className={`min-h-[80px] p-2 rounded-lg border ${isToday ? 'bg-amber-500/20 border-amber-500/30' : 'border-white/10'}`}>
+                      <div className={`text-xs text-center font-medium ${isToday ? 'text-amber-400' : 'text-white/60'}`}>
+                        {getDayName(d.getDay())}
+                        <br />
+                        <span className="text-sm">{d.getDate()}</span>
+                      </div>
+                      {ventasDelDia.slice(0, 2).map((v) => (
+                        <div key={v.id} className="text-[8px] truncate text-white/60 mt-1">
+                          {v.clienteNombre}
+                        </div>
+                      ))}
+                      {ventasDelDia.length > 2 && (
+                        <div className="text-[8px] text-white/40">
+                          +{ventasDelDia.length - 2}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+
       case "excursiones":
         return (
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
@@ -1512,13 +1763,14 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className={`flex flex-wrap gap-2 mb-8 ${cardBg} backdrop-blur-lg rounded-2xl p-2 border border-white/10`}>
-          {["dashboard", "ventas", "clientes", "proveedores", "bancos", "excursiones"].map((tab) => {
+          {["dashboard", "ventas", "clientes", "proveedores", "bancos", "calendario", "excursiones"].map((tab) => {
             const labels: any = {
               dashboard: "Dashboard",
               ventas: "Ventas",
               clientes: "Clientes",
               proveedores: "Proveedores",
               bancos: "Bancos",
+              calendario: "Calendario",
               excursiones: "Excursiones"
             };
             return (
@@ -1584,7 +1836,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL DE VENTA - ACTUALIZADO CON RECOGIDA Y TRANSPORTE
+          MODAL DE VENTA - CON PRECIOS EDITABLES
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
@@ -1620,29 +1872,32 @@ export default function Home() {
                 </select>
               </div>
 
-              {/* Precios */}
+              {/* Precios EDITABLES */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-blue-500/10 rounded-xl p-3 border border-blue-500/20">
-                  <label className="block text-sm font-medium text-white/60 mb-1">Precio Adulto (USD)</label>
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD) *</label>
                   <input
-                    type="text"
-                    className="w-full px-4 py-2 bg-transparent border-0 text-blue-400 font-bold text-lg"
+                    type="number"
+                    step="0.01"
+                    required
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
                     value={formData.precioAdultoUSD}
-                    readOnly
+                    onChange={handlePrecioAdultoChange}
                   />
                 </div>
-                <div className="bg-blue-500/10 rounded-xl p-3 border border-blue-500/20">
-                  <label className="block text-sm font-medium text-white/60 mb-1">Precio Nino (USD)</label>
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Precio Nino (USD)</label>
                   <input
-                    type="text"
-                    className="w-full px-4 py-2 bg-transparent border-0 text-blue-400 font-bold text-lg"
-                    value={formData.precioNinoUSD || "0"}
-                    readOnly
+                    type="number"
+                    step="0.01"
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
+                    value={formData.precioNinoUSD}
+                    onChange={handlePrecioNinoChange}
                   />
                 </div>
               </div>
 
-              {/* Cantidad Adultos y Ninos - CORREGIDO */}
+              {/* Cantidades */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Adultos *</label>
@@ -1667,29 +1922,32 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Costos y Comisiones */}
+              {/* Costos EDITABLES */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/20">
-                  <label className="block text-sm font-medium text-white/60 mb-1">Costo Proveedor Adulto (USD)</label>
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor Adulto (USD) *</label>
                   <input
-                    type="text"
-                    className="w-full px-4 py-2 bg-transparent border-0 text-red-400 font-bold text-lg"
+                    type="number"
+                    step="0.01"
+                    required
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
                     value={formData.costoProveedorAdultoUSD}
-                    readOnly
+                    onChange={handleCostoAdultoChange}
                   />
                 </div>
-                <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/20">
-                  <label className="block text-sm font-medium text-white/60 mb-1">Costo Proveedor Nino (USD)</label>
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor Nino (USD)</label>
                   <input
-                    type="text"
-                    className="w-full px-4 py-2 bg-transparent border-0 text-red-400 font-bold text-lg"
-                    value={formData.costoProveedorNinoUSD || "0"}
-                    readOnly
+                    type="number"
+                    step="0.01"
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
+                    value={formData.costoProveedorNinoUSD}
+                    onChange={handleCostoNinoChange}
                   />
                 </div>
               </div>
 
-              {/* Totales */}
+              {/* Totales (automaticos) */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20">
                   <label className="block text-sm font-medium text-white/60 mb-1">Total Venta (USD)</label>
@@ -1755,7 +2013,7 @@ export default function Home() {
                 </div>
               )}
 
-              {/* TIPO DE RECOGIDA - NUEVO */}
+              {/* Tipo de Recogida */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">Tipo de Recogida *</label>
                 <div className="flex flex-wrap gap-4">
@@ -1795,7 +2053,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* TRANSPORTE - NUEVO */}
+              {/* Transporte */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">Transporte *</label>
                 <div className="flex flex-wrap gap-4">
