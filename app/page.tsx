@@ -1423,7 +1423,6 @@ export default function Home() {
   // Cada usuario tiene su propio tema completamente diferente
   const themes = {
     admin: {
-      // Republic - Estilo Ejecutivo Oscuro con Dorado
       bg: "from-gray-950 via-slate-900 to-gray-950",
       accent: "amber",
       accentLight: "amber-400",
@@ -1440,7 +1439,6 @@ export default function Home() {
       iconBg: "bg-amber-500/10",
     },
     raul: {
-      // Raul - Estilo Moderno con Efectos de Cristal
       bg: "from-cyan-950 via-blue-950 to-indigo-950",
       accent: "cyan",
       accentLight: "cyan-400",
@@ -1457,7 +1455,6 @@ export default function Home() {
       iconBg: "bg-cyan-500/10",
     },
     gabrielle: {
-      // Gabrielle - Estilo Rosa con Efectos de Brillo
       bg: "from-pink-950 via-rose-950 to-fuchsia-950",
       accent: "pink",
       accentLight: "pink-300",
@@ -1520,7 +1517,7 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER DASHBOARD - CON EFECTOS DE BRILLO
+  // RENDER DASHBOARD
   // ============================================
   const renderDashboard = () => {
     const totalVentas = ventas.reduce((sum, v) => sum + v.precioVentaUSD, 0);
@@ -2133,4 +2130,825 @@ export default function Home() {
             <button onClick={() => cambiarMes(-1)} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all">◀</button>
             <h2 className="text-white text-xl font-bold">{getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}</h2>
             <button onClick={() => cambiarMes(1)} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all">▶</button>
-            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl
+            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all">Hoy</button>
+          </div>
+          <div className="flex items-center gap-2 text-white/40 text-sm">
+            <span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded-lg">● Ventas</span>
+          </div>
+        </div>
+
+        <div className={`${cardBg} rounded-2xl border ${cardBorder} overflow-hidden`}>
+          <div className="grid grid-cols-7 gap-0">
+            {["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(day => (
+              <div key={day} className="py-3 px-2 text-center text-white/40 text-sm font-medium border-b border-white/5">
+                {day}
+              </div>
+            ))}
+            {days.map((day, index) => {
+              const ventasDelDia = getVentasDelDia(day.date);
+              const isToday = day.date.getDate() === new Date().getDate() &&
+                              day.date.getMonth() === new Date().getMonth() &&
+                              day.date.getFullYear() === new Date().getFullYear();
+              
+              return (
+                <div key={index} className={`p-2 min-h-[80px] border-b border-r border-white/5 ${!day.isCurrentMonth ? 'opacity-30' : ''} ${isToday ? 'bg-amber-500/10 border-amber-500/30' : ''}`}>
+                  <div className={`text-sm ${isToday ? 'text-amber-400 font-bold' : 'text-white/60'}`}>
+                    {day.date.getDate()}
+                  </div>
+                  <div className="mt-1 space-y-1 max-h-[50px] overflow-y-auto">
+                    {ventasDelDia.slice(0, 3).map(v => (
+                      <div key={v.id} className="text-[10px] bg-amber-500/20 text-amber-400 rounded px-1 truncate">
+                        {v.clienteNombre} - {formatUSD(v.precioVentaUSD)}
+                      </div>
+                    ))}
+                    {ventasDelDia.length > 3 && (
+                      <div className="text-[10px] text-white/30">+{ventasDelDia.length - 3} más</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className={`${cardBg} rounded-2xl p-6 border ${cardBorder}`}>
+            <h3 className="text-white font-semibold mb-3">Ventas del Mes</h3>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {getVentasDelDia(currentDate).slice(0, 10).map(v => (
+                <div key={v.id} className="flex justify-between items-center border-b border-white/5 py-2">
+                  <div>
+                    <p className="text-white text-sm">{v.clienteNombre}</p>
+                    <p className="text-white/40 text-xs">{v.excursionNombre}</p>
+                  </div>
+                  <span className="text-white font-medium">{formatUSD(v.precioVentaUSD)}</span>
+                </div>
+              ))}
+              {getVentasDelDia(currentDate).length === 0 && (
+                <p className="text-white/40 text-sm text-center py-4">No hay ventas en este mes</p>
+              )}
+            </div>
+          </div>
+          <div className={`${cardBg} rounded-2xl p-6 border ${cardBorder}`}>
+            <h3 className="text-white font-semibold mb-3">Resumen del Mes</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-white/60">Ventas Totales</span>
+                <span className="text-white font-bold">{formatUSD(ventas.filter(v => {
+                  const d = new Date(v.fechaExcursion);
+                  return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+                }).reduce((s, v) => s + v.precioVentaUSD, 0))}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white/60">Comisiones</span>
+                <span className="text-green-400">{formatUSD(ventas.filter(v => {
+                  const d = new Date(v.fechaExcursion);
+                  return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+                }).reduce((s, v) => s + v.comisionUSD, 0))}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white/60">Total Ventas</span>
+                <span className="text-white">{ventas.filter(v => {
+                  const d = new Date(v.fechaExcursion);
+                  return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+                }).length}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================
+  // RENDER EXCURSIONES
+  // ============================================
+  const renderExcursiones = () => {
+    const excursionesFiltradas = excursiones.filter(e => {
+      const matchesSearch = e.nombre.toLowerCase().includes(searchExcursiones.toLowerCase()) ||
+                            e.proveedorNombre.toLowerCase().includes(searchExcursiones.toLowerCase());
+      const matchesProveedor = !filterExcursionProveedor || e.proveedorId === filterExcursionProveedor;
+      return matchesSearch && matchesProveedor;
+    });
+
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-wrap gap-3 items-center">
+          <div className="flex-1 min-w-[200px]">
+            <input
+              type="text"
+              placeholder="Buscar excursiones..."
+              value={searchExcursiones}
+              onChange={(e) => setSearchExcursiones(e.target.value)}
+              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500"
+            />
+          </div>
+          <select
+            value={filterExcursionProveedor}
+            onChange={(e) => setFilterExcursionProveedor(e.target.value)}
+            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
+          >
+            <option value="">Todos los proveedores</option>
+            {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+          </select>
+          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false }); setShowExcursionForm(true); }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 ${shadowColor}`}>
+            <span className="text-lg leading-none">+</span> Nueva Excursión
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {excursionesFiltradas.length === 0 ? (
+            <div className="col-span-full text-center py-12 text-white/40">No hay excursiones registradas</div>
+          ) : (
+            excursionesFiltradas.map(e => (
+              <div key={e.id} className={`${cardBg} rounded-2xl p-6 border ${cardBorder} hover:border-${accentColor}-500/50 transition-all`}>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-white font-semibold">{e.nombre}</h3>
+                    <p className="text-white/40 text-sm">{e.proveedorNombre}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => editExcursion(e)} className={`px-3 py-1 ${badgeStyle} rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}>Editar</button>
+                    <button onClick={() => deleteExcursion(e.id)} className="px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all">Eliminar</button>
+                  </div>
+                </div>
+                <div className="mt-3 space-y-1 text-sm">
+                  <div className="flex justify-between text-white/60">
+                    <span>Adulto</span>
+                    <span className="text-white font-medium">{formatUSD(e.precioAdultoUSD)}</span>
+                  </div>
+                  {e.precioNinoUSD !== null && (
+                    <div className="flex justify-between text-white/60">
+                      <span>Niño</span>
+                      <span className="text-white font-medium">{formatUSD(e.precioNinoUSD)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-white/60">
+                    <span>Comisión</span>
+                    <span className="text-green-400">{formatUSD(e.comisionAdultoUSD)}</span>
+                  </div>
+                  <div className="flex justify-between text-white/60 text-xs">
+                    <span>Zona</span>
+                    <span>{e.zona || "Sin zona"}</span>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================
+  // RENDER PRINCIPAL CON NAVEGACION
+  // ============================================
+  return (
+    <div className={`min-h-screen bg-gradient-to-br ${bgGradient} relative overflow-hidden`}>
+      <div className="absolute inset-0 pointer-events-none">
+        <div className={`absolute top-[-30%] right-[-10%] w-[50%] h-[50%] bg-${accentColor}-500/5 rounded-full blur-[150px]`}></div>
+        <div className="absolute bottom-[-30%] left-[-10%] w-[50%] h-[50%] bg-purple-500/5 rounded-full blur-[150px]`}></div>
+      </div>
+
+      <div className="relative z-10">
+        {/* HEADER - Cada usuario tiene un estilo único de header */}
+        <header className={`${headerBg} border-b ${cardBorder} sticky top-0 z-50 backdrop-blur-xl`}>
+          <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${buttonGradient} flex items-center justify-center text-slate-900 font-bold text-sm`}>
+                RE
+              </div>
+              <div>
+                <h1 className="text-white font-bold text-lg tracking-tight">Republic Excursions</h1>
+                <p className={`text-xs ${accentText}`}>{getUserEmoji()} {getUserRole()}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={() => setViewMode("dashboard")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "dashboard" ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                Dashboard
+              </button>
+              <button onClick={() => setViewMode("ventas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "ventas" ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                Ventas
+              </button>
+              <button onClick={() => setViewMode("reservas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "reservas" ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                Reservas
+              </button>
+              <button onClick={() => setViewMode("calendario")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "calendario" ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                Calendario
+              </button>
+              {isAdmin && (
+                <>
+                  <button onClick={() => setViewMode("clientes")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "clientes" ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                    Clientes
+                  </button>
+                  <button onClick={() => setViewMode("proveedores")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "proveedores" ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                    Proveedores
+                  </button>
+                  <button onClick={() => setViewMode("excursiones")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "excursiones" ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                    Excursiones
+                  </button>
+                  <button onClick={() => setViewMode("bancos")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "bancos" ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                    Bancos
+                  </button>
+                </>
+              )}
+              <button onClick={handleLogout} className="px-3 py-1.5 rounded-xl text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all">
+                Salir
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* MAIN CONTENT */}
+        <main className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <div>
+              <h2 className={`text-2xl font-bold text-white`}>
+                {viewMode === "dashboard" && "📊 Dashboard"}
+                {viewMode === "ventas" && "💰 Ventas"}
+                {viewMode === "reservas" && "📋 Reservas"}
+                {viewMode === "clientes" && "👥 Clientes"}
+                {viewMode === "proveedores" && "🏢 Proveedores"}
+                {viewMode === "excursiones" && "🏝️ Excursiones"}
+                {viewMode === "bancos" && "🏦 Bancos"}
+                {viewMode === "calendario" && "📅 Calendario"}
+              </h2>
+            </div>
+            <div className="flex gap-2">
+              {viewMode !== "calendario" && viewMode !== "dashboard" && (
+                <button onClick={() => setShowForm(true)} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 ${shadowColor}`}>
+                  <span className="text-lg leading-none">+</span> Nueva Venta
+                </button>
+              )}
+            </div>
+          </div>
+
+          {renderView()}
+        </main>
+      </div>
+
+      {/* MODALES */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className={`${cardBg} rounded-3xl border ${cardBorder} max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white text-xl font-bold">{editingVentaId ? "Editar Venta" : "Nueva Venta"}</h3>
+              <button onClick={resetForm} className="text-white/40 hover:text-white text-2xl">×</button>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Formulario de venta - simplificado para el ejemplo */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Cliente</label>
+                  <input
+                    type="text"
+                    value={formData.clienteNombre}
+                    onChange={(e) => setFormData(prev => ({ ...prev, clienteNombre: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    placeholder="Nombre del cliente"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">WhatsApp</label>
+                  <input
+                    type="text"
+                    value={formData.clienteWhatsapp}
+                    onChange={(e) => setFormData(prev => ({ ...prev, clienteWhatsapp: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    placeholder="WhatsApp"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Excursión</label>
+                  <select
+                    value={formData.excursionId}
+                    onChange={(e) => selectExcursionForVenta(e.target.value)}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    required
+                  >
+                    <option value="">Seleccionar excursión</option>
+                    {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {e.proveedorNombre}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Fecha</label>
+                  <input
+                    type="date"
+                    value={formData.fechaExcursion}
+                    onChange={(e) => setFormData(prev => ({ ...prev, fechaExcursion: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Adultos</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.cantidadAdultos}
+                    onChange={handleCantidadAdultosChange}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Niños</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.cantidadNinos}
+                    onChange={handleCantidadNinosChange}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Estado</label>
+                  <select
+                    value={formData.estado}
+                    onChange={(e) => setFormData(prev => ({ ...prev, estado: e.target.value as any }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  >
+                    <option value="pendiente">Pendiente</option>
+                    <option value="confirmada">Confirmada</option>
+                    <option value="cancelada">Cancelada</option>
+                    <option value="completada">Completada</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Precio Adulto (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.precioAdultoUSD}
+                    onChange={handlePrecioAdultoChange}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Precio Niño (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.precioNinoUSD}
+                    onChange={handlePrecioNinoChange}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Total</label>
+                  <input
+                    type="text"
+                    value={formData.precioTotalUSD}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white font-bold"
+                    disabled
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+                <button type="button" onClick={resetForm} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
+                  Cancelar
+                </button>
+                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${buttonGradient} text-slate-900 rounded-xl hover:shadow-xl transition-all ${shadowColor}`}>
+                  {editingVentaId ? "Actualizar Venta" : "Registrar Venta"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Cliente */}
+      {showClienteForm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className={`${cardBg} rounded-3xl border ${cardBorder} max-w-lg w-full p-6`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white text-xl font-bold">Nuevo Cliente</h3>
+              <button onClick={() => setShowClienteForm(false)} className="text-white/40 hover:text-white text-2xl">×</button>
+            </div>
+            <form onSubmit={handleClienteSubmit} className="space-y-4">
+              <div>
+                <label className="text-white/60 text-sm block mb-1">Nombre</label>
+                <input type="text" name="nombre" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white" required />
+              </div>
+              <div>
+                <label className="text-white/60 text-sm block mb-1">WhatsApp</label>
+                <input type="text" name="whatsapp" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white" />
+              </div>
+              <div>
+                <label className="text-white/60 text-sm block mb-1">Email</label>
+                <input type="email" name="email" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white" />
+              </div>
+              <div>
+                <label className="text-white/60 text-sm block mb-1">Excursión</label>
+                <select name="excursionId" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white">
+                  <option value="">Seleccionar excursión</option>
+                  {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-white/60 text-sm block mb-1">Fecha</label>
+                <input type="date" name="fechaExcursion" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white" />
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+                <button type="button" onClick={() => setShowClienteForm(false)} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
+                  Cancelar
+                </button>
+                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${buttonGradient} text-slate-900 rounded-xl hover:shadow-xl transition-all ${shadowColor}`}>
+                  Guardar Cliente
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Proveedor */}
+      {showProveedorForm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className={`${cardBg} rounded-3xl border ${cardBorder} max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white text-xl font-bold">{editingProveedorId ? "Editar Proveedor" : "Nuevo Proveedor"}</h3>
+              <button onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="text-white/40 hover:text-white text-2xl">×</button>
+            </div>
+            <form onSubmit={handleProveedorSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Nombre</label>
+                  <input
+                    type="text"
+                    value={proveedorFormData.nombre}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, nombre: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Empresa</label>
+                  <input
+                    type="text"
+                    value={proveedorFormData.empresa}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, empresa: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Teléfono</label>
+                  <input
+                    type="text"
+                    value={proveedorFormData.telefono}
+                    onChange={manejarCambioTelefono}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    placeholder="(XXX) XXX-XXXX"
+                  />
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={proveedorFormData.email}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, email: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-white/60 text-sm block mb-2">Métodos de Pago</label>
+                <div className="flex gap-4 flex-wrap">
+                  <button type="button" onClick={() => toggleMetodoPago("efectivo")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("efectivo") ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : 'bg-white/5 border border-white/10 text-white/60'}`}>
+                    Efectivo
+                  </button>
+                  <button type="button" onClick={() => toggleMetodoPago("transferencia")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("transferencia") ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : 'bg-white/5 border border-white/10 text-white/60'}`}>
+                    Transferencia
+                  </button>
+                  <button type="button" onClick={() => toggleMetodoPago("paypal")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("paypal") ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : 'bg-white/5 border border-white/10 text-white/60'}`}>
+                    PayPal
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Banco</label>
+                  <select
+                    value={proveedorFormData.banco}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, banco: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  >
+                    <option value="">Seleccionar banco</option>
+                    {BANCOS.map(b => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Número de Cuenta</label>
+                  <input
+                    type="text"
+                    value={proveedorFormData.numeroCuenta}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, numeroCuenta: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Moneda</label>
+                  <select
+                    value={proveedorFormData.monedaCuenta}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, monedaCuenta: e.target.value as "USD" | "RD$" }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  >
+                    <option value="RD$">RD$</option>
+                    <option value="USD">USD</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-2">Tipo de Cuenta</label>
+                  <div className="flex gap-4">
+                    <button type="button" onClick={() => toggleTipoCuenta("corriente")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("corriente") ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : 'bg-white/5 border border-white/10 text-white/60'}`}>
+                      Corriente
+                    </button>
+                    <button type="button" onClick={() => toggleTipoCuenta("ahorros")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("ahorros") ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : 'bg-white/5 border border-white/10 text-white/60'}`}>
+                      Ahorros
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Tipo de Beneficiario</label>
+                  <select
+                    value={proveedorFormData.tipoBeneficiario}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, tipoBeneficiario: e.target.value as "personal" | "empresarial" }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  >
+                    <option value="personal">Personal</option>
+                    <option value="empresarial">Empresarial</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Beneficiario</label>
+                  <input
+                    type="text"
+                    value={proveedorFormData.beneficiario}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, beneficiario: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Tipo de Documento</label>
+                  <select
+                    value={proveedorFormData.tipoDocumento}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, tipoDocumento: e.target.value as "rnc" | "cedula" }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  >
+                    <option value="cedula">Cédula</option>
+                    <option value="rnc">RNC</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">{proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cédula"}</label>
+                  <input
+                    type="text"
+                    value={proveedorFormData.rncCedula}
+                    onChange={manejarCambioRNCcedula}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    placeholder={proveedorFormData.tipoDocumento === "rnc" ? "XX-XXXXXXX-X" : "XXX-XXXXXXX-X"}
+                  />
+                </div>
+              </div>
+
+              {/* Excursiones temporales */}
+              <div className="border-t border-white/10 pt-4 mt-4">
+                <h4 className="text-white font-semibold mb-3">Excursiones del Proveedor</h4>
+                <div className="space-y-2 mb-3">
+                  {tempExcursiones.map((e, i) => (
+                    <div key={i} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2">
+                      <div>
+                        <span className="text-white">{e.nombre}</span>
+                        <span className="text-white/40 text-sm ml-2">Adulto: {formatUSD(e.precioAdultoUSD)}</span>
+                        {e.precioNinoUSD !== null && <span className="text-white/40 text-sm ml-2">Niño: {formatUSD(e.precioNinoUSD)}</span>}
+                      </div>
+                      <button type="button" onClick={() => eliminarTempExcursion(i)} className="text-red-400 hover:text-red-300">×</button>
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={tempExcursionForm.nombre}
+                    onChange={(e) => setTempExcursionForm(prev => ({ ...prev, nombre: e.target.value }))}
+                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    placeholder="Nombre de excursión"
+                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={tempExcursionForm.precioAdultoUSD}
+                      onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
+                      className="w-1/2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                      placeholder="Precio Adulto"
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={tempExcursionForm.precioNinoUSD}
+                      onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
+                      className="w-1/2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                      placeholder="Precio Niño"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={tempExcursionForm.costoProveedorAdultoUSD}
+                    onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
+                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    placeholder="Costo Adulto"
+                  />
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={tempExcursionForm.costoProveedorNinoUSD}
+                    onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
+                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    placeholder="Costo Niño"
+                  />
+                </div>
+                <div className="flex gap-4 mt-2 items-center">
+                  <label className="flex items-center gap-2 text-white/60 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={tempExcursionForm.tienePrecioNino}
+                      onChange={(e) => setTempExcursionForm(prev => ({ ...prev, tienePrecioNino: e.target.checked }))}
+                    />
+                    Tiene precio para niños
+                  </label>
+                  <button type="button" onClick={agregarTempExcursion} className={`px-4 py-2 bg-gradient-to-r ${buttonGradient} text-slate-900 rounded-xl hover:shadow-xl transition-all ${shadowColor} text-sm`}>
+                    Agregar Excursión
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+                <button type="button" onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
+                  Cancelar
+                </button>
+                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${buttonGradient} text-slate-900 rounded-xl hover:shadow-xl transition-all ${shadowColor}`}>
+                  {editingProveedorId ? "Actualizar Proveedor" : "Guardar Proveedor"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Excursión */}
+      {showExcursionForm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className={`${cardBg} rounded-3xl border ${cardBorder} max-w-2xl w-full p-6`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white text-xl font-bold">{editingExcursionId ? "Editar Excursión" : "Nueva Excursión"}</h3>
+              <button onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="text-white/40 hover:text-white text-2xl">×</button>
+            </div>
+            <form onSubmit={handleExcursionSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Nombre</label>
+                  <input
+                    type="text"
+                    value={excursionFormData.nombre}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, nombre: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Proveedor</label>
+                  <select
+                    value={excursionFormData.proveedorId}
+                    onChange={(e) => {
+                      const proveedor = proveedores.find(p => p.id === e.target.value);
+                      setExcursionFormData(prev => ({
+                        ...prev,
+                        proveedorId: e.target.value,
+                        proveedorNombre: proveedor?.nombre || ""
+                      }));
+                    }}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    required
+                  >
+                    <option value="">Seleccionar proveedor</option>
+                    {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Precio Adulto (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={excursionFormData.precioAdultoUSD}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Precio Niño (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={excursionFormData.precioNinoUSD}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Costo Proveedor Adulto (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={excursionFormData.costoProveedorAdultoUSD}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={excursionFormData.costoProveedorNinoUSD}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Zona</label>
+                  <select
+                    value={excursionFormData.zona}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, zona: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  >
+                    <option value="">Seleccionar zona</option>
+                    {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-white/60 text-sm block mb-1">Capacidad</label>
+                  <input
+                    type="text"
+                    value={excursionFormData.capacidad}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, capacidad: e.target.value }))}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                    placeholder="Ej: 20 personas"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 text-white/60 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={excursionFormData.tienePrecioNino}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, tienePrecioNino: e.target.checked }))}
+                  />
+                  Tiene precio para niños
+                </label>
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+                <button type="button" onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
+                  Cancelar
+                </button>
+                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${buttonGradient} text-slate-900 rounded-xl hover:shadow-xl transition-all ${shadowColor}`}>
+                  {editingExcursionId ? "Actualizar Excursión" : "Guardar Excursión"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
