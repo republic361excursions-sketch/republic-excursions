@@ -8,10 +8,6 @@ import { useState, useEffect } from "react";
 interface Excursion {
   id: string;
   nombre: string;
-  precioVentaUSD: number;
-  comisionPorcentaje: number;
-  comisionUSD: number;
-  aFacturarUSD: number;
   proveedorId: string;
   proveedorNombre: string;
   tipoCliente: "adulto" | "nino";
@@ -47,9 +43,8 @@ interface Venta {
   excursionNombre: string;
   fechaExcursion: string;
   precioVentaUSD: number;
-  comisionPorcentaje: number;
+  costoProveedorUSD: number;
   comisionUSD: number;
-  aFacturarUSD: number;
   pagoCliente: "completo" | "deposito_25" | "pago_dia";
   montoPagadoUSD: number;
   saldoPendienteUSD: number;
@@ -89,355 +84,46 @@ const PROVEEDORES_INICIALES: Proveedor[] = [
     telefono: "809-555-0103",
     email: "info@excursionestropicales.com",
     metodoPago: "transferencia",
-    nota: "Caballos, Monkeyland y Scuba Doo"
+    nota: "Caballos, Monkeyland, Scuba Doo, Party Boat"
   }
 ];
 
 // ============================================
-// DATOS PRECARGADOS - EXCURSIONES
+// DATOS PRECARGADOS - EXCURSIONES (SIN PRECIOS)
 // ============================================
 const EXCURSIONES_INICIALES: Excursion[] = [
   // DOMINICAN WAY TRAVEL
-  {
-    id: "exc1",
-    nombre: "Isla Saona - Bávaro (Adulto)",
-    precioVentaUSD: 75,
-    comisionPorcentaje: 46.67,
-    comisionUSD: 35,
-    aFacturarUSD: 40,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "adulto",
-    zona: "Bávaro"
-  },
-  {
-    id: "exc2",
-    nombre: "Isla Saona - Bávaro (Niño)",
-    precioVentaUSD: 50,
-    comisionPorcentaje: 40,
-    comisionUSD: 20,
-    aFacturarUSD: 30,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "nino",
-    zona: "Bávaro"
-  },
-  {
-    id: "exc3",
-    nombre: "Isla Saona - Uvero Alto (Adulto)",
-    precioVentaUSD: 75,
-    comisionPorcentaje: 40,
-    comisionUSD: 30,
-    aFacturarUSD: 45,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "adulto",
-    zona: "Uvero Alto"
-  },
-  {
-    id: "exc4",
-    nombre: "Isla Saona - Uvero Alto (Niño)",
-    precioVentaUSD: 50,
-    comisionPorcentaje: 40,
-    comisionUSD: 20,
-    aFacturarUSD: 30,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "nino",
-    zona: "Uvero Alto"
-  },
-  {
-    id: "exc5",
-    nombre: "Isla Saona - Cabeza de Toro (Adulto)",
-    precioVentaUSD: 75,
-    comisionPorcentaje: 40,
-    comisionUSD: 30,
-    aFacturarUSD: 45,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "adulto",
-    zona: "Cabeza de Toro"
-  },
-  {
-    id: "exc6",
-    nombre: "Isla Saona - Cabeza de Toro (Niño)",
-    precioVentaUSD: 50,
-    comisionPorcentaje: 40,
-    comisionUSD: 20,
-    aFacturarUSD: 30,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "nino",
-    zona: "Cabeza de Toro"
-  },
-  {
-    id: "exc7",
-    nombre: "Isla Catalina (Adulto)",
-    precioVentaUSD: 75,
-    comisionPorcentaje: 46.67,
-    comisionUSD: 35,
-    aFacturarUSD: 40,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "adulto"
-  },
-  {
-    id: "exc8",
-    nombre: "Isla Catalina (Niño)",
-    precioVentaUSD: 50,
-    comisionPorcentaje: 40,
-    comisionUSD: 20,
-    aFacturarUSD: 30,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "nino"
-  },
-  {
-    id: "exc9",
-    nombre: "Santo Domingo (Adulto)",
-    precioVentaUSD: 70,
-    comisionPorcentaje: 42.86,
-    comisionUSD: 30,
-    aFacturarUSD: 40,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "adulto"
-  },
-  {
-    id: "exc10",
-    nombre: "Santo Domingo (Niño)",
-    precioVentaUSD: 50,
-    comisionPorcentaje: 40,
-    comisionUSD: 20,
-    aFacturarUSD: 30,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "nino"
-  },
-  {
-    id: "exc11",
-    nombre: "Samaná Ballenas (Adulto)",
-    precioVentaUSD: 120,
-    comisionPorcentaje: 25,
-    comisionUSD: 30,
-    aFacturarUSD: 90,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "adulto"
-  },
-  {
-    id: "exc12",
-    nombre: "Samaná Ballenas (Niño)",
-    precioVentaUSD: 80,
-    comisionPorcentaje: 25,
-    comisionUSD: 20,
-    aFacturarUSD: 60,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "nino"
-  },
-  {
-    id: "exc13",
-    nombre: "Samaná (Adulto)",
-    precioVentaUSD: 80,
-    comisionPorcentaje: 12.5,
-    comisionUSD: 10,
-    aFacturarUSD: 70,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "adulto"
-  },
-  {
-    id: "exc14",
-    nombre: "Samaná (Niño)",
-    precioVentaUSD: 65,
-    comisionPorcentaje: 7.69,
-    comisionUSD: 5,
-    aFacturarUSD: 60,
-    proveedorId: "prov1",
-    proveedorNombre: "Dominican Way Travel",
-    tipoCliente: "nino"
-  },
+  { id: "exc1", nombre: "Isla Saona - Bavaro", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "adulto", zona: "Bavaro" },
+  { id: "exc2", nombre: "Isla Saona - Bavaro (Nino)", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "nino", zona: "Bavaro" },
+  { id: "exc3", nombre: "Isla Saona - Uvero Alto", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "adulto", zona: "Uvero Alto" },
+  { id: "exc4", nombre: "Isla Saona - Uvero Alto (Nino)", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "nino", zona: "Uvero Alto" },
+  { id: "exc5", nombre: "Isla Catalina", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "adulto" },
+  { id: "exc6", nombre: "Isla Catalina (Nino)", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "nino" },
+  { id: "exc7", nombre: "Santo Domingo", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "adulto" },
+  { id: "exc8", nombre: "Santo Domingo (Nino)", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "nino" },
+  { id: "exc9", nombre: "Samana Ballenas", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "adulto" },
+  { id: "exc10", nombre: "Samana Ballenas (Nino)", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "nino" },
+  { id: "exc11", nombre: "Samana", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "adulto" },
+  { id: "exc12", nombre: "Samana (Nino)", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "nino" },
 
   // BUGGY ADVENTURE RD
-  {
-    id: "exc15",
-    nombre: "ATV/Moto (1 persona)",
-    precioVentaUSD: 50,
-    comisionPorcentaje: 40,
-    comisionUSD: 20,
-    aFacturarUSD: 30,
-    proveedorId: "prov2",
-    proveedorNombre: "Buggy Adventure RD",
-    tipoCliente: "adulto",
-    capacidad: "1 persona"
-  },
-  {
-    id: "exc16",
-    nombre: "Buggy Normal (1 persona)",
-    precioVentaUSD: 45,
-    comisionPorcentaje: 33.33,
-    comisionUSD: 15,
-    aFacturarUSD: 30,
-    proveedorId: "prov2",
-    proveedorNombre: "Buggy Adventure RD",
-    tipoCliente: "adulto",
-    capacidad: "1 persona"
-  },
-  {
-    id: "exc17",
-    nombre: "Buggy Doble (2 personas)",
-    precioVentaUSD: 130,
-    comisionPorcentaje: 80.77,
-    comisionUSD: 105,
-    aFacturarUSD: 25,
-    proveedorId: "prov2",
-    proveedorNombre: "Buggy Adventure RD",
-    tipoCliente: "adulto",
-    capacidad: "2 personas"
-  },
-  {
-    id: "exc18",
-    nombre: "Buggy Familiar (4 personas)",
-    precioVentaUSD: 185,
-    comisionPorcentaje: 72.97,
-    comisionUSD: 135,
-    aFacturarUSD: 50,
-    proveedorId: "prov2",
-    proveedorNombre: "Buggy Adventure RD",
-    tipoCliente: "adulto",
-    capacidad: "4 personas"
-  },
-  {
-    id: "exc19",
-    nombre: "Buggy Kayo (1 persona)",
-    precioVentaUSD: 80,
-    comisionPorcentaje: 25,
-    comisionUSD: 20,
-    aFacturarUSD: 60,
-    proveedorId: "prov2",
-    proveedorNombre: "Buggy Adventure RD",
-    tipoCliente: "adulto",
-    capacidad: "1 persona"
-  },
-  {
-    id: "exc20",
-    nombre: "Buggy VIP Doble (2 personas)",
-    precioVentaUSD: 195,
-    comisionPorcentaje: 74.36,
-    comisionUSD: 145,
-    aFacturarUSD: 50,
-    proveedorId: "prov2",
-    proveedorNombre: "Buggy Adventure RD",
-    tipoCliente: "adulto",
-    capacidad: "2 personas"
-  },
-  {
-    id: "exc21",
-    nombre: "Buggy VIP Familiar (4 personas)",
-    precioVentaUSD: 150,
-    comisionPorcentaje: 33.33,
-    comisionUSD: 50,
-    aFacturarUSD: 100,
-    proveedorId: "prov2",
-    proveedorNombre: "Buggy Adventure RD",
-    tipoCliente: "adulto",
-    capacidad: "4 personas"
-  },
+  { id: "exc13", nombre: "ATV Moto", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "1 persona" },
+  { id: "exc14", nombre: "Buggy Normal", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "1 persona" },
+  { id: "exc15", nombre: "Buggy Doble", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "2 personas" },
+  { id: "exc16", nombre: "Buggy Familiar", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "4 personas" },
+  { id: "exc17", nombre: "Buggy Kayo", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "1 persona" },
+  { id: "exc18", nombre: "Buggy VIP Doble", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "2 personas" },
+  { id: "exc19", nombre: "Buggy VIP Familiar", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "4 personas" },
 
   // EXCURSIONES TROPICALES
-  {
-    id: "exc22",
-    nombre: "Caballos",
-    precioVentaUSD: 50,
-    comisionPorcentaje: 50,
-    comisionUSD: 25,
-    aFacturarUSD: 25,
-    proveedorId: "prov3",
-    proveedorNombre: "Excursiones Tropicales",
-    tipoCliente: "adulto"
-  },
-  {
-    id: "exc23",
-    nombre: "Monkeyland",
-    precioVentaUSD: 99,
-    comisionPorcentaje: 34.34,
-    comisionUSD: 34,
-    aFacturarUSD: 65,
-    proveedorId: "prov3",
-    proveedorNombre: "Excursiones Tropicales",
-    tipoCliente: "adulto"
-  },
-  {
-    id: "exc24",
-    nombre: "Scuba Doo - Bávaro",
-    precioVentaUSD: 70,
-    comisionPorcentaje: 50,
-    comisionUSD: 35,
-    aFacturarUSD: 35,
-    proveedorId: "prov3",
-    proveedorNombre: "Excursiones Tropicales",
-    tipoCliente: "adulto",
-    zona: "Bávaro"
-  },
-  {
-    id: "exc25",
-    nombre: "Scuba Doo - Bávaro (Niño)",
-    precioVentaUSD: 35,
-    comisionPorcentaje: 50,
-    comisionUSD: 17.50,
-    aFacturarUSD: 17.50,
-    proveedorId: "prov3",
-    proveedorNombre: "Excursiones Tropicales",
-    tipoCliente: "nino",
-    zona: "Bávaro"
-  },
-  {
-    id: "exc26",
-    nombre: "Scuba Doo - Uvero Alto",
-    precioVentaUSD: 50,
-    comisionPorcentaje: 10,
-    comisionUSD: 5,
-    aFacturarUSD: 45,
-    proveedorId: "prov3",
-    proveedorNombre: "Excursiones Tropicales",
-    tipoCliente: "adulto",
-    zona: "Uvero Alto"
-  },
-  {
-    id: "exc27",
-    nombre: "Scuba Doo - Uvero Alto (Niño)",
-    precioVentaUSD: 40,
-    comisionPorcentaje: 10,
-    comisionUSD: 4,
-    aFacturarUSD: 36,
-    proveedorId: "prov3",
-    proveedorNombre: "Excursiones Tropicales",
-    tipoCliente: "nino",
-    zona: "Uvero Alto"
-  },
-  {
-    id: "exc28",
-    nombre: "Party Boat",
-    precioVentaUSD: 70,
-    comisionPorcentaje: 64.29,
-    comisionUSD: 45,
-    aFacturarUSD: 25,
-    proveedorId: "prov3",
-    proveedorNombre: "Excursiones Tropicales",
-    tipoCliente: "adulto"
-  },
-  {
-    id: "exc29",
-    nombre: "Party Boat (Niño)",
-    precioVentaUSD: 50,
-    comisionPorcentaje: 50,
-    comisionUSD: 25,
-    aFacturarUSD: 25,
-    proveedorId: "prov3",
-    proveedorNombre: "Excursiones Tropicales",
-    tipoCliente: "nino"
-  }
+  { id: "exc20", nombre: "Caballos", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "adulto" },
+  { id: "exc21", nombre: "Monkeyland", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "adulto" },
+  { id: "exc22", nombre: "Scuba Doo - Bavaro", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "adulto", zona: "Bavaro" },
+  { id: "exc23", nombre: "Scuba Doo - Bavaro (Nino)", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "nino", zona: "Bavaro" },
+  { id: "exc24", nombre: "Scuba Doo - Uvero Alto", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "adulto", zona: "Uvero Alto" },
+  { id: "exc25", nombre: "Scuba Doo - Uvero Alto (Nino)", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "nino", zona: "Uvero Alto" },
+  { id: "exc26", nombre: "Party Boat", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "adulto" },
+  { id: "exc27", nombre: "Party Boat (Nino)", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "nino" }
 ];
 
 // ============================================
@@ -462,8 +148,6 @@ export default function Home() {
   const [filterYear, setFilterYear] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones">("dashboard");
-  const [cantidadPersonas, setCantidadPersonas] = useState(1);
-  const [selectedExcursion, setSelectedExcursion] = useState<Excursion | null>(null);
 
   const [formData, setFormData] = useState({
     clienteNombre: "",
@@ -473,9 +157,8 @@ export default function Home() {
     excursionNombre: "",
     fechaExcursion: "",
     precioVentaUSD: "",
-    comisionPorcentaje: "",
+    costoProveedorUSD: "",
     comisionUSD: "",
-    aFacturarUSD: "",
     pagoCliente: "completo" as "completo" | "deposito_25" | "pago_dia",
     montoPagadoUSD: "",
     saldoPendienteUSD: "",
@@ -519,10 +202,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v5");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v5");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v5");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v5");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v6");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v6");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v6");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v6");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -532,55 +215,45 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v5", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v6", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v5", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v6", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v5", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v6", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v5", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v6", JSON.stringify(data));
   };
 
   // ============================================
-  // CALCULAR COMISIÓN Y A FACTURAR
+  // CALCULAR COMISION AUTOMATICAMENTE
   // ============================================
-  const calcularComision = (precio: string, porcentaje: string) => {
-    const p = parseFloat(precio) || 0;
-    const porc = parseFloat(porcentaje) || 0;
-    const comision = p * (porc / 100);
-    const aFacturar = p - comision;
-    return { comision, aFacturar };
+  const calcularComision = (precioVenta: string, costoProveedor: string) => {
+    const pv = parseFloat(precioVenta) || 0;
+    const cp = parseFloat(costoProveedor) || 0;
+    const comision = pv - cp;
+    return { comision };
   };
 
   // ============================================
-  // HANDLE EXCURSIÓN
+  // HANDLE EXCURSION
   // ============================================
   const handleExcursionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const data = new FormData(form);
     
-    const precioVentaUSD = parseFloat(data.get("precioVentaUSD") as string);
-    const comisionPorcentaje = parseFloat(data.get("comisionPorcentaje") as string);
-    const comisionUSD = precioVentaUSD * (comisionPorcentaje / 100);
-    const aFacturarUSD = precioVentaUSD - comisionUSD;
-    
     const nuevaExcursion: Excursion = {
       id: Date.now().toString(),
       nombre: data.get("nombre") as string,
-      precioVentaUSD,
-      comisionPorcentaje,
-      comisionUSD,
-      aFacturarUSD,
       proveedorId: data.get("proveedorId") as string,
       proveedorNombre: proveedores.find(p => p.id === data.get("proveedorId"))?.nombre || "",
       tipoCliente: data.get("tipoCliente") as "adulto" | "nino",
@@ -590,7 +263,7 @@ export default function Home() {
     
     saveExcursiones([...excursiones, nuevaExcursion]);
     setShowExcursionForm(false);
-    alert("Excursión agregada correctamente");
+    alert("Excursion agregada correctamente");
   };
 
   // ============================================
@@ -646,20 +319,23 @@ export default function Home() {
   // ============================================
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const precioVentaUSD = parseFloat(formData.precioVentaUSD);
-    const comisionPorcentaje = parseFloat(formData.comisionPorcentaje);
-    const comisionUSD = precioVentaUSD * (comisionPorcentaje / 100);
-    const aFacturarUSD = precioVentaUSD - comisionUSD;
+    const precioVentaUSD = parseFloat(formData.precioVentaUSD) || 0;
+    const costoProveedorUSD = parseFloat(formData.costoProveedorUSD) || 0;
+    const comisionUSD = precioVentaUSD - costoProveedorUSD;
     const montoPagadoUSD = parseFloat(formData.montoPagadoUSD) || 0;
     const cantidad = parseInt(formData.cantidadPersonas.toString()) || 1;
+    
+    const precioTotal = precioVentaUSD * cantidad;
+    const costoTotal = costoProveedorUSD * cantidad;
+    const comisionTotal = comisionUSD * cantidad;
     
     let saldoPendienteUSD = 0;
     if (formData.pagoCliente === "completo") {
       saldoPendienteUSD = 0;
     } else if (formData.pagoCliente === "deposito_25") {
-      saldoPendienteUSD = precioVentaUSD * 0.75;
+      saldoPendienteUSD = precioTotal * 0.75;
     } else if (formData.pagoCliente === "pago_dia") {
-      saldoPendienteUSD = precioVentaUSD;
+      saldoPendienteUSD = precioTotal;
     }
 
     const nuevaVenta: Venta = {
@@ -670,13 +346,12 @@ export default function Home() {
       excursionId: formData.excursionId,
       excursionNombre: formData.excursionNombre,
       fechaExcursion: formData.fechaExcursion,
-      precioVentaUSD: precioVentaUSD * cantidad,
-      comisionPorcentaje,
-      comisionUSD: comisionUSD * cantidad,
-      aFacturarUSD: aFacturarUSD * cantidad,
+      precioVentaUSD: precioTotal,
+      costoProveedorUSD: costoTotal,
+      comisionUSD: comisionTotal,
       pagoCliente: formData.pagoCliente,
-      montoPagadoUSD,
-      saldoPendienteUSD: saldoPendienteUSD * cantidad,
+      montoPagadoUSD: montoPagadoUSD * cantidad,
+      saldoPendienteUSD: saldoPendienteUSD,
       metodoPagoCliente: formData.metodoPagoCliente,
       proveedorId: formData.proveedorId,
       proveedorNombre: formData.proveedorNombre,
@@ -707,9 +382,8 @@ export default function Home() {
       excursionNombre: "",
       fechaExcursion: "",
       precioVentaUSD: "",
-      comisionPorcentaje: "",
+      costoProveedorUSD: "",
       comisionUSD: "",
-      aFacturarUSD: "",
       pagoCliente: "completo",
       montoPagadoUSD: "",
       saldoPendienteUSD: "",
@@ -724,27 +398,18 @@ export default function Home() {
     });
     setShowForm(false);
     setEditingId(null);
-    setSelectedExcursion(null);
-    setCantidadPersonas(1);
   };
 
   // ============================================
-  // SELECCIONAR EXCURSIÓN
+  // SELECCIONAR EXCURSION
   // ============================================
   const selectExcursion = (excursionId: string) => {
     const excursion = excursiones.find(e => e.id === excursionId);
     if (excursion) {
-      setSelectedExcursion(excursion);
-      const cantidad = parseInt(formData.cantidadPersonas.toString()) || 1;
-      
       setFormData({
         ...formData,
         excursionId: excursion.id,
         excursionNombre: excursion.nombre,
-        precioVentaUSD: (excursion.precioVentaUSD * cantidad).toString(),
-        comisionPorcentaje: excursion.comisionPorcentaje.toString(),
-        comisionUSD: (excursion.comisionUSD * cantidad).toString(),
-        aFacturarUSD: (excursion.aFacturarUSD * cantidad).toString(),
         proveedorId: excursion.proveedorId,
         proveedorNombre: excursion.proveedorNombre,
         tipoCliente: excursion.tipoCliente,
@@ -753,36 +418,46 @@ export default function Home() {
   };
 
   // ============================================
-  // ACTUALIZAR CANTIDAD DE PERSONAS
+  // ACTUALIZAR PRECIO VENTA (CALCULA COMISION)
   // ============================================
-  const updateCantidadPersonas = (cantidad: number) => {
-    setCantidadPersonas(cantidad);
-    if (selectedExcursion) {
-      const precioTotal = selectedExcursion.precioVentaUSD * cantidad;
-      const comisionTotal = selectedExcursion.comisionUSD * cantidad;
-      const aFacturarTotal = selectedExcursion.aFacturarUSD * cantidad;
-      
-      setFormData({
-        ...formData,
-        cantidadPersonas: cantidad,
-        precioVentaUSD: precioTotal.toString(),
-        comisionUSD: comisionTotal.toString(),
-        aFacturarUSD: aFacturarTotal.toString(),
-      });
-    }
+  const handlePrecioVentaChange = (valor: string) => {
+    const { comision } = calcularComision(valor, formData.costoProveedorUSD);
+    setFormData({
+      ...formData,
+      precioVentaUSD: valor,
+      comisionUSD: comision.toString()
+    });
   };
 
   // ============================================
-  // CALCULAR COMISIÓN AL CAMBIAR PRECIO O %
+  // ACTUALIZAR COSTO PROVEEDOR (CALCULA COMISION)
   // ============================================
-  const handleComisionChange = (campo: "precioVentaUSD" | "comisionPorcentaje", valor: string) => {
-    const newFormData = { ...formData, [campo]: valor };
-    const precio = campo === "precioVentaUSD" ? valor : formData.precioVentaUSD;
-    const porcentaje = campo === "comisionPorcentaje" ? valor : formData.comisionPorcentaje;
-    const { comision, aFacturar } = calcularComision(precio, porcentaje);
-    newFormData.comisionUSD = comision.toString();
-    newFormData.aFacturarUSD = aFacturar.toString();
-    setFormData(newFormData);
+  const handleCostoProveedorChange = (valor: string) => {
+    const { comision } = calcularComision(formData.precioVentaUSD, valor);
+    setFormData({
+      ...formData,
+      costoProveedorUSD: valor,
+      comisionUSD: comision.toString()
+    });
+  };
+
+  // ============================================
+  // ACTUALIZAR CANTIDAD DE PERSONAS
+  // ============================================
+  const updateCantidadPersonas = (cantidad: number) => {
+    const precioUnitario = parseFloat(formData.precioVentaUSD) || 0;
+    const costoUnitario = parseFloat(formData.costoProveedorUSD) || 0;
+    const precioTotal = precioUnitario * cantidad;
+    const costoTotal = costoUnitario * cantidad;
+    const comisionTotal = precioTotal - costoTotal;
+    
+    setFormData({
+      ...formData,
+      cantidadPersonas: cantidad,
+      precioVentaUSD: precioTotal.toString(),
+      costoProveedorUSD: costoTotal.toString(),
+      comisionUSD: comisionTotal.toString()
+    });
   };
 
   const editVenta = (venta: Venta) => {
@@ -795,9 +470,8 @@ export default function Home() {
       excursionNombre: venta.excursionNombre,
       fechaExcursion: venta.fechaExcursion,
       precioVentaUSD: venta.precioVentaUSD.toString(),
-      comisionPorcentaje: venta.comisionPorcentaje.toString(),
+      costoProveedorUSD: venta.costoProveedorUSD.toString(),
       comisionUSD: venta.comisionUSD.toString(),
-      aFacturarUSD: venta.aFacturarUSD.toString(),
       pagoCliente: venta.pagoCliente,
       montoPagadoUSD: venta.montoPagadoUSD.toString(),
       saldoPendienteUSD: venta.saldoPendienteUSD.toString(),
@@ -810,30 +484,29 @@ export default function Home() {
       cantidadPersonas: venta.cantidadPersonas,
       nota: venta.nota,
     });
-    setCantidadPersonas(venta.cantidadPersonas);
     setShowForm(true);
   };
 
   const deleteVenta = (id: string) => {
-    if (!confirm("¿Eliminar esta venta?")) return;
+    if (!confirm("Eliminar esta venta?")) return;
     const updated = ventas.filter(v => v.id !== id);
     saveVentas(updated);
   };
 
   const deleteCliente = (id: string) => {
-    if (!confirm("¿Eliminar este cliente?")) return;
+    if (!confirm("Eliminar este cliente?")) return;
     const updated = clientes.filter(c => c.id !== id);
     saveClientes(updated);
   };
 
   const deleteProveedor = (id: string) => {
-    if (!confirm("¿Eliminar este proveedor?")) return;
+    if (!confirm("Eliminar este proveedor?")) return;
     const updated = proveedores.filter(p => p.id !== id);
     saveProveedores(updated);
   };
 
   const deleteExcursion = (id: string) => {
-    if (!confirm("¿Eliminar esta excursión?")) return;
+    if (!confirm("Eliminar esta excursion?")) return;
     const updated = excursiones.filter(e => e.id !== id);
     saveExcursiones(updated);
   };
@@ -857,11 +530,11 @@ export default function Home() {
     const key = `${year}-${String(month).padStart(2, "0")}`;
     
     if (!acc[key]) {
-      acc[key] = { year, month, totalUSD: 0, totalComision: 0, totalAFacturar: 0, ventas: [] };
+      acc[key] = { year, month, totalUSD: 0, totalComision: 0, totalCosto: 0, ventas: [] };
     }
     acc[key].totalUSD += venta.precioVentaUSD;
     acc[key].totalComision += venta.comisionUSD;
-    acc[key].totalAFacturar += venta.aFacturarUSD;
+    acc[key].totalCosto += venta.costoProveedorUSD;
     acc[key].ventas.push(venta);
     return acc;
   }, {});
@@ -875,7 +548,7 @@ export default function Home() {
 
   const totalVentasUSD = filtered.reduce((sum, v) => sum + v.precioVentaUSD, 0);
   const totalComision = filtered.reduce((sum, v) => sum + v.comisionUSD, 0);
-  const totalAFacturar = filtered.reduce((sum, v) => sum + v.aFacturarUSD, 0);
+  const totalCosto = filtered.reduce((sum, v) => sum + v.costoProveedorUSD, 0);
   const totalPendienteUSD = filtered.reduce((sum, v) => sum + v.saldoPendienteUSD, 0);
   
   const years = [...new Set(ventas.map(v => new Date(v.fechaExcursion).getFullYear().toString()))].sort().reverse();
@@ -901,8 +574,8 @@ export default function Home() {
   const getPagoClienteText = (tipo: string) => {
     const map: any = {
       completo: "Pago completo (USD)",
-      deposito_25: "Depósito 25% (USD)",
-      pago_dia: "Pago el día (USD)"
+      deposito_25: "Deposito 25% (USD)",
+      pago_dia: "Pago el dia (USD)"
     };
     return map[tipo] || tipo;
   };
@@ -913,9 +586,9 @@ export default function Home() {
 
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Cliente,Excursión,Cantidad,Tipo,Precio Venta (USD),% Comisión,Comisión (USD),A Facturar (USD),Pago Cliente,Saldo Pendiente (USD),Método Pago,Proveedor,Pago Proveedor,Nota\n";
+    let csv = "Fecha,Cliente,Excursion,Cantidad,Tipo,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
     ventas.forEach(v => {
-      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadPersonas},"${v.tipoCliente}",${v.precioVentaUSD},${v.comisionPorcentaje}%,${v.comisionUSD},${v.aFacturarUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadPersonas},"${v.tipoCliente}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -938,7 +611,7 @@ export default function Home() {
               <span className="text-3xl text-slate-900 font-bold">RE</span>
             </div>
             <h1 className="text-2xl font-bold text-white mt-4">Republic Excursions</h1>
-            <p className="text-white/40">Inicia sesión para continuar</p>
+            <p className="text-white/40">Inicia sesion para continuar</p>
           </div>
 
           <form onSubmit={(e) => {
@@ -959,13 +632,13 @@ export default function Home() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-1">Contraseña</label>
+              <label className="block text-sm font-medium text-white/70 mb-1">Contrasena</label>
               <input
                 type="password"
                 name="password"
                 required
                 className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
-                placeholder="Ingresa tu contraseña"
+                placeholder="Ingresa tu contrasena"
               />
             </div>
             {loginError && (
@@ -977,13 +650,13 @@ export default function Home() {
               type="submit"
               className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all shadow-lg shadow-amber-500/25"
             >
-              Iniciar Sesión
+              Iniciar Sesion
             </button>
           </form>
 
           <div className="mt-6 text-center text-xs text-white/30">
             <p>Usuarios: Raul | Gabrielle</p>
-            <p>Contraseña: Republ1c$$</p>
+            <p>Contrasena: Republ1c$$</p>
           </div>
         </div>
       </div>
@@ -991,7 +664,7 @@ export default function Home() {
   }
 
   // ============================================
-  // RENDER - RAÚL O GABRIELLE
+  // RENDER - RAUL O GABRIELLE
   // ============================================
   const renderContent = () => {
     const isRaul = currentUser === "raul";
@@ -1017,7 +690,7 @@ export default function Home() {
                 <div>
                   <h1 className="text-xl font-bold text-white tracking-tight">Republic Excursions</h1>
                   <p className={`text-xs text-${accentColor}-400/80`}>
-                    {isRaul ? "Bienvenido, Raúl • Comisión USD" : "✨ Bienvenida, Gabrielle • Comisión USD"}
+                    {isRaul ? "Bienvenido, Raul - Comision USD" : "Bienvenida, Gabrielle - Comision USD"}
                   </p>
                 </div>
               </div>
@@ -1025,14 +698,14 @@ export default function Home() {
               <div className="flex items-center gap-3">
                 <div className={`px-4 py-2 ${isRaul ? 'bg-amber-500/10 border-amber-500/20' : 'bg-pink-500/20 border-pink-500/20'} rounded-xl border`}>
                   <span className={`text-sm ${isRaul ? 'text-amber-400' : 'text-pink-300'} font-medium`}>
-                    {isRaul ? "👑 Admin" : "🌟 Manager"}
+                    {isRaul ? "Admin" : "Manager"}
                   </span>
                 </div>
                 <button
                   onClick={handleLogout}
                   className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-all text-sm font-medium"
                 >
-                  Cerrar Sesión
+                  Cerrar Sesion
                 </button>
               </div>
             </div>
@@ -1043,13 +716,6 @@ export default function Home() {
           {/* Navigation */}
           <div className={`flex flex-wrap gap-2 mb-8 ${cardBg} backdrop-blur-lg rounded-2xl p-2 border border-white/10`}>
             {["dashboard", "ventas", "clientes", "proveedores", "excursiones"].map((tab) => {
-              const icons: any = {
-                dashboard: isRaul ? "📊" : "🌟",
-                ventas: isRaul ? "💰" : "💎",
-                clientes: isRaul ? "👥" : "👤",
-                proveedores: isRaul ? "🏢" : "🏗️",
-                excursiones: isRaul ? "🏝️" : "🌴"
-              };
               const labels: any = {
                 dashboard: "Dashboard",
                 ventas: "Ventas",
@@ -1067,7 +733,7 @@ export default function Home() {
                       : "text-white/70 hover:text-white hover:bg-white/10"
                   }`}
                 >
-                  {icons[tab]} {labels[tab]}
+                  {labels[tab]}
                 </button>
               );
             })}
@@ -1090,13 +756,13 @@ export default function Home() {
                   <p className="text-xs text-white/40">{ventas.length} ventas</p>
                 </div>
                 <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all`}>
-                  <p className="text-sm text-white/60">Total Comisión (USD)</p>
+                  <p className="text-sm text-white/60">Total Comision (USD)</p>
                   <p className="text-2xl font-bold text-green-400">{formatUSD(totalComision)}</p>
                   <p className="text-xs text-white/40">Tu ganancia</p>
                 </div>
                 <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all`}>
-                  <p className="text-sm text-white/60">Total A Facturar (USD)</p>
-                  <p className={`text-2xl font-bold ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>{formatUSD(totalAFacturar)}</p>
+                  <p className="text-sm text-white/60">Total Costo (USD)</p>
+                  <p className={`text-2xl font-bold ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>{formatUSD(totalCosto)}</p>
                   <p className="text-xs text-white/40">Pago a proveedores</p>
                 </div>
                 <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all`}>
@@ -1107,7 +773,7 @@ export default function Home() {
               </div>
 
               <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
-                <h2 className="text-lg font-bold text-white mb-4">{isRaul ? "📋 Últimas ventas" : "✨ Últimas ventas"}</h2>
+                <h2 className="text-lg font-bold text-white mb-4">Ultimas ventas</h2>
                 {ventas.length === 0 ? (
                   <div className="text-center py-12">
                     <p className="text-white/40">No hay ventas registradas</p>
@@ -1118,18 +784,18 @@ export default function Home() {
                     <div key={v.id} className="flex flex-wrap items-center justify-between py-3 border-b border-white/5 last:border-0">
                       <div>
                         <p className="font-medium text-white">{v.clienteNombre}</p>
-                        <p className="text-sm text-white/40">{v.excursionNombre} • {v.cantidadPersonas} {v.cantidadPersonas === 1 ? 'persona' : 'personas'} • {new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</p>
+                        <p className="text-sm text-white/40">{v.excursionNombre} - {v.cantidadPersonas} {v.cantidadPersonas === 1 ? 'persona' : 'personas'} - {new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</p>
                       </div>
                       <div className="flex flex-wrap items-center gap-4">
                         <span className={`text-xs px-2 py-1 rounded-full ${v.tipoCliente === 'adulto' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
-                          {v.tipoCliente === 'adulto' ? '👤 Adulto' : '🧒 Niño'}
+                          {v.tipoCliente === 'adulto' ? 'Adulto' : 'Nino'}
                         </span>
                         <span className={`text-xs px-2 py-1 rounded-full ${v.pagoCliente === 'completo' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
                           {getPagoClienteText(v.pagoCliente)}
                         </span>
                         <span className={`text-sm font-bold ${isRaul ? 'text-amber-400' : 'text-pink-300'}`}>{formatUSD(v.precioVentaUSD)}</span>
                         <span className="text-xs text-green-400">+{formatUSD(v.comisionUSD)}</span>
-                        <span className={`text-xs ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>-{formatUSD(v.aFacturarUSD)}</span>
+                        <span className={`text-xs ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>-{formatUSD(v.costoProveedorUSD)}</span>
                       </div>
                     </div>
                   ))
@@ -1143,12 +809,12 @@ export default function Home() {
             <>
               <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 mb-6 border border-white/10`}>
                 <div className="flex flex-wrap items-center gap-3">
-                  <input type="text" placeholder="🔍 Buscar..." className="flex-1 min-w-[200px] px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                  <input type="text" placeholder="Buscar..." className="flex-1 min-w-[200px] px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                   <select className="px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm" value={filterYear} onChange={(e) => setFilterYear(e.target.value)}>
-                    <option value="" className="text-slate-900">Todos los años</option>
+                    <option value="" className="text-slate-900">Todos los anos</option>
                     {years.map(y => <option key={y} value={y} className="text-slate-900">{y}</option>)}
                   </select>
-                  <button onClick={exportCSV} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 text-sm font-medium`}>📥 Exportar CSV</button>
+                  <button onClick={exportCSV} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 text-sm font-medium`}>Exportar CSV</button>
                 </div>
               </div>
 
@@ -1174,7 +840,7 @@ export default function Home() {
                           <div className="flex items-center gap-4">
                             <span className={`text-sm font-bold ${isRaul ? 'text-amber-400' : 'text-pink-300'}`}>{formatUSD(group.totalUSD)}</span>
                             <span className="text-sm text-green-400">+{formatUSD(group.totalComision)}</span>
-                            <span className={`text-sm ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>-{formatUSD(group.totalAFacturar)}</span>
+                            <span className={`text-sm ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>-{formatUSD(group.totalCosto)}</span>
                             <span className="text-white/40 text-xl">{isExpanded ? "▼" : "▶"}</span>
                           </div>
                         </button>
@@ -1187,13 +853,12 @@ export default function Home() {
                                   <tr>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Fecha</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Cliente</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursión</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursion</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Cant</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Tipo</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Venta (USD)</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">% Com</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Comisión</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">A Facturar</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Costo (USD)</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Comision</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
                                   </tr>
                                 </thead>
@@ -1206,17 +871,16 @@ export default function Home() {
                                       <td className="px-4 py-3 text-sm text-white/60">{v.cantidadPersonas}</td>
                                       <td className="px-4 py-3 text-sm">
                                         <span className={`text-xs px-2 py-1 rounded-full ${v.tipoCliente === 'adulto' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
-                                          {v.tipoCliente === 'adulto' ? 'Adulto' : 'Niño'}
+                                          {v.tipoCliente === 'adulto' ? 'Adulto' : 'Nino'}
                                         </span>
                                       </td>
                                       <td className={`px-4 py-3 text-sm font-bold ${isRaul ? 'text-amber-400' : 'text-pink-300'}`}>{formatUSD(v.precioVentaUSD)}</td>
-                                      <td className="px-4 py-3 text-sm text-white/60">{v.comisionPorcentaje}%</td>
+                                      <td className={`px-4 py-3 text-sm font-bold ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>{formatUSD(v.costoProveedorUSD)}</td>
                                       <td className="px-4 py-3 text-sm font-bold text-green-400">{formatUSD(v.comisionUSD)}</td>
-                                      <td className={`px-4 py-3 text-sm font-bold ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>{formatUSD(v.aFacturarUSD)}</td>
                                       <td className="px-4 py-3 text-sm">
                                         <div className="flex items-center gap-2">
-                                          <button onClick={() => editVenta(v)} className={`${isRaul ? 'text-amber-400 hover:text-amber-300' : 'text-pink-300 hover:text-pink-200'}`}>✏️</button>
-                                          <button onClick={() => deleteVenta(v.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>🗑️</button>
+                                          <button onClick={() => editVenta(v)} className={`${isRaul ? 'text-amber-400 hover:text-amber-300' : 'text-pink-300 hover:text-pink-200'}`}>Editar</button>
+                                          <button onClick={() => deleteVenta(v.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>Eliminar</button>
                                         </div>
                                       </td>
                                     </tr>
@@ -1226,9 +890,8 @@ export default function Home() {
                                   <tr>
                                     <td colSpan={5} className="px-4 py-3 text-right font-medium text-white/60">Totales del mes:</td>
                                     <td className={`px-4 py-3 font-bold ${isRaul ? 'text-amber-400' : 'text-pink-300'}`}>{formatUSD(group.totalUSD)}</td>
-                                    <td></td>
+                                    <td className={`px-4 py-3 font-bold ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>{formatUSD(group.totalCosto)}</td>
                                     <td className="px-4 py-3 font-bold text-green-400">{formatUSD(group.totalComision)}</td>
-                                    <td className={`px-4 py-3 font-bold ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>{formatUSD(group.totalAFacturar)}</td>
                                     <td></td>
                                   </tr>
                                 </tfoot>
@@ -1248,7 +911,7 @@ export default function Home() {
           {viewMode === "clientes" && (
             <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-white">{isRaul ? "👥 Clientes" : "👤 Clientes"}</h2>
+                <h2 className="text-lg font-bold text-white">Clientes</h2>
                 <button onClick={() => setShowClienteForm(true)} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>+ Agregar Cliente</button>
               </div>
               {clientes.length === 0 ? (
@@ -1261,7 +924,7 @@ export default function Home() {
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Nombre</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">WhatsApp</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Email</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursión</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursion</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Fecha</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
                       </tr>
@@ -1275,7 +938,7 @@ export default function Home() {
                           <td className="px-4 py-3 text-sm text-white/60">{c.excursionNombre}</td>
                           <td className="px-4 py-3 text-sm text-white/60">{new Date(c.fechaExcursion).toLocaleDateString("es-DO")}</td>
                           <td className="px-4 py-3 text-sm">
-                            <button onClick={() => deleteCliente(c.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>🗑️</button>
+                            <button onClick={() => deleteCliente(c.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>Eliminar</button>
                           </td>
                         </tr>
                       ))}
@@ -1290,7 +953,7 @@ export default function Home() {
           {viewMode === "proveedores" && (
             <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-white">{isRaul ? "🏢 Proveedores" : "🏗️ Proveedores"}</h2>
+                <h2 className="text-lg font-bold text-white">Proveedores</h2>
                 <button onClick={() => setShowProveedorForm(true)} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>+ Agregar Proveedor</button>
               </div>
               {proveedores.length === 0 ? (
@@ -1301,24 +964,33 @@ export default function Home() {
                     <thead>
                       <tr className="border-b border-white/10">
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Nombre</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Teléfono</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Telefono</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Email</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Método</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Metodo</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursiones</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {proveedores.map((p) => (
-                        <tr key={p.id} className="border-b border-white/5 hover:bg-white/5">
-                          <td className="px-4 py-3 text-sm font-medium text-white">{p.nombre}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">{p.telefono}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">{p.email}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">{p.metodoPago}</td>
-                          <td className="px-4 py-3 text-sm">
-                            <button onClick={() => deleteProveedor(p.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>🗑️</button>
-                          </td>
-                        </tr>
-                      ))}
+                      {proveedores.map((p) => {
+                        const excursionesDelProveedor = excursiones.filter(e => e.proveedorId === p.id);
+                        return (
+                          <tr key={p.id} className="border-b border-white/5 hover:bg-white/5">
+                            <td className="px-4 py-3 text-sm font-medium text-white">{p.nombre}</td>
+                            <td className="px-4 py-3 text-sm text-white/60">{p.telefono}</td>
+                            <td className="px-4 py-3 text-sm text-white/60">{p.email}</td>
+                            <td className="px-4 py-3 text-sm text-white/60">{p.metodoPago}</td>
+                            <td className="px-4 py-3 text-sm text-white/60">
+                              <span className="text-xs bg-white/10 px-2 py-1 rounded-full">
+                                {excursionesDelProveedor.length} excursiones
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              <button onClick={() => deleteProveedor(p.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>Eliminar</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -1330,8 +1002,8 @@ export default function Home() {
           {viewMode === "excursiones" && (
             <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-white">{isRaul ? "🏝️ Excursiones" : "🌴 Excursiones"}</h2>
-                <button onClick={() => setShowExcursionForm(true)} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>+ Agregar Excursión</button>
+                <h2 className="text-lg font-bold text-white">Excursiones</h2>
+                <button onClick={() => setShowExcursionForm(true)} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>+ Agregar Excursion</button>
               </div>
               {excursiones.length === 0 ? (
                 <p className="text-center text-white/40 py-8">No hay excursiones registradas</p>
@@ -1340,13 +1012,11 @@ export default function Home() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-white/10">
-                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursión</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursion</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Proveedor</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Tipo</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Precio Venta</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">% Com</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Comisión</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">A Facturar</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Zona</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Capacidad</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
                       </tr>
                     </thead>
@@ -1357,15 +1027,13 @@ export default function Home() {
                           <td className="px-4 py-3 text-sm text-white/60">{e.proveedorNombre}</td>
                           <td className="px-4 py-3 text-sm">
                             <span className={`text-xs px-2 py-1 rounded-full ${e.tipoCliente === 'adulto' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
-                              {e.tipoCliente === 'adulto' ? 'Adulto' : 'Niño'}
+                              {e.tipoCliente === 'adulto' ? 'Adulto' : 'Nino'}
                             </span>
                           </td>
-                          <td className={`px-4 py-3 text-sm font-bold ${isRaul ? 'text-amber-400' : 'text-pink-300'}`}>{formatUSD(e.precioVentaUSD)}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">{e.comisionPorcentaje}%</td>
-                          <td className="px-4 py-3 text-sm font-bold text-green-400">{formatUSD(e.comisionUSD)}</td>
-                          <td className={`px-4 py-3 text-sm font-bold ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>{formatUSD(e.aFacturarUSD)}</td>
+                          <td className="px-4 py-3 text-sm text-white/60">{e.zona || '-'}</td>
+                          <td className="px-4 py-3 text-sm text-white/60">{e.capacidad || '-'}</td>
                           <td className="px-4 py-3 text-sm">
-                            <button onClick={() => deleteExcursion(e.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>🗑️</button>
+                            <button onClick={() => deleteExcursion(e.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>Eliminar</button>
                           </td>
                         </tr>
                       ))}
@@ -1377,31 +1045,33 @@ export default function Home() {
           )}
         </main>
 
-        {/* FORMULARIOS MODALES */}
-        {/* Modal de Venta */}
+        {/* ============================================
+            MODAL DE VENTA
+        ============================================ */}
         {showForm && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
             <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto border border-white/10">
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-white">{editingId ? "Editar Venta" : "Nueva Venta"}</h2>
-                  <p className="text-sm text-white/40">Cliente paga en USD • Comisión automática</p>
+                  <p className="text-sm text-white/40">Cliente paga en USD - Comision automatica</p>
                 </div>
                 <button onClick={() => setShowForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
               </div>
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Excursión *</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Excursion *</label>
                   <select
                     className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
                     value={formData.excursionId}
                     onChange={(e) => selectExcursion(e.target.value)}
+                    required
                   >
-                    <option value="" className="text-slate-900">Seleccionar excursión</option>
+                    <option value="" className="text-slate-900">Seleccionar excursion</option>
                     {excursiones.map(e => (
                       <option key={e.id} value={e.id} className="text-slate-900">
-                        {e.nombre} - {formatUSD(e.precioVentaUSD)} | {e.comisionPorcentaje}% | {e.proveedorNombre}
+                        {e.nombre} - {e.proveedorNombre}
                       </option>
                     ))}
                   </select>
@@ -1428,26 +1098,26 @@ export default function Home() {
                       className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
                       placeholder="0.00"
                       value={formData.precioVentaUSD}
-                      onChange={(e) => handleComisionChange("precioVentaUSD", e.target.value)}
+                      onChange={(e) => handlePrecioVentaChange(e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">% Comisión *</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor (USD) *</label>
                     <input
                       type="number"
                       required
                       step="0.01"
                       className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
-                      placeholder="0"
-                      value={formData.comisionPorcentaje}
-                      onChange={(e) => handleComisionChange("comisionPorcentaje", e.target.value)}
+                      placeholder="0.00"
+                      value={formData.costoProveedorUSD}
+                      onChange={(e) => handleCostoProveedorChange(e.target.value)}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-green-500/10 rounded-xl p-3 border border-green-500/20">
-                    <label className="block text-sm font-medium text-white/60 mb-1">Comisión (USD) - Tu Ganancia</label>
+                    <label className="block text-sm font-medium text-white/60 mb-1">Comision (USD) - Tu Ganancia</label>
                     <input
                       type="text"
                       className="w-full px-4 py-2 bg-transparent border-0 text-green-400 font-bold text-lg"
@@ -1455,12 +1125,17 @@ export default function Home() {
                       readOnly
                     />
                   </div>
-                  <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/20">
-                    <label className="block text-sm font-medium text-white/60 mb-1">A Facturar (USD) - Pago al Proveedor</label>
+                  <div className="bg-blue-500/10 rounded-xl p-3 border border-blue-500/20">
+                    <label className="block text-sm font-medium text-white/60 mb-1">% Comision</label>
                     <input
                       type="text"
-                      className="w-full px-4 py-2 bg-transparent border-0 text-red-400 font-bold text-lg"
-                      value={formData.aFacturarUSD}
+                      className="w-full px-4 py-2 bg-transparent border-0 text-blue-400 font-bold text-lg"
+                      value={(() => {
+                        const pv = parseFloat(formData.precioVentaUSD) || 0;
+                        const cp = parseFloat(formData.costoProveedorUSD) || 0;
+                        if (pv === 0) return "0%";
+                        return ((pv - cp) / pv * 100).toFixed(2) + "%";
+                      })()}
                       readOnly
                     />
                   </div>
@@ -1479,7 +1154,7 @@ export default function Home() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Fecha Excursión *</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Fecha Excursion *</label>
                     <input type="date" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white" value={formData.fechaExcursion} onChange={(e) => setFormData({ ...formData, fechaExcursion: e.target.value })} />
                   </div>
                   <div>
@@ -1494,7 +1169,7 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Método de Pago del Cliente *</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago del Cliente *</label>
                   <select required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white" value={formData.metodoPagoCliente} onChange={(e) => setFormData({ ...formData, metodoPagoCliente: e.target.value as any })}>
                     <option value="efectivo" className="text-slate-900">Efectivo</option>
                     <option value="tarjeta" className="text-slate-900">Tarjeta</option>
@@ -1507,8 +1182,8 @@ export default function Home() {
                   <label className="block text-sm font-medium text-white/70 mb-1">Estado del Pago del Cliente *</label>
                   <select required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white" value={formData.pagoCliente} onChange={(e) => setFormData({ ...formData, pagoCliente: e.target.value as any })}>
                     <option value="completo" className="text-slate-900">Pago completo (USD)</option>
-                    <option value="deposito_25" className="text-slate-900">Depósito del 25% (USD)</option>
-                    <option value="pago_dia" className="text-slate-900">Paga el día de la excursión (USD)</option>
+                    <option value="deposito_25" className="text-slate-900">Deposito del 25% (USD)</option>
+                    <option value="pago_dia" className="text-slate-900">Paga el dia de la excursion (USD)</option>
                   </select>
                 </div>
 
@@ -1530,18 +1205,20 @@ export default function Home() {
           </div>
         )}
 
-        {/* Modal de Excursión */}
+        {/* ============================================
+            MODAL DE EXCURSION
+        ============================================ */}
         {showExcursionForm && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
             <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Nueva Excursión</h2>
+                <h2 className="text-2xl font-bold text-white">Nueva Excursion</h2>
                 <button onClick={() => setShowExcursionForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
               </div>
               <form onSubmit={handleExcursionSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre de la Excursión *</label>
-                  <input type="text" name="nombre" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Ej: Isla Saona - Bávaro (Adulto)" />
+                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre de la Excursion *</label>
+                  <input type="text" name="nombre" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Ej: Isla Saona - Bavaro" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Proveedor *</label>
@@ -1554,32 +1231,26 @@ export default function Home() {
                   <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Cliente *</label>
                   <select name="tipoCliente" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white">
                     <option value="adulto" className="text-slate-900">Adulto</option>
-                    <option value="nino" className="text-slate-900">Niño</option>
+                    <option value="nino" className="text-slate-900">Nino</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Precio Venta (USD) *</label>
-                  <input type="number" name="precioVentaUSD" required step="0.01" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="99.00" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">% Comisión *</label>
-                  <input type="number" name="comisionPorcentaje" required step="0.01" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="25" />
-                </div>
-                <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Zona (opcional)</label>
-                  <input type="text" name="zona" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Bávaro, Uvero Alto, etc." />
+                  <input type="text" name="zona" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Bavaro, Uvero Alto, etc." />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Capacidad (opcional)</label>
                   <input type="text" name="capacidad" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="2 personas, 4 personas, etc." />
                 </div>
-                <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>Guardar Excursión</button>
+                <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>Guardar Excursion</button>
               </form>
             </div>
           </div>
         )}
 
-        {/* Modal de Proveedor */}
+        {/* ============================================
+            MODAL DE PROVEEDOR
+        ============================================ */}
         {showProveedorForm && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
             <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
@@ -1593,7 +1264,7 @@ export default function Home() {
                   <input type="text" name="nombre" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Ej: Dominican Way Travel" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Teléfono</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Telefono</label>
                   <input type="text" name="telefono" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="809-000-0000" />
                 </div>
                 <div>
@@ -1601,7 +1272,7 @@ export default function Home() {
                   <input type="email" name="email" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="info@proveedor.com" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Método de Pago</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago</label>
                   <select name="metodoPago" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white">
                     <option value="efectivo" className="text-slate-900">Efectivo</option>
                     <option value="transferencia" className="text-slate-900">Transferencia</option>
@@ -1618,7 +1289,9 @@ export default function Home() {
           </div>
         )}
 
-        {/* Modal de Cliente */}
+        {/* ============================================
+            MODAL DE CLIENTE
+        ============================================ */}
         {showClienteForm && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
             <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
@@ -1629,7 +1302,7 @@ export default function Home() {
               <form onSubmit={handleClienteSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Cliente *</label>
-                  <input type="text" name="nombre" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Ej: Juan Pérez" />
+                  <input type="text" name="nombre" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Ej: Juan Perez" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">WhatsApp</label>
@@ -1640,14 +1313,14 @@ export default function Home() {
                   <input type="email" name="email" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="cliente@email.com" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Excursión *</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Excursion *</label>
                   <select name="excursionId" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white">
-                    <option value="" className="text-slate-900">Seleccionar excursión</option>
-                    {excursiones.map(e => <option key={e.id} value={e.id} className="text-slate-900">{e.nombre} - {formatUSD(e.precioVentaUSD)}</option>)}
+                    <option value="" className="text-slate-900">Seleccionar excursion</option>
+                    {excursiones.map(e => <option key={e.id} value={e.id} className="text-slate-900">{e.nombre}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Fecha de la Excursión *</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Fecha de la Excursion *</label>
                   <input type="date" name="fechaExcursion" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white" />
                 </div>
                 <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>Guardar Cliente</button>
