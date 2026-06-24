@@ -76,6 +76,7 @@ interface Venta {
   costoAdultoPersonalizado: number;
   costoNinoPersonalizado: number;
   nota: string;
+  estado: "pendiente" | "confirmada" | "cancelada" | "completada";
 }
 
 // ============================================
@@ -102,11 +103,12 @@ export default function Home() {
   const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
   const [filterYear, setFilterYear] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones" | "bancos" | "calendario">("dashboard");
+  const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones" | "bancos" | "calendario" | "reservas">("dashboard");
   const [selectedExcursionForVenta, setSelectedExcursionForVenta] = useState<Excursion | null>(null);
   const [calendarioView, setCalendarioView] = useState<"dia" | "semana" | "mes">("mes");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [filtroEstadoReserva, setFiltroEstadoReserva] = useState<string>("todas");
 
   // Reloj en tiempo real
   useEffect(() => {
@@ -137,7 +139,7 @@ export default function Home() {
     excursionId: "",
     excursionNombre: "",
     fechaExcursion: "",
-    horaExcursion: "14:00",
+    horaExcursion: "02:00 PM",
     precioAdultoUSD: "",
     precioNinoUSD: "",
     costoProveedorAdultoUSD: "",
@@ -161,6 +163,7 @@ export default function Home() {
     nombreGrupo: "",
     tipoRecogida: "sin_recogida" as "hotel" | "airbnb" | "sin_recogida",
     transporte: "no" as "si" | "no",
+    estado: "pendiente" as "pendiente" | "confirmada" | "cancelada" | "completada",
     nota: "",
   });
 
@@ -207,6 +210,32 @@ export default function Home() {
   });
 
   // ============================================
+  // FUNCIONES DE HORA
+  // ============================================
+  const formatearHora = (hora24: string) => {
+    if (!hora24) return "02:00 PM";
+    const partes = hora24.split(":");
+    let hora = parseInt(partes[0]);
+    const minutos = partes[1] || "00";
+    const ampm = hora >= 12 ? "PM" : "AM";
+    hora = hora % 12 || 12;
+    return `${hora.toString().padStart(2, "0")}:${minutos} ${ampm}`;
+  };
+
+  const convertirHora24 = (hora12: string) => {
+    if (!hora12) return "14:00";
+    const partes = hora12.split(" ");
+    if (partes.length !== 2) return "14:00";
+    const horaMin = partes[0].split(":");
+    const ampm = partes[1];
+    let hora = parseInt(horaMin[0]);
+    const minutos = horaMin[1] || "00";
+    if (ampm === "PM" && hora < 12) hora += 12;
+    if (ampm === "AM" && hora === 12) hora = 0;
+    return `${hora.toString().padStart(2, "0")}:${minutos}`;
+  };
+
+  // ============================================
   // LOGIN
   // ============================================
   const handleLogin = (username: string, password: string) => {
@@ -236,10 +265,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v23");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v23");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v23");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v23");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v24");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v24");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v24");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v24");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -249,22 +278,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v23", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v24", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v23", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v24", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v23", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v24", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v23", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v24", JSON.stringify(data));
   };
 
   // ============================================
@@ -770,6 +799,7 @@ export default function Home() {
       precioNinoPersonalizado: parseFloat(formData.precioNinoUSD) || 0,
       costoAdultoPersonalizado: parseFloat(formData.costoProveedorAdultoUSD) || 0,
       costoNinoPersonalizado: parseFloat(formData.costoProveedorNinoUSD) || 0,
+      estado: formData.estado,
       nota: formData.nota,
     };
 
@@ -792,7 +822,7 @@ export default function Home() {
       excursionId: "",
       excursionNombre: "",
       fechaExcursion: "",
-      horaExcursion: "14:00",
+      horaExcursion: "02:00 PM",
       precioAdultoUSD: "",
       precioNinoUSD: "",
       costoProveedorAdultoUSD: "",
@@ -816,6 +846,7 @@ export default function Home() {
       nombreGrupo: "",
       tipoRecogida: "sin_recogida",
       transporte: "no",
+      estado: "pendiente",
       nota: "",
     });
     setShowForm(false);
@@ -922,7 +953,7 @@ export default function Home() {
       excursionId: venta.excursionId,
       excursionNombre: venta.excursionNombre,
       fechaExcursion: venta.fechaExcursion,
-      horaExcursion: venta.horaExcursion || "14:00",
+      horaExcursion: venta.horaExcursion || "02:00 PM",
       precioAdultoUSD: venta.precioAdultoPersonalizado?.toString() || excursion?.precioAdultoUSD?.toString() || "0",
       precioNinoUSD: venta.precioNinoPersonalizado?.toString() || excursion?.precioNinoUSD?.toString() || "0",
       costoProveedorAdultoUSD: venta.costoAdultoPersonalizado?.toString() || excursion?.costoProveedorAdultoUSD?.toString() || "0",
@@ -946,6 +977,7 @@ export default function Home() {
       nombreGrupo: venta.nombreGrupo || "",
       tipoRecogida: venta.tipoRecogida,
       transporte: venta.transporte,
+      estado: venta.estado || "pendiente",
       nota: venta.nota,
     });
     setShowForm(true);
@@ -1092,11 +1124,31 @@ export default function Home() {
     return valor === "si" ? "Si" : "No";
   };
 
+  const getEstadoText = (estado: string) => {
+    const map: any = {
+      pendiente: "Pendiente",
+      confirmada: "Confirmada",
+      cancelada: "Cancelada",
+      completada: "Completada"
+    };
+    return map[estado] || estado;
+  };
+
+  const getEstadoColor = (estado: string) => {
+    const map: any = {
+      pendiente: "bg-yellow-500/20 text-yellow-400",
+      confirmada: "bg-blue-500/20 text-blue-400",
+      cancelada: "bg-red-500/20 text-red-400",
+      completada: "bg-green-500/20 text-green-400"
+    };
+    return map[estado] || "bg-gray-500/20 text-gray-400";
+  };
+
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Hora,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Recogida,Transporte,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
+    let csv = "Fecha,Hora,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Recogida,Transporte,Estado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
     ventas.forEach(v => {
-      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -1193,7 +1245,6 @@ export default function Home() {
       case "dashboard":
         return (
           <>
-            {/* Reloj en el Dashboard */}
             <div className="mb-6 flex justify-between items-center">
               <div>
                 <h2 className="text-xl font-bold text-white">Dashboard</h2>
@@ -1232,12 +1283,11 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Resumen rápido del calendario en el Dashboard */}
             <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 mb-8`}>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-white">Proximas Reservas</h3>
                 <button 
-                  onClick={() => setViewMode("calendario")}
+                  onClick={() => setViewMode("reservas")}
                   className="text-sm text-amber-400 hover:text-amber-300 transition-all"
                 >
                   Ver todas →
@@ -1280,7 +1330,7 @@ export default function Home() {
                       excursionId: "",
                       excursionNombre: "",
                       fechaExcursion: "",
-                      horaExcursion: "14:00",
+                      horaExcursion: "02:00 PM",
                       precioAdultoUSD: "",
                       precioNinoUSD: "",
                       costoProveedorAdultoUSD: "",
@@ -1304,6 +1354,7 @@ export default function Home() {
                       nombreGrupo: "",
                       tipoRecogida: "sin_recogida",
                       transporte: "no",
+                      estado: "pendiente",
                       nota: "",
                     });
                     setShowForm(true);
@@ -1317,6 +1368,9 @@ export default function Home() {
                       <p className="text-sm text-white/40">{v.excursionNombre} - {v.cantidadAdultos + v.cantidadNinos} personas - {new Date(v.fechaExcursion).toLocaleDateString("es-DO")} {v.horaExcursion}</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-4">
+                      <span className={`text-xs px-2 py-1 rounded-full ${getEstadoColor(v.estado)}`}>
+                        {getEstadoText(v.estado)}
+                      </span>
                       <span className={`text-xs px-2 py-1 rounded-full ${v.tipoServicio === 'compartido' ? 'bg-purple-500/20 text-purple-400' : v.tipoServicio === 'privado' ? 'bg-orange-500/20 text-orange-400' : 'bg-green-500/20 text-green-400'}`}>
                         {v.tipoServicio === 'compartido' ? 'Compartido' : v.tipoServicio === 'privado' ? 'Privado' : 'Grupo'}
                       </span>
@@ -1331,6 +1385,123 @@ export default function Home() {
               )}
             </div>
           </>
+        );
+
+      case "reservas":
+        const reservasFiltradas = filtroEstadoReserva === "todas" 
+          ? ventas 
+          : ventas.filter(v => v.estado === filtroEstadoReserva);
+        
+        return (
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-white">Gestion de Reservas</h2>
+              <div className="flex items-center gap-3">
+                <select 
+                  value={filtroEstadoReserva}
+                  onChange={(e) => setFiltroEstadoReserva(e.target.value)}
+                  className="px-4 py-2 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm"
+                >
+                  <option value="todas" className="text-slate-900">Todas</option>
+                  <option value="pendiente" className="text-slate-900">Pendientes</option>
+                  <option value="confirmada" className="text-slate-900">Confirmadas</option>
+                  <option value="completada" className="text-slate-900">Completadas</option>
+                  <option value="cancelada" className="text-slate-900">Canceladas</option>
+                </select>
+                <button 
+                  onClick={() => setViewMode("calendario")}
+                  className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}
+                >
+                  Ver Calendario
+                </button>
+              </div>
+            </div>
+            
+            {reservasFiltradas.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-white/40">No hay reservas {filtroEstadoReserva !== "todas" ? `con estado "${getEstadoText(filtroEstadoReserva)}"` : "registradas"}</p>
+                <button onClick={() => {
+                  setEditingVentaId(null);
+                  setSelectedExcursionForVenta(null);
+                  setFormData({
+                    clienteNombre: "",
+                    clienteWhatsapp: "",
+                    clienteEmail: "",
+                    excursionId: "",
+                    excursionNombre: "",
+                    fechaExcursion: "",
+                    horaExcursion: "02:00 PM",
+                    precioAdultoUSD: "",
+                    precioNinoUSD: "",
+                    costoProveedorAdultoUSD: "",
+                    costoProveedorNinoUSD: "",
+                    comisionAdultoUSD: "",
+                    comisionNinoUSD: "",
+                    cantidadAdultos: 1,
+                    cantidadNinos: 0,
+                    precioTotalUSD: "",
+                    costoTotalUSD: "",
+                    comisionTotalUSD: "",
+                    pagoCliente: "completo",
+                    montoPagadoUSD: "",
+                    saldoPendienteUSD: "",
+                    metodoPagoCliente: "efectivo",
+                    proveedorId: "",
+                    proveedorNombre: "",
+                    proveedorPagado: "pendiente",
+                    metodoPagoProveedor: "efectivo",
+                    tipoServicio: "compartido",
+                    nombreGrupo: "",
+                    tipoRecogida: "sin_recogida",
+                    transporte: "no",
+                    estado: "pendiente",
+                    nota: "",
+                  });
+                  setShowForm(true);
+                }} className={`mt-4 bg-gradient-to-r ${buttonGradient} text-slate-900 px-6 py-3 rounded-xl hover:shadow-xl transition-all font-medium`}>Crear nueva reserva</button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Fecha</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Hora</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Cliente</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursion</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Personas</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Estado</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Total</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reservasFiltradas.sort((a, b) => new Date(a.fechaExcursion).getTime() - new Date(b.fechaExcursion).getTime()).map((v) => (
+                      <tr key={v.id} className="border-b border-white/5 hover:bg-white/5">
+                        <td className="px-4 py-3 text-sm text-white/60">{new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</td>
+                        <td className="px-4 py-3 text-sm text-white/60">{v.horaExcursion}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-white">{v.clienteNombre}</td>
+                        <td className="px-4 py-3 text-sm text-white/60">{v.excursionNombre}</td>
+                        <td className="px-4 py-3 text-sm text-white/60">{v.cantidadAdultos + v.cantidadNinos}</td>
+                        <td className="px-4 py-3 text-sm">
+                          <span className={`text-xs px-2 py-1 rounded-full ${getEstadoColor(v.estado)}`}>
+                            {getEstadoText(v.estado)}
+                          </span>
+                        </td>
+                        <td className={`px-4 py-3 text-sm font-bold ${isRaul ? 'text-amber-400' : 'text-pink-300'}`}>{formatUSD(v.precioVentaUSD)}</td>
+                        <td className="px-4 py-3 text-sm">
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => editVenta(v)} className={`${isRaul ? 'text-amber-400 hover:text-amber-300' : 'text-pink-300 hover:text-pink-200'}`}>Editar</button>
+                            <button onClick={() => deleteVenta(v.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>Eliminar</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         );
 
       case "ventas":
@@ -1360,7 +1531,7 @@ export default function Home() {
                     excursionId: "",
                     excursionNombre: "",
                     fechaExcursion: "",
-                    horaExcursion: "14:00",
+                    horaExcursion: "02:00 PM",
                     precioAdultoUSD: "",
                     precioNinoUSD: "",
                     costoProveedorAdultoUSD: "",
@@ -1384,6 +1555,7 @@ export default function Home() {
                     nombreGrupo: "",
                     tipoRecogida: "sin_recogida",
                     transporte: "no",
+                    estado: "pendiente",
                     nota: "",
                   });
                   setShowForm(true);
@@ -1423,7 +1595,7 @@ export default function Home() {
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursion</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Adultos</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Ninos</th>
-                                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Servicio</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Estado</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Venta</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Comision</th>
                                   <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
@@ -1439,8 +1611,8 @@ export default function Home() {
                                     <td className="px-4 py-3 text-sm text-white/60">{v.cantidadAdultos}</td>
                                     <td className="px-4 py-3 text-sm text-white/60">{v.cantidadNinos}</td>
                                     <td className="px-4 py-3 text-sm">
-                                      <span className={`text-xs px-2 py-1 rounded-full ${v.tipoServicio === 'compartido' ? 'bg-purple-500/20 text-purple-400' : v.tipoServicio === 'privado' ? 'bg-orange-500/20 text-orange-400' : 'bg-green-500/20 text-green-400'}`}>
-                                        {v.tipoServicio === 'compartido' ? 'Compartido' : v.tipoServicio === 'privado' ? 'Privado' : 'Grupo'}
+                                      <span className={`text-xs px-2 py-1 rounded-full ${getEstadoColor(v.estado)}`}>
+                                        {getEstadoText(v.estado)}
                                       </span>
                                     </td>
                                     <td className={`px-4 py-3 text-sm font-bold ${isRaul ? 'text-amber-400' : 'text-pink-300'}`}>{formatUSD(v.precioVentaUSD)}</td>
@@ -1680,6 +1852,12 @@ export default function Home() {
                 >
                   Hoy
                 </button>
+                <button 
+                  onClick={() => setViewMode("reservas")}
+                  className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-3 py-1 rounded-lg hover:shadow-xl transition-all text-sm font-medium`}
+                >
+                  Lista
+                </button>
               </div>
             </div>
 
@@ -1767,6 +1945,9 @@ export default function Home() {
                           </p>
                           <p className="text-xs text-white/40">
                             Recogida: {getTipoRecogidaText(v.tipoRecogida)} • Transporte: {getTransporteText(v.transporte)}
+                          </p>
+                          <p className="text-xs text-white/40">
+                            Estado: <span className={`${getEstadoColor(v.estado)}`}>{getEstadoText(v.estado)}</span>
                           </p>
                         </div>
                         <div className="text-right">
@@ -1932,10 +2113,11 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className={`flex flex-wrap gap-2 mb-8 ${cardBg} backdrop-blur-lg rounded-2xl p-2 border border-white/10`}>
-          {["dashboard", "ventas", "clientes", "proveedores", "bancos", "calendario", "excursiones"].map((tab) => {
+          {["dashboard", "ventas", "reservas", "clientes", "proveedores", "bancos", "calendario", "excursiones"].map((tab) => {
             const labels: any = {
               dashboard: "Dashboard",
               ventas: "Ventas",
+              reservas: "Reservas",
               clientes: "Clientes",
               proveedores: "Proveedores",
               bancos: "Bancos",
@@ -1968,7 +2150,7 @@ export default function Home() {
                 excursionId: "",
                 excursionNombre: "",
                 fechaExcursion: "",
-                horaExcursion: "14:00",
+                horaExcursion: "02:00 PM",
                 precioAdultoUSD: "",
                 precioNinoUSD: "",
                 costoProveedorAdultoUSD: "",
@@ -1992,6 +2174,7 @@ export default function Home() {
                 nombreGrupo: "",
                 tipoRecogida: "sin_recogida",
                 transporte: "no",
+                estado: "pendiente",
                 nota: "",
               });
               setShowForm(true);
@@ -2006,7 +2189,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL DE VENTA - CON HORA
+          MODAL DE VENTA - CON HORA AM/PM
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
@@ -2049,7 +2232,7 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Fecha y Hora */}
+              {/* Fecha y Hora con AM/PM */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Fecha Excursion *</label>
@@ -2067,9 +2250,13 @@ export default function Home() {
                     type="time" 
                     required 
                     className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white" 
-                    value={formData.horaExcursion} 
-                    onChange={(e) => setFormData({ ...formData, horaExcursion: e.target.value })} 
+                    value={convertirHora24(formData.horaExcursion)} 
+                    onChange={(e) => {
+                      const hora24 = e.target.value;
+                      setFormData({ ...formData, horaExcursion: formatearHora(hora24) });
+                    }} 
                   />
+                  <p className="text-xs text-white/40 mt-1">Formato 12h: {formData.horaExcursion}</p>
                 </div>
               </div>
 
@@ -2177,6 +2364,22 @@ export default function Home() {
                     readOnly
                   />
                 </div>
+              </div>
+
+              {/* Estado de la Reserva */}
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-1">Estado de la Reserva *</label>
+                <select 
+                  required 
+                  className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
+                  value={formData.estado}
+                  onChange={(e) => setFormData({ ...formData, estado: e.target.value as "pendiente" | "confirmada" | "cancelada" | "completada" })}
+                >
+                  <option value="pendiente" className="text-slate-900">Pendiente</option>
+                  <option value="confirmada" className="text-slate-900">Confirmada</option>
+                  <option value="completada" className="text-slate-900">Completada</option>
+                  <option value="cancelada" className="text-slate-900">Cancelada</option>
+                </select>
               </div>
 
               {/* Tipo de Servicio */}
