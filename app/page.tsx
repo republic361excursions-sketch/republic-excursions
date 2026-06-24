@@ -33,6 +33,8 @@ interface Proveedor {
   tipoCuenta: ("corriente" | "ahorros")[];
   tipoBeneficiario: "personal" | "empresarial";
   beneficiario: string;
+  rncCedula: string;
+  tipoDocumento: "rnc" | "cedula";
   documentos: string;
   nota: string;
 }
@@ -118,6 +120,37 @@ const ZONAS_PUNTA_CANA = [
   "Playa Macao",
   "Playa Bavaro",
   "Playa Uvero Alto"
+];
+
+// ============================================
+// LISTA DE BANCOS DE REPÚBLICA DOMINICANA
+// ============================================
+const BANCOS_RD = [
+  "Banco BHD",
+  "Banreservas",
+  "Banco Popular Dominicano",
+  "Scotiabank",
+  "Banco Santa Cruz",
+  "Banco Vimenca",
+  "Banco ADOPEM",
+  "Banco Caribe",
+  "Banco Multiple",
+  "Bancamérica",
+  "Banco Activo",
+  "Banfondesa",
+  "Banco BDI",
+  "Banco Promerica",
+  "Banco Lafise",
+  "Banesco",
+  "Banco de Ahorro y Crédito",
+  "Banco de Desarrollo",
+  "Banco Nacional",
+  "Banco de la Producción",
+  "Banco de los Trabajadores",
+  "AFP Popular",
+  "AFP Reservas",
+  "AFP Crecer",
+  "AFP Siembra"
 ];
 
 // ============================================
@@ -255,6 +288,8 @@ export default function Home() {
     tipoCuenta: [] as ("corriente" | "ahorros")[],
     tipoBeneficiario: "personal" as "personal" | "empresarial",
     beneficiario: "",
+    rncCedula: "",
+    tipoDocumento: "cedula" as "rnc" | "cedula",
     documentos: "",
     nota: "",
   });
@@ -271,6 +306,81 @@ export default function Home() {
     zona: "",
     capacidad: "",
   });
+
+  // ============================================
+  // FUNCIONES DE FORMATO DE TELÉFONO
+  // ============================================
+  const formatearTelefono = (telefono: string) => {
+    // Eliminar todos los caracteres no numéricos
+    const numeros = telefono.replace(/\D/g, '');
+    
+    // Si tiene 10 dígitos, formatear como (809) 123-4567
+    if (numeros.length === 10) {
+      return `(${numeros.slice(0, 3)}) ${numeros.slice(3, 6)}-${numeros.slice(6, 10)}`;
+    }
+    
+    // Si tiene menos de 10 dígitos, devolver solo los números
+    return numeros;
+  };
+
+  const manejarCambioTelefono = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valor = e.target.value;
+    // Eliminar todos los caracteres no numéricos
+    const numeros = valor.replace(/\D/g, '');
+    
+    // Limitar a 10 dígitos
+    const numerosLimitados = numeros.slice(0, 10);
+    
+    // Formatear el número
+    const telefonoFormateado = formatearTelefono(numerosLimitados);
+    
+    setProveedorFormData(prev => ({
+      ...prev,
+      telefono: telefonoFormateado
+    }));
+  };
+
+  // ============================================
+  // FUNCIONES DE FORMATO DE RNC/CÉDULA
+  // ============================================
+  const formatearRNC = (rnc: string) => {
+    const numeros = rnc.replace(/\D/g, '');
+    if (numeros.length <= 2) return numeros;
+    if (numeros.length <= 9) {
+      return `${numeros.slice(0, 2)}-${numeros.slice(2)}`;
+    }
+    return `${numeros.slice(0, 2)}-${numeros.slice(2, 9)}-${numeros.slice(9, 10)}`;
+  };
+
+  const formatearCedula = (cedula: string) => {
+    const numeros = cedula.replace(/\D/g, '');
+    if (numeros.length <= 3) return numeros;
+    if (numeros.length <= 10) {
+      return `${numeros.slice(0, 3)}-${numeros.slice(3)}`;
+    }
+    return `${numeros.slice(0, 3)}-${numeros.slice(3, 10)}-${numeros.slice(10, 11)}`;
+  };
+
+  const manejarCambioRNCcedula = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valor = e.target.value;
+    const numeros = valor.replace(/\D/g, '');
+    
+    let formateado = numeros;
+    if (proveedorFormData.tipoDocumento === "rnc") {
+      // RNC: XX-XXXXXXX-X (11 dígitos)
+      const numerosLimitados = numeros.slice(0, 11);
+      formateado = formatearRNC(numerosLimitados);
+    } else {
+      // Cédula: XXX-XXXXXXX-X (11 dígitos)
+      const numerosLimitados = numeros.slice(0, 11);
+      formateado = formatearCedula(numerosLimitados);
+    }
+    
+    setProveedorFormData(prev => ({
+      ...prev,
+      rncCedula: formateado
+    }));
+  };
 
   // ============================================
   // FUNCIONES DE HORA
@@ -333,10 +443,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v24");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v24");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v24");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v24");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v25");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v25");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v25");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v25");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -346,22 +456,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v24", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v25", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v24", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v25", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v24", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v25", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v24", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v25", JSON.stringify(data));
   };
 
   // ============================================
@@ -426,6 +536,8 @@ export default function Home() {
         tipoCuenta: ["corriente"],
         tipoBeneficiario: "personal",
         beneficiario: "",
+        rncCedula: "",
+        tipoDocumento: "cedula",
         documentos: "",
         nota: "",
       };
@@ -508,6 +620,8 @@ export default function Home() {
               tipoCuenta: proveedorFormData.tipoCuenta,
               tipoBeneficiario: proveedorFormData.tipoBeneficiario,
               beneficiario: proveedorFormData.beneficiario,
+              rncCedula: proveedorFormData.rncCedula,
+              tipoDocumento: proveedorFormData.tipoDocumento,
               documentos: proveedorFormData.documentos,
               nota: proveedorFormData.nota,
             }
@@ -561,6 +675,8 @@ export default function Home() {
       tipoCuenta: [],
       tipoBeneficiario: "personal",
       beneficiario: "",
+      rncCedula: "",
+      tipoDocumento: "cedula",
       documentos: "",
       nota: "",
     });
@@ -593,6 +709,8 @@ export default function Home() {
       tipoCuenta: proveedor.tipoCuenta || [],
       tipoBeneficiario: proveedor.tipoBeneficiario || "personal",
       beneficiario: proveedor.beneficiario,
+      rncCedula: proveedor.rncCedula || "",
+      tipoDocumento: proveedor.tipoDocumento || "cedula",
       documentos: proveedor.documentos,
       nota: proveedor.nota,
     });
@@ -2011,6 +2129,8 @@ export default function Home() {
                 tipoCuenta: [],
                 tipoBeneficiario: "personal",
                 beneficiario: "",
+                rncCedula: "",
+                tipoDocumento: "cedula",
                 documentos: "",
                 nota: "",
               });
@@ -2057,6 +2177,9 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-2 text-white/60">
                     <span>Email</span> {p.email || "Sin email"}
+                  </div>
+                  <div className="flex items-center gap-2 text-white/60">
+                    <span>RNC/Cédula</span> {p.rncCedula || "Sin documento"}
                   </div>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {p.metodosPago.map(m => (
@@ -2163,6 +2286,9 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-2 text-white/60">
                     <span>Beneficiario</span> {p.beneficiario || "Sin beneficiario"}
+                  </div>
+                  <div className="flex items-center gap-2 text-white/60">
+                    <span>RNC/Cédula</span> {p.rncCedula || "Sin documento"}
                   </div>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {p.tipoCuenta.map(t => (
@@ -2916,11 +3042,13 @@ export default function Home() {
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Telefono</label>
                     <input
-                      type="text"
+                      type="tel"
                       value={proveedorFormData.telefono}
-                      onChange={(e) => setProveedorFormData(prev => ({ ...prev, telefono: e.target.value }))}
+                      onChange={manejarCambioTelefono}
+                      placeholder="(829) 537-4530"
                       className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
                     />
+                    <p className="text-[10px] text-white/30 mt-1">Formato: (809) 123-4567</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
@@ -2956,12 +3084,16 @@ export default function Home() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Banco</label>
-                    <input
-                      type="text"
+                    <select
                       value={proveedorFormData.banco}
                       onChange={(e) => setProveedorFormData(prev => ({ ...prev, banco: e.target.value }))}
                       className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
-                    />
+                    >
+                      <option value="">Seleccionar banco</option>
+                      {BANCOS_RD.map(b => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-1">Numero de Cuenta</label>
@@ -3027,6 +3159,44 @@ export default function Home() {
                       onChange={(e) => setProveedorFormData(prev => ({ ...prev, beneficiario: e.target.value }))}
                       className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Documento</label>
+                    <select
+                      value={proveedorFormData.tipoDocumento}
+                      onChange={(e) => {
+                        const tipo = e.target.value as "rnc" | "cedula";
+                        setProveedorFormData(prev => ({ 
+                          ...prev, 
+                          tipoDocumento: tipo,
+                          rncCedula: "" 
+                        }));
+                      }}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
+                    >
+                      <option value="rnc">RNC</option>
+                      <option value="cedula">Cédula</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">
+                      {proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cédula"}
+                    </label>
+                    <input
+                      type="text"
+                      value={proveedorFormData.rncCedula}
+                      onChange={manejarCambioRNCcedula}
+                      placeholder={proveedorFormData.tipoDocumento === "rnc" ? "XX-XXXXXXX-X" : "XXX-XXXXXXX-X"}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
+                    />
+                    <p className="text-[10px] text-white/30 mt-1">
+                      {proveedorFormData.tipoDocumento === "rnc" 
+                        ? "Formato: XX-XXXXXXX-X (11 dígitos)" 
+                        : "Formato: XXX-XXXXXXX-X (11 dígitos)"}
+                    </p>
                   </div>
                 </div>
 
