@@ -57,6 +57,8 @@ interface Venta {
   proveedorPagado: "pendiente" | "pagado";
   metodoPagoProveedor: "efectivo" | "transferencia" | "paypal";
   tipoCliente: "adulto" | "nino";
+  tipoServicio: "compartido" | "privado";
+  grupoPrivado?: number;
   cantidadPersonas: number;
   nota: string;
 }
@@ -87,6 +89,18 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones">("dashboard");
   const [selectedExcursionForVenta, setSelectedExcursionForVenta] = useState<Excursion | null>(null);
 
+  // Excursiones temporales para el formulario de proveedor
+  const [tempExcursiones, setTempExcursiones] = useState<Omit<Excursion, "id" | "proveedorId" | "proveedorNombre">[]>([]);
+  const [tempExcursionForm, setTempExcursionForm] = useState({
+    nombre: "",
+    precioVentaUSD: "",
+    costoProveedorUSD: "",
+    comisionUSD: "",
+    tipoCliente: "adulto" as "adulto" | "nino",
+    zona: "",
+    capacidad: "",
+  });
+
   const [formData, setFormData] = useState({
     clienteNombre: "",
     clienteWhatsapp: "",
@@ -106,6 +120,8 @@ export default function Home() {
     proveedorPagado: "pendiente" as "pendiente" | "pagado",
     metodoPagoProveedor: "efectivo" as "efectivo" | "transferencia" | "paypal",
     tipoCliente: "adulto" as "adulto" | "nino",
+    tipoServicio: "compartido" as "compartido" | "privado",
+    grupoPrivado: "",
     cantidadPersonas: 1,
     nota: "",
   });
@@ -145,7 +161,7 @@ export default function Home() {
       setLoginError("");
       return true;
     } else {
-      setLoginError("Usuario o contraseña incorrectos");
+      setLoginError("Usuario o contrasena incorrectos");
       return false;
     }
   };
@@ -160,10 +176,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v8");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v8");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v8");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v8");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v10");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v10");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v10");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v10");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -173,22 +189,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v8", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v10", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v8", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v10", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v8", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v10", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v8", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v10", JSON.stringify(data));
   };
 
   // ============================================
@@ -199,10 +215,12 @@ export default function Home() {
   };
 
   // ============================================
-  // HANDLE PROVEEDOR
+  // HANDLE PROVEEDOR CON EXCURSIONES
   // ============================================
   const handleProveedorSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const proveedorId = editingProveedorId || Date.now().toString();
     
     if (editingProveedorId) {
       const updated = proveedores.map(p => 
@@ -211,14 +229,37 @@ export default function Home() {
           : p
       );
       saveProveedores(updated);
-      alert("Proveedor actualizado correctamente");
+      
+      const excursionesSinViejas = excursiones.filter(e => e.proveedorId !== editingProveedorId);
+      
+      const nuevasExcursiones = tempExcursiones.map((e, index) => ({
+        id: Date.now().toString() + index,
+        ...e,
+        proveedorId: editingProveedorId,
+        proveedorNombre: proveedorFormData.nombre,
+      }));
+      
+      saveExcursiones([...excursionesSinViejas, ...nuevasExcursiones]);
+      alert("Proveedor y excursiones actualizados correctamente");
     } else {
       const nuevoProveedor: Proveedor = {
-        id: Date.now().toString(),
+        id: proveedorId,
         ...proveedorFormData,
       };
       saveProveedores([...proveedores, nuevoProveedor]);
-      alert("Proveedor agregado correctamente");
+      
+      const nuevasExcursiones = tempExcursiones.map((e, index) => ({
+        id: Date.now().toString() + index,
+        ...e,
+        proveedorId: proveedorId,
+        proveedorNombre: proveedorFormData.nombre,
+      }));
+      
+      if (nuevasExcursiones.length > 0) {
+        saveExcursiones([...excursiones, ...nuevasExcursiones]);
+      }
+      
+      alert("Proveedor y excursiones agregados correctamente");
     }
     
     setShowProveedorForm(false);
@@ -229,6 +270,16 @@ export default function Home() {
       email: "",
       metodoPago: "efectivo",
       nota: "",
+    });
+    setTempExcursiones([]);
+    setTempExcursionForm({
+      nombre: "",
+      precioVentaUSD: "",
+      costoProveedorUSD: "",
+      comisionUSD: "",
+      tipoCliente: "adulto",
+      zona: "",
+      capacidad: "",
     });
   };
 
@@ -241,6 +292,18 @@ export default function Home() {
       metodoPago: proveedor.metodoPago,
       nota: proveedor.nota,
     });
+    
+    const excursionesDelProveedor = excursiones.filter(e => e.proveedorId === proveedor.id);
+    setTempExcursiones(excursionesDelProveedor.map(e => ({
+      nombre: e.nombre,
+      precioVentaUSD: e.precioVentaUSD,
+      costoProveedorUSD: e.costoProveedorUSD,
+      comisionUSD: e.comisionUSD,
+      tipoCliente: e.tipoCliente,
+      zona: e.zona || "",
+      capacidad: e.capacidad || "",
+    })));
+    
     setShowProveedorForm(true);
   };
 
@@ -253,7 +316,57 @@ export default function Home() {
   };
 
   // ============================================
-  // HANDLE EXCURSION
+  // MANEJAR EXCURSIONES TEMPORALES DEL PROVEEDOR
+  // ============================================
+  const agregarTempExcursion = () => {
+    if (!tempExcursionForm.nombre) {
+      alert("Debes escribir el nombre de la excursion");
+      return;
+    }
+    
+    const precioVentaUSD = parseFloat(tempExcursionForm.precioVentaUSD) || 0;
+    const costoProveedorUSD = parseFloat(tempExcursionForm.costoProveedorUSD) || 0;
+    const comisionUSD = calcularComision(precioVentaUSD, costoProveedorUSD);
+    
+    setTempExcursiones([
+      ...tempExcursiones,
+      {
+        nombre: tempExcursionForm.nombre,
+        precioVentaUSD,
+        costoProveedorUSD,
+        comisionUSD,
+        tipoCliente: tempExcursionForm.tipoCliente,
+        zona: tempExcursionForm.zona || undefined,
+        capacidad: tempExcursionForm.capacidad || undefined,
+      }
+    ]);
+    
+    setTempExcursionForm({
+      nombre: "",
+      precioVentaUSD: "",
+      costoProveedorUSD: "",
+      comisionUSD: "",
+      tipoCliente: "adulto",
+      zona: "",
+      capacidad: "",
+    });
+  };
+
+  const eliminarTempExcursion = (index: number) => {
+    setTempExcursiones(tempExcursiones.filter((_, i) => i !== index));
+  };
+
+  const handleTempExcursionChange = (campo: "precioVentaUSD" | "costoProveedorUSD", valor: string) => {
+    const newData = { ...tempExcursionForm, [campo]: valor };
+    const pv = parseFloat(newData.precioVentaUSD) || 0;
+    const cp = parseFloat(newData.costoProveedorUSD) || 0;
+    const comision = calcularComision(pv, cp);
+    newData.comisionUSD = comision.toString();
+    setTempExcursionForm(newData);
+  };
+
+  // ============================================
+  // HANDLE EXCURSION (INDEPENDIENTE)
   // ============================================
   const handleExcursionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -378,6 +491,7 @@ export default function Home() {
     const comisionUSD = calcularComision(precioVentaUSD, costoProveedorUSD);
     const montoPagadoUSD = parseFloat(formData.montoPagadoUSD) || 0;
     const cantidad = parseInt(formData.cantidadPersonas.toString()) || 1;
+    const grupoPrivado = formData.tipoServicio === "privado" ? parseInt(formData.grupoPrivado) || 0 : undefined;
     
     const precioTotal = precioVentaUSD * cantidad;
     const costoTotal = costoProveedorUSD * cantidad;
@@ -412,6 +526,8 @@ export default function Home() {
       proveedorPagado: formData.proveedorPagado,
       metodoPagoProveedor: formData.metodoPagoProveedor,
       tipoCliente: formData.tipoCliente,
+      tipoServicio: formData.tipoServicio,
+      grupoPrivado: grupoPrivado,
       cantidadPersonas: cantidad,
       nota: formData.nota,
     };
@@ -447,6 +563,8 @@ export default function Home() {
       proveedorPagado: "pendiente",
       metodoPagoProveedor: "efectivo",
       tipoCliente: "adulto",
+      tipoServicio: "compartido",
+      grupoPrivado: "",
       cantidadPersonas: 1,
       nota: "",
     });
@@ -506,18 +624,6 @@ export default function Home() {
   };
 
   // ============================================
-  // CALCULAR COMISION EN FORMULARIO DE EXCURSION
-  // ============================================
-  const handleExcursionPrecioChange = (campo: "precioVentaUSD" | "costoProveedorUSD", valor: string) => {
-    const newData = { ...excursionFormData, [campo]: valor };
-    const pv = parseFloat(newData.precioVentaUSD) || 0;
-    const cp = parseFloat(newData.costoProveedorUSD) || 0;
-    const comision = calcularComision(pv, cp);
-    newData.comisionUSD = comision.toString();
-    setExcursionFormData(newData);
-  };
-
-  // ============================================
   // ACTUALIZAR PRECIO VENTA EN FORMULARIO DE VENTA
   // ============================================
   const handleVentaPrecioChange = (valor: string) => {
@@ -566,6 +672,8 @@ export default function Home() {
       proveedorPagado: venta.proveedorPagado,
       metodoPagoProveedor: venta.metodoPagoProveedor,
       tipoCliente: venta.tipoCliente,
+      tipoServicio: venta.tipoServicio,
+      grupoPrivado: venta.grupoPrivado?.toString() || "",
       cantidadPersonas: venta.cantidadPersonas,
       nota: venta.nota,
     });
@@ -652,9 +760,9 @@ export default function Home() {
 
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Cliente,Excursion,Cantidad,Tipo,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
+    let csv = "Fecha,Cliente,Excursion,Cantidad,Tipo,Servicio,Grupo Privado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
     ventas.forEach(v => {
-      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadPersonas},"${v.tipoCliente}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadPersonas},"${v.tipoCliente}","${v.tipoServicio}",${v.grupoPrivado || 0},${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -827,6 +935,8 @@ export default function Home() {
                   proveedorPagado: "pendiente",
                   metodoPagoProveedor: "efectivo",
                   tipoCliente: "adulto",
+                  tipoServicio: "compartido",
+                  grupoPrivado: "",
                   cantidadPersonas: 1,
                   nota: "",
                 });
@@ -891,6 +1001,8 @@ export default function Home() {
                         proveedorPagado: "pendiente",
                         metodoPagoProveedor: "efectivo",
                         tipoCliente: "adulto",
+                        tipoServicio: "compartido",
+                        grupoPrivado: "",
                         cantidadPersonas: 1,
                         nota: "",
                       });
@@ -902,18 +1014,20 @@ export default function Home() {
                     <div key={v.id} className="flex flex-wrap items-center justify-between py-3 border-b border-white/5 last:border-0">
                       <div>
                         <p className="font-medium text-white">{v.clienteNombre}</p>
-                        <p className="text-sm text-white/40">{v.excursionNombre} - {v.cantidadPersonas} {v.cantidadPersonas === 1 ? 'persona' : 'personas'} - {new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</p>
+                        <p className="text-sm text-white/40">{v.excursionNombre} - {v.cantidadPersonas} personas - {new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</p>
                       </div>
                       <div className="flex flex-wrap items-center gap-4">
                         <span className={`text-xs px-2 py-1 rounded-full ${v.tipoCliente === 'adulto' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
                           {v.tipoCliente === 'adulto' ? 'Adulto' : 'Nino'}
+                        </span>
+                        <span className={`text-xs px-2 py-1 rounded-full ${v.tipoServicio === 'compartido' ? 'bg-purple-500/20 text-purple-400' : 'bg-orange-500/20 text-orange-400'}`}>
+                          {v.tipoServicio === 'compartido' ? 'Compartido' : 'Privado'}
                         </span>
                         <span className={`text-xs px-2 py-1 rounded-full ${v.pagoCliente === 'completo' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
                           {getPagoClienteText(v.pagoCliente)}
                         </span>
                         <span className={`text-sm font-bold ${isRaul ? 'text-amber-400' : 'text-pink-300'}`}>{formatUSD(v.precioVentaUSD)}</span>
                         <span className="text-xs text-green-400">+{formatUSD(v.comisionUSD)}</span>
-                        <span className={`text-xs ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>-{formatUSD(v.costoProveedorUSD)}</span>
                       </div>
                     </div>
                   ))
@@ -961,6 +1075,8 @@ export default function Home() {
                       proveedorPagado: "pendiente",
                       metodoPagoProveedor: "efectivo",
                       tipoCliente: "adulto",
+                      tipoServicio: "compartido",
+                      grupoPrivado: "",
                       cantidadPersonas: 1,
                       nota: "",
                     });
@@ -1000,8 +1116,8 @@ export default function Home() {
                                     <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursion</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Cant</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Tipo</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Venta (USD)</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Costo (USD)</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Servicio</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Venta</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Comision</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
                                   </tr>
@@ -1018,8 +1134,12 @@ export default function Home() {
                                           {v.tipoCliente === 'adulto' ? 'Adulto' : 'Nino'}
                                         </span>
                                       </td>
+                                      <td className="px-4 py-3 text-sm">
+                                        <span className={`text-xs px-2 py-1 rounded-full ${v.tipoServicio === 'compartido' ? 'bg-purple-500/20 text-purple-400' : 'bg-orange-500/20 text-orange-400'}`}>
+                                          {v.tipoServicio === 'compartido' ? 'Compartido' : 'Privado'}
+                                        </span>
+                                      </td>
                                       <td className={`px-4 py-3 text-sm font-bold ${isRaul ? 'text-amber-400' : 'text-pink-300'}`}>{formatUSD(v.precioVentaUSD)}</td>
-                                      <td className={`px-4 py-3 text-sm font-bold ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>{formatUSD(v.costoProveedorUSD)}</td>
                                       <td className="px-4 py-3 text-sm font-bold text-green-400">{formatUSD(v.comisionUSD)}</td>
                                       <td className="px-4 py-3 text-sm">
                                         <div className="flex items-center gap-2">
@@ -1032,9 +1152,8 @@ export default function Home() {
                                 </tbody>
                                 <tfoot className="bg-white/5">
                                   <tr>
-                                    <td colSpan={5} className="px-4 py-3 text-right font-medium text-white/60">Totales del mes:</td>
+                                    <td colSpan={6} className="px-4 py-3 text-right font-medium text-white/60">Totales del mes:</td>
                                     <td className={`px-4 py-3 font-bold ${isRaul ? 'text-amber-400' : 'text-pink-300'}`}>{formatUSD(group.totalUSD)}</td>
-                                    <td className={`px-4 py-3 font-bold ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>{formatUSD(group.totalCosto)}</td>
                                     <td className="px-4 py-3 font-bold text-green-400">{formatUSD(group.totalComision)}</td>
                                     <td></td>
                                   </tr>
@@ -1106,6 +1225,16 @@ export default function Home() {
                     email: "",
                     metodoPago: "efectivo",
                     nota: "",
+                  });
+                  setTempExcursiones([]);
+                  setTempExcursionForm({
+                    nombre: "",
+                    precioVentaUSD: "",
+                    costoProveedorUSD: "",
+                    comisionUSD: "",
+                    tipoCliente: "adulto",
+                    zona: "",
+                    capacidad: "",
                   });
                   setShowProveedorForm(true);
                 }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>+ Agregar Proveedor</button>
@@ -1243,6 +1372,200 @@ export default function Home() {
         </main>
 
         {/* ============================================
+            MODAL DE PROVEEDOR CON EXCURSIONES
+        ============================================ */}
+        {showProveedorForm && (
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
+            <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto border border-white/10">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-white">{editingProveedorId ? "Editar Proveedor" : "Nuevo Proveedor"}</h2>
+                <button onClick={() => setShowProveedorForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
+              </div>
+              <form onSubmit={handleProveedorSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Proveedor *</label>
+                  <input 
+                    type="text" 
+                    value={proveedorFormData.nombre}
+                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, nombre: e.target.value })}
+                    required 
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                    placeholder="Ej: Dominican Way Travel" 
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Telefono</label>
+                    <input 
+                      type="text" 
+                      value={proveedorFormData.telefono}
+                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, telefono: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                      placeholder="809-000-0000" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
+                    <input 
+                      type="email" 
+                      value={proveedorFormData.email}
+                      onChange={(e) => setProveedorFormData({ ...proveedorFormData, email: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                      placeholder="info@proveedor.com" 
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago</label>
+                  <select 
+                    value={proveedorFormData.metodoPago}
+                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, metodoPago: e.target.value as "efectivo" | "transferencia" | "paypal" })}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
+                  >
+                    <option value="efectivo" className="text-slate-900">Efectivo</option>
+                    <option value="transferencia" className="text-slate-900">Transferencia</option>
+                    <option value="paypal" className="text-slate-900">PayPal</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Nota</label>
+                  <textarea 
+                    value={proveedorFormData.nota}
+                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, nota: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                    placeholder="Detalles del proveedor..." 
+                    rows={2}
+                  />
+                </div>
+
+                {/* EXCURSIONES DEL PROVEEDOR */}
+                <div className="border-t border-white/10 pt-4">
+                  <h3 className="text-lg font-semibold text-white mb-3">Excursiones de este Proveedor</h3>
+                  
+                  {/* Lista de excursiones temporales */}
+                  {tempExcursiones.length > 0 && (
+                    <div className="mb-4">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-white/10">
+                              <th className="px-2 py-2 text-left text-white/60">Nombre</th>
+                              <th className="px-2 py-2 text-left text-white/60">Precio Venta</th>
+                              <th className="px-2 py-2 text-left text-white/60">Costo Prov.</th>
+                              <th className="px-2 py-2 text-left text-white/60">Comision</th>
+                              <th className="px-2 py-2 text-left text-white/60">Tipo</th>
+                              <th className="px-2 py-2 text-left text-white/60">Accion</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {tempExcursiones.map((e, index) => (
+                              <tr key={index} className="border-b border-white/5">
+                                <td className="px-2 py-2 text-white">{e.nombre}</td>
+                                <td className="px-2 py-2 text-amber-400">{formatUSD(e.precioVentaUSD)}</td>
+                                <td className="px-2 py-2 text-red-400">{formatUSD(e.costoProveedorUSD)}</td>
+                                <td className="px-2 py-2 text-green-400">{formatUSD(e.comisionUSD)}</td>
+                                <td className="px-2 py-2">
+                                  <span className={`text-xs px-2 py-1 rounded-full ${e.tipoCliente === 'adulto' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
+                                    {e.tipoCliente === 'adulto' ? 'Adulto' : 'Nino'}
+                                  </span>
+                                </td>
+                                <td className="px-2 py-2">
+                                  <button type="button" onClick={() => eliminarTempExcursion(index)} className="text-red-400 hover:text-red-300">Eliminar</button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Formulario para agregar excursion temporal */}
+                  <div className="grid grid-cols-2 gap-3 p-3 bg-white/5 rounded-xl">
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1">Nombre Excursion *</label>
+                      <input 
+                        type="text" 
+                        value={tempExcursionForm.nombre}
+                        onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, nombre: e.target.value })}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                        placeholder="Isla Saona - Bavaro" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1">Tipo</label>
+                      <select 
+                        value={tempExcursionForm.tipoCliente}
+                        onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, tipoCliente: e.target.value as "adulto" | "nino" })}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm"
+                      >
+                        <option value="adulto" className="text-slate-900">Adulto</option>
+                        <option value="nino" className="text-slate-900">Nino</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1">Precio Venta (USD)</label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        value={tempExcursionForm.precioVentaUSD}
+                        onChange={(e) => handleTempExcursionChange("precioVentaUSD", e.target.value)}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                        placeholder="99.00" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1">Costo Proveedor (USD)</label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        value={tempExcursionForm.costoProveedorUSD}
+                        onChange={(e) => handleTempExcursionChange("costoProveedorUSD", e.target.value)}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                        placeholder="55.00" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1">Zona</label>
+                      <input 
+                        type="text" 
+                        value={tempExcursionForm.zona}
+                        onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, zona: e.target.value })}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                        placeholder="Bavaro" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1">Capacidad</label>
+                      <input 
+                        type="text" 
+                        value={tempExcursionForm.capacidad}
+                        onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, capacidad: e.target.value })}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                        placeholder="2 personas" 
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <button 
+                        type="button" 
+                        onClick={agregarTempExcursion}
+                        className="w-full bg-blue-500/20 text-blue-400 py-2 rounded-lg hover:bg-blue-500/30 transition-all text-sm font-medium"
+                      >
+                        + Agregar Excursion
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>
+                  {editingProveedorId ? "Actualizar Proveedor" : "Guardar Proveedor"}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================
             MODAL DE VENTA
         ============================================ */}
         {showForm && (
@@ -1338,6 +1661,54 @@ export default function Home() {
                     />
                   </div>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Cliente *</label>
+                    <select 
+                      required 
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
+                      value={formData.tipoCliente}
+                      onChange={(e) => setFormData({ ...formData, tipoCliente: e.target.value as "adulto" | "nino" })}
+                    >
+                      <option value="adulto" className="text-slate-900">Adulto</option>
+                      <option value="nino" className="text-slate-900">Nino</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Servicio *</label>
+                    <select 
+                      required 
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
+                      value={formData.tipoServicio}
+                      onChange={(e) => {
+                        const value = e.target.value as "compartido" | "privado";
+                        setFormData({ 
+                          ...formData, 
+                          tipoServicio: value,
+                          grupoPrivado: value === "privado" ? formData.grupoPrivado : ""
+                        });
+                      }}
+                    >
+                      <option value="compartido" className="text-slate-900">Compartido</option>
+                      <option value="privado" className="text-slate-900">Privado</option>
+                    </select>
+                  </div>
+                </div>
+
+                {formData.tipoServicio === "privado" && (
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Grupo Privado (capacidad)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
+                      placeholder="Numero de personas en el grupo privado"
+                      value={formData.grupoPrivado}
+                      onChange={(e) => setFormData({ ...formData, grupoPrivado: e.target.value })}
+                    />
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -1456,7 +1827,16 @@ export default function Home() {
                       type="number" 
                       step="0.01"
                       value={excursionFormData.precioVentaUSD}
-                      onChange={(e) => handleExcursionPrecioChange("precioVentaUSD", e.target.value)}
+                      onChange={(e) => {
+                        const pv = e.target.value;
+                        const cp = excursionFormData.costoProveedorUSD;
+                        const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
+                        setExcursionFormData({ 
+                          ...excursionFormData, 
+                          precioVentaUSD: pv,
+                          comisionUSD: comision.toString()
+                        });
+                      }}
                       required 
                       className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
                       placeholder="99.00" 
@@ -1468,7 +1848,16 @@ export default function Home() {
                       type="number" 
                       step="0.01"
                       value={excursionFormData.costoProveedorUSD}
-                      onChange={(e) => handleExcursionPrecioChange("costoProveedorUSD", e.target.value)}
+                      onChange={(e) => {
+                        const cp = e.target.value;
+                        const pv = excursionFormData.precioVentaUSD;
+                        const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
+                        setExcursionFormData({ 
+                          ...excursionFormData, 
+                          costoProveedorUSD: cp,
+                          comisionUSD: comision.toString()
+                        });
+                      }}
                       required 
                       className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
                       placeholder="55.00" 
@@ -1506,78 +1895,6 @@ export default function Home() {
                 </div>
                 <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>
                   {editingExcursionId ? "Actualizar Excursion" : "Guardar Excursion"}
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* ============================================
-            MODAL DE PROVEEDOR
-        ============================================ */}
-        {showProveedorForm && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
-            <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">{editingProveedorId ? "Editar Proveedor" : "Nuevo Proveedor"}</h2>
-                <button onClick={() => setShowProveedorForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
-              </div>
-              <form onSubmit={handleProveedorSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Proveedor *</label>
-                  <input 
-                    type="text" 
-                    value={proveedorFormData.nombre}
-                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, nombre: e.target.value })}
-                    required 
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="Ej: Dominican Way Travel" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Telefono</label>
-                  <input 
-                    type="text" 
-                    value={proveedorFormData.telefono}
-                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, telefono: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="809-000-0000" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
-                  <input 
-                    type="email" 
-                    value={proveedorFormData.email}
-                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="info@proveedor.com" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago</label>
-                  <select 
-                    value={proveedorFormData.metodoPago}
-                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, metodoPago: e.target.value as "efectivo" | "transferencia" | "paypal" })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
-                  >
-                    <option value="efectivo" className="text-slate-900">Efectivo</option>
-                    <option value="transferencia" className="text-slate-900">Transferencia</option>
-                    <option value="paypal" className="text-slate-900">PayPal</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Nota</label>
-                  <textarea 
-                    value={proveedorFormData.nota}
-                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, nota: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
-                    placeholder="Detalles del proveedor..." 
-                    rows={2}
-                  />
-                </div>
-                <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>
-                  {editingProveedorId ? "Actualizar Proveedor" : "Guardar Proveedor"}
                 </button>
               </form>
             </div>
