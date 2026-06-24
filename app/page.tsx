@@ -8,8 +8,8 @@ import { useState, useEffect } from "react";
 interface Excursion {
   id: string;
   nombre: string;
-  precioProveedor: number;
-  precioCliente: number;
+  precioProveedor: number; // En DÓLARES
+  precioCliente: number; // En DÓLARES
   ganancia: number;
 }
 
@@ -22,7 +22,6 @@ interface Proveedor {
   precioCompra: number;
   metodoPago: "efectivo" | "transferencia" | "paypal";
   pagoStatus: "pendiente" | "pagado";
-  fechaPago?: string;
   nota: string;
 }
 
@@ -38,16 +37,15 @@ interface Cliente {
 
 interface Venta {
   id: string;
-  clienteId: string;
   clienteNombre: string;
   clienteWhatsapp: string;
   clienteEmail: string;
   excursionId: string;
   excursionNombre: string;
   fechaExcursion: string;
-  precioVenta: number;
-  precioCompra: number;
-  ganancia: number;
+  precioVenta: number; // En DÓLARES
+  precioCompra: number; // En DÓLARES
+  ganancia: number; // En DÓLARES
   pagoCliente: "completo" | "deposito_25" | "pago_dia";
   montoPagado: number;
   saldoPendiente: number;
@@ -59,6 +57,9 @@ interface Venta {
   nota: string;
 }
 
+// ============================================
+// COMPONENTE PRINCIPAL
+// ============================================
 export default function Home() {
   const [ventas, setVentas] = useState<Venta[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -75,6 +76,9 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones">("dashboard");
 
+  // ============================================
+  // FORMULARIO - TODOS LOS CAMPOS EDITABLES
+  // ============================================
   const [formData, setFormData] = useState({
     clienteNombre: "",
     clienteWhatsapp: "",
@@ -95,6 +99,9 @@ export default function Home() {
     nota: "",
   });
 
+  // ============================================
+  // CARGAR DATOS
+  // ============================================
   useEffect(() => {
     const savedVentas = localStorage.getItem("excursiones_ventas");
     const savedClientes = localStorage.getItem("excursiones_clientes");
@@ -107,6 +114,9 @@ export default function Home() {
     if (savedExcursiones) setExcursiones(JSON.parse(savedExcursiones));
   }, []);
 
+  // ============================================
+  // GUARDAR DATOS
+  // ============================================
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
     localStorage.setItem("excursiones_ventas", JSON.stringify(data));
@@ -127,6 +137,9 @@ export default function Home() {
     localStorage.setItem("excursiones_excursiones", JSON.stringify(data));
   };
 
+  // ============================================
+  // AGREGAR EXCURSIÓN
+  // ============================================
   const handleExcursionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -148,6 +161,9 @@ export default function Home() {
     alert("✅ Excursión agregada");
   };
 
+  // ============================================
+  // AGREGAR PROVEEDOR
+  // ============================================
   const handleProveedorSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -173,6 +189,9 @@ export default function Home() {
     alert("✅ Proveedor agregado");
   };
 
+  // ============================================
+  // AGREGAR CLIENTE
+  // ============================================
   const handleClienteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -196,9 +215,20 @@ export default function Home() {
     alert("✅ Cliente agregado");
   };
 
+  // ============================================
+  // CALCULAR GANANCIA AUTOMÁTICAMENTE
+  // ============================================
+  const calcularGanancia = (venta: string, compra: string) => {
+    const v = parseFloat(venta) || 0;
+    const c = parseFloat(compra) || 0;
+    return (v - c).toString();
+  };
+
+  // ============================================
+  // GUARDAR VENTA
+  // ============================================
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const fecha = new Date(formData.fechaExcursion);
     const precioVenta = parseFloat(formData.precioVenta);
     const precioCompra = parseFloat(formData.precioCompra);
     const ganancia = precioVenta - precioCompra;
@@ -213,17 +243,13 @@ export default function Home() {
       saldoPendiente = precioVenta;
     }
 
-    const excursion = excursiones.find(e => e.id === formData.excursionId);
-    const proveedor = proveedores.find(p => p.id === formData.proveedorId);
-
     const nuevaVenta: Venta = {
       id: editingId || Date.now().toString(),
-      clienteId: "",
       clienteNombre: formData.clienteNombre,
       clienteWhatsapp: formData.clienteWhatsapp,
       clienteEmail: formData.clienteEmail,
       excursionId: formData.excursionId,
-      excursionNombre: excursion?.nombre || formData.excursionNombre,
+      excursionNombre: formData.excursionNombre,
       fechaExcursion: formData.fechaExcursion,
       precioVenta,
       precioCompra,
@@ -233,7 +259,7 @@ export default function Home() {
       saldoPendiente,
       metodoPagoCliente: formData.metodoPagoCliente,
       proveedorId: formData.proveedorId,
-      proveedorNombre: proveedor?.nombre || formData.proveedorNombre,
+      proveedorNombre: formData.proveedorNombre,
       proveedorPagado: formData.proveedorPagado,
       metodoPagoProveedor: formData.metodoPagoProveedor,
       nota: formData.nota,
@@ -244,20 +270,6 @@ export default function Home() {
       saveVentas(updated);
     } else {
       saveVentas([...ventas, nuevaVenta]);
-    }
-
-    const clienteExistente = clientes.find(c => c.nombre === formData.clienteNombre);
-    if (!clienteExistente && formData.clienteNombre) {
-      const nuevoCliente: Cliente = {
-        id: Date.now().toString(),
-        nombre: formData.clienteNombre,
-        whatsapp: formData.clienteWhatsapp,
-        email: formData.clienteEmail,
-        excursionId: formData.excursionId,
-        excursionNombre: excursion?.nombre || formData.excursionNombre,
-        fechaExcursion: formData.fechaExcursion,
-      };
-      saveClientes([...clientes, nuevoCliente]);
     }
 
     resetForm();
@@ -288,6 +300,9 @@ export default function Home() {
     setEditingId(null);
   };
 
+  // ============================================
+  // SELECCIONAR EXCURSIÓN - CARGA AUTOMÁTICA
+  // ============================================
   const selectExcursion = (excursionId: string) => {
     const excursion = excursiones.find(e => e.id === excursionId);
     if (excursion) {
@@ -304,6 +319,17 @@ export default function Home() {
         proveedorNombre: proveedor?.nombre || "",
       });
     }
+  };
+
+  // ============================================
+  // MANEJAR CAMBIOS EN PRECIOS - CALCULAR GANANCIA
+  // ============================================
+  const handlePrecioChange = (campo: "precioVenta" | "precioCompra", valor: string) => {
+    const newFormData = { ...formData, [campo]: valor };
+    const venta = campo === "precioVenta" ? valor : formData.precioVenta;
+    const compra = campo === "precioCompra" ? valor : formData.precioCompra;
+    newFormData.ganancia = calcularGanancia(venta, compra);
+    setFormData(newFormData);
   };
 
   const editVenta = (venta: Venta) => {
@@ -330,6 +356,9 @@ export default function Home() {
     setShowForm(true);
   };
 
+  // ============================================
+  // ELIMINAR
+  // ============================================
   const deleteVenta = (id: string) => {
     if (!confirm("¿Eliminar esta venta?")) return;
     const updated = ventas.filter(v => v.id !== id);
@@ -354,6 +383,9 @@ export default function Home() {
     saveExcursiones(updated);
   };
 
+  // ============================================
+  // FILTROS
+  // ============================================
   let filtered = ventas;
   
   if (filterYear) {
@@ -388,6 +420,9 @@ export default function Home() {
       return b.month - a.month;
     });
 
+  // ============================================
+  // CÁLCULOS
+  // ============================================
   const totalVentas = filtered.reduce((sum, v) => sum + v.precioVenta, 0);
   const totalGanancia = filtered.reduce((sum, v) => sum + v.ganancia, 0);
   const totalPendiente = filtered.reduce((sum, v) => sum + v.saldoPendiente, 0);
@@ -396,9 +431,9 @@ export default function Home() {
   const years = [...new Set(ventas.map(v => new Date(v.fechaExcursion).getFullYear().toString()))].sort().reverse();
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("es-DO", {
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "DOP",
+      currency: "USD",
     }).format(amount);
   };
 
@@ -426,7 +461,7 @@ export default function Home() {
 
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Cliente,Excursión,Precio Venta,Precio Compra,Ganancia,Pago Cliente,Saldo Pendiente,Método Pago,Proveedor,Pago Proveedor,Nota\n";
+    let csv = "Fecha,Cliente,Excursión,Precio Venta (USD),Precio Compra (USD),Ganancia (USD),Pago Cliente,Saldo Pendiente,Método Pago,Proveedor,Pago Proveedor,Nota\n";
     ventas.forEach(v => {
       csv += `"${v.fechaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.precioVenta},${v.precioCompra},${v.ganancia},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendiente},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
@@ -439,6 +474,9 @@ export default function Home() {
     window.URL.revokeObjectURL(url);
   };
 
+  // ============================================
+  // RENDER - FORMULARIO MODIFICADO
+  // ============================================
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-20">
@@ -449,75 +487,25 @@ export default function Home() {
                 <span className="text-xl text-white">🏝️</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-800">Excursiones Pro</h1>
+                <h1 className="text-xl font-bold text-gray-800">Republic Excursions</h1>
                 <p className="text-xs text-gray-400">Clientes • Proveedores • Ganancias</p>
               </div>
             </div>
             
             <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={() => setViewMode("dashboard")}
-                className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                  viewMode === "dashboard" 
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25" 
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                📊 Dashboard
-              </button>
-              <button
-                onClick={() => setViewMode("ventas")}
-                className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                  viewMode === "ventas" 
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25" 
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                🧾 Ventas
-              </button>
-              <button
-                onClick={() => setViewMode("clientes")}
-                className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                  viewMode === "clientes" 
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25" 
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                👤 Clientes
-              </button>
-              <button
-                onClick={() => setViewMode("proveedores")}
-                className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                  viewMode === "proveedores" 
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25" 
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                🏢 Proveedores
-              </button>
-              <button
-                onClick={() => setViewMode("excursiones")}
-                className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                  viewMode === "excursiones" 
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25" 
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                🏝️ Excursiones
-              </button>
-              
-              <button
-                onClick={() => setShowForm(true)}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 text-sm font-medium shadow-lg shadow-blue-500/25"
-              >
-                <span>+</span> Nueva Venta
-              </button>
+              <button onClick={() => setViewMode("dashboard")} className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${viewMode === "dashboard" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25" : "text-gray-600 hover:bg-gray-100"}`}>📊 Dashboard</button>
+              <button onClick={() => setViewMode("ventas")} className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${viewMode === "ventas" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25" : "text-gray-600 hover:bg-gray-100"}`}>🧾 Ventas</button>
+              <button onClick={() => setViewMode("clientes")} className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${viewMode === "clientes" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25" : "text-gray-600 hover:bg-gray-100"}`}>👤 Clientes</button>
+              <button onClick={() => setViewMode("proveedores")} className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${viewMode === "proveedores" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25" : "text-gray-600 hover:bg-gray-100"}`}>🏢 Proveedores</button>
+              <button onClick={() => setViewMode("excursiones")} className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${viewMode === "excursiones" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25" : "text-gray-600 hover:bg-gray-100"}`}>🏝️ Excursiones</button>
+              <button onClick={() => setShowForm(true)} className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 text-sm font-medium shadow-lg shadow-blue-500/25">+ Nueva Venta</button>
             </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* DASHBOARD */}
         {viewMode === "dashboard" && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
@@ -547,45 +535,15 @@ export default function Home() {
                 <p className="text-xs text-gray-400">Pagos pendientes</p>
               </div>
             </div>
-
-            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-              <h2 className="text-lg font-bold text-gray-800 mb-4">📋 Últimas ventas</h2>
-              {ventas.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">🏝️</div>
-                  <p className="text-gray-400">No hay ventas registradas</p>
-                  <button onClick={() => setShowForm(true)} className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all">
-                    + Registrar primera venta
-                  </button>
-                </div>
-              ) : (
-                ventas.slice(0, 5).map((v) => (
-                  <div key={v.id} className="flex flex-wrap items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                    <div>
-                      <p className="font-medium text-gray-800">{v.clienteNombre}</p>
-                      <p className="text-sm text-gray-400">{v.excursionNombre} • {new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-4">
-                      <span className={`text-xs px-2 py-1 rounded-full ${v.pagoCliente === 'completo' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                        {getPagoClienteText(v.pagoCliente)}
-                      </span>
-                      <span className="text-sm font-bold text-blue-600">{formatCurrency(v.precioVenta)}</span>
-                      <span className="text-xs text-green-600">+{formatCurrency(v.ganancia)}</span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
           </>
         )}
 
+        {/* EXCURSIONES */}
         {viewMode === "excursiones" && (
           <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold text-gray-800">🏝️ Excursiones</h2>
-              <button onClick={() => setShowExcursionForm(true)} className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition-all text-sm">
-                + Agregar Excursión
-              </button>
+              <button onClick={() => setShowExcursionForm(true)} className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition-all text-sm">+ Agregar Excursión</button>
             </div>
             {excursiones.length === 0 ? (
               <p className="text-center text-gray-400 py-8">No hay excursiones registradas</p>
@@ -620,13 +578,12 @@ export default function Home() {
           </div>
         )}
 
+        {/* CLIENTES */}
         {viewMode === "clientes" && (
           <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold text-gray-800">👤 Clientes</h2>
-              <button onClick={() => setShowClienteForm(true)} className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all text-sm">
-                + Agregar Cliente
-              </button>
+              <button onClick={() => setShowClienteForm(true)} className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all text-sm">+ Agregar Cliente</button>
             </div>
             {clientes.length === 0 ? (
               <p className="text-center text-gray-400 py-8">No hay clientes registrados</p>
@@ -663,13 +620,12 @@ export default function Home() {
           </div>
         )}
 
+        {/* PROVEEDORES */}
         {viewMode === "proveedores" && (
           <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold text-gray-800">🏢 Proveedores</h2>
-              <button onClick={() => setShowProveedorForm(true)} className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition-all text-sm">
-                + Agregar Proveedor
-              </button>
+              <button onClick={() => setShowProveedorForm(true)} className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition-all text-sm">+ Agregar Proveedor</button>
             </div>
             {proveedores.length === 0 ? (
               <p className="text-center text-gray-400 py-8">No hay proveedores registrados</p>
@@ -712,30 +668,17 @@ export default function Home() {
           </div>
         )}
 
+        {/* VENTAS */}
         {viewMode === "ventas" && (
           <>
             <div className="bg-white rounded-2xl shadow-xl p-4 mb-6 border border-gray-100">
               <div className="flex flex-wrap items-center gap-3">
-                <input
-                  type="text"
-                  placeholder="🔍 Buscar por cliente o excursión..."
-                  className="flex-1 min-w-[200px] px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <select
-                  className="px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  value={filterYear}
-                  onChange={(e) => setFilterYear(e.target.value)}
-                >
+                <input type="text" placeholder="🔍 Buscar..." className="flex-1 min-w-[200px] px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                <select className="px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" value={filterYear} onChange={(e) => setFilterYear(e.target.value)}>
                   <option value="">Todos los años</option>
-                  {years.map(y => (
-                    <option key={y} value={y}>{y}</option>
-                  ))}
+                  {years.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
-                <button onClick={exportCSV} className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition-all flex items-center gap-2 text-sm">
-                  📊 CSV
-                </button>
+                <button onClick={exportCSV} className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition-all flex items-center gap-2 text-sm">📊 CSV</button>
               </div>
             </div>
 
@@ -743,7 +686,7 @@ export default function Home() {
               <div className="bg-white rounded-2xl shadow-xl p-16 text-center border-2 border-dashed border-gray-300">
                 <div className="text-6xl mb-4">🧾</div>
                 <h3 className="text-xl font-bold text-gray-800 mb-2">No hay ventas</h3>
-                <p className="text-gray-400 mb-4">Registra tu primera venta</p>
+                <button onClick={() => setShowForm(true)} className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:shadow-xl transition-all">+ Registrar primera venta</button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -751,16 +694,11 @@ export default function Home() {
                   const isExpanded = expandedMonth === group.key;
                   return (
                     <div key={group.key} className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-                      <button
-                        onClick={() => toggleMonth(group.key)}
-                        className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50 transition-colors"
-                      >
+                      <button onClick={() => toggleMonth(group.key)} className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
                         <div className="flex items-center gap-4">
                           <span className="text-2xl">📆</span>
                           <div className="text-left">
-                            <h3 className="text-lg font-bold text-gray-800">
-                              {getMonthName(group.month)} {group.year}
-                            </h3>
+                            <h3 className="text-lg font-bold text-gray-800">{getMonthName(group.month)} {group.year}</h3>
                             <p className="text-sm text-gray-400">{group.ventas.length} ventas</p>
                           </div>
                         </div>
@@ -829,52 +767,84 @@ export default function Home() {
         )}
       </main>
 
+      {/* ============================================
+          MODAL DE VENTA - TODOS LOS CAMPOS EDITABLES
+      ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {editingId ? "✏️ Editar Venta" : "📝 Nueva Venta"}
-                </h2>
+                <h2 className="text-2xl font-bold text-gray-800">{editingId ? "✏️ Editar Venta" : "📝 Nueva Venta"}</h2>
                 <p className="text-sm text-gray-400">Registra una venta de excursión</p>
               </div>
               <button onClick={() => setShowForm(false)} className="text-gray-300 hover:text-gray-600 text-3xl leading-none">×</button>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Excursión - SELECCIONAR O ESCRIBIR */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">🏝️ Excursión *</label>
-                <select
-                  required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={formData.excursionId}
-                  onChange={(e) => selectExcursion(e.target.value)}
-                >
-                  <option value="">Seleccionar excursión</option>
-                  {excursiones.map(e => (
-                    <option key={e.id} value={e.id}>
-                      {e.nombre} - Cliente: {formatCurrency(e.precioCliente)} | Proveedor: {formatCurrency(e.precioProveedor)} | Ganancia: {formatCurrency(e.ganancia)}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <select
+                    className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={formData.excursionId}
+                    onChange={(e) => selectExcursion(e.target.value)}
+                  >
+                    <option value="">Seleccionar excursión</option>
+                    {excursiones.map(e => (
+                      <option key={e.id} value={e.id}>
+                        {e.nombre} - ${e.precioCliente}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="O escribe nombre"
+                    className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={formData.excursionNombre}
+                    onChange={(e) => setFormData({ ...formData, excursionNombre: e.target.value })}
+                  />
+                </div>
               </div>
 
+              {/* Precios - TODOS EDITABLES */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">💰 Precio Venta</label>
-                  <input type="number" required className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50" value={formData.precioVenta} readOnly />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">💰 Precio Venta (USD) *</label>
+                  <input
+                    type="number"
+                    required
+                    step="0.01"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0.00"
+                    value={formData.precioVenta}
+                    onChange={(e) => handlePrecioChange("precioVenta", e.target.value)}
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">💸 Precio Compra</label>
-                  <input type="number" required className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50" value={formData.precioCompra} readOnly />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">💸 Precio Compra (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0.00"
+                    value={formData.precioCompra}
+                    onChange={(e) => handlePrecioChange("precioCompra", e.target.value)}
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">📈 Ganancia</label>
-                  <input type="text" className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-green-50 text-green-600 font-bold" value={formData.ganancia} readOnly />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">📈 Ganancia (USD)</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-green-50 text-green-600 font-bold"
+                    value={formData.ganancia}
+                    readOnly
+                  />
                 </div>
               </div>
 
+              {/* Cliente */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">👤 Cliente *</label>
@@ -886,6 +856,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Fecha y Proveedor */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">📅 Fecha Excursión *</label>
@@ -895,13 +866,12 @@ export default function Home() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">🏢 Proveedor</label>
                   <select className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" value={formData.proveedorId} onChange={(e) => setFormData({ ...formData, proveedorId: e.target.value })}>
                     <option value="">Seleccionar proveedor</option>
-                    {proveedores.map(p => (
-                      <option key={p.id} value={p.id}>{p.nombre} - {p.excursionNombre}</option>
-                    ))}
+                    {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre} - {p.excursionNombre}</option>)}
                   </select>
                 </div>
               </div>
 
+              {/* Método de Pago Cliente */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">💳 Método de Pago del Cliente *</label>
                 <select required className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" value={formData.metodoPagoCliente} onChange={(e) => setFormData({ ...formData, metodoPagoCliente: e.target.value as any })}>
@@ -912,6 +882,7 @@ export default function Home() {
                 </select>
               </div>
 
+              {/* Estado Pago Cliente */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">📋 Estado del Pago del Cliente *</label>
                 <select required className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" value={formData.pagoCliente} onChange={(e) => setFormData({ ...formData, pagoCliente: e.target.value as any })}>
@@ -921,11 +892,13 @@ export default function Home() {
                 </select>
               </div>
 
+              {/* Monto Pagado */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">💵 Monto Pagado</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">💵 Monto Pagado (USD)</label>
                 <input type="number" step="0.01" className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" placeholder="0.00" value={formData.montoPagado} onChange={(e) => setFormData({ ...formData, montoPagado: e.target.value })} />
               </div>
 
+              {/* Nota */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">📝 Nota</label>
                 <textarea className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" placeholder="Detalles adicionales..." rows={2} value={formData.nota} onChange={(e) => setFormData({ ...formData, nota: e.target.value })} />
@@ -939,6 +912,7 @@ export default function Home() {
         </div>
       )}
 
+      {/* MODAL EXCURSIÓN */}
       {showExcursionForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6">
@@ -952,21 +926,20 @@ export default function Home() {
                 <input type="text" name="nombre" required className="w-full px-4 py-3 border border-gray-200 rounded-xl" placeholder="Ej: Tour Samaná" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">💰 Precio al Proveedor *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">💰 Precio al Proveedor (USD) *</label>
                 <input type="number" name="precioProveedor" required step="0.01" className="w-full px-4 py-3 border border-gray-200 rounded-xl" placeholder="70.00" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">💰 Precio al Cliente *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">💰 Precio al Cliente (USD) *</label>
                 <input type="number" name="precioCliente" required step="0.01" className="w-full px-4 py-3 border border-gray-200 rounded-xl" placeholder="85.00" />
               </div>
-              <button type="submit" className="w-full bg-purple-600 text-white py-4 rounded-xl font-semibold hover:bg-purple-700 transition-all">
-                💾 Guardar Excursión
-              </button>
+              <button type="submit" className="w-full bg-purple-600 text-white py-4 rounded-xl font-semibold hover:bg-purple-700 transition-all">💾 Guardar Excursión</button>
             </form>
           </div>
         </div>
       )}
 
+      {/* MODAL PROVEEDOR */}
       {showProveedorForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6">
@@ -987,9 +960,7 @@ export default function Home() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">🏝️ Excursión *</label>
                 <select name="excursionId" required className="w-full px-4 py-3 border border-gray-200 rounded-xl">
                   <option value="">Seleccionar excursión</option>
-                  {excursiones.map(e => (
-                    <option key={e.id} value={e.id}>{e.nombre} - Precio: {formatCurrency(e.precioProveedor)}</option>
-                  ))}
+                  {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - ${e.precioProveedor}</option>)}
                 </select>
               </div>
               <div>
@@ -1004,14 +975,13 @@ export default function Home() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">📝 Nota</label>
                 <textarea name="nota" className="w-full px-4 py-3 border border-gray-200 rounded-xl" placeholder="Detalles del proveedor..." rows={2}></textarea>
               </div>
-              <button type="submit" className="w-full bg-purple-600 text-white py-4 rounded-xl font-semibold hover:bg-purple-700 transition-all">
-                💾 Guardar Proveedor
-              </button>
+              <button type="submit" className="w-full bg-purple-600 text-white py-4 rounded-xl font-semibold hover:bg-purple-700 transition-all">💾 Guardar Proveedor</button>
             </form>
           </div>
         </div>
       )}
 
+      {/* MODAL CLIENTE */}
       {showClienteForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6">
@@ -1036,18 +1006,14 @@ export default function Home() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">🏝️ Excursión *</label>
                 <select name="excursionId" required className="w-full px-4 py-3 border border-gray-200 rounded-xl">
                   <option value="">Seleccionar excursión</option>
-                  {excursiones.map(e => (
-                    <option key={e.id} value={e.id}>{e.nombre} - {formatCurrency(e.precioCliente)}</option>
-                  ))}
+                  {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - ${e.precioCliente}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">📅 Fecha de la Excursión *</label>
                 <input type="date" name="fechaExcursion" required className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
               </div>
-              <button type="submit" className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 transition-all">
-                💾 Guardar Cliente
-              </button>
+              <button type="submit" className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 transition-all">💾 Guardar Cliente</button>
             </form>
           </div>
         </div>
