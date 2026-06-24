@@ -8,9 +8,9 @@ import { useState, useEffect } from "react";
 interface Excursion {
   id: string;
   nombre: string;
-  precioProveedor: number; // Lo que pagas al proveedor
-  precioCliente: number; // Lo que cobras al cliente
-  ganancia: number; // Calculado automáticamente
+  precioProveedor: number;
+  precioCliente: number;
+  ganancia: number;
 }
 
 interface Proveedor {
@@ -48,24 +48,17 @@ interface Venta {
   precioVenta: number;
   precioCompra: number;
   ganancia: number;
-  // Pago del cliente
   pagoCliente: "completo" | "deposito_25" | "pago_dia";
   montoPagado: number;
   saldoPendiente: number;
   metodoPagoCliente: "efectivo" | "tarjeta" | "transferencia" | "paypal";
-  // Pago al proveedor
   proveedorId: string;
   proveedorNombre: string;
   proveedorPagado: "pendiente" | "pagado";
   metodoPagoProveedor: "efectivo" | "transferencia" | "paypal";
   nota: string;
-  mes: number;
-  year: number;
 }
 
-// ============================================
-// COMPONENTE PRINCIPAL
-// ============================================
 export default function Home() {
   const [ventas, setVentas] = useState<Venta[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -82,9 +75,6 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones">("dashboard");
 
-  // ============================================
-  // FORMULARIO DE VENTA
-  // ============================================
   const [formData, setFormData] = useState({
     clienteNombre: "",
     clienteWhatsapp: "",
@@ -105,9 +95,6 @@ export default function Home() {
     nota: "",
   });
 
-  // ============================================
-  // CARGAR DATOS DESDE LOCALSTORAGE
-  // ============================================
   useEffect(() => {
     const savedVentas = localStorage.getItem("excursiones_ventas");
     const savedClientes = localStorage.getItem("excursiones_clientes");
@@ -120,9 +107,6 @@ export default function Home() {
     if (savedExcursiones) setExcursiones(JSON.parse(savedExcursiones));
   }, []);
 
-  // ============================================
-  // GUARDAR DATOS
-  // ============================================
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
     localStorage.setItem("excursiones_ventas", JSON.stringify(data));
@@ -143,9 +127,6 @@ export default function Home() {
     localStorage.setItem("excursiones_excursiones", JSON.stringify(data));
   };
 
-  // ============================================
-  // AGREGAR EXCURSIÓN
-  // ============================================
   const handleExcursionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -167,9 +148,6 @@ export default function Home() {
     alert("✅ Excursión agregada");
   };
 
-  // ============================================
-  // AGREGAR PROVEEDOR
-  // ============================================
   const handleProveedorSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -195,9 +173,6 @@ export default function Home() {
     alert("✅ Proveedor agregado");
   };
 
-  // ============================================
-  // AGREGAR CLIENTE
-  // ============================================
   const handleClienteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -221,12 +196,9 @@ export default function Home() {
     alert("✅ Cliente agregado");
   };
 
-  // ============================================
-  // GUARDAR VENTA
-  // ============================================
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const dateObj = new Date(formData.fechaExcursion);
+    const fecha = new Date(formData.fechaExcursion);
     const precioVenta = parseFloat(formData.precioVenta);
     const precioCompra = parseFloat(formData.precioCompra);
     const ganancia = precioVenta - precioCompra;
@@ -265,8 +237,6 @@ export default function Home() {
       proveedorPagado: formData.proveedorPagado,
       metodoPagoProveedor: formData.metodoPagoProveedor,
       nota: formData.nota,
-      mes: dateObj.getMonth() + 1,
-      year: dateObj.getFullYear(),
     };
 
     if (editingId) {
@@ -276,7 +246,6 @@ export default function Home() {
       saveVentas([...ventas, nuevaVenta]);
     }
 
-    // Guardar cliente automáticamente
     const clienteExistente = clientes.find(c => c.nombre === formData.clienteNombre);
     if (!clienteExistente && formData.clienteNombre) {
       const nuevoCliente: Cliente = {
@@ -319,13 +288,9 @@ export default function Home() {
     setEditingId(null);
   };
 
-  // ============================================
-  // SELECCIONAR EXCURSIÓN (carga automática de precios)
-  // ============================================
   const selectExcursion = (excursionId: string) => {
     const excursion = excursiones.find(e => e.id === excursionId);
     if (excursion) {
-      // Buscar proveedor para esta excursión
       const proveedor = proveedores.find(p => p.excursionId === excursionId);
       
       setFormData({
@@ -365,9 +330,6 @@ export default function Home() {
     setShowForm(true);
   };
 
-  // ============================================
-  // ELIMINAR
-  // ============================================
   const deleteVenta = (id: string) => {
     if (!confirm("¿Eliminar esta venta?")) return;
     const updated = ventas.filter(v => v.id !== id);
@@ -392,12 +354,10 @@ export default function Home() {
     saveExcursiones(updated);
   };
 
-  // ============================================
-  // FILTROS
-  // ============================================
   let filtered = ventas;
+  
   if (filterYear) {
-    filtered = filtered.filter(v => v.year.toString() === filterYear);
+    filtered = filtered.filter(v => new Date(v.fechaExcursion).getFullYear().toString() === filterYear);
   }
   if (searchTerm) {
     filtered = filtered.filter(v => 
@@ -407,9 +367,13 @@ export default function Home() {
   }
 
   const grouped = filtered.reduce((acc: any, venta) => {
-    const key = `${venta.year}-${String(venta.month).padStart(2, "0")}`;
+    const fecha = new Date(venta.fechaExcursion);
+    const year = fecha.getFullYear();
+    const month = fecha.getMonth() + 1;
+    const key = `${year}-${String(month).padStart(2, "0")}`;
+    
     if (!acc[key]) {
-      acc[key] = { year: venta.year, month: venta.month, total: 0, ventas: [], ganancias: 0 };
+      acc[key] = { year, month, total: 0, ventas: [], ganancias: 0 };
     }
     acc[key].total += venta.precioVenta;
     acc[key].ganancias += venta.ganancia;
@@ -424,15 +388,12 @@ export default function Home() {
       return b.month - a.month;
     });
 
-  // ============================================
-  // CÁLCULOS
-  // ============================================
   const totalVentas = filtered.reduce((sum, v) => sum + v.precioVenta, 0);
   const totalGanancia = filtered.reduce((sum, v) => sum + v.ganancia, 0);
   const totalPendiente = filtered.reduce((sum, v) => sum + v.saldoPendiente, 0);
   const proveedoresPendientes = proveedores.filter(p => p.pagoStatus === "pendiente").length;
   
-  const years = [...new Set(ventas.map(v => v.year.toString()))].sort().reverse();
+  const years = [...new Set(ventas.map(v => new Date(v.fechaExcursion).getFullYear().toString()))].sort().reverse();
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("es-DO", {
@@ -463,9 +424,6 @@ export default function Home() {
     return status === "pagado" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700";
   };
 
-  // ============================================
-  // EXPORTAR
-  // ============================================
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
     let csv = "Fecha,Cliente,Excursión,Precio Venta,Precio Compra,Ganancia,Pago Cliente,Saldo Pendiente,Método Pago,Proveedor,Pago Proveedor,Nota\n";
@@ -481,12 +439,8 @@ export default function Home() {
     window.URL.revokeObjectURL(url);
   };
 
-  // ============================================
-  // RENDER
-  // ============================================
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      {/* HEADER */}
       <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -564,9 +518,6 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* ============================================
-            DASHBOARD
-        ============================================ */}
         {viewMode === "dashboard" && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
@@ -597,7 +548,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Últimas ventas */}
             <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
               <h2 className="text-lg font-bold text-gray-800 mb-4">📋 Últimas ventas</h2>
               {ventas.length === 0 ? (
@@ -629,9 +579,6 @@ export default function Home() {
           </>
         )}
 
-        {/* ============================================
-            EXCURSIONES
-        ============================================ */}
         {viewMode === "excursiones" && (
           <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
             <div className="flex justify-between items-center mb-4">
@@ -673,9 +620,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* ============================================
-            CLIENTES
-        ============================================ */}
         {viewMode === "clientes" && (
           <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
             <div className="flex justify-between items-center mb-4">
@@ -719,9 +663,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* ============================================
-            PROVEEDORES
-        ============================================ */}
         {viewMode === "proveedores" && (
           <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
             <div className="flex justify-between items-center mb-4">
@@ -771,12 +712,8 @@ export default function Home() {
           </div>
         )}
 
-        {/* ============================================
-            VENTAS
-        ============================================ */}
         {viewMode === "ventas" && (
           <>
-            {/* Filtros */}
             <div className="bg-white rounded-2xl shadow-xl p-4 mb-6 border border-gray-100">
               <div className="flex flex-wrap items-center gap-3">
                 <input
@@ -802,7 +739,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Lista de ventas por mes */}
             {groupedArray.length === 0 ? (
               <div className="bg-white rounded-2xl shadow-xl p-16 text-center border-2 border-dashed border-gray-300">
                 <div className="text-6xl mb-4">🧾</div>
@@ -893,9 +829,6 @@ export default function Home() {
         )}
       </main>
 
-      {/* ============================================
-          MODAL DE VENTA
-      ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
@@ -910,7 +843,6 @@ export default function Home() {
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Seleccionar Excursión */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">🏝️ Excursión *</label>
                 <select
@@ -1007,9 +939,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* ============================================
-          MODAL DE EXCURSIÓN
-      ============================================ */}
       {showExcursionForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6">
@@ -1038,9 +967,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* ============================================
-          MODAL DE PROVEEDOR
-      ============================================ */}
       {showProveedorForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6">
@@ -1086,9 +1012,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* ============================================
-          MODAL DE CLIENTE
-      ============================================ */}
       {showClienteForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6">
