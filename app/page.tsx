@@ -10,6 +10,9 @@ interface Excursion {
   nombre: string;
   proveedorId: string;
   proveedorNombre: string;
+  precioVentaUSD: number;
+  costoProveedorUSD: number;
+  comisionUSD: number;
   tipoCliente: "adulto" | "nino";
   zona?: string;
   capacidad?: string;
@@ -59,74 +62,6 @@ interface Venta {
 }
 
 // ============================================
-// DATOS PRECARGADOS - PROVEEDORES
-// ============================================
-const PROVEEDORES_INICIALES: Proveedor[] = [
-  {
-    id: "prov1",
-    nombre: "Dominican Way Travel",
-    telefono: "809-555-0101",
-    email: "info@dominicanway.com",
-    metodoPago: "transferencia",
-    nota: "Proveedor principal de excursiones"
-  },
-  {
-    id: "prov2",
-    nombre: "Buggy Adventure RD",
-    telefono: "809-555-0102",
-    email: "info@buggyadventurerd.com",
-    metodoPago: "efectivo",
-    nota: "Especialistas en buggies y ATV"
-  },
-  {
-    id: "prov3",
-    nombre: "Excursiones Tropicales",
-    telefono: "809-555-0103",
-    email: "info@excursionestropicales.com",
-    metodoPago: "transferencia",
-    nota: "Caballos, Monkeyland, Scuba Doo, Party Boat"
-  }
-];
-
-// ============================================
-// DATOS PRECARGADOS - EXCURSIONES (SIN PRECIOS)
-// ============================================
-const EXCURSIONES_INICIALES: Excursion[] = [
-  // DOMINICAN WAY TRAVEL
-  { id: "exc1", nombre: "Isla Saona - Bavaro", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "adulto", zona: "Bavaro" },
-  { id: "exc2", nombre: "Isla Saona - Bavaro (Nino)", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "nino", zona: "Bavaro" },
-  { id: "exc3", nombre: "Isla Saona - Uvero Alto", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "adulto", zona: "Uvero Alto" },
-  { id: "exc4", nombre: "Isla Saona - Uvero Alto (Nino)", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "nino", zona: "Uvero Alto" },
-  { id: "exc5", nombre: "Isla Catalina", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "adulto" },
-  { id: "exc6", nombre: "Isla Catalina (Nino)", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "nino" },
-  { id: "exc7", nombre: "Santo Domingo", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "adulto" },
-  { id: "exc8", nombre: "Santo Domingo (Nino)", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "nino" },
-  { id: "exc9", nombre: "Samana Ballenas", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "adulto" },
-  { id: "exc10", nombre: "Samana Ballenas (Nino)", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "nino" },
-  { id: "exc11", nombre: "Samana", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "adulto" },
-  { id: "exc12", nombre: "Samana (Nino)", proveedorId: "prov1", proveedorNombre: "Dominican Way Travel", tipoCliente: "nino" },
-
-  // BUGGY ADVENTURE RD
-  { id: "exc13", nombre: "ATV Moto", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "1 persona" },
-  { id: "exc14", nombre: "Buggy Normal", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "1 persona" },
-  { id: "exc15", nombre: "Buggy Doble", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "2 personas" },
-  { id: "exc16", nombre: "Buggy Familiar", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "4 personas" },
-  { id: "exc17", nombre: "Buggy Kayo", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "1 persona" },
-  { id: "exc18", nombre: "Buggy VIP Doble", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "2 personas" },
-  { id: "exc19", nombre: "Buggy VIP Familiar", proveedorId: "prov2", proveedorNombre: "Buggy Adventure RD", tipoCliente: "adulto", capacidad: "4 personas" },
-
-  // EXCURSIONES TROPICALES
-  { id: "exc20", nombre: "Caballos", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "adulto" },
-  { id: "exc21", nombre: "Monkeyland", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "adulto" },
-  { id: "exc22", nombre: "Scuba Doo - Bavaro", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "adulto", zona: "Bavaro" },
-  { id: "exc23", nombre: "Scuba Doo - Bavaro (Nino)", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "nino", zona: "Bavaro" },
-  { id: "exc24", nombre: "Scuba Doo - Uvero Alto", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "adulto", zona: "Uvero Alto" },
-  { id: "exc25", nombre: "Scuba Doo - Uvero Alto (Nino)", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "nino", zona: "Uvero Alto" },
-  { id: "exc26", nombre: "Party Boat", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "adulto" },
-  { id: "exc27", nombre: "Party Boat (Nino)", proveedorId: "prov3", proveedorNombre: "Excursiones Tropicales", tipoCliente: "nino" }
-];
-
-// ============================================
 // COMPONENTE PRINCIPAL
 // ============================================
 export default function Home() {
@@ -136,18 +71,21 @@ export default function Home() {
   
   const [ventas, setVentas] = useState<Venta[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [proveedores, setProveedores] = useState<Proveedor[]>(PROVEEDORES_INICIALES);
-  const [excursiones, setExcursiones] = useState<Excursion[]>(EXCURSIONES_INICIALES);
+  const [proveedores, setProveedores] = useState<Proveedor[]>([]);
+  const [excursiones, setExcursiones] = useState<Excursion[]>([]);
   
   const [showForm, setShowForm] = useState(false);
   const [showClienteForm, setShowClienteForm] = useState(false);
   const [showProveedorForm, setShowProveedorForm] = useState(false);
   const [showExcursionForm, setShowExcursionForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingVentaId, setEditingVentaId] = useState<string | null>(null);
+  const [editingExcursionId, setEditingExcursionId] = useState<string | null>(null);
+  const [editingProveedorId, setEditingProveedorId] = useState<string | null>(null);
   const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
   const [filterYear, setFilterYear] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones">("dashboard");
+  const [selectedExcursionForVenta, setSelectedExcursionForVenta] = useState<Excursion | null>(null);
 
   const [formData, setFormData] = useState({
     clienteNombre: "",
@@ -169,6 +107,26 @@ export default function Home() {
     metodoPagoProveedor: "efectivo" as "efectivo" | "transferencia" | "paypal",
     tipoCliente: "adulto" as "adulto" | "nino",
     cantidadPersonas: 1,
+    nota: "",
+  });
+
+  const [excursionFormData, setExcursionFormData] = useState({
+    nombre: "",
+    proveedorId: "",
+    proveedorNombre: "",
+    precioVentaUSD: "",
+    costoProveedorUSD: "",
+    comisionUSD: "",
+    tipoCliente: "adulto" as "adulto" | "nino",
+    zona: "",
+    capacidad: "",
+  });
+
+  const [proveedorFormData, setProveedorFormData] = useState({
+    nombre: "",
+    telefono: "",
+    email: "",
+    metodoPago: "efectivo" as "efectivo" | "transferencia" | "paypal",
     nota: "",
   });
 
@@ -202,10 +160,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v6");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v6");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v6");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v6");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v8");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v8");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v8");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v8");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -215,55 +173,29 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v6", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v8", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v6", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v8", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v6", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v8", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v6", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v8", JSON.stringify(data));
   };
 
   // ============================================
-  // CALCULAR COMISION AUTOMATICAMENTE
+  // CALCULAR COMISION
   // ============================================
-  const calcularComision = (precioVenta: string, costoProveedor: string) => {
-    const pv = parseFloat(precioVenta) || 0;
-    const cp = parseFloat(costoProveedor) || 0;
-    const comision = pv - cp;
-    return { comision };
-  };
-
-  // ============================================
-  // HANDLE EXCURSION
-  // ============================================
-  const handleExcursionSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const data = new FormData(form);
-    
-    const nuevaExcursion: Excursion = {
-      id: Date.now().toString(),
-      nombre: data.get("nombre") as string,
-      proveedorId: data.get("proveedorId") as string,
-      proveedorNombre: proveedores.find(p => p.id === data.get("proveedorId"))?.nombre || "",
-      tipoCliente: data.get("tipoCliente") as "adulto" | "nino",
-      zona: data.get("zona") as string || undefined,
-      capacidad: data.get("capacidad") as string || undefined,
-    };
-    
-    saveExcursiones([...excursiones, nuevaExcursion]);
-    setShowExcursionForm(false);
-    alert("Excursion agregada correctamente");
+  const calcularComision = (precioVenta: number, costoProveedor: number) => {
+    return precioVenta - costoProveedor;
   };
 
   // ============================================
@@ -271,21 +203,137 @@ export default function Home() {
   // ============================================
   const handleProveedorSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const data = new FormData(form);
     
-    const nuevoProveedor: Proveedor = {
-      id: Date.now().toString(),
-      nombre: data.get("nombre") as string,
-      telefono: data.get("telefono") as string,
-      email: data.get("email") as string,
-      metodoPago: data.get("metodoPago") as "efectivo" | "transferencia" | "paypal",
-      nota: data.get("nota") as string || "",
-    };
+    if (editingProveedorId) {
+      const updated = proveedores.map(p => 
+        p.id === editingProveedorId 
+          ? { ...p, ...proveedorFormData }
+          : p
+      );
+      saveProveedores(updated);
+      alert("Proveedor actualizado correctamente");
+    } else {
+      const nuevoProveedor: Proveedor = {
+        id: Date.now().toString(),
+        ...proveedorFormData,
+      };
+      saveProveedores([...proveedores, nuevoProveedor]);
+      alert("Proveedor agregado correctamente");
+    }
     
-    saveProveedores([...proveedores, nuevoProveedor]);
     setShowProveedorForm(false);
-    alert("Proveedor agregado correctamente");
+    setEditingProveedorId(null);
+    setProveedorFormData({
+      nombre: "",
+      telefono: "",
+      email: "",
+      metodoPago: "efectivo",
+      nota: "",
+    });
+  };
+
+  const editProveedor = (proveedor: Proveedor) => {
+    setEditingProveedorId(proveedor.id);
+    setProveedorFormData({
+      nombre: proveedor.nombre,
+      telefono: proveedor.telefono,
+      email: proveedor.email,
+      metodoPago: proveedor.metodoPago,
+      nota: proveedor.nota,
+    });
+    setShowProveedorForm(true);
+  };
+
+  const deleteProveedor = (id: string) => {
+    if (!confirm("Eliminar este proveedor y todas sus excursiones?")) return;
+    const updated = proveedores.filter(p => p.id !== id);
+    saveProveedores(updated);
+    const excursionesActualizadas = excursiones.filter(e => e.proveedorId !== id);
+    saveExcursiones(excursionesActualizadas);
+  };
+
+  // ============================================
+  // HANDLE EXCURSION
+  // ============================================
+  const handleExcursionSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const precioVentaUSD = parseFloat(excursionFormData.precioVentaUSD) || 0;
+    const costoProveedorUSD = parseFloat(excursionFormData.costoProveedorUSD) || 0;
+    const comisionUSD = calcularComision(precioVentaUSD, costoProveedorUSD);
+    const proveedor = proveedores.find(p => p.id === excursionFormData.proveedorId);
+    
+    if (editingExcursionId) {
+      const updated = excursiones.map(e => 
+        e.id === editingExcursionId 
+          ? { 
+              ...e, 
+              nombre: excursionFormData.nombre,
+              proveedorId: excursionFormData.proveedorId,
+              proveedorNombre: proveedor?.nombre || "",
+              precioVentaUSD,
+              costoProveedorUSD,
+              comisionUSD,
+              tipoCliente: excursionFormData.tipoCliente,
+              zona: excursionFormData.zona || undefined,
+              capacidad: excursionFormData.capacidad || undefined,
+            }
+          : e
+      );
+      saveExcursiones(updated);
+      alert("Excursion actualizada correctamente");
+    } else {
+      const nuevaExcursion: Excursion = {
+        id: Date.now().toString(),
+        nombre: excursionFormData.nombre,
+        proveedorId: excursionFormData.proveedorId,
+        proveedorNombre: proveedor?.nombre || "",
+        precioVentaUSD,
+        costoProveedorUSD,
+        comisionUSD,
+        tipoCliente: excursionFormData.tipoCliente,
+        zona: excursionFormData.zona || undefined,
+        capacidad: excursionFormData.capacidad || undefined,
+      };
+      saveExcursiones([...excursiones, nuevaExcursion]);
+      alert("Excursion agregada correctamente");
+    }
+    
+    setShowExcursionForm(false);
+    setEditingExcursionId(null);
+    setExcursionFormData({
+      nombre: "",
+      proveedorId: "",
+      proveedorNombre: "",
+      precioVentaUSD: "",
+      costoProveedorUSD: "",
+      comisionUSD: "",
+      tipoCliente: "adulto",
+      zona: "",
+      capacidad: "",
+    });
+  };
+
+  const editExcursion = (excursion: Excursion) => {
+    setEditingExcursionId(excursion.id);
+    setExcursionFormData({
+      nombre: excursion.nombre,
+      proveedorId: excursion.proveedorId,
+      proveedorNombre: excursion.proveedorNombre,
+      precioVentaUSD: excursion.precioVentaUSD.toString(),
+      costoProveedorUSD: excursion.costoProveedorUSD.toString(),
+      comisionUSD: excursion.comisionUSD.toString(),
+      tipoCliente: excursion.tipoCliente,
+      zona: excursion.zona || "",
+      capacidad: excursion.capacidad || "",
+    });
+    setShowExcursionForm(true);
+  };
+
+  const deleteExcursion = (id: string) => {
+    if (!confirm("Eliminar esta excursion?")) return;
+    const updated = excursiones.filter(e => e.id !== id);
+    saveExcursiones(updated);
   };
 
   // ============================================
@@ -314,6 +362,12 @@ export default function Home() {
     alert("Cliente agregado correctamente");
   };
 
+  const deleteCliente = (id: string) => {
+    if (!confirm("Eliminar este cliente?")) return;
+    const updated = clientes.filter(c => c.id !== id);
+    saveClientes(updated);
+  };
+
   // ============================================
   // HANDLE VENTA
   // ============================================
@@ -321,7 +375,7 @@ export default function Home() {
     e.preventDefault();
     const precioVentaUSD = parseFloat(formData.precioVentaUSD) || 0;
     const costoProveedorUSD = parseFloat(formData.costoProveedorUSD) || 0;
-    const comisionUSD = precioVentaUSD - costoProveedorUSD;
+    const comisionUSD = calcularComision(precioVentaUSD, costoProveedorUSD);
     const montoPagadoUSD = parseFloat(formData.montoPagadoUSD) || 0;
     const cantidad = parseInt(formData.cantidadPersonas.toString()) || 1;
     
@@ -339,7 +393,7 @@ export default function Home() {
     }
 
     const nuevaVenta: Venta = {
-      id: editingId || Date.now().toString(),
+      id: editingVentaId || Date.now().toString(),
       clienteNombre: formData.clienteNombre,
       clienteWhatsapp: formData.clienteWhatsapp,
       clienteEmail: formData.clienteEmail,
@@ -350,7 +404,7 @@ export default function Home() {
       costoProveedorUSD: costoTotal,
       comisionUSD: comisionTotal,
       pagoCliente: formData.pagoCliente,
-      montoPagadoUSD: montoPagadoUSD * cantidad,
+      montoPagadoUSD: montoPagadoUSD,
       saldoPendienteUSD: saldoPendienteUSD,
       metodoPagoCliente: formData.metodoPagoCliente,
       proveedorId: formData.proveedorId,
@@ -362,8 +416,8 @@ export default function Home() {
       nota: formData.nota,
     };
 
-    if (editingId) {
-      const updated = ventas.map(v => v.id === editingId ? nuevaVenta : v);
+    if (editingVentaId) {
+      const updated = ventas.map(v => v.id === editingVentaId ? nuevaVenta : v);
       saveVentas(updated);
     } else {
       saveVentas([...ventas, nuevaVenta]);
@@ -397,19 +451,29 @@ export default function Home() {
       nota: "",
     });
     setShowForm(false);
-    setEditingId(null);
+    setEditingVentaId(null);
+    setSelectedExcursionForVenta(null);
   };
 
   // ============================================
-  // SELECCIONAR EXCURSION
+  // SELECCIONAR EXCURSION PARA VENTA
   // ============================================
-  const selectExcursion = (excursionId: string) => {
+  const selectExcursionForVenta = (excursionId: string) => {
     const excursion = excursiones.find(e => e.id === excursionId);
     if (excursion) {
+      setSelectedExcursionForVenta(excursion);
+      const cantidad = parseInt(formData.cantidadPersonas.toString()) || 1;
+      const precioTotal = excursion.precioVentaUSD * cantidad;
+      const costoTotal = excursion.costoProveedorUSD * cantidad;
+      const comisionTotal = excursion.comisionUSD * cantidad;
+      
       setFormData({
         ...formData,
         excursionId: excursion.id,
         excursionNombre: excursion.nombre,
+        precioVentaUSD: precioTotal.toString(),
+        costoProveedorUSD: costoTotal.toString(),
+        comisionUSD: comisionTotal.toString(),
         proveedorId: excursion.proveedorId,
         proveedorNombre: excursion.proveedorNombre,
         tipoCliente: excursion.tipoCliente,
@@ -418,10 +482,48 @@ export default function Home() {
   };
 
   // ============================================
-  // ACTUALIZAR PRECIO VENTA (CALCULA COMISION)
+  // ACTUALIZAR CANTIDAD DE PERSONAS EN VENTA
   // ============================================
-  const handlePrecioVentaChange = (valor: string) => {
-    const { comision } = calcularComision(valor, formData.costoProveedorUSD);
+  const updateCantidadPersonas = (cantidad: number) => {
+    if (selectedExcursionForVenta) {
+      const precioTotal = selectedExcursionForVenta.precioVentaUSD * cantidad;
+      const costoTotal = selectedExcursionForVenta.costoProveedorUSD * cantidad;
+      const comisionTotal = selectedExcursionForVenta.comisionUSD * cantidad;
+      
+      setFormData({
+        ...formData,
+        cantidadPersonas: cantidad,
+        precioVentaUSD: precioTotal.toString(),
+        costoProveedorUSD: costoTotal.toString(),
+        comisionUSD: comisionTotal.toString(),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        cantidadPersonas: cantidad,
+      });
+    }
+  };
+
+  // ============================================
+  // CALCULAR COMISION EN FORMULARIO DE EXCURSION
+  // ============================================
+  const handleExcursionPrecioChange = (campo: "precioVentaUSD" | "costoProveedorUSD", valor: string) => {
+    const newData = { ...excursionFormData, [campo]: valor };
+    const pv = parseFloat(newData.precioVentaUSD) || 0;
+    const cp = parseFloat(newData.costoProveedorUSD) || 0;
+    const comision = calcularComision(pv, cp);
+    newData.comisionUSD = comision.toString();
+    setExcursionFormData(newData);
+  };
+
+  // ============================================
+  // ACTUALIZAR PRECIO VENTA EN FORMULARIO DE VENTA
+  // ============================================
+  const handleVentaPrecioChange = (valor: string) => {
+    const pv = parseFloat(valor) || 0;
+    const cp = parseFloat(formData.costoProveedorUSD) || 0;
+    const comision = calcularComision(pv, cp);
     setFormData({
       ...formData,
       precioVentaUSD: valor,
@@ -430,10 +532,12 @@ export default function Home() {
   };
 
   // ============================================
-  // ACTUALIZAR COSTO PROVEEDOR (CALCULA COMISION)
+  // ACTUALIZAR COSTO PROVEEDOR EN FORMULARIO DE VENTA
   // ============================================
-  const handleCostoProveedorChange = (valor: string) => {
-    const { comision } = calcularComision(formData.precioVentaUSD, valor);
+  const handleVentaCostoChange = (valor: string) => {
+    const pv = parseFloat(formData.precioVentaUSD) || 0;
+    const cp = parseFloat(valor) || 0;
+    const comision = calcularComision(pv, cp);
     setFormData({
       ...formData,
       costoProveedorUSD: valor,
@@ -441,27 +545,8 @@ export default function Home() {
     });
   };
 
-  // ============================================
-  // ACTUALIZAR CANTIDAD DE PERSONAS
-  // ============================================
-  const updateCantidadPersonas = (cantidad: number) => {
-    const precioUnitario = parseFloat(formData.precioVentaUSD) || 0;
-    const costoUnitario = parseFloat(formData.costoProveedorUSD) || 0;
-    const precioTotal = precioUnitario * cantidad;
-    const costoTotal = costoUnitario * cantidad;
-    const comisionTotal = precioTotal - costoTotal;
-    
-    setFormData({
-      ...formData,
-      cantidadPersonas: cantidad,
-      precioVentaUSD: precioTotal.toString(),
-      costoProveedorUSD: costoTotal.toString(),
-      comisionUSD: comisionTotal.toString()
-    });
-  };
-
   const editVenta = (venta: Venta) => {
-    setEditingId(venta.id);
+    setEditingVentaId(venta.id);
     setFormData({
       clienteNombre: venta.clienteNombre,
       clienteWhatsapp: venta.clienteWhatsapp,
@@ -493,24 +578,9 @@ export default function Home() {
     saveVentas(updated);
   };
 
-  const deleteCliente = (id: string) => {
-    if (!confirm("Eliminar este cliente?")) return;
-    const updated = clientes.filter(c => c.id !== id);
-    saveClientes(updated);
-  };
-
-  const deleteProveedor = (id: string) => {
-    if (!confirm("Eliminar este proveedor?")) return;
-    const updated = proveedores.filter(p => p.id !== id);
-    saveProveedores(updated);
-  };
-
-  const deleteExcursion = (id: string) => {
-    if (!confirm("Eliminar esta excursion?")) return;
-    const updated = excursiones.filter(e => e.id !== id);
-    saveExcursiones(updated);
-  };
-
+  // ============================================
+  // FILTROS Y AGRUPACIONES
+  // ============================================
   let filtered = ventas;
   
   if (filterYear) {
@@ -578,10 +648,6 @@ export default function Home() {
       pago_dia: "Pago el dia (USD)"
     };
     return map[tipo] || tipo;
-  };
-
-  const getStatusColor = (status: string) => {
-    return status === "pagado" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700";
   };
 
   const exportCSV = () => {
@@ -739,14 +805,40 @@ export default function Home() {
             })}
             <div className="flex-1"></div>
             <button 
-              onClick={() => setShowForm(true)} 
+              onClick={() => {
+                setEditingVentaId(null);
+                setSelectedExcursionForVenta(null);
+                setFormData({
+                  clienteNombre: "",
+                  clienteWhatsapp: "",
+                  clienteEmail: "",
+                  excursionId: "",
+                  excursionNombre: "",
+                  fechaExcursion: "",
+                  precioVentaUSD: "",
+                  costoProveedorUSD: "",
+                  comisionUSD: "",
+                  pagoCliente: "completo",
+                  montoPagadoUSD: "",
+                  saldoPendienteUSD: "",
+                  metodoPagoCliente: "efectivo",
+                  proveedorId: "",
+                  proveedorNombre: "",
+                  proveedorPagado: "pendiente",
+                  metodoPagoProveedor: "efectivo",
+                  tipoCliente: "adulto",
+                  cantidadPersonas: 1,
+                  nota: "",
+                });
+                setShowForm(true);
+              }} 
               className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 text-sm font-medium shadow-lg shadow-${accentColor}-500/25`}
             >
               <span className="text-lg leading-none">+</span> Nueva Venta
             </button>
           </div>
 
-          {/* Dashboard */}
+          {/* DASHBOARD */}
           {viewMode === "dashboard" && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -777,7 +869,33 @@ export default function Home() {
                 {ventas.length === 0 ? (
                   <div className="text-center py-12">
                     <p className="text-white/40">No hay ventas registradas</p>
-                    <button onClick={() => setShowForm(true)} className={`mt-4 bg-gradient-to-r ${buttonGradient} text-slate-900 px-6 py-3 rounded-xl hover:shadow-xl transition-all font-medium`}>Registrar primera venta</button>
+                    <button onClick={() => {
+                      setEditingVentaId(null);
+                      setSelectedExcursionForVenta(null);
+                      setFormData({
+                        clienteNombre: "",
+                        clienteWhatsapp: "",
+                        clienteEmail: "",
+                        excursionId: "",
+                        excursionNombre: "",
+                        fechaExcursion: "",
+                        precioVentaUSD: "",
+                        costoProveedorUSD: "",
+                        comisionUSD: "",
+                        pagoCliente: "completo",
+                        montoPagadoUSD: "",
+                        saldoPendienteUSD: "",
+                        metodoPagoCliente: "efectivo",
+                        proveedorId: "",
+                        proveedorNombre: "",
+                        proveedorPagado: "pendiente",
+                        metodoPagoProveedor: "efectivo",
+                        tipoCliente: "adulto",
+                        cantidadPersonas: 1,
+                        nota: "",
+                      });
+                      setShowForm(true);
+                    }} className={`mt-4 bg-gradient-to-r ${buttonGradient} text-slate-900 px-6 py-3 rounded-xl hover:shadow-xl transition-all font-medium`}>Registrar primera venta</button>
                   </div>
                 ) : (
                   ventas.slice(0, 5).map((v) => (
@@ -804,7 +922,7 @@ export default function Home() {
             </>
           )}
 
-          {/* Ventas */}
+          {/* VENTAS */}
           {viewMode === "ventas" && (
             <>
               <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 mb-6 border border-white/10`}>
@@ -821,7 +939,33 @@ export default function Home() {
               {groupedArray.length === 0 ? (
                 <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-16 text-center border-2 border-dashed border-white/10`}>
                   <p className="text-white/40 text-xl mb-4">No hay ventas registradas</p>
-                  <button onClick={() => setShowForm(true)} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-6 py-3 rounded-xl hover:shadow-xl transition-all font-medium`}>Registrar primera venta</button>
+                  <button onClick={() => {
+                    setEditingVentaId(null);
+                    setSelectedExcursionForVenta(null);
+                    setFormData({
+                      clienteNombre: "",
+                      clienteWhatsapp: "",
+                      clienteEmail: "",
+                      excursionId: "",
+                      excursionNombre: "",
+                      fechaExcursion: "",
+                      precioVentaUSD: "",
+                      costoProveedorUSD: "",
+                      comisionUSD: "",
+                      pagoCliente: "completo",
+                      montoPagadoUSD: "",
+                      saldoPendienteUSD: "",
+                      metodoPagoCliente: "efectivo",
+                      proveedorId: "",
+                      proveedorNombre: "",
+                      proveedorPagado: "pendiente",
+                      metodoPagoProveedor: "efectivo",
+                      tipoCliente: "adulto",
+                      cantidadPersonas: 1,
+                      nota: "",
+                    });
+                    setShowForm(true);
+                  }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-6 py-3 rounded-xl hover:shadow-xl transition-all font-medium`}>Registrar primera venta</button>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -907,7 +1051,7 @@ export default function Home() {
             </>
           )}
 
-          {/* Clientes */}
+          {/* CLIENTES */}
           {viewMode === "clientes" && (
             <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
               <div className="flex justify-between items-center mb-4">
@@ -949,15 +1093,28 @@ export default function Home() {
             </div>
           )}
 
-          {/* Proveedores */}
+          {/* PROVEEDORES */}
           {viewMode === "proveedores" && (
             <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-bold text-white">Proveedores</h2>
-                <button onClick={() => setShowProveedorForm(true)} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>+ Agregar Proveedor</button>
+                <button onClick={() => {
+                  setEditingProveedorId(null);
+                  setProveedorFormData({
+                    nombre: "",
+                    telefono: "",
+                    email: "",
+                    metodoPago: "efectivo",
+                    nota: "",
+                  });
+                  setShowProveedorForm(true);
+                }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>+ Agregar Proveedor</button>
               </div>
               {proveedores.length === 0 ? (
-                <p className="text-center text-white/40 py-8">No hay proveedores registrados</p>
+                <div className="text-center py-12">
+                  <p className="text-white/40">No hay proveedores registrados</p>
+                  <p className="text-white/30 text-sm mt-2">Crea un proveedor para poder agregar excursiones</p>
+                </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -986,7 +1143,10 @@ export default function Home() {
                               </span>
                             </td>
                             <td className="px-4 py-3 text-sm">
-                              <button onClick={() => deleteProveedor(p.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>Eliminar</button>
+                              <div className="flex items-center gap-2">
+                                <button onClick={() => editProveedor(p)} className={`${isRaul ? 'text-amber-400 hover:text-amber-300' : 'text-pink-300 hover:text-pink-200'}`}>Editar</button>
+                                <button onClick={() => deleteProveedor(p.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>Eliminar</button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -998,15 +1158,36 @@ export default function Home() {
             </div>
           )}
 
-          {/* Excursiones */}
+          {/* EXCURSIONES */}
           {viewMode === "excursiones" && (
             <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-bold text-white">Excursiones</h2>
-                <button onClick={() => setShowExcursionForm(true)} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>+ Agregar Excursion</button>
+                <button onClick={() => {
+                  if (proveedores.length === 0) {
+                    alert("Primero debes crear un proveedor");
+                    return;
+                  }
+                  setEditingExcursionId(null);
+                  setExcursionFormData({
+                    nombre: "",
+                    proveedorId: "",
+                    proveedorNombre: "",
+                    precioVentaUSD: "",
+                    costoProveedorUSD: "",
+                    comisionUSD: "",
+                    tipoCliente: "adulto",
+                    zona: "",
+                    capacidad: "",
+                  });
+                  setShowExcursionForm(true);
+                }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all text-sm font-medium`}>+ Agregar Excursion</button>
               </div>
               {excursiones.length === 0 ? (
-                <p className="text-center text-white/40 py-8">No hay excursiones registradas</p>
+                <div className="text-center py-12">
+                  <p className="text-white/40">No hay excursiones registradas</p>
+                  <p className="text-white/30 text-sm mt-2">Primero crea un proveedor y luego agrega sus excursiones</p>
+                </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -1015,28 +1196,44 @@ export default function Home() {
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursion</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Proveedor</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Tipo</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Precio Venta</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Costo Prov.</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Comision</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">% Comision</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Zona</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Capacidad</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {excursiones.map((e) => (
-                        <tr key={e.id} className="border-b border-white/5 hover:bg-white/5">
-                          <td className="px-4 py-3 text-sm font-medium text-white">{e.nombre}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">{e.proveedorNombre}</td>
-                          <td className="px-4 py-3 text-sm">
-                            <span className={`text-xs px-2 py-1 rounded-full ${e.tipoCliente === 'adulto' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
-                              {e.tipoCliente === 'adulto' ? 'Adulto' : 'Nino'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-sm text-white/60">{e.zona || '-'}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">{e.capacidad || '-'}</td>
-                          <td className="px-4 py-3 text-sm">
-                            <button onClick={() => deleteExcursion(e.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>Eliminar</button>
-                          </td>
-                        </tr>
-                      ))}
+                      {excursiones.map((e) => {
+                        const porcentajeComision = e.precioVentaUSD > 0 
+                          ? ((e.comisionUSD / e.precioVentaUSD) * 100).toFixed(2) 
+                          : "0";
+                        return (
+                          <tr key={e.id} className="border-b border-white/5 hover:bg-white/5">
+                            <td className="px-4 py-3 text-sm font-medium text-white">{e.nombre}</td>
+                            <td className="px-4 py-3 text-sm text-white/60">{e.proveedorNombre}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <span className={`text-xs px-2 py-1 rounded-full ${e.tipoCliente === 'adulto' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
+                                {e.tipoCliente === 'adulto' ? 'Adulto' : 'Nino'}
+                              </span>
+                            </td>
+                            <td className={`px-4 py-3 text-sm font-bold ${isRaul ? 'text-amber-400' : 'text-pink-300'}`}>{formatUSD(e.precioVentaUSD)}</td>
+                            <td className={`px-4 py-3 text-sm font-bold ${isRaul ? 'text-red-400' : 'text-rose-300'}`}>{formatUSD(e.costoProveedorUSD)}</td>
+                            <td className="px-4 py-3 text-sm font-bold text-green-400">{formatUSD(e.comisionUSD)}</td>
+                            <td className="px-4 py-3 text-sm text-white/60">{porcentajeComision}%</td>
+                            <td className="px-4 py-3 text-sm text-white/60">{e.zona || '-'}</td>
+                            <td className="px-4 py-3 text-sm text-white/60">{e.capacidad || '-'}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <div className="flex items-center gap-2">
+                                <button onClick={() => editExcursion(e)} className={`${isRaul ? 'text-amber-400 hover:text-amber-300' : 'text-pink-300 hover:text-pink-200'}`}>Editar</button>
+                                <button onClick={() => deleteExcursion(e.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>Eliminar</button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -1053,7 +1250,7 @@ export default function Home() {
             <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto border border-white/10">
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-white">{editingId ? "Editar Venta" : "Nueva Venta"}</h2>
+                  <h2 className="text-2xl font-bold text-white">{editingVentaId ? "Editar Venta" : "Nueva Venta"}</h2>
                   <p className="text-sm text-white/40">Cliente paga en USD - Comision automatica</p>
                 </div>
                 <button onClick={() => setShowForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
@@ -1065,13 +1262,14 @@ export default function Home() {
                   <select
                     className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
                     value={formData.excursionId}
-                    onChange={(e) => selectExcursion(e.target.value)}
+                    onChange={(e) => selectExcursionForVenta(e.target.value)}
                     required
                   >
                     <option value="" className="text-slate-900">Seleccionar excursion</option>
                     {excursiones.map(e => (
                       <option key={e.id} value={e.id} className="text-slate-900">
-                        {e.nombre} - {e.proveedorNombre}
+                        {e.nombre} - {e.proveedorNombre} - {formatUSD(e.precioVentaUSD)} 
+                        {e.tipoCliente === 'nino' ? ' (Nino)' : ' (Adulto)'}
                       </option>
                     ))}
                   </select>
@@ -1098,7 +1296,7 @@ export default function Home() {
                       className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
                       placeholder="0.00"
                       value={formData.precioVentaUSD}
-                      onChange={(e) => handlePrecioVentaChange(e.target.value)}
+                      onChange={(e) => handleVentaPrecioChange(e.target.value)}
                     />
                   </div>
                   <div>
@@ -1110,7 +1308,7 @@ export default function Home() {
                       className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40"
                       placeholder="0.00"
                       value={formData.costoProveedorUSD}
-                      onChange={(e) => handleCostoProveedorChange(e.target.value)}
+                      onChange={(e) => handleVentaCostoChange(e.target.value)}
                     />
                   </div>
                 </div>
@@ -1198,7 +1396,7 @@ export default function Home() {
                 </div>
 
                 <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>
-                  {editingId ? "Actualizar Venta" : "Guardar Venta"}
+                  {editingVentaId ? "Actualizar Venta" : "Guardar Venta"}
                 </button>
               </form>
             </div>
@@ -1212,37 +1410,103 @@ export default function Home() {
           <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
             <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Nueva Excursion</h2>
+                <h2 className="text-2xl font-bold text-white">{editingExcursionId ? "Editar Excursion" : "Nueva Excursion"}</h2>
                 <button onClick={() => setShowExcursionForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
               </div>
               <form onSubmit={handleExcursionSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Nombre de la Excursion *</label>
-                  <input type="text" name="nombre" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Ej: Isla Saona - Bavaro" />
+                  <input 
+                    type="text" 
+                    value={excursionFormData.nombre}
+                    onChange={(e) => setExcursionFormData({ ...excursionFormData, nombre: e.target.value })}
+                    required 
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                    placeholder="Ej: Isla Saona - Bavaro" 
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Proveedor *</label>
-                  <select name="proveedorId" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white">
+                  <select 
+                    value={excursionFormData.proveedorId}
+                    onChange={(e) => setExcursionFormData({ ...excursionFormData, proveedorId: e.target.value })}
+                    required 
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
+                  >
                     <option value="" className="text-slate-900">Seleccionar proveedor</option>
                     {proveedores.map(p => <option key={p.id} value={p.id} className="text-slate-900">{p.nombre}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Cliente *</label>
-                  <select name="tipoCliente" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white">
+                  <select 
+                    value={excursionFormData.tipoCliente}
+                    onChange={(e) => setExcursionFormData({ ...excursionFormData, tipoCliente: e.target.value as "adulto" | "nino" })}
+                    required 
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
+                  >
                     <option value="adulto" className="text-slate-900">Adulto</option>
                     <option value="nino" className="text-slate-900">Nino</option>
                   </select>
                 </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Venta (USD) *</label>
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      value={excursionFormData.precioVentaUSD}
+                      onChange={(e) => handleExcursionPrecioChange("precioVentaUSD", e.target.value)}
+                      required 
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                      placeholder="99.00" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor (USD) *</label>
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      value={excursionFormData.costoProveedorUSD}
+                      onChange={(e) => handleExcursionPrecioChange("costoProveedorUSD", e.target.value)}
+                      required 
+                      className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                      placeholder="55.00" 
+                    />
+                  </div>
+                </div>
+                <div className="bg-green-500/10 rounded-xl p-3 border border-green-500/20">
+                  <label className="block text-sm font-medium text-white/60 mb-1">Comision (USD) - Tu Ganancia</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 bg-transparent border-0 text-green-400 font-bold text-lg"
+                    value={excursionFormData.comisionUSD}
+                    readOnly
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Zona (opcional)</label>
-                  <input type="text" name="zona" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Bavaro, Uvero Alto, etc." />
+                  <input 
+                    type="text" 
+                    value={excursionFormData.zona}
+                    onChange={(e) => setExcursionFormData({ ...excursionFormData, zona: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                    placeholder="Bavaro, Uvero Alto, etc." 
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Capacidad (opcional)</label>
-                  <input type="text" name="capacidad" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="2 personas, 4 personas, etc." />
+                  <input 
+                    type="text" 
+                    value={excursionFormData.capacidad}
+                    onChange={(e) => setExcursionFormData({ ...excursionFormData, capacidad: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                    placeholder="2 personas, 4 personas, etc." 
+                  />
                 </div>
-                <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>Guardar Excursion</button>
+                <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>
+                  {editingExcursionId ? "Actualizar Excursion" : "Guardar Excursion"}
+                </button>
               </form>
             </div>
           </div>
@@ -1255,25 +1519,48 @@ export default function Home() {
           <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
             <div className="bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-white/10">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Nuevo Proveedor</h2>
+                <h2 className="text-2xl font-bold text-white">{editingProveedorId ? "Editar Proveedor" : "Nuevo Proveedor"}</h2>
                 <button onClick={() => setShowProveedorForm(false)} className="text-white/40 hover:text-white text-3xl leading-none">×</button>
               </div>
               <form onSubmit={handleProveedorSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Proveedor *</label>
-                  <input type="text" name="nombre" required className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Ej: Dominican Way Travel" />
+                  <input 
+                    type="text" 
+                    value={proveedorFormData.nombre}
+                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, nombre: e.target.value })}
+                    required 
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                    placeholder="Ej: Dominican Way Travel" 
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Telefono</label>
-                  <input type="text" name="telefono" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="809-000-0000" />
+                  <input 
+                    type="text" 
+                    value={proveedorFormData.telefono}
+                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, telefono: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                    placeholder="809-000-0000" 
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
-                  <input type="email" name="email" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="info@proveedor.com" />
+                  <input 
+                    type="email" 
+                    value={proveedorFormData.email}
+                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, email: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                    placeholder="info@proveedor.com" 
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Metodo de Pago</label>
-                  <select name="metodoPago" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white">
+                  <select 
+                    value={proveedorFormData.metodoPago}
+                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, metodoPago: e.target.value as "efectivo" | "transferencia" | "paypal" })}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white"
+                  >
                     <option value="efectivo" className="text-slate-900">Efectivo</option>
                     <option value="transferencia" className="text-slate-900">Transferencia</option>
                     <option value="paypal" className="text-slate-900">PayPal</option>
@@ -1281,9 +1568,17 @@ export default function Home() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Nota</label>
-                  <textarea name="nota" className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" placeholder="Detalles del proveedor..." rows={2}></textarea>
+                  <textarea 
+                    value={proveedorFormData.nota}
+                    onChange={(e) => setProveedorFormData({ ...proveedorFormData, nota: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40" 
+                    placeholder="Detalles del proveedor..." 
+                    rows={2}
+                  />
                 </div>
-                <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>Guardar Proveedor</button>
+                <button type="submit" className={`w-full bg-gradient-to-r ${buttonGradient} text-slate-900 py-4 rounded-xl font-semibold hover:shadow-xl transition-all`}>
+                  {editingProveedorId ? "Actualizar Proveedor" : "Guardar Proveedor"}
+                </button>
               </form>
             </div>
           </div>
