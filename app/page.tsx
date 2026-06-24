@@ -82,79 +82,31 @@ interface Venta {
 }
 
 // ============================================
-// LISTA DE ZONAS DE PUNTA CANA
+// LISTA DE ZONAS
 // ============================================
-const ZONAS_PUNTA_CANA = [
-  "Jellyfish",
-  "Macao",
-  "Los Corales Beach",
-  "Bavaro",
-  "Punta Cana Village",
-  "Cap Cana",
-  "Uvero Alto",
-  "Cabeza de Toro",
-  "El Cortecito",
-  "Los Corales",
-  "Bibijagua",
-  "Arena Gorda",
-  "Melia",
-  "Riu",
-  "Hard Rock",
-  "Iberostar",
-  "Bahia Principe",
-  "Sirenis",
-  "Dreams",
-  "Excellence",
-  "San Juan",
-  "Veron",
-  "Frias",
-  "La Otra Banda",
-  "Los Prados",
-  "Los Maestros",
-  "Los Jardines",
-  "Villa Baya",
-  "Brisas del Mar",
-  "Playa Los Corales",
-  "Playa Macao",
-  "Playa Bavaro",
-  "Playa Uvero Alto"
+const ZONAS = [
+  "Bavaro", "Punta Cana Village", "Cap Cana", "Uvero Alto",
+  "Cabeza de Toro", "El Cortecito", "Los Corales", "Bibijagua",
+  "Arena Gorda", "Melia", "Riu", "Hard Rock", "Iberostar",
+  "Bahia Principe", "Sirenis", "Dreams", "Excellence",
+  "San Juan", "Veron", "La Otra Banda", "Playa Bavaro"
 ];
 
 // ============================================
-// LISTA DE BANCOS DE REPÚBLICA DOMINICANA
+// LISTA DE BANCOS
 // ============================================
-const BANCOS_RD = [
-  "Banco BHD",
-  "Banreservas",
-  "Banco Popular Dominicano",
-  "Scotiabank",
-  "Banco Santa Cruz",
-  "Banco Vimenca",
-  "Banco ADOPEM",
-  "Banco Caribe",
-  "Banco Multiple",
-  "Bancamerica",
-  "Banco Activo",
-  "Banfondesa",
-  "Banco BDI",
-  "Banco Promerica",
-  "Banco Lafise",
-  "Banesco",
-  "Banco de Ahorro y Credito",
-  "Banco de Desarrollo",
-  "Banco Nacional",
-  "Banco de la Produccion",
-  "Banco de los Trabajadores",
-  "AFP Popular",
-  "AFP Reservas",
-  "AFP Crecer",
-  "AFP Siembra"
+const BANCOS = [
+  "Banco BHD", "Banreservas", "Banco Popular Dominicano",
+  "Scotiabank", "Banco Santa Cruz", "Banco Vimenca",
+  "Banco ADOPEM", "Banco Caribe", "Bancamerica",
+  "Banco Activo", "Banfondesa", "Banco BDI",
+  "Banco Promerica", "Banco Lafise", "Banesco"
 ];
 
 // ============================================
-// HORAS DISPONIBLES (AM/PM)
+// HORAS DISPONIBLES
 // ============================================
-const HORAS_DISPONIBLES = [
+const HORAS = [
   "06:00 AM", "06:30 AM", "07:00 AM", "07:30 AM",
   "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
   "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
@@ -196,7 +148,7 @@ export default function Home() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Buscadores y filtros por seccion
+  // Buscadores y filtros
   const [searchClientes, setSearchClientes] = useState("");
   const [filterClienteExcursion, setFilterClienteExcursion] = useState("");
 
@@ -209,7 +161,6 @@ export default function Home() {
   const [searchBancos, setSearchBancos] = useState("");
   const [filterBancoTipo, setFilterBancoTipo] = useState("todos");
   const [filterBancoMoneda, setFilterBancoMoneda] = useState("todas");
-  const [filterBancoBeneficiario, setFilterBancoBeneficiario] = useState("todos");
 
   const [searchReservas, setSearchReservas] = useState("");
   const [filterReservaEstado, setFilterReservaEstado] = useState("todas");
@@ -318,7 +269,7 @@ export default function Home() {
   });
 
   // ============================================
-  // FUNCIONES DE FORMATO DE TELEFONO
+  // FUNCIONES DE FORMATO
   // ============================================
   const formatearTelefono = (telefono: string) => {
     const numeros = telefono.replace(/\D/g, '');
@@ -339,9 +290,6 @@ export default function Home() {
     }));
   };
 
-  // ============================================
-  // FUNCIONES DE FORMATO DE RNC/CEDULA
-  // ============================================
   const formatearRNC = (rnc: string) => {
     const numeros = rnc.replace(/\D/g, '');
     if (numeros.length <= 2) return numeros;
@@ -379,9 +327,6 @@ export default function Home() {
     }));
   };
 
-  // ============================================
-  // FUNCIONES DE HORA
-  // ============================================
   const formatearHora = (hora24: string) => {
     if (!hora24) return "02:00 PM";
     const partes = hora24.split(":");
@@ -440,10 +385,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v27");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v27");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v27");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v27");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v28");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v28");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v28");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v28");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -453,22 +398,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v27", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v28", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v27", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v28", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v27", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v28", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v27", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v28", JSON.stringify(data));
   };
 
   // ============================================
@@ -743,7 +688,7 @@ export default function Home() {
   };
 
   // ============================================
-  // MANEJAR TIPO DE CUENTA (Corriente / Ahorros)
+  // MANEJAR TIPO DE CUENTA
   // ============================================
   const toggleTipoCuenta = (tipo: "corriente" | "ahorros") => {
     setProveedorFormData(prev => {
@@ -1467,26 +1412,54 @@ export default function Home() {
   }
 
   // ============================================
-  // RENDER PRINCIPAL
+  // CONFIGURACION DE ESTILOS POR USUARIO
   // ============================================
   const isAdmin = currentUser === "republic";
   const isRaul = currentUser === "raul";
   const isGabrielle = currentUser === "gabrielle";
   
-  const bgGradient = isAdmin 
-    ? "from-slate-900 via-slate-800 to-slate-900"
-    : isRaul 
-      ? "from-slate-900 via-blue-900 to-slate-900"
-      : "from-purple-900 via-pink-800 to-rose-900";
-  
-  const accentColor = isAdmin ? "amber" : isRaul ? "blue" : "pink";
-  const headerBg = isAdmin ? "bg-white/5" : "bg-white/10";
-  const cardBg = isAdmin ? "bg-white/5" : "bg-white/10";
-  const buttonGradient = isAdmin 
-    ? "from-amber-500 to-amber-600"
-    : isRaul
-      ? "from-blue-500 to-indigo-600"
-      : "from-pink-500 to-purple-500";
+  // Colores por usuario
+  const colors = {
+    admin: {
+      bg: "from-slate-900 via-slate-800 to-slate-900",
+      accent: "amber",
+      accentLight: "amber-400",
+      gradient: "from-amber-500 to-amber-600",
+      header: "bg-white/5",
+      card: "bg-white/5",
+      shadow: "shadow-amber-500/25",
+      border: "border-amber-500/30",
+    },
+    raul: {
+      bg: "from-slate-900 via-indigo-950 to-slate-900",
+      accent: "blue",
+      accentLight: "blue-400",
+      gradient: "from-blue-500 to-indigo-600",
+      header: "bg-white/5",
+      card: "bg-white/5",
+      shadow: "shadow-blue-500/25",
+      border: "border-blue-500/30",
+    },
+    gabrielle: {
+      bg: "from-rose-950 via-pink-900 to-purple-950",
+      accent: "pink",
+      accentLight: "pink-400",
+      gradient: "from-pink-500 to-rose-500",
+      header: "bg-white/10",
+      card: "bg-white/10",
+      shadow: "shadow-pink-500/25",
+      border: "border-pink-500/30",
+    }
+  };
+
+  const userColors = isAdmin ? colors.admin : isRaul ? colors.raul : colors.gabrielle;
+  const bgGradient = userColors.bg;
+  const accentColor = userColors.accent;
+  const accentLight = userColors.accentLight;
+  const headerBg = userColors.header;
+  const cardBg = userColors.card;
+  const buttonGradient = userColors.gradient;
+  const shadowColor = userColors.shadow;
 
   const getUserRole = () => {
     if (isAdmin) return "Administrador";
@@ -1559,27 +1532,18 @@ export default function Home() {
 
     return (
       <div className="space-y-6">
-        <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 text-center`}>
-          <div className="text-4xl font-bold text-white font-mono tracking-wider">
-            {horaActual}
-          </div>
-          <div className="text-sm text-white/50 mt-1">
-            {fechaActual}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-2xl">$</div>
+              <div className={`w-12 h-12 rounded-xl bg-${accentColor}-500/20 flex items-center justify-center text-2xl`}>$</div>
               <div>
                 <p className="text-white/40 text-sm">Total Ventas</p>
-                <p className="text-white font-bold text-xl">{formatUSD(totalVentas)}</p>
+                <p className={`text-white font-bold text-xl`}>{formatUSD(totalVentas)}</p>
               </div>
             </div>
           </div>
           
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center text-2xl">%</div>
               <div>
@@ -1589,7 +1553,7 @@ export default function Home() {
             </div>
           </div>
           
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center text-2xl">!</div>
               <div>
@@ -1599,7 +1563,7 @@ export default function Home() {
             </div>
           </div>
           
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-2xl">👥</div>
               <div>
@@ -1612,7 +1576,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
-            <h3 className="text-white font-semibold mb-3">Resumen de Ventas</h3>
+            <h3 className={`text-${accentLight} font-semibold mb-3`}>Resumen de Ventas</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-white/60">Hoy</span>
@@ -1634,7 +1598,7 @@ export default function Home() {
           </div>
 
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
-            <h3 className="text-white font-semibold mb-3">Excursiones</h3>
+            <h3 className={`text-${accentLight} font-semibold mb-3`}>Excursiones</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-white/60">Total Excursiones</span>
@@ -1652,7 +1616,7 @@ export default function Home() {
           </div>
 
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
-            <h3 className="text-white font-semibold mb-3">Ultimas Ventas</h3>
+            <h3 className={`text-${accentLight} font-semibold mb-3`}>Ultimas Ventas</h3>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {ventas.slice(-5).reverse().map(v => (
                 <div key={v.id} className="flex justify-between text-sm border-b border-white/5 pb-1">
@@ -1668,7 +1632,7 @@ export default function Home() {
         </div>
 
         {ventas.length === 0 && (
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-12 border border-white/10 text-center`}>
+          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-12 border-2 border-dashed border-white/10 text-center`}>
             <div className="text-6xl mb-4">🚀</div>
             <h3 className="text-white text-xl font-semibold mb-2">Comienza tu primera venta!</h3>
             <p className="text-white/40">Haz clic en "Nueva Venta" para registrar tu primera excursion</p>
@@ -1812,7 +1776,7 @@ export default function Home() {
                               <div className="flex gap-1">
                                 <button
                                   onClick={() => editVenta(venta)}
-                                  className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-xs transition-all"
+                                  className={`px-2 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}
                                 >
                                   Editar
                                 </button>
@@ -1958,7 +1922,7 @@ export default function Home() {
                     <td className="py-3 px-4">
                       <button
                         onClick={() => editVenta(v)}
-                        className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-xs transition-all"
+                        className={`px-3 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}
                       >
                         Editar
                       </button>
@@ -2008,7 +1972,7 @@ export default function Home() {
           </select>
           <button
             onClick={() => setShowClienteForm(true)}
-            className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-lg shadow-${accentColor}-500/25`}
+            className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 ${shadowColor}`}
           >
             <span className="text-lg leading-none">+</span> Nuevo Cliente
           </button>
@@ -2118,7 +2082,7 @@ export default function Home() {
               setTempExcursiones([]);
               setShowProveedorForm(true);
             }}
-            className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-lg shadow-${accentColor}-500/25`}
+            className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 ${shadowColor}`}
           >
             <span className="text-lg leading-none">+</span> Nuevo Proveedor
           </button>
@@ -2131,7 +2095,7 @@ export default function Home() {
             </div>
           ) : (
             proveedoresFiltrados.map(p => (
-              <div key={p.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all`}>
+              <div key={p.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-white font-semibold">{p.nombre}</h3>
@@ -2140,7 +2104,7 @@ export default function Home() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => editProveedor(p)}
-                      className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-xs transition-all"
+                      className={`px-3 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}
                     >
                       Editar
                     </button>
@@ -2191,8 +2155,7 @@ export default function Home() {
                             p.beneficiario.toLowerCase().includes(searchBancos.toLowerCase());
       const matchesTipo = filterBancoTipo === "todos" || p.tipoCuenta.includes(filterBancoTipo as any);
       const matchesMoneda = filterBancoMoneda === "todas" || p.monedaCuenta === filterBancoMoneda;
-      const matchesBeneficiario = filterBancoBeneficiario === "todos" || p.tipoBeneficiario === filterBancoBeneficiario;
-      return matchesSearch && matchesTipo && matchesMoneda && matchesBeneficiario;
+      return matchesSearch && matchesTipo && matchesMoneda;
     });
 
     return (
@@ -2225,15 +2188,6 @@ export default function Home() {
             <option value="USD">USD</option>
             <option value="RD$">RD$</option>
           </select>
-          <select
-            value={filterBancoBeneficiario}
-            onChange={(e) => setFilterBancoBeneficiario(e.target.value)}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
-          >
-            <option value="todos">Todos los beneficiarios</option>
-            <option value="personal">Personal</option>
-            <option value="empresarial">Empresarial</option>
-          </select>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2243,7 +2197,7 @@ export default function Home() {
             </div>
           ) : (
             bancosFiltrados.map(p => (
-              <div key={p.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
+              <div key={p.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-white font-semibold">{p.nombre}</h3>
@@ -2324,7 +2278,7 @@ export default function Home() {
               onClick={() => setCalendarioView("mes")}
               className={`px-4 py-2 rounded-xl text-sm transition-all ${
                 calendarioView === "mes" 
-                  ? `bg-gradient-to-r ${buttonGradient} text-slate-900` 
+                  ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` 
                   : "text-white/60 hover:text-white"
               }`}
             >
@@ -2376,7 +2330,7 @@ export default function Home() {
         </div>
 
         <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border border-white/10`}>
-          <h3 className="text-white font-semibold mb-3">Eventos del dia</h3>
+          <h3 className={`text-${accentLight} font-semibold mb-3`}>Eventos del dia</h3>
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {getVentasDelDia(currentDate).length === 0 ? (
               <p className="text-white/40 text-sm text-center py-4">No hay ventas para este dia</p>
@@ -2453,7 +2407,7 @@ export default function Home() {
               });
               setShowExcursionForm(true);
             }}
-            className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-lg shadow-${accentColor}-500/25`}
+            className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 ${shadowColor}`}
           >
             <span className="text-lg leading-none">+</span> Nueva Excursion
           </button>
@@ -2466,7 +2420,7 @@ export default function Home() {
             </div>
           ) : (
             excursionesFiltradas.map(e => (
-              <div key={e.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all`}>
+              <div key={e.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10 hover:border-${accentColor}-500/30 transition-all`}>
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-white font-semibold">{e.nombre}</h3>
@@ -2475,7 +2429,7 @@ export default function Home() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => editExcursion(e)}
-                      className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-xs transition-all"
+                      className={`px-3 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}
                     >
                       Editar
                     </button>
@@ -2550,7 +2504,7 @@ export default function Home() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Cliente *</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Cliente</label>
                     <input
                       type="text"
                       value={formData.clienteNombre}
@@ -2581,7 +2535,7 @@ export default function Home() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Excursion *</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Excursion</label>
                     <select
                       value={formData.excursionId}
                       onChange={(e) => selectExcursionForVenta(e.target.value)}
@@ -2596,7 +2550,7 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={() => setShowCrearExcursionDesdeVenta(true)}
-                      className="mt-1 text-xs text-amber-400 hover:text-amber-300 transition-all"
+                      className={`mt-1 text-xs text-${accentColor}-400 hover:text-${accentColor}-300 transition-all`}
                     >
                       + Crear nueva excursion
                     </button>
@@ -2614,7 +2568,7 @@ export default function Home() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Fecha de Excursion *</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Fecha de Excursion</label>
                     <input
                       type="date"
                       value={formData.fechaExcursion}
@@ -2630,7 +2584,7 @@ export default function Home() {
                       onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))}
                       className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
                     >
-                      {HORAS_DISPONIBLES.map(h => (
+                      {HORAS.map(h => (
                         <option key={h} value={h}>{h}</option>
                       ))}
                     </select>
@@ -2639,7 +2593,7 @@ export default function Home() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD) *</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -2660,7 +2614,7 @@ export default function Home() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor (USD) *</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor (USD)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -2684,7 +2638,7 @@ export default function Home() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Cant. Adultos</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Adultos</label>
                     <input
                       type="number"
                       min="0"
@@ -2694,7 +2648,7 @@ export default function Home() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Cant. Ninos</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Ninos</label>
                     <input
                       type="number"
                       min="0"
@@ -2872,7 +2826,7 @@ export default function Home() {
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all shadow-lg shadow-${accentColor}-500/25`}
+                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}
                   >
                     {editingVentaId ? "Actualizar Venta" : "Registrar Venta"}
                   </button>
@@ -2905,7 +2859,7 @@ export default function Home() {
               
               <form onSubmit={handleClienteSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre *</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre</label>
                   <input
                     type="text"
                     name="nombre"
@@ -2952,7 +2906,7 @@ export default function Home() {
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all shadow-lg shadow-${accentColor}-500/25`}
+                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}
                   >
                     Agregar Cliente
                   </button>
@@ -2991,7 +2945,7 @@ export default function Home() {
               <form onSubmit={handleProveedorSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Nombre *</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Nombre</label>
                     <input
                       type="text"
                       value={proveedorFormData.nombre}
@@ -3063,7 +3017,7 @@ export default function Home() {
                       className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
                     >
                       <option value="">Seleccionar banco</option>
-                      {BANCOS_RD.map(b => (
+                      {BANCOS.map(b => (
                         <option key={b} value={b}>{b}</option>
                       ))}
                     </select>
@@ -3173,10 +3127,177 @@ export default function Home() {
                   </div>
                 </div>
 
+                {/* EXCURSIONES DEL PROVEEDOR - TEMPORALES */}
+                <div className="border-t border-white/10 pt-4">
+                  <h3 className={`text-${accentLight} font-semibold mb-3`}>Excursiones de este Proveedor</h3>
+                  
+                  {tempExcursiones.length > 0 && (
+                    <div className="mb-4 overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-white/10">
+                            <th className="px-2 py-2 text-left text-white/60">Nombre</th>
+                            <th className="px-2 py-2 text-left text-white/60">Adulto Venta</th>
+                            <th className="px-2 py-2 text-left text-white/60">Adulto Costo</th>
+                            <th className="px-2 py-2 text-left text-white/60">Nino Venta</th>
+                            <th className="px-2 py-2 text-left text-white/60">Nino Costo</th>
+                            <th className="px-2 py-2 text-left text-white/60">Accion</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {tempExcursiones.map((e, index) => (
+                            <tr key={index} className="border-b border-white/5">
+                              <td className="px-2 py-2 text-white">{e.nombre}</td>
+                              <td className="px-2 py-2 text-amber-400">{formatUSD(e.precioAdultoUSD)}</td>
+                              <td className="px-2 py-2 text-red-400">{formatUSD(e.costoProveedorAdultoUSD)}</td>
+                              <td className="px-2 py-2 text-amber-400">{e.precioNinoUSD !== null ? formatUSD(e.precioNinoUSD) : "-"}</td>
+                              <td className="px-2 py-2 text-red-400">{e.costoProveedorNinoUSD !== null ? formatUSD(e.costoProveedorNinoUSD) : "-"}</td>
+                              <td className="px-2 py-2">
+                                <button type="button" onClick={() => eliminarTempExcursion(index)} className="text-red-400 hover:text-red-300">Eliminar</button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-3 p-3 bg-white/5 rounded-xl">
+                    <div className="col-span-2">
+                      <label className="block text-xs font-medium text-white/60 mb-1">Nombre Excursion</label>
+                      <input 
+                        type="text" 
+                        value={tempExcursionForm.nombre}
+                        onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, nombre: e.target.value })}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                        placeholder="Isla Saona" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1">Precio Adulto (USD)</label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        value={tempExcursionForm.precioAdultoUSD}
+                        onChange={(e) => {
+                          const valor = e.target.value;
+                          const pv = parseFloat(valor) || 0;
+                          const cp = parseFloat(tempExcursionForm.costoProveedorAdultoUSD) || 0;
+                          const comision = calcularComision(pv, cp);
+                          setTempExcursionForm({ 
+                            ...tempExcursionForm, 
+                            precioAdultoUSD: valor,
+                            comisionAdultoUSD: comision.toString()
+                          });
+                        }}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                        placeholder="99.00" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1">Costo Adulto (USD)</label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        value={tempExcursionForm.costoProveedorAdultoUSD}
+                        onChange={(e) => {
+                          const valor = e.target.value;
+                          const cp = parseFloat(valor) || 0;
+                          const pv = parseFloat(tempExcursionForm.precioAdultoUSD) || 0;
+                          const comision = calcularComision(pv, cp);
+                          setTempExcursionForm({ 
+                            ...tempExcursionForm, 
+                            costoProveedorAdultoUSD: valor,
+                            comisionAdultoUSD: comision.toString()
+                          });
+                        }}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                        placeholder="55.00" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1">Precio Nino (USD)</label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        value={tempExcursionForm.precioNinoUSD}
+                        onChange={(e) => {
+                          const valor = e.target.value;
+                          const tienePrecioNino = valor !== "" && parseFloat(valor) > 0;
+                          const pv = parseFloat(valor) || 0;
+                          const cp = parseFloat(tempExcursionForm.costoProveedorNinoUSD) || 0;
+                          const comision = calcularComision(pv, cp);
+                          setTempExcursionForm({ 
+                            ...tempExcursionForm, 
+                            precioNinoUSD: valor,
+                            tienePrecioNino: tienePrecioNino,
+                            comisionNinoUSD: comision.toString()
+                          });
+                        }}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                        placeholder="Dejar vacio si no aplica" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1">Costo Nino (USD)</label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        value={tempExcursionForm.costoProveedorNinoUSD}
+                        onChange={(e) => {
+                          const valor = e.target.value;
+                          const cp = parseFloat(valor) || 0;
+                          const pv = parseFloat(tempExcursionForm.precioNinoUSD) || 0;
+                          const comision = calcularComision(pv, cp);
+                          setTempExcursionForm({ 
+                            ...tempExcursionForm, 
+                            costoProveedorNinoUSD: valor,
+                            comisionNinoUSD: comision.toString()
+                          });
+                        }}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                        placeholder="Dejar vacio si no aplica" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1">Zona</label>
+                      <select
+                        value={tempExcursionForm.zona}
+                        onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, zona: e.target.value })}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm"
+                      >
+                        <option value="">Seleccionar zona</option>
+                        {ZONAS.map(z => (
+                          <option key={z} value={z}>{z}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/60 mb-1">Capacidad</label>
+                      <input 
+                        type="text" 
+                        value={tempExcursionForm.capacidad}
+                        onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, capacidad: e.target.value })}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" 
+                        placeholder="2 personas" 
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <button 
+                        type="button" 
+                        onClick={agregarTempExcursion}
+                        className={`w-full bg-${accentColor}-500/20 text-${accentColor}-400 py-2 rounded-lg hover:bg-${accentColor}-500/30 transition-all text-sm font-medium`}
+                      >
+                        + Agregar Excursion
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all shadow-lg shadow-${accentColor}-500/25`}
+                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}
                   >
                     {editingProveedorId ? "Actualizar Proveedor" : "Agregar Proveedor"}
                   </button>
@@ -3217,7 +3338,7 @@ export default function Home() {
               
               <form onSubmit={handleExcursionSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre *</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre</label>
                   <input
                     type="text"
                     value={excursionFormData.nombre}
@@ -3228,7 +3349,7 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Proveedor *</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Proveedor</label>
                   <select
                     value={excursionFormData.proveedorId}
                     onChange={(e) => {
@@ -3252,23 +3373,41 @@ export default function Home() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD) *</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD)</label>
                     <input
                       type="number"
                       step="0.01"
                       value={excursionFormData.precioAdultoUSD}
-                      onChange={(e) => setExcursionFormData(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
+                      onChange={(e) => {
+                        const pv = e.target.value;
+                        const cp = excursionFormData.costoProveedorAdultoUSD;
+                        const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
+                        setExcursionFormData({ 
+                          ...excursionFormData, 
+                          precioAdultoUSD: pv,
+                          comisionAdultoUSD: comision.toString()
+                        });
+                      }}
                       required
                       className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor Adulto (USD) *</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor Adulto (USD)</label>
                     <input
                       type="number"
                       step="0.01"
                       value={excursionFormData.costoProveedorAdultoUSD}
-                      onChange={(e) => setExcursionFormData(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
+                      onChange={(e) => {
+                        const cp = e.target.value;
+                        const pv = excursionFormData.precioAdultoUSD;
+                        const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
+                        setExcursionFormData({ 
+                          ...excursionFormData, 
+                          costoProveedorAdultoUSD: cp,
+                          comisionAdultoUSD: comision.toString()
+                        });
+                      }}
                       required
                       className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
                     />
@@ -3296,7 +3435,16 @@ export default function Home() {
                         type="number"
                         step="0.01"
                         value={excursionFormData.precioNinoUSD}
-                        onChange={(e) => setExcursionFormData(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
+                        onChange={(e) => {
+                          const pv = e.target.value;
+                          const cp = excursionFormData.costoProveedorNinoUSD;
+                          const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
+                          setExcursionFormData({ 
+                            ...excursionFormData, 
+                            precioNinoUSD: pv,
+                            comisionNinoUSD: comision.toString()
+                          });
+                        }}
                         className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
                       />
                     </div>
@@ -3306,7 +3454,16 @@ export default function Home() {
                         type="number"
                         step="0.01"
                         value={excursionFormData.costoProveedorNinoUSD}
-                        onChange={(e) => setExcursionFormData(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
+                        onChange={(e) => {
+                          const cp = e.target.value;
+                          const pv = excursionFormData.precioNinoUSD;
+                          const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0);
+                          setExcursionFormData({ 
+                            ...excursionFormData, 
+                            costoProveedorNinoUSD: cp,
+                            comisionNinoUSD: comision.toString()
+                          });
+                        }}
                         className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
                       />
                     </div>
@@ -3322,7 +3479,7 @@ export default function Home() {
                       className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
                     >
                       <option value="">Seleccionar zona</option>
-                      {ZONAS_PUNTA_CANA.map(z => (
+                      {ZONAS.map(z => (
                         <option key={z} value={z}>{z}</option>
                       ))}
                     </select>
@@ -3341,7 +3498,7 @@ export default function Home() {
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all shadow-lg shadow-${accentColor}-500/25`}
+                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}
                   >
                     {editingExcursionId ? "Actualizar Excursion" : "Agregar Excursion"}
                   </button>
@@ -3377,7 +3534,7 @@ export default function Home() {
               
               <form onSubmit={handleCrearExcursionDesdeVenta} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre *</label>
+                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre</label>
                   <input
                     type="text"
                     value={nuevaExcursionDesdeVenta.nombre}
@@ -3422,7 +3579,7 @@ export default function Home() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD) *</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -3433,7 +3590,7 @@ export default function Home() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Costo Adulto (USD) *</label>
+                    <label className="block text-sm font-medium text-white/70 mb-1">Costo Adulto (USD)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -3492,7 +3649,7 @@ export default function Home() {
                       className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500"
                     >
                       <option value="">Seleccionar zona</option>
-                      {ZONAS_PUNTA_CANA.map(z => (
+                      {ZONAS.map(z => (
                         <option key={z} value={z}>{z}</option>
                       ))}
                     </select>
@@ -3511,7 +3668,7 @@ export default function Home() {
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all shadow-lg shadow-${accentColor}-500/25`}
+                    className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}
                   >
                     Crear Excursion
                   </button>
@@ -3532,7 +3689,7 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER PRINCIPAL (continuacion)
+  // RENDER PRINCIPAL
   // ============================================
   return (
     <div className={`min-h-screen bg-gradient-to-br ${bgGradient}`}>
@@ -3540,12 +3697,12 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3 py-4">
             <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${buttonGradient} flex items-center justify-center shadow-lg shadow-${accentColor}-500/25`}>
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${buttonGradient} flex items-center justify-center ${shadowColor}`}>
                 <span className="text-xl text-slate-900 font-bold">RE</span>
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white tracking-tight">Republic Excursions</h1>
-                <p className={`text-xs text-${accentColor}-400/80`}>
+                <p className={`text-xs text-${accentLight}/80`}>
                   {currentUser === "republic" ? "Administrador" : currentUser === "raul" ? "Vendedor" : "Vendedora"} - {getUserRole()}
                 </p>
               </div>
@@ -3587,7 +3744,7 @@ export default function Home() {
                 onClick={() => setViewMode(tab as any)} 
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                   viewMode === tab 
-                    ? `bg-gradient-to-r ${buttonGradient} text-slate-900 shadow-lg shadow-${accentColor}-500/25` 
+                    ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` 
                     : "text-white/70 hover:text-white hover:bg-white/10"
                 }`}
               >
@@ -3637,7 +3794,7 @@ export default function Home() {
               });
               setShowForm(true);
             }} 
-            className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 text-sm font-medium shadow-lg shadow-${accentColor}-500/25`}
+            className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 text-sm font-medium ${shadowColor}`}
           >
             <span className="text-lg leading-none">+</span> Nueva Venta
           </button>
