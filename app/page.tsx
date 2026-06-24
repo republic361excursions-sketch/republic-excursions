@@ -377,10 +377,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v30");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v30");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v30");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v30");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v31");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v31");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v31");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v31");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -390,22 +390,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v30", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v31", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v30", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v31", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v30", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v31", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v30", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v31", JSON.stringify(data));
   };
 
   // ============================================
@@ -1297,7 +1297,7 @@ export default function Home() {
   };
 
   // ============================================
-  // NUEVO LOGIN MODERNO
+  // LOGIN MODERNO
   // ============================================
   if (!isLoggedIn) {
     return (
@@ -1405,7 +1405,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-[10px] text-white/20">v3.0 • Republic Excursions © 2026</p>
+              <p className="text-[10px] text-white/20">v3.1 • Republic Excursions © 2026</p>
             </div>
           </div>
         </div>
@@ -1420,52 +1420,58 @@ export default function Home() {
   const isRaul = currentUser === "raul";
   const isGabrielle = currentUser === "gabrielle";
   
-  // Cada usuario tiene su propio tema de colores completamente diferente
+  // Cada usuario tiene su propio tema completamente diferente
   const themes = {
     admin: {
-      // Republic - Estilo Corporativo/Dorado
-      bg: "from-slate-900 via-slate-800 to-slate-900",
+      // Republic - Estilo Ejecutivo Oscuro con Dorado
+      bg: "from-gray-950 via-slate-900 to-gray-950",
       accent: "amber",
       accentLight: "amber-400",
-      gradient: "from-amber-500 to-amber-600",
-      header: "bg-white/5",
+      gradient: "from-amber-400 to-yellow-500",
+      header: "bg-black/40",
       card: "bg-white/5",
-      shadow: "shadow-amber-500/25",
+      shadow: "shadow-amber-500/30",
       border: "border-amber-500/30",
       text: "text-amber-400",
       bgHover: "hover:bg-amber-500/10",
       glow: "shadow-amber-500/20",
       cardBorder: "border-amber-500/20",
+      badge: "bg-amber-500/20 text-amber-400",
+      iconBg: "bg-amber-500/10",
     },
     raul: {
-      // Raul - Estilo Ejecutivo/Azul
-      bg: "from-slate-900 via-blue-950 to-indigo-950",
-      accent: "blue",
-      accentLight: "blue-400",
-      gradient: "from-blue-500 to-cyan-600",
-      header: "bg-white/5",
-      card: "bg-white/5",
-      shadow: "shadow-blue-500/25",
-      border: "border-blue-500/30",
-      text: "text-blue-400",
-      bgHover: "hover:bg-blue-500/10",
-      glow: "shadow-blue-500/20",
-      cardBorder: "border-blue-500/20",
+      // Raul - Estilo Moderno con Efectos de Cristal
+      bg: "from-cyan-950 via-blue-950 to-indigo-950",
+      accent: "cyan",
+      accentLight: "cyan-400",
+      gradient: "from-cyan-400 to-blue-500",
+      header: "bg-white/10 backdrop-blur-xl",
+      card: "bg-white/10 backdrop-blur-xl",
+      shadow: "shadow-cyan-500/30",
+      border: "border-cyan-500/30",
+      text: "text-cyan-400",
+      bgHover: "hover:bg-cyan-500/10",
+      glow: "shadow-cyan-500/20",
+      cardBorder: "border-cyan-500/20",
+      badge: "bg-cyan-500/20 text-cyan-400",
+      iconBg: "bg-cyan-500/10",
     },
     gabrielle: {
-      // Gabrielle - Estilo Moderno/Rosa
-      bg: "from-rose-950 via-pink-950 to-fuchsia-950",
+      // Gabrielle - Estilo Rosa con Efectos de Brillo
+      bg: "from-pink-950 via-rose-950 to-fuchsia-950",
       accent: "pink",
-      accentLight: "pink-400",
-      gradient: "from-pink-500 to-rose-500",
-      header: "bg-white/10",
-      card: "bg-white/10",
-      shadow: "shadow-pink-500/25",
+      accentLight: "pink-300",
+      gradient: "from-pink-400 to-rose-500",
+      header: "bg-white/10 backdrop-blur-xl",
+      card: "bg-white/10 backdrop-blur-xl",
+      shadow: "shadow-pink-500/30",
       border: "border-pink-500/30",
-      text: "text-pink-400",
+      text: "text-pink-300",
       bgHover: "hover:bg-pink-500/10",
       glow: "shadow-pink-500/20",
       cardBorder: "border-pink-500/20",
+      badge: "bg-pink-500/20 text-pink-300",
+      iconBg: "bg-pink-500/10",
     }
   };
 
@@ -1479,6 +1485,8 @@ export default function Home() {
   const shadowColor = theme.shadow;
   const accentText = theme.text;
   const cardBorder = theme.cardBorder;
+  const badgeStyle = theme.badge;
+  const iconBg = theme.iconBg;
 
   const getUserRole = () => {
     if (isAdmin) return "Administrador";
@@ -1512,7 +1520,7 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER DASHBOARD
+  // RENDER DASHBOARD - CON EFECTOS DE BRILLO
   // ============================================
   const renderDashboard = () => {
     const totalVentas = ventas.reduce((sum, v) => sum + v.precioVentaUSD, 0);
@@ -1534,63 +1542,67 @@ export default function Home() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-white">Dashboard</h2>
-            <p className="text-white/40 text-sm">{getUserEmoji()} Bienvenido de vuelta, {currentUser}</p>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Dashboard</h2>
+            <p className="text-white/40 text-sm">{getUserEmoji()} {getUserRole()} - {currentUser}</p>
           </div>
-          <div className={`bg-${accentColor}-500/10 border ${cardBorder} rounded-2xl px-6 py-3 text-right`}>
+          <div className={`${cardBg} rounded-2xl px-6 py-3 border ${cardBorder} text-center`}>
             <div className={`text-${accentLight} text-sm font-mono font-bold`}>
               {currentTime.toLocaleTimeString("es-DO", { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </div>
             <div className="text-white/30 text-xs">
-              {currentTime.toLocaleDateString("es-DO", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              {currentTime.toLocaleDateString("es-DO", { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} transition-all ${theme.bgHover}`}>
+          <div className={`${cardBg} rounded-2xl p-6 border ${cardBorder} transition-all ${theme.bgHover} relative overflow-hidden`}>
+            <div className={`absolute top-0 right-0 w-20 h-20 rounded-full bg-${accentColor}-500/10 blur-2xl`}></div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Total Ventas</p>
                 <p className="text-white text-2xl font-bold">{formatUSD(totalVentas)}</p>
               </div>
-              <div className={`w-12 h-12 rounded-xl bg-${accentColor}-500/20 flex items-center justify-center text-2xl`}>$</div>
+              <div className={`${iconBg} w-12 h-12 rounded-xl flex items-center justify-center text-2xl border ${cardBorder}`}>$</div>
             </div>
           </div>
           
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} transition-all ${theme.bgHover}`}>
+          <div className={`${cardBg} rounded-2xl p-6 border ${cardBorder} transition-all ${theme.bgHover} relative overflow-hidden`}>
+            <div className={`absolute top-0 right-0 w-20 h-20 rounded-full bg-green-500/10 blur-2xl`}></div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Comisiones</p>
                 <p className="text-white text-2xl font-bold">{formatUSD(totalComisiones)}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center text-2xl">%</div>
+              <div className="bg-green-500/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-green-500/30">%</div>
             </div>
           </div>
           
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} transition-all ${theme.bgHover}`}>
+          <div className={`${cardBg} rounded-2xl p-6 border ${cardBorder} transition-all ${theme.bgHover} relative overflow-hidden`}>
+            <div className={`absolute top-0 right-0 w-20 h-20 rounded-full bg-yellow-500/10 blur-2xl`}></div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Por Cobrar</p>
                 <p className="text-white text-2xl font-bold">{formatUSD(totalPendiente)}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center text-2xl">!</div>
+              <div className="bg-yellow-500/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-yellow-500/30">!</div>
             </div>
           </div>
           
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} transition-all ${theme.bgHover}`}>
+          <div className={`${cardBg} rounded-2xl p-6 border ${cardBorder} transition-all ${theme.bgHover} relative overflow-hidden`}>
+            <div className={`absolute top-0 right-0 w-20 h-20 rounded-full bg-blue-500/10 blur-2xl`}></div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Clientes</p>
                 <p className="text-white text-2xl font-bold">{totalClientes}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-2xl">👥</div>
+              <div className="bg-blue-500/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-blue-500/30">👥</div>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder}`}>
+          <div className={`${cardBg} rounded-2xl p-6 border ${cardBorder}`}>
             <h3 className={`text-sm font-semibold ${accentText} mb-3`}>Resumen de Ventas</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
@@ -1612,7 +1624,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder}`}>
+          <div className={`${cardBg} rounded-2xl p-6 border ${cardBorder}`}>
             <h3 className={`text-sm font-semibold ${accentText} mb-3`}>Resumen General</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
@@ -1630,7 +1642,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder}`}>
+          <div className={`${cardBg} rounded-2xl p-6 border ${cardBorder}`}>
             <h3 className={`text-sm font-semibold ${accentText} mb-3`}>Últimas Ventas</h3>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {ventas.slice(-4).reverse().map(v => (
@@ -1647,7 +1659,7 @@ export default function Home() {
         </div>
 
         {ventas.length === 0 && (
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-12 border-2 border-dashed ${cardBorder} text-center`}>
+          <div className={`${cardBg} rounded-2xl p-12 border-2 border-dashed ${cardBorder} text-center`}>
             <div className="text-5xl mb-4">🚀</div>
             <h3 className="text-white text-xl font-semibold mb-2">Comienza tu primera venta</h3>
             <p className="text-white/40 text-sm">Haz clic en "Nueva Venta" para registrar tu primera excursión</p>
@@ -1690,15 +1702,15 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
+          <div className={`${cardBg} rounded-2xl p-4 border ${cardBorder}`}>
             <p className="text-white/40 text-sm">Total Ventas</p>
             <p className="text-white text-2xl font-bold">{formatUSD(totalVentasUSD)}</p>
           </div>
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
+          <div className={`${cardBg} rounded-2xl p-4 border ${cardBorder}`}>
             <p className="text-white/40 text-sm">Comisión Total</p>
             <p className="text-green-400 text-2xl font-bold">{formatUSD(totalComision)}</p>
           </div>
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
+          <div className={`${cardBg} rounded-2xl p-4 border ${cardBorder}`}>
             <p className="text-white/40 text-sm">Pendiente Cobrar</p>
             <p className="text-yellow-400 text-2xl font-bold">{formatUSD(totalPendienteUSD)}</p>
           </div>
@@ -1706,12 +1718,12 @@ export default function Home() {
 
         <div className="space-y-2">
           {groupedArray.length === 0 ? (
-            <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-12 border ${cardBorder} text-center`}>
+            <div className={`${cardBg} rounded-2xl p-12 border ${cardBorder} text-center`}>
               <p className="text-white/40">No hay ventas registradas</p>
             </div>
           ) : (
             groupedArray.map((group: any) => (
-              <div key={group.key} className={`${cardBg} backdrop-blur-lg rounded-2xl border ${cardBorder} overflow-hidden`}>
+              <div key={group.key} className={`${cardBg} rounded-2xl border ${cardBorder} overflow-hidden`}>
                 <button onClick={() => toggleMonth(group.key)} className="w-full px-6 py-4 flex flex-wrap items-center justify-between hover:bg-white/5 transition-all">
                   <div className="flex items-center gap-4">
                     <span className="text-white font-semibold text-lg">{getMonthName(group.month - 1)} {group.year}</span>
@@ -1758,7 +1770,7 @@ export default function Home() {
                             </td>
                             <td className="py-2 px-2">
                               <div className="flex gap-1">
-                                <button onClick={() => editVenta(venta)} className={`px-2 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}>Editar</button>
+                                <button onClick={() => editVenta(venta)} className={`px-2 py-1 ${badgeStyle} rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}>Editar</button>
                                 <button onClick={() => deleteVenta(venta.id)} className="px-2 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all">Eliminar</button>
                               </div>
                             </td>
@@ -1823,21 +1835,21 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
+          <div className={`${cardBg} rounded-2xl p-4 border ${cardBorder}`}>
             <p className="text-white/40 text-sm">Total Reservas</p>
             <p className="text-white text-2xl font-bold">{reservasFiltradas.length}</p>
           </div>
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
+          <div className={`${cardBg} rounded-2xl p-4 border ${cardBorder}`}>
             <p className="text-white/40 text-sm">Monto Total</p>
             <p className="text-white text-2xl font-bold">{formatUSD(reservasFiltradas.reduce((s, v) => s + v.precioVentaUSD, 0))}</p>
           </div>
-          <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
+          <div className={`${cardBg} rounded-2xl p-4 border ${cardBorder}`}>
             <p className="text-white/40 text-sm">Pendientes</p>
             <p className="text-yellow-400 text-2xl font-bold">{reservasFiltradas.filter(v => v.estado === "pendiente").length}</p>
           </div>
         </div>
 
-        <div className={`${cardBg} backdrop-blur-lg rounded-2xl border ${cardBorder} overflow-x-auto`}>
+        <div className={`${cardBg} rounded-2xl border ${cardBorder} overflow-x-auto`}>
           <table className="w-full text-sm">
             <thead>
               <tr className="text-white/40 border-b border-white/10">
@@ -1872,7 +1884,7 @@ export default function Home() {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <button onClick={() => editVenta(v)} className={`px-3 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}>Editar</button>
+                      <button onClick={() => editVenta(v)} className={`px-3 py-1 ${badgeStyle} rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}>Editar</button>
                     </td>
                   </tr>
                 ))
@@ -1920,7 +1932,7 @@ export default function Home() {
           </button>
         </div>
 
-        <div className={`${cardBg} backdrop-blur-lg rounded-2xl border ${cardBorder} overflow-x-auto`}>
+        <div className={`${cardBg} rounded-2xl border ${cardBorder} overflow-x-auto`}>
           <table className="w-full text-sm">
             <thead>
               <tr className="text-white/40 border-b border-white/10">
@@ -1999,14 +2011,15 @@ export default function Home() {
             <div className="col-span-full text-center py-12 text-white/40">No hay proveedores registrados</div>
           ) : (
             proveedoresFiltrados.map(p => (
-              <div key={p.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} hover:border-${accentColor}-500/30 transition-all`}>
+              <div key={p.id} className={`${cardBg} rounded-2xl p-6 border ${cardBorder} hover:border-${accentColor}-500/50 transition-all relative overflow-hidden`}>
+                <div className={`absolute top-0 right-0 w-32 h-32 rounded-full bg-${accentColor}-500/5 blur-2xl`}></div>
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-white font-semibold">{p.nombre}</h3>
                     <p className="text-white/40 text-sm">{p.empresa || "Sin empresa"}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => editProveedor(p)} className={`px-3 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}>Editar</button>
+                    <button onClick={() => editProveedor(p)} className={`px-3 py-1 ${badgeStyle} rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}>Editar</button>
                     <button onClick={() => deleteProveedor(p.id)} className="px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all">Eliminar</button>
                   </div>
                 </div>
@@ -2015,7 +2028,7 @@ export default function Home() {
                   <div className="flex items-center gap-2 text-white/60"><span>Email</span> {p.email || "Sin email"}</div>
                   <div className="flex items-center gap-2 text-white/60"><span>RNC/Cédula</span> {p.rncCedula || "Sin documento"}</div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.metodosPago.map(m => <span key={m} className="px-2 py-1 bg-white/10 rounded-lg text-white/60 text-xs">{m === "efectivo" ? "Efectivo" : m === "transferencia" ? "Transferencia" : "PayPal"}</span>)}
+                    {p.metodosPago.map(m => <span key={m} className={`px-2 py-1 ${badgeStyle} rounded-lg text-xs`}>{m === "efectivo" ? "Efectivo" : m === "transferencia" ? "Transferencia" : "PayPal"}</span>)}
                   </div>
                 </div>
                 <div className="mt-3 text-xs text-white/40 border-t border-white/5 pt-2">
@@ -2079,7 +2092,7 @@ export default function Home() {
             <div className="col-span-full text-center py-12 text-white/40">No hay información bancaria registrada</div>
           ) : (
             bancosFiltrados.map(p => (
-              <div key={p.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} hover:border-${accentColor}-500/30 transition-all`}>
+              <div key={p.id} className={`${cardBg} rounded-2xl p-6 border ${cardBorder} hover:border-${accentColor}-500/50 transition-all`}>
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-white font-semibold">{p.nombre}</h3>
@@ -2096,7 +2109,7 @@ export default function Home() {
                   <div className="flex items-center gap-2 text-white/60"><span>Beneficiario</span> {p.beneficiario || "Sin beneficiario"}</div>
                   <div className="flex items-center gap-2 text-white/60"><span>RNC/Cédula</span> {p.rncCedula || "Sin documento"}</div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.tipoCuenta.map(t => <span key={t} className="px-2 py-1 bg-white/10 rounded-lg text-white/60 text-xs">{t === "corriente" ? "Corriente" : "Ahorros"}</span>)}
+                    {p.tipoCuenta.map(t => <span key={t} className={`px-2 py-1 ${badgeStyle} rounded-lg text-xs`}>{t === "corriente" ? "Corriente" : "Ahorros"}</span>)}
                   </div>
                 </div>
               </div>
@@ -2120,741 +2133,4 @@ export default function Home() {
             <button onClick={() => cambiarMes(-1)} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all">◀</button>
             <h2 className="text-white text-xl font-bold">{getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}</h2>
             <button onClick={() => cambiarMes(1)} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all">▶</button>
-            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all text-sm">Hoy</button>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={() => setCalendarioView("mes")} className={`px-4 py-2 rounded-xl text-sm transition-all ${calendarioView === "mes" ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : "text-white/60 hover:text-white"}`}>Mes</button>
-          </div>
-        </div>
-
-        <div className={`${cardBg} backdrop-blur-lg rounded-2xl border ${cardBorder} overflow-hidden`}>
-          <div className="grid grid-cols-7 gap-1 p-4">
-            {["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(day => <div key={day} className="text-center text-white/40 text-sm py-2 font-medium">{day}</div>)}
-            {days.map((day, index) => {
-              const ventasDelDia = getVentasDelDia(day.date);
-              const hasVentas = ventasDelDia.length > 0;
-              const isToday = new Date().toDateString() === day.date.toDateString();
-              return (
-                <div key={index} className={`min-h-[80px] p-2 rounded-xl border transition-all ${day.isCurrentMonth ? isToday ? `border-${accentColor}-500/50 bg-${accentColor}-500/10` : "border-white/5 hover:border-white/20 bg-white/5" : "border-white/5 bg-white/5 opacity-40"}`}>
-                  <div className="text-xs text-white/60 text-right">{day.date.getDate()}</div>
-                  {hasVentas && <div className="mt-1 space-y-1"><div className="text-[10px] text-green-400 font-medium">{formatUSD(ventasDelDia.reduce((s, v) => s + v.precioVentaUSD, 0))}</div><div className="text-[10px] text-white/40">{ventasDelDia.length} {ventasDelDia.length === 1 ? "venta" : "ventas"}</div></div>}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-4 border ${cardBorder}`}>
-          <h3 className={`text-${accentLight} font-semibold mb-3`}>Eventos del día</h3>
-          <div className="space-y-2 max-h-60 overflow-y-auto">
-            {getVentasDelDia(currentDate).length === 0 ? <p className="text-white/40 text-sm text-center py-4">No hay ventas para este día</p> :
-              getVentasDelDia(currentDate).map(v => (
-                <div key={v.id} className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
-                  <div><p className="text-white text-sm font-medium">{v.clienteNombre}</p><p className="text-white/40 text-xs">{v.excursionNombre}</p></div>
-                  <div className="text-right"><p className="text-white font-medium">{formatUSD(v.precioVentaUSD)}</p><span className={`px-2 py-0.5 rounded-lg text-xs ${getEstadoColor(v.estado)}`}>{getEstadoText(v.estado)}</span></div>
-                </div>
-              ))
-            }
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // ============================================
-  // RENDER EXCURSIONES
-  // ============================================
-  const renderExcursiones = () => {
-    const excursionesFiltradas = excursiones.filter(e => {
-      const matchesSearch = e.nombre.toLowerCase().includes(searchExcursiones.toLowerCase());
-      const matchesProveedor = !filterExcursionProveedor || e.proveedorId === filterExcursionProveedor;
-      return matchesSearch && matchesProveedor;
-    });
-
-    return (
-      <div className="space-y-4">
-        <div className="flex flex-wrap gap-3 items-center">
-          <div className="flex-1 min-w-[200px]">
-            <input
-              type="text"
-              placeholder="Buscar excursiones..."
-              value={searchExcursiones}
-              onChange={(e) => setSearchExcursiones(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-amber-500"
-            />
-          </div>
-          <select
-            value={filterExcursionProveedor}
-            onChange={(e) => setFilterExcursionProveedor(e.target.value)}
-            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
-          >
-            <option value="">Todos los proveedores</option>
-            {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-          </select>
-          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false }); setShowExcursionForm(true); }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 ${shadowColor}`}>
-            <span className="text-lg leading-none">+</span> Nueva Excursión
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {excursionesFiltradas.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-white/40">No hay excursiones registradas</div>
-          ) : (
-            excursionesFiltradas.map(e => (
-              <div key={e.id} className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border ${cardBorder} hover:border-${accentColor}-500/30 transition-all`}>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-white font-semibold">{e.nombre}</h3>
-                    <p className="text-white/40 text-sm">{e.proveedorNombre}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => editExcursion(e)} className={`px-3 py-1 bg-${accentColor}-500/20 text-${accentColor}-400 rounded-lg hover:bg-${accentColor}-500/30 text-xs transition-all`}>Editar</button>
-                    <button onClick={() => deleteExcursion(e.id)} className="px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all">Eliminar</button>
-                  </div>
-                </div>
-                <div className="mt-3 space-y-1">
-                  <div className="flex justify-between text-sm"><span className="text-white/40">Adulto</span><span className="text-white font-medium">{formatUSD(e.precioAdultoUSD)}</span></div>
-                  {e.precioNinoUSD !== null && <div className="flex justify-between text-sm"><span className="text-white/40">Niño</span><span className="text-white font-medium">{formatUSD(e.precioNinoUSD)}</span></div>}
-                  <div className="flex justify-between text-sm border-t border-white/5 pt-2 mt-2"><span className="text-white/40">Costo Proveedor</span><span className="text-white/60">{formatUSD(e.costoProveedorAdultoUSD)}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-white/40">Comisión</span><span className="text-green-400">{formatUSD(e.comisionAdultoUSD)}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-white/40">Zona</span><span className="text-white/60">{e.zona || "Sin zona"}</span></div>
-                  {e.capacidad && <div className="flex justify-between text-sm"><span className="text-white/40">Capacidad</span><span className="text-white/60">{e.capacidad}</span></div>}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // ============================================
-  // FORMULARIOS MODALES
-  // ============================================
-  const renderFormularios = () => {
-    return (
-      <>
-        {/* Formulario de Venta */}
-        {showForm && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <div className={`${cardBg} backdrop-blur-2xl rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-white/20`}>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">{editingVentaId ? "Editar Venta" : "Nueva Venta"}</h2>
-                <button onClick={resetForm} className="text-white/40 hover:text-white transition-all text-2xl">✕</button>
-              </div>
-              
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Cliente</label>
-                    <input type="text" value={formData.clienteNombre} onChange={(e) => setFormData(prev => ({ ...prev, clienteNombre: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">WhatsApp</label>
-                    <input type="text" value={formData.clienteWhatsapp} onChange={(e) => setFormData(prev => ({ ...prev, clienteWhatsapp: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
-                    <input type="email" value={formData.clienteEmail} onChange={(e) => setFormData(prev => ({ ...prev, clienteEmail: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Excursión</label>
-                    <select value={formData.excursionId} onChange={(e) => selectExcursionForVenta(e.target.value)} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      <option value="">Seleccionar excursión</option>
-                      {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
-                    </select>
-                    <button type="button" onClick={() => setShowCrearExcursionDesdeVenta(true)} className={`mt-1 text-xs text-${accentColor}-400 hover:text-${accentColor}-300 transition-all`}>+ Crear nueva excursión</button>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Zona</label>
-                    <input type="text" value={formData.zona} readOnly className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/60 cursor-not-allowed" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Fecha de Excursión</label>
-                    <input type="date" value={formData.fechaExcursion} onChange={(e) => setFormData(prev => ({ ...prev, fechaExcursion: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Hora</label>
-                    <select value={formData.horaExcursion} onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      {HORAS.map(h => <option key={h} value={h}>{h}</option>)}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD)</label>
-                    <input type="number" step="0.01" value={formData.precioAdultoUSD} onChange={handlePrecioAdultoChange} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Niño (USD)</label>
-                    <input type="number" step="0.01" value={formData.precioNinoUSD} onChange={handlePrecioNinoChange} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor (USD)</label>
-                    <input type="number" step="0.01" value={formData.costoProveedorAdultoUSD} onChange={handleCostoAdultoChange} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Comisión (USD)</label>
-                    <input type="number" step="0.01" value={formData.comisionAdultoUSD} readOnly className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-green-400 font-medium cursor-not-allowed" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Adultos</label>
-                    <input type="number" min="0" value={formData.cantidadAdultos} onChange={handleCantidadAdultosChange} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Niños</label>
-                    <input type="number" min="0" value={formData.cantidadNinos} onChange={handleCantidadNinosChange} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Total</label>
-                    <input type="text" value={formData.precioTotalUSD} readOnly className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white font-bold cursor-not-allowed" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Comisión Total</label>
-                    <input type="text" value={formData.comisionTotalUSD} readOnly className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-green-400 font-bold cursor-not-allowed" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Pago</label>
-                    <select value={formData.pagoCliente} onChange={(e) => { const val = e.target.value as "completo" | "deposito_25" | "pago_dia"; setFormData(prev => ({ ...prev, pagoCliente: val })); setTimeout(() => { const { precioTotal } = calcularTotalesVenta(); let saldo = 0; if (val === "completo") saldo = 0; else if (val === "deposito_25") saldo = precioTotal * 0.75; else if (val === "pago_dia") saldo = precioTotal; setFormData(prev => ({ ...prev, saldoPendienteUSD: saldo.toFixed(2) })); }, 10); }} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      <option value="completo">Pago Completo</option>
-                      <option value="deposito_25">Depósito 25%</option>
-                      <option value="pago_dia">Pago el Día</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Monto Pagado (USD)</label>
-                    <input type="number" step="0.01" value={formData.montoPagadoUSD} onChange={(e) => setFormData(prev => ({ ...prev, montoPagadoUSD: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Saldo Pendiente (USD)</label>
-                    <input type="text" value={formData.saldoPendienteUSD} readOnly className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-yellow-400 font-medium cursor-not-allowed" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Método Pago Cliente</label>
-                    <select value={formData.metodoPagoCliente} onChange={(e) => setFormData(prev => ({ ...prev, metodoPagoCliente: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      <option value="efectivo">Efectivo</option>
-                      <option value="tarjeta">Tarjeta</option>
-                      <option value="transferencia">Transferencia</option>
-                      <option value="paypal">PayPal</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Estado</label>
-                    <select value={formData.estado} onChange={(e) => setFormData(prev => ({ ...prev, estado: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      <option value="pendiente">Pendiente</option>
-                      <option value="confirmada">Confirmada</option>
-                      <option value="completada">Completada</option>
-                      <option value="cancelada">Cancelada</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Proveedor</label>
-                    <input type="text" value={formData.proveedorNombre} readOnly className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/60 cursor-not-allowed" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Servicio</label>
-                    <select value={formData.tipoServicio} onChange={(e) => setFormData(prev => ({ ...prev, tipoServicio: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      <option value="compartido">Compartido</option>
-                      <option value="privado">Privado</option>
-                      <option value="grupo">Grupo</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Grupo</label>
-                    <input type="text" value={formData.nombreGrupo} onChange={(e) => setFormData(prev => ({ ...prev, nombreGrupo: e.target.value }))} disabled={formData.tipoServicio !== "grupo"} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500 disabled:opacity-40" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Recogida</label>
-                    <select value={formData.tipoRecogida} onChange={(e) => setFormData(prev => ({ ...prev, tipoRecogida: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      <option value="hotel">Hotel</option>
-                      <option value="airbnb">Airbnb</option>
-                      <option value="sin_recogida">Sin Recogida</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Transporte</label>
-                    <select value={formData.transporte} onChange={(e) => setFormData(prev => ({ ...prev, transporte: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      <option value="no">No</option>
-                      <option value="si">Si</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Nota</label>
-                    <input type="text" value={formData.nota} onChange={(e) => setFormData(prev => ({ ...prev, nota: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button type="submit" className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}>
-                    {editingVentaId ? "Actualizar Venta" : "Registrar Venta"}
-                  </button>
-                  <button type="button" onClick={resetForm} className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all">Cancelar</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Formulario de Cliente */}
-        {showClienteForm && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className={`${cardBg} backdrop-blur-2xl rounded-3xl p-8 max-w-lg w-full border border-white/20`}>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">Nuevo Cliente</h2>
-                <button onClick={() => setShowClienteForm(false)} className="text-white/40 hover:text-white transition-all text-2xl">✕</button>
-              </div>
-              <form onSubmit={handleClienteSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre</label>
-                  <input type="text" name="nombre" required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">WhatsApp</label>
-                  <input type="text" name="whatsapp" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
-                  <input type="email" name="email" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Excursión</label>
-                  <select name="excursionId" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                    <option value="">Seleccionar excursión</option>
-                    {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Fecha Excursión</label>
-                  <input type="date" name="fechaExcursion" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button type="submit" className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}>Agregar Cliente</button>
-                  <button type="button" onClick={() => setShowClienteForm(false)} className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all">Cancelar</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Formulario de Proveedor */}
-        {showProveedorForm && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <div className={`${cardBg} backdrop-blur-2xl rounded-3xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-white/20`}>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">{editingProveedorId ? "Editar Proveedor" : "Nuevo Proveedor"}</h2>
-                <button onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="text-white/40 hover:text-white transition-all text-2xl">✕</button>
-              </div>
-              <form onSubmit={handleProveedorSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Nombre</label>
-                    <input type="text" value={proveedorFormData.nombre} onChange={(e) => setProveedorFormData(prev => ({ ...prev, nombre: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Empresa</label>
-                    <input type="text" value={proveedorFormData.empresa} onChange={(e) => setProveedorFormData(prev => ({ ...prev, empresa: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Teléfono</label>
-                    <input type="tel" value={proveedorFormData.telefono} onChange={manejarCambioTelefono} placeholder="(829) 537-4530" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                    <p className="text-[10px] text-white/30 mt-1">Formato: (809) 123-4567</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
-                    <input type="email" value={proveedorFormData.email} onChange={(e) => setProveedorFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">Métodos de Pago</label>
-                  <div className="flex flex-wrap gap-2">
-                    {["efectivo", "transferencia", "paypal"].map(m => (
-                      <button key={m} type="button" onClick={() => toggleMetodoPago(m as any)} className={`px-4 py-2 rounded-xl text-sm transition-all ${proveedorFormData.metodosPago.includes(m as any) ? `bg-gradient-to-r ${buttonGradient} text-slate-900` : "bg-white/10 text-white/60 hover:bg-white/20"}`}>
-                        {m === "efectivo" ? "Efectivo" : m === "transferencia" ? "Transferencia" : "PayPal"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Banco</label>
-                    <select value={proveedorFormData.banco} onChange={(e) => setProveedorFormData(prev => ({ ...prev, banco: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      <option value="">Seleccionar banco</option>
-                      {BANCOS.map(b => <option key={b} value={b}>{b}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Número de Cuenta</label>
-                    <input type="text" value={proveedorFormData.numeroCuenta} onChange={(e) => setProveedorFormData(prev => ({ ...prev, numeroCuenta: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Moneda</label>
-                    <select value={proveedorFormData.monedaCuenta} onChange={(e) => setProveedorFormData(prev => ({ ...prev, monedaCuenta: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      <option value="USD">USD</option>
-                      <option value="RD$">RD$</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Cuenta</label>
-                    <div className="flex gap-2">
-                      {["corriente", "ahorros"].map(t => (
-                        <button key={t} type="button" onClick={() => toggleTipoCuenta(t as any)} className={`px-4 py-2 rounded-xl text-sm transition-all flex-1 ${proveedorFormData.tipoCuenta.includes(t as any) ? `bg-gradient-to-r ${buttonGradient} text-slate-900` : "bg-white/10 text-white/60 hover:bg-white/20"}`}>
-                          {t === "corriente" ? "Corriente" : "Ahorros"}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Beneficiario</label>
-                    <select value={proveedorFormData.tipoBeneficiario} onChange={(e) => setProveedorFormData(prev => ({ ...prev, tipoBeneficiario: e.target.value as any }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      <option value="personal">Personal</option>
-                      <option value="empresarial">Empresarial</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Beneficiario</label>
-                    <input type="text" value={proveedorFormData.beneficiario} onChange={(e) => setProveedorFormData(prev => ({ ...prev, beneficiario: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Tipo de Documento</label>
-                    <select value={proveedorFormData.tipoDocumento} onChange={(e) => { const tipo = e.target.value as "rnc" | "cedula"; setProveedorFormData(prev => ({ ...prev, tipoDocumento: tipo, rncCedula: "" })); }} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      <option value="rnc">RNC</option>
-                      <option value="cedula">Cédula</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">{proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cédula"}</label>
-                    <input type="text" value={proveedorFormData.rncCedula} onChange={manejarCambioRNCcedula} placeholder={proveedorFormData.tipoDocumento === "rnc" ? "XX-XXXXXXX-X" : "XXX-XXXXXXX-X"} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                    <p className="text-[10px] text-white/30 mt-1">{proveedorFormData.tipoDocumento === "rnc" ? "Formato: XX-XXXXXXX-X (11 dígitos)" : "Formato: XXX-XXXXXXX-X (11 dígitos)"}</p>
-                  </div>
-                </div>
-
-                {/* Excursiones del Proveedor */}
-                <div className="border-t border-white/10 pt-4">
-                  <h3 className={`text-${accentLight} font-semibold mb-3`}>Excursiones de este Proveedor</h3>
-                  
-                  {tempExcursiones.length > 0 && (
-                    <div className="mb-4 overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-white/10">
-                            <th className="px-2 py-2 text-left text-white/60">Nombre</th>
-                            <th className="px-2 py-2 text-left text-white/60">Adulto Venta</th>
-                            <th className="px-2 py-2 text-left text-white/60">Adulto Costo</th>
-                            <th className="px-2 py-2 text-left text-white/60">Niño Venta</th>
-                            <th className="px-2 py-2 text-left text-white/60">Niño Costo</th>
-                            <th className="px-2 py-2 text-left text-white/60">Acción</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {tempExcursiones.map((e, index) => (
-                            <tr key={index} className="border-b border-white/5">
-                              <td className="px-2 py-2 text-white">{e.nombre}</td>
-                              <td className="px-2 py-2 text-amber-400">{formatUSD(e.precioAdultoUSD)}</td>
-                              <td className="px-2 py-2 text-red-400">{formatUSD(e.costoProveedorAdultoUSD)}</td>
-                              <td className="px-2 py-2 text-amber-400">{e.precioNinoUSD !== null ? formatUSD(e.precioNinoUSD) : "-"}</td>
-                              <td className="px-2 py-2 text-red-400">{e.costoProveedorNinoUSD !== null ? formatUSD(e.costoProveedorNinoUSD) : "-"}</td>
-                              <td className="px-2 py-2">
-                                <button type="button" onClick={() => eliminarTempExcursion(index)} className="text-red-400 hover:text-red-300">Eliminar</button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-3 p-3 bg-white/5 rounded-xl">
-                    <div className="col-span-2">
-                      <label className="block text-xs font-medium text-white/60 mb-1">Nombre Excursión</label>
-                      <input type="text" value={tempExcursionForm.nombre} onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, nombre: e.target.value })} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" placeholder="Isla Saona" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-white/60 mb-1">Precio Adulto (USD)</label>
-                      <input type="number" step="0.01" value={tempExcursionForm.precioAdultoUSD} onChange={(e) => { const valor = e.target.value; const pv = parseFloat(valor) || 0; const cp = parseFloat(tempExcursionForm.costoProveedorAdultoUSD) || 0; const comision = calcularComision(pv, cp); setTempExcursionForm({ ...tempExcursionForm, precioAdultoUSD: valor, comisionAdultoUSD: comision.toString() }); }} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" placeholder="99.00" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-white/60 mb-1">Costo Adulto (USD)</label>
-                      <input type="number" step="0.01" value={tempExcursionForm.costoProveedorAdultoUSD} onChange={(e) => { const valor = e.target.value; const cp = parseFloat(valor) || 0; const pv = parseFloat(tempExcursionForm.precioAdultoUSD) || 0; const comision = calcularComision(pv, cp); setTempExcursionForm({ ...tempExcursionForm, costoProveedorAdultoUSD: valor, comisionAdultoUSD: comision.toString() }); }} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" placeholder="55.00" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-white/60 mb-1">Precio Niño (USD)</label>
-                      <input type="number" step="0.01" value={tempExcursionForm.precioNinoUSD} onChange={(e) => { const valor = e.target.value; const tienePrecioNino = valor !== "" && parseFloat(valor) > 0; const pv = parseFloat(valor) || 0; const cp = parseFloat(tempExcursionForm.costoProveedorNinoUSD) || 0; const comision = calcularComision(pv, cp); setTempExcursionForm({ ...tempExcursionForm, precioNinoUSD: valor, tienePrecioNino: tienePrecioNino, comisionNinoUSD: comision.toString() }); }} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" placeholder="Dejar vacío si no aplica" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-white/60 mb-1">Costo Niño (USD)</label>
-                      <input type="number" step="0.01" value={tempExcursionForm.costoProveedorNinoUSD} onChange={(e) => { const valor = e.target.value; const cp = parseFloat(valor) || 0; const pv = parseFloat(tempExcursionForm.precioNinoUSD) || 0; const comision = calcularComision(pv, cp); setTempExcursionForm({ ...tempExcursionForm, costoProveedorNinoUSD: valor, comisionNinoUSD: comision.toString() }); }} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" placeholder="Dejar vacío si no aplica" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-white/60 mb-1">Zona</label>
-                      <select value={tempExcursionForm.zona} onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, zona: e.target.value })} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white text-sm">
-                        <option value="">Seleccionar zona</option>
-                        {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-white/60 mb-1">Capacidad</label>
-                      <input type="text" value={tempExcursionForm.capacidad} onChange={(e) => setTempExcursionForm({ ...tempExcursionForm, capacidad: e.target.value })} className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-white placeholder-white/40 text-sm" placeholder="2 personas" />
-                    </div>
-                    <div className="col-span-2">
-                      <button type="button" onClick={agregarTempExcursion} className={`w-full bg-${accentColor}-500/20 text-${accentColor}-400 py-2 rounded-lg hover:bg-${accentColor}-500/30 transition-all text-sm font-medium`}>+ Agregar Excursión</button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button type="submit" className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}>
-                    {editingProveedorId ? "Actualizar Proveedor" : "Agregar Proveedor"}
-                  </button>
-                  <button type="button" onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all">Cancelar</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Formulario de Excursión */}
-        {showExcursionForm && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <div className={`${cardBg} backdrop-blur-2xl rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/20`}>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">{editingExcursionId ? "Editar Excursión" : "Nueva Excursión"}</h2>
-                <button onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="text-white/40 hover:text-white transition-all text-2xl">✕</button>
-              </div>
-              <form onSubmit={handleExcursionSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre</label>
-                  <input type="text" value={excursionFormData.nombre} onChange={(e) => setExcursionFormData(prev => ({ ...prev, nombre: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Proveedor</label>
-                  <select value={excursionFormData.proveedorId} onChange={(e) => { const id = e.target.value; const proveedor = proveedores.find(p => p.id === id); setExcursionFormData(prev => ({ ...prev, proveedorId: id, proveedorNombre: proveedor?.nombre || "" })); }} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                    <option value="">Seleccionar proveedor</option>
-                    {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-                  </select>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD)</label>
-                    <input type="number" step="0.01" value={excursionFormData.precioAdultoUSD} onChange={(e) => { const pv = e.target.value; const cp = excursionFormData.costoProveedorAdultoUSD; const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0); setExcursionFormData({ ...excursionFormData, precioAdultoUSD: pv, comisionAdultoUSD: comision.toString() }); }} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor Adulto (USD)</label>
-                    <input type="number" step="0.01" value={excursionFormData.costoProveedorAdultoUSD} onChange={(e) => { const cp = e.target.value; const pv = excursionFormData.precioAdultoUSD; const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0); setExcursionFormData({ ...excursionFormData, costoProveedorAdultoUSD: cp, comisionAdultoUSD: comision.toString() }); }} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <input type="checkbox" checked={excursionFormData.tienePrecioNino} onChange={(e) => setExcursionFormData(prev => ({ ...prev, tienePrecioNino: e.target.checked }))} className="w-4 h-4 accent-amber-500" />
-                  <label className="text-white/70 text-sm">Tiene precio para niños</label>
-                </div>
-                {excursionFormData.tienePrecioNino && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-white/70 mb-1">Precio Niño (USD)</label>
-                      <input type="number" step="0.01" value={excursionFormData.precioNinoUSD} onChange={(e) => { const pv = e.target.value; const cp = excursionFormData.costoProveedorNinoUSD; const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0); setExcursionFormData({ ...excursionFormData, precioNinoUSD: pv, comisionNinoUSD: comision.toString() }); }} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-white/70 mb-1">Costo Proveedor Niño (USD)</label>
-                      <input type="number" step="0.01" value={excursionFormData.costoProveedorNinoUSD} onChange={(e) => { const cp = e.target.value; const pv = excursionFormData.precioNinoUSD; const comision = calcularComision(parseFloat(pv) || 0, parseFloat(cp) || 0); setExcursionFormData({ ...excursionFormData, costoProveedorNinoUSD: cp, comisionNinoUSD: comision.toString() }); }} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                    </div>
-                  </div>
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Zona</label>
-                    <select value={excursionFormData.zona} onChange={(e) => setExcursionFormData(prev => ({ ...prev, zona: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      <option value="">Seleccionar zona</option>
-                      {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Capacidad</label>
-                    <input type="text" value={excursionFormData.capacidad} onChange={(e) => setExcursionFormData(prev => ({ ...prev, capacidad: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button type="submit" className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}>
-                    {editingExcursionId ? "Actualizar Excursión" : "Agregar Excursión"}
-                  </button>
-                  <button type="button" onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all">Cancelar</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Modal para crear excursión desde venta */}
-        {showCrearExcursionDesdeVenta && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <div className={`${cardBg} backdrop-blur-2xl rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/20`}>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">Crear Nueva Excursión</h2>
-                <button onClick={() => setShowCrearExcursionDesdeVenta(false)} className="text-white/40 hover:text-white transition-all text-2xl">✕</button>
-              </div>
-              <form onSubmit={handleCrearExcursionDesdeVenta} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre</label>
-                  <input type="text" value={nuevaExcursionDesdeVenta.nombre} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, nombre: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Proveedor</label>
-                  <select value={nuevaExcursionDesdeVenta.proveedorId} onChange={(e) => { const id = e.target.value; const proveedor = proveedores.find(p => p.id === id); setNuevaExcursionDesdeVenta(prev => ({ ...prev, proveedorId: id, proveedorNombre: proveedor?.nombre || "" })); }} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                    <option value="">Seleccionar proveedor existente</option>
-                    {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-1">Nombre del Proveedor (si no existe)</label>
-                  <input type="text" value={nuevaExcursionDesdeVenta.proveedorNombre} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, proveedorNombre: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" placeholder="Crear nuevo proveedor" />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Precio Adulto (USD)</label>
-                    <input type="number" step="0.01" value={nuevaExcursionDesdeVenta.precioAdultoUSD} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, precioAdultoUSD: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Costo Adulto (USD)</label>
-                    <input type="number" step="0.01" value={nuevaExcursionDesdeVenta.costoProveedorAdultoUSD} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))} required className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <input type="checkbox" checked={nuevaExcursionDesdeVenta.tienePrecioNino} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, tienePrecioNino: e.target.checked }))} className="w-4 h-4 accent-amber-500" />
-                  <label className="text-white/70 text-sm">Tiene precio para niños</label>
-                </div>
-                {nuevaExcursionDesdeVenta.tienePrecioNino && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-white/70 mb-1">Precio Niño (USD)</label>
-                      <input type="number" step="0.01" value={nuevaExcursionDesdeVenta.precioNinoUSD} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, precioNinoUSD: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-white/70 mb-1">Costo Niño (USD)</label>
-                      <input type="number" step="0.01" value={nuevaExcursionDesdeVenta.costoProveedorNinoUSD} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                    </div>
-                  </div>
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Zona</label>
-                    <select value={nuevaExcursionDesdeVenta.zona} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, zona: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500">
-                      <option value="">Seleccionar zona</option>
-                      {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1">Capacidad</label>
-                    <input type="text" value={nuevaExcursionDesdeVenta.capacidad} onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, capacidad: e.target.value }))} className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-amber-500" />
-                  </div>
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button type="submit" className={`flex-1 bg-gradient-to-r ${buttonGradient} text-slate-900 py-3 rounded-xl font-semibold hover:shadow-xl transition-all ${shadowColor}`}>Crear Excursión</button>
-                  <button type="button" onClick={() => setShowCrearExcursionDesdeVenta(false)} className="px-6 py-3 bg-white/10 text-white/60 rounded-xl hover:bg-white/20 transition-all">Cancelar</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-      </>
-    );
-  };
-
-  // ============================================
-  // RENDER PRINCIPAL
-  // ============================================
-  return (
-    <div className={`min-h-screen bg-gradient-to-br ${bgGradient}`}>
-      <header className={`${headerBg} backdrop-blur-lg border-b border-white/10 sticky top-0 z-20`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-3 py-4">
-            <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${buttonGradient} flex items-center justify-center ${shadowColor}`}>
-                <span className="text-xl text-slate-900 font-bold">RE</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-white tracking-tight">Republic Excursions</h1>
-                <p className={`text-xs text-${accentLight}/80`}>
-                  {currentUser === "republic" ? "Administrador" : currentUser === "raul" ? "Vendedor" : "Vendedora"} - {getUserRole()} {getUserEmoji()}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className={`px-4 py-2 ${isAdmin ? 'bg-amber-500/10 border-amber-500/20' : isRaul ? 'bg-blue-500/10 border-blue-500/20' : 'bg-pink-500/20 border-pink-500/20'} rounded-xl border`}>
-                <span className={`text-sm ${isAdmin ? 'text-amber-400' : isRaul ? 'text-blue-400' : 'text-pink-300'} font-medium`}>
-                  {isAdmin ? "Admin" : "Vendedor"}
-                </span>
-              </div>
-              <button onClick={handleLogout} className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-all text-sm font-medium">
-                Cerrar Sesión
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className={`flex flex-wrap gap-2 mb-8 ${cardBg} backdrop-blur-lg rounded-2xl p-2 border ${cardBorder}`}>
-          {["dashboard", "ventas", "reservas", "clientes", "proveedores", "bancos", "calendario", "excursiones"].map((tab) => {
-            const labels: any = {
-              dashboard: "Dashboard",
-              ventas: "Ventas",
-              reservas: "Reservas",
-              clientes: "Clientes",
-              proveedores: "Proveedores",
-              bancos: "Bancos",
-              calendario: "Calendario",
-              excursiones: "Excursiones"
-            };
-            return (
-              <button key={tab} onClick={() => setViewMode(tab as any)} className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${viewMode === tab ? `bg-gradient-to-r ${buttonGradient} text-slate-900 ${shadowColor}` : "text-white/70 hover:text-white hover:bg-white/10"}`}>
-                {labels[tab]}
-              </button>
-            );
-          })}
-          <div className="flex-1"></div>
-          <button onClick={() => { setEditingVentaId(null); setSelectedExcursionForVenta(null); setFormData({ clienteNombre: "", clienteWhatsapp: "", clienteEmail: "", excursionId: "", excursionNombre: "", fechaExcursion: "", horaExcursion: "02:00 PM", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", cantidadAdultos: 1, cantidadNinos: 0, precioTotalUSD: "", costoTotalUSD: "", comisionTotalUSD: "", pagoCliente: "completo", montoPagadoUSD: "", saldoPendienteUSD: "", metodoPagoCliente: "efectivo", proveedorId: "", proveedorNombre: "", proveedorPagado: "pendiente", metodoPagoProveedor: "efectivo", tipoServicio: "compartido", nombreGrupo: "", tipoRecogida: "sin_recogida", transporte: "no", estado: "pendiente", nota: "", zona: "" }); setShowForm(true); }} className={`bg-gradient-to-r ${buttonGradient} text-slate-900 px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 text-sm font-medium ${shadowColor}`}>
-            <span className="text-lg leading-none">+</span> Nueva Venta
-          </button>
-        </div>
-
-        {renderView()}
-        {renderFormularios()}
-      </main>
-    </div>
-  );
-}
+            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl
