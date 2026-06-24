@@ -195,7 +195,6 @@ export default function Home() {
   const [calendarioView, setCalendarioView] = useState<"dia" | "semana" | "mes">("mes");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [filtroEstadoReserva, setFiltroEstadoReserva] = useState<string>("todas");
 
   // Buscadores y filtros por seccion
   const [searchClientes, setSearchClientes] = useState("");
@@ -441,10 +440,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v26");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v26");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v26");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v26");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v27");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v27");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v27");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v27");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -454,22 +453,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v26", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v27", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v26", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v27", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v26", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v27", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v26", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v27", JSON.stringify(data));
   };
 
   // ============================================
@@ -589,7 +588,7 @@ export default function Home() {
     });
     
     setTimeout(updateCantidades, 50);
-    alert("Excursion creada correctamente");
+    alert("Excursión creada correctamente");
   };
 
   // ============================================
@@ -1846,7 +1845,7 @@ export default function Home() {
     const reservasFiltradas = ventas.filter(v => {
       const matchesSearch = v.clienteNombre.toLowerCase().includes(searchReservas.toLowerCase()) ||
                             v.excursionNombre.toLowerCase().includes(searchReservas.toLowerCase());
-      const matchesEstado = filtroEstadoReserva === "todas" || v.estado === filtroEstadoReserva;
+      const matchesEstado = filterReservaEstado === "todas" || v.estado === filterReservaEstado;
       const matchesFecha = !filterReservaFecha || v.fechaExcursion === filterReservaFecha;
       return matchesSearch && matchesEstado && matchesFecha;
     });
@@ -1867,8 +1866,8 @@ export default function Home() {
             />
           </div>
           <select
-            value={filtroEstadoReserva}
-            onChange={(e) => setFiltroEstadoReserva(e.target.value)}
+            value={filterReservaEstado}
+            onChange={(e) => setFilterReservaEstado(e.target.value)}
             className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
           >
             <option value="todas">Todos los estados</option>
@@ -1886,7 +1885,7 @@ export default function Home() {
           <button
             onClick={() => {
               setSearchReservas("");
-              setFiltroEstadoReserva("todas");
+              setFilterReservaEstado("todas");
               setFilterReservaFecha("");
             }}
             className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white"
