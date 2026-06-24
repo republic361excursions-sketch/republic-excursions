@@ -91,6 +91,7 @@ export default function Home() {
   const [editingExcursionId, setEditingExcursionId] = useState<string | null>(null);
   const [editingProveedorId, setEditingProveedorId] = useState<string | null>(null);
   const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
+  const [expandedProveedor, setExpandedProveedor] = useState<string | null>(null);
   const [filterYear, setFilterYear] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones">("dashboard");
@@ -193,10 +194,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v15");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v15");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v15");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v15");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v16");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v16");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v16");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v16");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -206,22 +207,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v15", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v16", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v15", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v16", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v15", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v16", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v15", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v16", JSON.stringify(data));
   };
 
   // ============================================
@@ -880,6 +881,10 @@ export default function Home() {
     setExpandedMonth(expandedMonth === key ? null : key);
   };
 
+  const toggleProveedor = (id: string) => {
+    setExpandedProveedor(expandedProveedor === id ? null : id);
+  };
+
   const getPagoClienteText = (tipo: string) => {
     const map: any = {
       completo: "Pago completo (USD)",
@@ -1017,7 +1022,7 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation - SIN EL BOTON DE NUEVA VENTA */}
+        {/* Navigation */}
         <div className={`flex flex-wrap gap-2 mb-8 ${cardBg} backdrop-blur-lg rounded-2xl p-2 border border-white/10`}>
           {["dashboard", "ventas", "clientes", "proveedores", "excursiones"].map((tab) => {
             const labels: any = {
@@ -1042,7 +1047,6 @@ export default function Home() {
             );
           })}
           <div className="flex-1"></div>
-          {/* BOTON DE NUEVA VENTA MOVIDO A LA DERECHA */}
           <button 
             onClick={() => {
               setEditingVentaId(null);
@@ -1343,7 +1347,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* PROVEEDORES - CON DATOS BANCARIOS EN LA TABLA */}
+        {/* PROVEEDORES - CON DETALLE EXPANDIBLE PARA DATOS BANCARIOS */}
         {viewMode === "proveedores" && (
           <div className={`${cardBg} backdrop-blur-lg rounded-2xl p-6 border border-white/10`}>
             <div className="flex justify-between items-center mb-4">
@@ -1384,59 +1388,128 @@ export default function Home() {
                 <p className="text-white/30 text-sm mt-2">Crea un proveedor para poder agregar excursiones</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Nombre</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Telefono</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Metodos Pago</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Banco</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Cuenta</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Beneficiario</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Tipo</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Documentos</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Excursiones</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {proveedores.map((p) => {
-                      const excursionesDelProveedor = excursiones.filter(e => e.proveedorId === p.id);
-                      return (
-                        <tr key={p.id} className="border-b border-white/5 hover:bg-white/5">
-                          <td className="px-4 py-3 text-sm font-medium text-white">{p.nombre}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">{p.telefono}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">
+              <div className="space-y-3">
+                {proveedores.map((p) => {
+                  const excursionesDelProveedor = excursiones.filter(e => e.proveedorId === p.id);
+                  const isExpanded = expandedProveedor === p.id;
+                  return (
+                    <div key={p.id} className={`border ${isExpanded ? 'border-white/20' : 'border-white/10'} rounded-xl overflow-hidden`}>
+                      {/* Fila del proveedor (siempre visible) */}
+                      <button 
+                        onClick={() => toggleProveedor(p.id)}
+                        className="w-full px-4 py-3 flex flex-wrap items-center justify-between hover:bg-white/5 transition-colors"
+                      >
+                        <div className="flex flex-wrap items-center gap-4">
+                          <span className="font-medium text-white">{p.nombre}</span>
+                          <span className="text-sm text-white/60">{p.telefono}</span>
+                          <span className="text-sm text-white/60">{p.email}</span>
+                          <div className="flex gap-1">
                             {p.metodosPago.map(m => (
-                              <span key={m} className="text-xs bg-white/10 px-2 py-1 rounded-full mr-1">
+                              <span key={m} className="text-xs bg-white/10 px-2 py-1 rounded-full">
                                 {m === 'efectivo' ? 'Efectivo' : m === 'transferencia' ? 'Transferencia' : 'PayPal'}
                               </span>
                             ))}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-white/60">{p.banco || "-"}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">{p.numeroCuenta || "-"}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">{p.beneficiario || "-"}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">
-                            {p.tipoCuenta === 'corriente' ? 'Corriente' : p.tipoCuenta === 'ahorros' ? 'Ahorros' : 'Nomina'}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-white/60">{p.documentos || "-"}</td>
-                          <td className="px-4 py-3 text-sm text-white/60">
-                            <span className="text-xs bg-white/10 px-2 py-1 rounded-full">
-                              {excursionesDelProveedor.length} excursiones
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-sm">
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => editProveedor(p)} className={`${isRaul ? 'text-amber-400 hover:text-amber-300' : 'text-pink-300 hover:text-pink-200'}`}>Editar</button>
-                              <button onClick={() => deleteProveedor(p.id)} className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'}`}>Eliminar</button>
+                          </div>
+                          <span className="text-xs bg-white/10 px-2 py-1 rounded-full">
+                            {excursionesDelProveedor.length} excursiones
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-white/40 text-sm">{isExpanded ? "▼" : "▶"}</span>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              editProveedor(p);
+                            }} 
+                            className={`${isRaul ? 'text-amber-400 hover:text-amber-300' : 'text-pink-300 hover:text-pink-200'} text-sm`}
+                          >
+                            Editar
+                          </button>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteProveedor(p.id);
+                            }} 
+                            className={`${isRaul ? 'text-red-400 hover:text-red-300' : 'text-rose-300 hover:text-rose-200'} text-sm`}
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </button>
+
+                      {/* Detalle expandible - Datos Bancarios */}
+                      {isExpanded && (
+                        <div className="border-t border-white/10 p-4 bg-white/5">
+                          <h4 className="text-sm font-semibold text-white/70 mb-3">Datos Bancarios del Proveedor</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <p className="text-xs text-white/40">Banco</p>
+                              <p className="text-sm text-white font-medium">{p.banco || "-"}</p>
                             </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                            <div>
+                              <p className="text-xs text-white/40">Numero de Cuenta</p>
+                              <p className="text-sm text-white font-medium">{p.numeroCuenta || "-"}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-white/40">Beneficiario</p>
+                              <p className="text-sm text-white font-medium">{p.beneficiario || "-"}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-white/40">Tipo de Cuenta</p>
+                              <p className="text-sm text-white font-medium">
+                                {p.tipoCuenta === 'corriente' ? 'Corriente' : p.tipoCuenta === 'ahorros' ? 'Ahorros' : 'Nomina'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-white/40">Documentos</p>
+                              <p className="text-sm text-white font-medium">{p.documentos || "-"}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-white/40">Nota</p>
+                              <p className="text-sm text-white font-medium">{p.nota || "-"}</p>
+                            </div>
+                          </div>
+
+                          {/* Excursiones del proveedor en el detalle */}
+                          {excursionesDelProveedor.length > 0 && (
+                            <div className="mt-4 pt-4 border-t border-white/10">
+                              <h4 className="text-sm font-semibold text-white/70 mb-2">Excursiones de este Proveedor</h4>
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                  <thead>
+                                    <tr className="border-b border-white/10">
+                                      <th className="px-3 py-2 text-left text-white/40">Nombre</th>
+                                      <th className="px-3 py-2 text-left text-white/40">Adulto Venta</th>
+                                      <th className="px-3 py-2 text-left text-white/40">Adulto Costo</th>
+                                      <th className="px-3 py-2 text-left text-white/40">Nino Venta</th>
+                                      <th className="px-3 py-2 text-left text-white/40">Nino Costo</th>
+                                      <th className="px-3 py-2 text-left text-white/40">Comision</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {excursionesDelProveedor.map((e) => {
+                                      const tieneNino = e.precioNinoUSD !== null && e.precioNinoUSD !== undefined;
+                                      return (
+                                        <tr key={e.id} className="border-b border-white/5">
+                                          <td className="px-3 py-2 text-white">{e.nombre}</td>
+                                          <td className="px-3 py-2 text-amber-400">{formatUSD(e.precioAdultoUSD)}</td>
+                                          <td className="px-3 py-2 text-red-400">{formatUSD(e.costoProveedorAdultoUSD)}</td>
+                                          <td className="px-3 py-2 text-amber-400">{tieneNino ? formatUSD(e.precioNinoUSD!) : "-"}</td>
+                                          <td className="px-3 py-2 text-red-400">{tieneNino ? formatUSD(e.costoProveedorNinoUSD!) : "-"}</td>
+                                          <td className="px-3 py-2 text-green-400">{formatUSD(e.comisionAdultoUSD)}</td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -1521,7 +1594,8 @@ export default function Home() {
 
       {/* ============================================
           MODALES - (VENTA, PROVEEDOR, EXCURSION, CLIENTE)
-          ... el resto del código es igual que antes ...
+          El resto del código de modales es igual que antes
+          pero se omitió por longitud. La estructura es la misma.
       ============================================ */}
       {/* Modal de Venta */}
       {showForm && (
@@ -1846,7 +1920,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Metodos de Pago del Proveedor - MULTIPLE SELECT */}
+              {/* Metodos de Pago del Proveedor */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">Metodos de Pago del Proveedor</label>
                 <div className="flex flex-wrap gap-3">
@@ -1881,7 +1955,7 @@ export default function Home() {
                 <p className="text-xs text-white/40 mt-1">Selecciona todos los metodos de pago que acepta el proveedor</p>
               </div>
 
-              {/* Datos Bancarios - SECCION SEPARADA */}
+              {/* Datos Bancarios */}
               <div className="border-t border-white/10 pt-4 mt-2">
                 <h3 className="text-lg font-semibold text-white mb-3">Datos Bancarios del Proveedor</h3>
                 <div className="space-y-3">
@@ -1940,7 +2014,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Nota */}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-1">Nota</label>
                 <textarea 
