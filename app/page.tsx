@@ -18,6 +18,7 @@ interface Excursion {
   comisionNinoUSD: number | null;
   zona: string;
   capacidad?: string;
+  tipo: "excursion" | "traslado";
 }
 
 interface Proveedor {
@@ -54,6 +55,7 @@ interface Venta {
   clienteEmail: string;
   excursionId: string;
   excursionNombre: string;
+  tipoServicio: "excursion" | "traslado";
   fechaExcursion: string;
   horaExcursion: string;
   precioVentaUSD: number;
@@ -69,9 +71,8 @@ interface Venta {
   metodoPagoProveedor: "efectivo" | "transferencia" | "paypal";
   cantidadAdultos: number;
   cantidadNinos: number;
-  tipoServicio: "compartido" | "privado" | "grupo";
   nombreGrupo?: string;
-  tipoRecogida: "hotel" | "airbnb" | "sin_recogida";
+  tipoRecogida: "hotel" | "airbnb" | "sin_recogida" | "aeropuerto";
   transporte: "si" | "no";
   hotelNombre: string;
   airbnbUbicacion: string;
@@ -83,6 +84,17 @@ interface Venta {
   costoNinoPersonalizado: number;
   nota: string;
   estado: "pendiente" | "confirmada" | "cancelada" | "completada";
+  // Datos específicos para traslados
+  tipoViaje?: "ida" | "vuelta" | "ida_vuelta";
+  aeropuertoOrigen?: string;
+  aeropuertoDestino?: string;
+  aeropuertoSalida?: string;
+  fechaRegreso?: string;
+  horaRegreso?: string;
+  tipoVehiculo?: string;
+  numeroVuelo?: string;
+  idiomaConductor?: string;
+  maletas?: number;
 }
 
 // ============================================
@@ -128,6 +140,41 @@ const HORAS_RECOGIDA = [
   "10:00 PM"
 ];
 
+const AEROPUERTOS = [
+  "PUJ - Punta Cana",
+  "SDQ - Santo Domingo",
+  "STI - Santiago",
+  "LRM - La Romana",
+  "AZS - Samana",
+  "POP - Puerto Plata",
+  "JBQ - Santo Domingo (La Isabela)"
+];
+
+const TIPOS_VEHICULO = [
+  "Sedan (4 pasajeros, 2 maletas)",
+  "SUV (5 pasajeros, 3 maletas)",
+  "Minivan (7 pasajeros, 5 maletas)",
+  "Bus (15 pasajeros, 10 maletas)",
+  "Premium Sedan (4 pasajeros, 2 maletas)",
+  "Premium SUV (5 pasajeros, 3 maletas)"
+];
+
+const IDIOMAS = [
+  "Español",
+  "Ingles",
+  "Frances",
+  "Aleman",
+  "Italiano",
+  "Portugues",
+  "Ruso"
+];
+
+const TIPO_VIAJE = [
+  "Ida",
+  "Vuelta",
+  "Ida y vuelta"
+];
+
 // ============================================
 // COMPONENTE PRINCIPAL
 // ============================================
@@ -165,6 +212,7 @@ export default function Home() {
 
   const [searchExcursiones, setSearchExcursiones] = useState("");
   const [filterExcursionProveedor, setFilterExcursionProveedor] = useState("");
+  const [filterExcursionTipo, setFilterExcursionTipo] = useState("todos");
 
   const [searchBancos, setSearchBancos] = useState("");
   const [filterBancoTipo, setFilterBancoTipo] = useState("todos");
@@ -173,6 +221,7 @@ export default function Home() {
   const [searchReservas, setSearchReservas] = useState("");
   const [filterReservaEstado, setFilterReservaEstado] = useState("todas");
   const [filterReservaFecha, setFilterReservaFecha] = useState("");
+  const [filterReservaTipo, setFilterReservaTipo] = useState("todos");
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -193,6 +242,7 @@ export default function Home() {
     zona: "",
     capacidad: "",
     tienePrecioNino: false,
+    tipo: "excursion" as "excursion" | "traslado",
   });
 
   // ============================================
@@ -205,6 +255,7 @@ export default function Home() {
     clienteId: "",
     excursionId: "",
     excursionNombre: "",
+    tipoServicio: "excursion" as "excursion" | "traslado",
     fechaExcursion: "",
     horaExcursion: "02:00 PM",
     precioAdultoUSD: "",
@@ -226,9 +277,8 @@ export default function Home() {
     proveedorNombre: "",
     proveedorPagado: "pendiente" as "pendiente" | "pagado",
     metodoPagoProveedor: "efectivo" as "efectivo" | "transferencia" | "paypal",
-    tipoServicio: "compartido" as "compartido" | "privado" | "grupo",
     nombreGrupo: "",
-    tipoRecogida: "sin_recogida" as "hotel" | "airbnb" | "sin_recogida",
+    tipoRecogida: "sin_recogida" as "hotel" | "airbnb" | "sin_recogida" | "aeropuerto",
     transporte: "no" as "si" | "no",
     hotelNombre: "",
     airbnbUbicacion: "",
@@ -237,6 +287,17 @@ export default function Home() {
     estado: "pendiente" as "pendiente" | "confirmada" | "cancelada" | "completada",
     nota: "",
     zona: "",
+    // Datos de traslado
+    tipoViaje: "ida" as "ida" | "vuelta" | "ida_vuelta",
+    aeropuertoOrigen: "",
+    aeropuertoDestino: "",
+    aeropuertoSalida: "",
+    fechaRegreso: "",
+    horaRegreso: "",
+    tipoVehiculo: "",
+    numeroVuelo: "",
+    idiomaConductor: "",
+    maletas: 0,
   });
 
   const [excursionFormData, setExcursionFormData] = useState({
@@ -252,6 +313,7 @@ export default function Home() {
     zona: "",
     capacidad: "",
     tienePrecioNino: false,
+    tipo: "excursion" as "excursion" | "traslado",
   });
 
   const [proveedorFormData, setProveedorFormData] = useState({
@@ -281,6 +343,7 @@ export default function Home() {
     proveedorNombre: "",
     zona: "",
     capacidad: "",
+    tipo: "excursion" as "excursion" | "traslado",
   });
 
   // ============================================
@@ -488,6 +551,7 @@ export default function Home() {
         ...prev,
         excursionId: excursion.id,
         excursionNombre: excursion.nombre,
+        tipoServicio: excursion.tipo || "excursion",
         precioAdultoUSD: String(precioAdulto),
         precioNinoUSD: String(precioNino),
         costoProveedorAdultoUSD: String(costoAdulto),
@@ -575,6 +639,7 @@ export default function Home() {
       clienteEmail: formData.clienteEmail,
       excursionId: formData.excursionId,
       excursionNombre: formData.excursionNombre,
+      tipoServicio: formData.tipoServicio,
       fechaExcursion: formData.fechaExcursion,
       horaExcursion: formData.horaExcursion,
       precioVentaUSD: precioTotal,
@@ -590,8 +655,7 @@ export default function Home() {
       metodoPagoProveedor: formData.metodoPagoProveedor,
       cantidadAdultos: formData.cantidadAdultos,
       cantidadNinos: formData.cantidadNinos,
-      tipoServicio: formData.tipoServicio,
-      nombreGrupo: formData.tipoServicio === "grupo" ? formData.nombreGrupo : undefined,
+      nombreGrupo: formData.nombreGrupo || undefined,
       tipoRecogida: formData.tipoRecogida,
       transporte: formData.transporte,
       hotelNombre: formData.hotelNombre || "",
@@ -604,6 +668,17 @@ export default function Home() {
       costoNinoPersonalizado: Number(formData.costoProveedorNinoUSD) || 0,
       estado: formData.estado,
       nota: formData.nota,
+      // Datos de traslado
+      tipoViaje: formData.tipoViaje,
+      aeropuertoOrigen: formData.aeropuertoOrigen,
+      aeropuertoDestino: formData.aeropuertoDestino,
+      aeropuertoSalida: formData.aeropuertoSalida,
+      fechaRegreso: formData.fechaRegreso,
+      horaRegreso: formData.horaRegreso,
+      tipoVehiculo: formData.tipoVehiculo,
+      numeroVuelo: formData.numeroVuelo,
+      idiomaConductor: formData.idiomaConductor,
+      maletas: formData.maletas,
     };
 
     if (editingVentaId) {
@@ -625,6 +700,7 @@ export default function Home() {
       clienteId: "",
       excursionId: "",
       excursionNombre: "",
+      tipoServicio: "excursion",
       fechaExcursion: "",
       horaExcursion: "02:00 PM",
       precioAdultoUSD: "",
@@ -646,7 +722,6 @@ export default function Home() {
       proveedorNombre: "",
       proveedorPagado: "pendiente",
       metodoPagoProveedor: "efectivo",
-      tipoServicio: "compartido",
       nombreGrupo: "",
       tipoRecogida: "sin_recogida",
       transporte: "no",
@@ -657,6 +732,16 @@ export default function Home() {
       estado: "pendiente",
       nota: "",
       zona: "",
+      tipoViaje: "ida",
+      aeropuertoOrigen: "",
+      aeropuertoDestino: "",
+      aeropuertoSalida: "",
+      fechaRegreso: "",
+      horaRegreso: "",
+      tipoVehiculo: "",
+      numeroVuelo: "",
+      idiomaConductor: "",
+      maletas: 0,
     });
     setShowForm(false);
     setEditingVentaId(null);
@@ -677,6 +762,7 @@ export default function Home() {
       clienteId: "",
       excursionId: venta.excursionId,
       excursionNombre: venta.excursionNombre,
+      tipoServicio: venta.tipoServicio || "excursion",
       fechaExcursion: venta.fechaExcursion,
       horaExcursion: venta.horaExcursion || "02:00 PM",
       precioAdultoUSD: String(venta.precioAdultoPersonalizado || ""),
@@ -698,7 +784,6 @@ export default function Home() {
       proveedorNombre: venta.proveedorNombre,
       proveedorPagado: venta.proveedorPagado,
       metodoPagoProveedor: venta.metodoPagoProveedor,
-      tipoServicio: venta.tipoServicio,
       nombreGrupo: venta.nombreGrupo || "",
       tipoRecogida: venta.tipoRecogida || "sin_recogida",
       transporte: venta.transporte || "no",
@@ -709,6 +794,16 @@ export default function Home() {
       estado: venta.estado || "pendiente",
       nota: venta.nota,
       zona: excursion?.zona || "",
+      tipoViaje: venta.tipoViaje || "ida",
+      aeropuertoOrigen: venta.aeropuertoOrigen || "",
+      aeropuertoDestino: venta.aeropuertoDestino || "",
+      aeropuertoSalida: venta.aeropuertoSalida || "",
+      fechaRegreso: venta.fechaRegreso || "",
+      horaRegreso: venta.horaRegreso || "",
+      tipoVehiculo: venta.tipoVehiculo || "",
+      numeroVuelo: venta.numeroVuelo || "",
+      idiomaConductor: venta.idiomaConductor || "",
+      maletas: venta.maletas || 0,
     });
     setShowForm(true);
   };
@@ -811,6 +906,7 @@ export default function Home() {
       zona: "",
       capacidad: "",
       tienePrecioNino: false,
+      tipo: "excursion",
     });
   };
 
@@ -843,6 +939,7 @@ export default function Home() {
       comisionNinoUSD: e.comisionNinoUSD,
       zona: e.zona || "",
       capacidad: e.capacidad || "",
+      tipo: e.tipo || "excursion",
     })));
     
     setShowProveedorForm(true);
@@ -916,6 +1013,7 @@ export default function Home() {
         comisionNinoUSD,
         zona: tempExcursionForm.zona || "Bavaro",
         capacidad: tempExcursionForm.capacidad || undefined,
+        tipo: tempExcursionForm.tipo || "excursion",
       }
     ]);
     
@@ -930,6 +1028,7 @@ export default function Home() {
       zona: "",
       capacidad: "",
       tienePrecioNino: false,
+      tipo: "excursion",
     });
   };
 
@@ -975,6 +1074,7 @@ export default function Home() {
               comisionNinoUSD,
               zona: excursionFormData.zona || "Bavaro",
               capacidad: excursionFormData.capacidad || undefined,
+              tipo: excursionFormData.tipo || "excursion",
             }
           : e
       );
@@ -994,6 +1094,7 @@ export default function Home() {
         comisionNinoUSD,
         zona: excursionFormData.zona || "Bavaro",
         capacidad: excursionFormData.capacidad || undefined,
+        tipo: excursionFormData.tipo || "excursion",
       };
       saveExcursiones([...excursiones, nuevaExcursion]);
       alert("Excursion agregada correctamente");
@@ -1014,6 +1115,7 @@ export default function Home() {
       zona: "",
       capacidad: "",
       tienePrecioNino: false,
+      tipo: "excursion",
     });
   };
 
@@ -1032,6 +1134,7 @@ export default function Home() {
       zona: excursion.zona || "",
       capacidad: excursion.capacidad || "",
       tienePrecioNino: excursion.precioNinoUSD !== null,
+      tipo: excursion.tipo || "excursion",
     });
     setShowExcursionForm(true);
   };
@@ -1132,6 +1235,7 @@ export default function Home() {
       comisionNinoUSD,
       zona: nuevaExcursionDesdeVenta.zona || "Bavaro",
       capacidad: nuevaExcursionDesdeVenta.capacidad || undefined,
+      tipo: nuevaExcursionDesdeVenta.tipo || "excursion",
     };
     
     saveExcursiones([...excursiones, nuevaExcursion]);
@@ -1140,6 +1244,7 @@ export default function Home() {
       ...formData,
       excursionId: nuevaExcursion.id,
       excursionNombre: nuevaExcursion.nombre,
+      tipoServicio: nuevaExcursion.tipo || "excursion",
       precioAdultoUSD: String(nuevaExcursion.precioAdultoUSD || ""),
       precioNinoUSD: String(nuevaExcursion.precioNinoUSD || ""),
       costoProveedorAdultoUSD: String(nuevaExcursion.costoProveedorAdultoUSD || ""),
@@ -1163,6 +1268,7 @@ export default function Home() {
       proveedorNombre: "",
       zona: "",
       capacidad: "",
+      tipo: "excursion",
     });
     
     setTimeout(updateCantidades, 50);
@@ -1280,7 +1386,8 @@ export default function Home() {
     const map: any = {
       hotel: "Hotel",
       airbnb: "Airbnb",
-      sin_recogida: "Sin Recogida"
+      sin_recogida: "Sin Recogida",
+      aeropuerto: "Aeropuerto"
     };
     return map[tipo] || tipo;
   };
@@ -1309,13 +1416,15 @@ export default function Home() {
     return map[estado] || "bg-gray-100 text-gray-800";
   };
 
+  const getTipoServicioText = (tipo: string) => {
+    return tipo === "excursion" ? "Excursion" : "Traslado";
+  };
+
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Hora,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Recogida,Transporte,Hotel/Airbnb,Estado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
+    let csv = "Fecha,Hora,Tipo,Cliente,Excursion,Adultos,Ninos,Recogida,Transporte,Estado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD)\n";
     ventas.forEach(v => {
-      const recogidaInfo = v.tipoRecogida === "hotel" ? v.hotelNombre : 
-                           v.tipoRecogida === "airbnb" ? v.airbnbUbicacion : "Sin recogida";
-      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${getTipoServicioText(v.tipoServicio)}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD}\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -1669,6 +1778,7 @@ export default function Home() {
                         <tr className="text-gray-400 border-b border-gray-100">
                           <th className="text-left py-2 px-2">Fecha</th>
                           <th className="text-left py-2 px-2">Hora</th>
+                          <th className="text-left py-2 px-2">Tipo</th>
                           <th className="text-left py-2 px-2">Cliente</th>
                           <th className="text-left py-2 px-2">Excursion</th>
                           <th className="text-left py-2 px-2">Adultos</th>
@@ -1684,6 +1794,7 @@ export default function Home() {
                           <tr key={venta.id} className="border-b border-gray-50 hover:bg-gray-50">
                             <td className="py-2 px-2 text-gray-500 text-xs">{new Date(venta.fechaExcursion).toLocaleDateString("es-DO")}</td>
                             <td className="py-2 px-2 text-gray-500 text-xs">{venta.horaExcursion}</td>
+                            <td className="py-2 px-2 text-gray-500 text-xs">{getTipoServicioText(venta.tipoServicio)}</td>
                             <td className="py-2 px-2 text-[#0a1628]">{venta.clienteNombre}</td>
                             <td className="py-2 px-2 text-gray-600 text-xs max-w-[100px] truncate">{venta.excursionNombre}</td>
                             <td className="py-2 px-2 text-gray-500">{venta.cantidadAdultos}</td>
@@ -1716,7 +1827,7 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER RESERVAS
+  // RENDER RESERVAS - CON FILTRO DE TIPO
   // ============================================
   const renderReservas = () => {
     const reservasFiltradas = ventas.filter(v => {
@@ -1724,7 +1835,8 @@ export default function Home() {
                             v.excursionNombre.toLowerCase().includes(searchReservas.toLowerCase());
       const matchesEstado = filterReservaEstado === "todas" || v.estado === filterReservaEstado;
       const matchesFecha = !filterReservaFecha || v.fechaExcursion === filterReservaFecha;
-      return matchesSearch && matchesEstado && matchesFecha;
+      const matchesTipo = filterReservaTipo === "todos" || v.tipoServicio === filterReservaTipo;
+      return matchesSearch && matchesEstado && matchesFecha && matchesTipo;
     });
 
     return (
@@ -1739,6 +1851,15 @@ export default function Home() {
               className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628] placeholder-gray-400 focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
             />
           </div>
+          <select
+            value={filterReservaTipo}
+            onChange={(e) => setFilterReservaTipo(e.target.value)}
+            className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628]"
+          >
+            <option value="todos">Todos los tipos</option>
+            <option value="excursion">Excursiones</option>
+            <option value="traslado">Traslados</option>
+          </select>
           <select
             value={filterReservaEstado}
             onChange={(e) => setFilterReservaEstado(e.target.value)}
@@ -1756,7 +1877,7 @@ export default function Home() {
             onChange={(e) => setFilterReservaFecha(e.target.value)}
             className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628]"
           />
-          <button onClick={() => { setSearchReservas(""); setFilterReservaEstado("todas"); setFilterReservaFecha(""); }} className="px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
+          <button onClick={() => { setSearchReservas(""); setFilterReservaEstado("todas"); setFilterReservaFecha(""); setFilterReservaTipo("todos"); }} className="px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
             Limpiar
           </button>
         </div>
@@ -1782,8 +1903,10 @@ export default function Home() {
               <tr className="text-gray-400 border-b border-gray-100">
                 <th className="text-left py-3 px-4">Fecha</th>
                 <th className="text-left py-3 px-4">Hora</th>
+                <th className="text-left py-3 px-4">Tipo</th>
                 <th className="text-left py-3 px-4">Cliente</th>
-                <th className="text-left py-3 px-4">Excursion</th>
+                <th className="text-left py-3 px-4">Excursion/Traslado</th>
+                <th className="text-left py-3 px-4">Traslado</th>
                 <th className="text-left py-3 px-4">Contacto</th>
                 <th className="text-right py-3 px-4">Monto</th>
                 <th className="text-left py-3 px-4">Estado</th>
@@ -1792,29 +1915,55 @@ export default function Home() {
             </thead>
             <tbody>
               {reservasFiltradas.length === 0 ? (
-                <tr><td colSpan={8} className="text-center py-8 text-gray-400">No hay reservas</td></tr>
+                <tr><td colSpan={10} className="text-center py-8 text-gray-400">No hay reservas</td></tr>
               ) : (
-                reservasFiltradas.map(v => (
-                  <tr key={v.id} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="py-3 px-4 text-gray-500 text-xs">{new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</td>
-                    <td className="py-3 px-4 text-gray-500 text-xs">{v.horaExcursion}</td>
-                    <td className="py-3 px-4 text-[#0a1628] font-medium">{v.clienteNombre}</td>
-                    <td className="py-3 px-4 text-gray-600 max-w-[150px] truncate">{v.excursionNombre}</td>
-                    <td className="py-3 px-4 text-gray-500 text-xs">
-                      <div>{v.clienteWhatsapp}</div>
-                      <div className="text-xs text-gray-400">{v.clienteEmail}</div>
-                    </td>
-                    <td className="py-3 px-4 text-right text-[#0a1628] font-medium">{formatUSD(v.precioVentaUSD)}</td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-1 rounded-lg text-xs ${getEstadoColor(v.estado)}`}>
-                        {getEstadoText(v.estado)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <button onClick={() => editVenta(v)} className="px-3 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg hover:bg-[#0a1628]/20 text-xs transition-all">Editar</button>
-                    </td>
-                  </tr>
-                ))
+                reservasFiltradas.map(v => {
+                  // Obtener información de traslado
+                  let trasladoInfo = "Sin traslado";
+                  if (v.transporte === "si") {
+                    if (v.tipoRecogida === "hotel") {
+                      trasladoInfo = `Hotel: ${v.hotelNombre || "N/A"}`;
+                      if (v.horaRecogida) trasladoInfo += ` (${v.horaRecogida})`;
+                    } else if (v.tipoRecogida === "airbnb") {
+                      trasladoInfo = `Airbnb: ${v.airbnbUbicacion || "N/A"}`;
+                      if (v.horaRecogida) trasladoInfo += ` (${v.horaRecogida})`;
+                    } else if (v.tipoRecogida === "aeropuerto") {
+                      trasladoInfo = `Aeropuerto: ${v.aeropuertoOrigen || "N/A"} → ${v.aeropuertoDestino || "N/A"}`;
+                      if (v.horaRecogida) trasladoInfo += ` (${v.horaRecogida})`;
+                      if (v.numeroVuelo) trasladoInfo += ` Vuelo: ${v.numeroVuelo}`;
+                    } else {
+                      trasladoInfo = "Sin recogida";
+                    }
+                  }
+                  
+                  return (
+                    <tr key={v.id} className="border-b border-gray-50 hover:bg-gray-50">
+                      <td className="py-3 px-4 text-gray-500 text-xs">{new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</td>
+                      <td className="py-3 px-4 text-gray-500 text-xs">{v.horaExcursion}</td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-1 rounded-lg text-xs ${v.tipoServicio === "excursion" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"}`}>
+                          {getTipoServicioText(v.tipoServicio)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-[#0a1628] font-medium">{v.clienteNombre}</td>
+                      <td className="py-3 px-4 text-gray-600 max-w-[150px] truncate">{v.excursionNombre}</td>
+                      <td className="py-3 px-4 text-gray-500 text-xs max-w-[150px] truncate">{trasladoInfo}</td>
+                      <td className="py-3 px-4 text-gray-500 text-xs">
+                        <div>{v.clienteWhatsapp}</div>
+                        <div className="text-xs text-gray-400">{v.clienteEmail}</div>
+                      </td>
+                      <td className="py-3 px-4 text-right text-[#0a1628] font-medium">{formatUSD(v.precioVentaUSD)}</td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-1 rounded-lg text-xs ${getEstadoColor(v.estado)}`}>
+                          {getEstadoText(v.estado)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <button onClick={() => editVenta(v)} className="px-3 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg hover:bg-[#0a1628]/20 text-xs transition-all">Editar</button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -1958,7 +2107,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="mt-3 text-xs text-gray-400 border-t border-gray-100 pt-2">
-                  {excursiones.filter(e => e.proveedorId === p.id).length} excursiones
+                  {excursiones.filter(e => e.proveedorId === p.id).length} servicios
                 </div>
               </div>
             ))
@@ -2151,7 +2300,7 @@ export default function Home() {
                 }).reduce((s, v) => s + v.comisionUSD, 0))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Total Ventas</span>
+                <span className="text-gray-500">Total Reservas</span>
                 <span className="text-[#0a1628]">{ventas.filter(v => {
                   const d = new Date(v.fechaExcursion);
                   return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
@@ -2165,14 +2314,15 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER EXCURSIONES
+  // RENDER EXCURSIONES - CON FILTRO DE TIPO
   // ============================================
   const renderExcursiones = () => {
     const excursionesFiltradas = excursiones.filter(e => {
       const matchesSearch = e.nombre.toLowerCase().includes(searchExcursiones.toLowerCase()) ||
                             e.proveedorNombre.toLowerCase().includes(searchExcursiones.toLowerCase());
       const matchesProveedor = !filterExcursionProveedor || e.proveedorId === filterExcursionProveedor;
-      return matchesSearch && matchesProveedor;
+      const matchesTipo = filterExcursionTipo === "todos" || e.tipo === filterExcursionTipo;
+      return matchesSearch && matchesProveedor && matchesTipo;
     });
 
     return (
@@ -2181,12 +2331,21 @@ export default function Home() {
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
-              placeholder="Buscar excursiones..."
+              placeholder="Buscar servicios..."
               value={searchExcursiones}
               onChange={(e) => setSearchExcursiones(e.target.value)}
               className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628] placeholder-gray-400 focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
             />
           </div>
+          <select
+            value={filterExcursionTipo}
+            onChange={(e) => setFilterExcursionTipo(e.target.value)}
+            className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628]"
+          >
+            <option value="todos">Todos los tipos</option>
+            <option value="excursion">Excursiones</option>
+            <option value="traslado">Traslados</option>
+          </select>
           <select
             value={filterExcursionProveedor}
             onChange={(e) => setFilterExcursionProveedor(e.target.value)}
@@ -2195,20 +2354,25 @@ export default function Home() {
             <option value="">Todos los proveedores</option>
             {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
           </select>
-          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false }); setShowExcursionForm(true); }} className="bg-[#0a1628] text-white px-4 py-2.5 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
-            <span className="text-lg leading-none">+</span> Nueva Excursion
+          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false, tipo: "excursion" }); setShowExcursionForm(true); }} className="bg-[#0a1628] text-white px-4 py-2.5 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
+            <span className="text-lg leading-none">+</span> Nuevo Servicio
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {excursionesFiltradas.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-gray-400">No hay excursiones registradas</div>
+            <div className="col-span-full text-center py-12 text-gray-400">No hay servicios registrados</div>
           ) : (
             excursionesFiltradas.map(e => (
               <div key={e.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-[#0a1628] font-semibold">{e.nombre}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-[#0a1628] font-semibold">{e.nombre}</h3>
+                      <span className={`px-2 py-0.5 rounded-lg text-xs ${e.tipo === "excursion" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"}`}>
+                        {getTipoServicioText(e.tipo)}
+                      </span>
+                    </div>
                     <p className="text-gray-400 text-sm">{e.proveedorNombre}</p>
                     <p className="text-xs text-gray-500">Zona: {e.zona || "Sin zona"}</p>
                   </div>
@@ -2301,7 +2465,7 @@ export default function Home() {
                   Proveedores
                 </button>
                 <button onClick={() => setViewMode("excursiones")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "excursiones" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
-                  Excursiones
+                  Servicios
                 </button>
                 <button onClick={() => setViewMode("bancos")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "bancos" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
                   Bancos
@@ -2325,7 +2489,7 @@ export default function Home() {
               {viewMode === "reservas" && "Reservas"}
               {viewMode === "clientes" && "Clientes"}
               {viewMode === "proveedores" && "Proveedores"}
-              {viewMode === "excursiones" && "Excursiones"}
+              {viewMode === "excursiones" && "Servicios"}
               {viewMode === "bancos" && "Bancos"}
               {viewMode === "calendario" && "Calendario"}
             </h2>
@@ -2387,10 +2551,10 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Excursión y Fechas */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Excursión y Tipo */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Excursión *</label>
+                  <label className="text-gray-600 text-sm block mb-1">Servicio *</label>
                   <div className="flex gap-2">
                     <select
                       value={formData.excursionId}
@@ -2398,8 +2562,8 @@ export default function Home() {
                       className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                       required
                     >
-                      <option value="">Seleccionar excursión</option>
-                      {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {e.proveedorNombre}</option>)}
+                      <option value="">Seleccionar servicio</option>
+                      {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {getTipoServicioText(e.tipo)}</option>)}
                     </select>
                     <button
                       type="button"
@@ -2409,12 +2573,20 @@ export default function Home() {
                       + Crear
                     </button>
                   </div>
-                  {formData.excursionId && (
-                    <div className="mt-1 text-xs text-gray-400">
-                      <span className="text-[#0a1628]">Proveedor:</span> {formData.proveedorNombre}
-                    </div>
-                  )}
                 </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo</label>
+                  <input
+                    type="text"
+                    value={getTipoServicioText(formData.tipoServicio)}
+                    className="w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-xl text-[#0a1628] cursor-not-allowed"
+                    disabled
+                  />
+                </div>
+              </div>
+
+              {/* Fecha y Hora */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Fecha *</label>
                   <input
@@ -2427,146 +2599,344 @@ export default function Home() {
                 </div>
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Hora</label>
-                  <select
+                  <input
+                    type="text"
                     value={formData.horaExcursion}
                     onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  >
-                    {HORAS.map(h => <option key={h} value={h}>{h}</option>)}
-                  </select>
+                    placeholder="Ej: 02:00 PM"
+                  />
                 </div>
               </div>
 
-              {/* Transporte y Recogida */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Si es Traslado - Mostrar campos adicionales */}
+              {formData.tipoServicio === "traslado" && (
+                <div className="border-t border-gray-200 pt-4 mt-2">
+                  <h4 className="text-[#0a1628] font-semibold mb-3">Datos del Traslado</h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Tipo de Viaje</label>
+                      <select
+                        value={formData.tipoViaje}
+                        onChange={(e) => setFormData(prev => ({ ...prev, tipoViaje: e.target.value as "ida" | "vuelta" | "ida_vuelta" }))}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      >
+                        {TIPO_VIAJE.map(t => <option key={t} value={t.toLowerCase().replace(" ", "_")}>{t}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Tipo de Vehículo</label>
+                      <select
+                        value={formData.tipoVehiculo}
+                        onChange={(e) => setFormData(prev => ({ ...prev, tipoVehiculo: e.target.value }))}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      >
+                        <option value="">Seleccionar vehículo</option>
+                        {TIPOS_VEHICULO.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Aeropuerto Origen</label>
+                      <select
+                        value={formData.aeropuertoOrigen}
+                        onChange={(e) => setFormData(prev => ({ ...prev, aeropuertoOrigen: e.target.value }))}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      >
+                        <option value="">Seleccionar origen</option>
+                        {AEROPUERTOS.map(a => <option key={a} value={a}>{a}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Aeropuerto Destino</label>
+                      <select
+                        value={formData.aeropuertoDestino}
+                        onChange={(e) => setFormData(prev => ({ ...prev, aeropuertoDestino: e.target.value }))}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      >
+                        <option value="">Seleccionar destino</option>
+                        {AEROPUERTOS.map(a => <option key={a} value={a}>{a}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Número de Vuelo</label>
+                      <input
+                        type="text"
+                        value={formData.numeroVuelo}
+                        onChange={(e) => setFormData(prev => ({ ...prev, numeroVuelo: e.target.value }))}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                        placeholder="Ej: AA1234"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Idioma del Conductor</label>
+                      <select
+                        value={formData.idiomaConductor}
+                        onChange={(e) => setFormData(prev => ({ ...prev, idiomaConductor: e.target.value }))}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      >
+                        <option value="">Seleccionar idioma</option>
+                        {IDIOMAS.map(i => <option key={i} value={i}>{i}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Fecha y hora de Regreso (solo si es ida_vuelta) */}
+                  {formData.tipoViaje === "ida_vuelta" && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 border-t border-gray-100 pt-3">
+                      <div>
+                        <label className="text-gray-600 text-sm block mb-1">Fecha Regreso</label>
+                        <input
+                          type="date"
+                          value={formData.fechaRegreso}
+                          onChange={(e) => setFormData(prev => ({ ...prev, fechaRegreso: e.target.value }))}
+                          className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-gray-600 text-sm block mb-1">Hora Regreso</label>
+                        <input
+                          type="text"
+                          value={formData.horaRegreso}
+                          onChange={(e) => setFormData(prev => ({ ...prev, horaRegreso: e.target.value }))}
+                          className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                          placeholder="Ej: 03:00 PM"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Adultos</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={formData.cantidadAdultos}
+                        onChange={handleCantidadAdultosChange}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Maletas</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.maletas}
+                        onChange={(e) => setFormData(prev => ({ ...prev, maletas: parseInt(e.target.value) || 0 }))}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Precios - solo para Excursiones */}
+              {formData.tipoServicio === "excursion" && (
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Precio Venta Adulto (USD)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={formData.precioAdultoUSD}
+                        onChange={handlePrecioAdultoChange}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Adulto (USD)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={formData.costoProveedorAdultoUSD}
+                        onChange={handleCostoAdultoChange}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Precio Venta Niño (USD)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={formData.precioNinoUSD}
+                        onChange={handlePrecioNinoChange}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={formData.costoProveedorNinoUSD}
+                        onChange={handleCostoNinoChange}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Adultos</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={formData.cantidadAdultos}
+                        onChange={handleCantidadAdultosChange}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-gray-600 text-sm block mb-1">Niños</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.cantidadNinos}
+                        onChange={handleCantidadNinosChange}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Totales */}
+                  <div className="grid grid-cols-3 gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                    <div>
+                      <label className="text-gray-500 text-sm block mb-1">Total Venta</label>
+                      <input
+                        type="text"
+                        value={formData.precioTotalUSD}
+                        className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] font-bold text-lg"
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <label className="text-gray-500 text-sm block mb-1">Costo Proveedor</label>
+                      <input
+                        type="text"
+                        value={formData.costoTotalUSD}
+                        className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-orange-600 font-bold text-lg"
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <label className="text-gray-500 text-sm block mb-1">Comisión</label>
+                      <input
+                        type="text"
+                        value={formData.comisionTotalUSD}
+                        className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-green-600 font-bold text-lg"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Para Traslados - Precio fijo */}
+              {formData.tipoServicio === "traslado" && (
+                <div className="grid grid-cols-2 gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                  <div>
+                    <label className="text-gray-500 text-sm block mb-1">Total Venta (USD)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.precioTotalUSD}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        setFormData(prev => ({ ...prev, precioTotalUSD: val.toFixed(2) }));
+                      }}
+                      className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] font-bold"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-500 text-sm block mb-1">Costo Proveedor (USD)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.costoTotalUSD}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        setFormData(prev => ({ ...prev, costoTotalUSD: val.toFixed(2) }));
+                      }}
+                      className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-orange-600 font-bold"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Pago */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Transporte</label>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Pago</label>
                   <select
-                    value={formData.transporte}
+                    value={formData.pagoCliente}
                     onChange={(e) => {
-                      const val = e.target.value as "si" | "no";
-                      setFormData(prev => ({ ...prev, transporte: val }));
-                      if (val === "no") {
-                        setFormData(prev => ({ ...prev, tipoRecogida: "sin_recogida", hotelNombre: "", airbnbUbicacion: "", apartamento: "", horaRecogida: "" }));
-                      }
+                      const val = e.target.value as "completo" | "deposito_25" | "pago_dia";
+                      setFormData(prev => ({ ...prev, pagoCliente: val }));
+                      setTimeout(() => {
+                        const precioTotal = parseFloat(formData.precioTotalUSD) || 0;
+                        let saldo = 0;
+                        if (val === "completo") saldo = 0;
+                        else if (val === "deposito_25") saldo = precioTotal * 0.75;
+                        else if (val === "pago_dia") saldo = precioTotal;
+                        setFormData(prev => ({ ...prev, saldoPendienteUSD: saldo.toFixed(2) }));
+                      }, 10);
                     }}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
-                    <option value="no">No</option>
-                    <option value="si">Si</option>
+                    <option value="completo">Pago Completo</option>
+                    <option value="deposito_25">Deposito 25%</option>
+                    <option value="pago_dia">Pago el Dia</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Tipo de Recogida</label>
-                  <select
-                    value={formData.tipoRecogida}
-                    onChange={(e) => {
-                      const val = e.target.value as "hotel" | "airbnb" | "sin_recogida";
-                      setFormData(prev => ({ ...prev, tipoRecogida: val }));
-                      setFormData(prev => ({ ...prev, hotelNombre: "", airbnbUbicacion: "", apartamento: "", horaRecogida: "" }));
-                    }}
-                    disabled={formData.transporte === "no"}
-                    className={`w-full px-4 py-2 border rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all ${formData.transporte === "no" ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'bg-gray-50 border-gray-200'}`}
-                  >
-                    <option value="sin_recogida">Sin Recogida</option>
-                    <option value="hotel">Hotel</option>
-                    <option value="airbnb">Airbnb</option>
-                  </select>
+                  <label className="text-gray-600 text-sm block mb-1">Monto Pagado (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.montoPagadoUSD}
+                    onChange={(e) => setFormData(prev => ({ ...prev, montoPagadoUSD: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Saldo Pendiente (USD)</label>
+                  <input
+                    type="text"
+                    value={formData.saldoPendienteUSD}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-yellow-600 font-medium"
+                    disabled
+                  />
                 </div>
               </div>
 
-              {/* Campos condicionales */}
-              {formData.transporte === "si" && formData.tipoRecogida === "hotel" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
-                  <div>
-                    <label className="text-gray-600 text-sm block mb-1">Hotel *</label>
-                    <input
-                      type="text"
-                      value={formData.hotelNombre}
-                      onChange={(e) => setFormData(prev => ({ ...prev, hotelNombre: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      placeholder="Ej: Hyatt Ziva Cap Cana"
-                      required={formData.tipoRecogida === "hotel"}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
-                    <select
-                      value={formData.horaRecogida}
-                      onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    >
-                      <option value="">Seleccionar hora</option>
-                      {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
-                    </select>
-                  </div>
-                </div>
-              )}
-
-              {formData.transporte === "si" && formData.tipoRecogida === "airbnb" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
-                  <div>
-                    <label className="text-gray-600 text-sm block mb-1">Ubicación Airbnb *</label>
-                    <input
-                      type="text"
-                      value={formData.airbnbUbicacion}
-                      onChange={(e) => setFormData(prev => ({ ...prev, airbnbUbicacion: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      placeholder="Ej: Parque Central, Pueblo Bavaro"
-                      required={formData.tipoRecogida === "airbnb"}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
-                    <select
-                      value={formData.horaRecogida}
-                      onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    >
-                      <option value="">Seleccionar hora</option>
-                      {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
-                    </select>
-                  </div>
-                </div>
-              )}
-
-              {formData.transporte === "si" && formData.tipoRecogida === "sin_recogida" && (
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-4 border-l-4 border-[#0a1628] pl-4">
-                  <div>
-                    <label className="text-gray-600 text-sm block mb-1">Apartamento *</label>
-                    <input
-                      type="text"
-                      value={formData.apartamento}
-                      onChange={(e) => setFormData(prev => ({ ...prev, apartamento: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      placeholder="Ej: Villa B12, Casa 5, Apt 3B"
-                      required={formData.tipoRecogida === "sin_recogida" && formData.transporte === "si"}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Adultos, Niños y Estado */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Adultos</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.cantidadAdultos}
-                    onChange={handleCantidadAdultosChange}
+                  <label className="text-gray-600 text-sm block mb-1">Método Pago Cliente</label>
+                  <select
+                    value={formData.metodoPagoCliente}
+                    onChange={(e) => setFormData(prev => ({ ...prev, metodoPagoCliente: e.target.value as any }))}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Niños</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.cantidadNinos}
-                    onChange={handleCantidadNinosChange}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  />
+                  >
+                    <option value="efectivo">Efectivo</option>
+                    <option value="tarjeta">Tarjeta</option>
+                    <option value="transferencia">Transferencia</option>
+                    <option value="paypal">PayPal</option>
+                  </select>
                 </div>
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Estado</label>
@@ -2581,85 +2951,26 @@ export default function Home() {
                     <option value="completada">Completada</option>
                   </select>
                 </div>
-              </div>
-
-              {/* Precios */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Adulto (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Proveedor</label>
                   <input
-                    type="number"
-                    step="0.01"
-                    value={formData.precioAdultoUSD}
-                    onChange={handlePrecioAdultoChange}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Adulto (USD)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.costoProveedorAdultoUSD}
-                    onChange={handleCostoAdultoChange}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Niño (USD)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.precioNinoUSD}
-                    onChange={handlePrecioNinoChange}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.costoProveedorNinoUSD}
-                    onChange={handleCostoNinoChange}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="0.00"
+                    type="text"
+                    value={formData.proveedorNombre}
+                    className="w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-xl text-[#0a1628] cursor-not-allowed"
+                    disabled
                   />
                 </div>
               </div>
 
-              {/* Totales */}
-              <div className="grid grid-cols-3 gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-100">
-                <div>
-                  <label className="text-gray-500 text-sm block mb-1">Total Venta</label>
-                  <input
-                    type="text"
-                    value={formData.precioTotalUSD}
-                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] font-bold text-lg"
-                    disabled
-                  />
-                </div>
-                <div>
-                  <label className="text-gray-500 text-sm block mb-1">Costo Proveedor</label>
-                  <input
-                    type="text"
-                    value={formData.costoTotalUSD}
-                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-orange-600 font-bold text-lg"
-                    disabled
-                  />
-                </div>
-                <div>
-                  <label className="text-gray-500 text-sm block mb-1">Comisión</label>
-                  <input
-                    type="text"
-                    value={formData.comisionTotalUSD}
-                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-green-600 font-bold text-lg"
-                    disabled
-                  />
-                </div>
+              <div>
+                <label className="text-gray-600 text-sm block mb-1">Nota</label>
+                <input
+                  type="text"
+                  value={formData.nota}
+                  onChange={(e) => setFormData(prev => ({ ...prev, nota: e.target.value }))}
+                  className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  placeholder="Nota adicional..."
+                />
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
@@ -2675,17 +2986,17 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL - Crear Excursión Rápida */}
+      {/* MODAL - Crear Servicio Rápido */}
       {showCrearExcursionDesdeVenta && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[#0a1628] text-xl font-bold">Crear Excursión Rápida</h3>
+              <h3 className="text-[#0a1628] text-xl font-bold">Crear Servicio Rápido</h3>
               <button onClick={() => setShowCrearExcursionDesdeVenta(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
             </div>
             <form onSubmit={handleCrearExcursionDesdeVenta} className="space-y-4">
               <div>
-                <label className="text-gray-600 text-sm block mb-1">Nombre de la Excursión *</label>
+                <label className="text-gray-600 text-sm block mb-1">Nombre del Servicio *</label>
                 <input
                   type="text"
                   value={nuevaExcursionDesdeVenta.nombre}
@@ -2696,6 +3007,17 @@ export default function Home() {
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo</label>
+                  <select
+                    value={nuevaExcursionDesdeVenta.tipo}
+                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, tipo: e.target.value as "excursion" | "traslado" }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  >
+                    <option value="excursion">Excursión</option>
+                    <option value="traslado">Traslado</option>
+                  </select>
+                </div>
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Proveedor</label>
                   <select
@@ -2712,17 +3034,6 @@ export default function Home() {
                   >
                     <option value="">Seleccionar proveedor</option>
                     {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Zona</label>
-                  <select
-                    value={nuevaExcursionDesdeVenta.zona}
-                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, zona: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  >
-                    <option value="">Seleccionar zona</option>
-                    {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
                   </select>
                 </div>
               </div>
@@ -2774,6 +3085,29 @@ export default function Home() {
                   />
                 </div>
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Zona</label>
+                  <select
+                    value={nuevaExcursionDesdeVenta.zona}
+                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, zona: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  >
+                    <option value="">Seleccionar zona</option>
+                    {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Capacidad</label>
+                  <input
+                    type="text"
+                    value={nuevaExcursionDesdeVenta.capacidad}
+                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, capacidad: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    placeholder="Ej: 20 personas"
+                  />
+                </div>
+              </div>
               <div className="flex items-center gap-3">
                 <label className="flex items-center gap-2 text-gray-600 text-sm">
                   <input
@@ -2789,7 +3123,7 @@ export default function Home() {
                   Cancelar
                 </button>
                 <button type="submit" className="px-6 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20">
-                  Crear Excursión
+                  Crear Servicio
                 </button>
               </div>
             </form>
@@ -2819,10 +3153,10 @@ export default function Home() {
                 <input type="email" name="email" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all" />
               </div>
               <div>
-                <label className="text-gray-600 text-sm block mb-1">Excursión</label>
+                <label className="text-gray-600 text-sm block mb-1">Servicio</label>
                 <select name="excursionId" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all">
-                  <option value="">Seleccionar excursión</option>
-                  {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+                  <option value="">Seleccionar servicio</option>
+                  {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {getTipoServicioText(e.tipo)}</option>)}
                 </select>
               </div>
               <div>
@@ -3017,7 +3351,7 @@ export default function Home() {
               </div>
 
               <div className="border-t border-gray-100 pt-4 mt-4">
-                <h4 className="text-[#0a1628] font-semibold mb-3">Excursiones del Proveedor</h4>
+                <h4 className="text-[#0a1628] font-semibold mb-3">Servicios del Proveedor</h4>
                 <div className="space-y-2 mb-3">
                   {tempExcursiones.map((e, i) => (
                     <div key={i} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-2">
@@ -3038,7 +3372,7 @@ export default function Home() {
                     value={tempExcursionForm.nombre}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, nombre: e.target.value }))}
                     className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="Nombre de excursión"
+                    placeholder="Nombre del servicio"
                   />
                   <div className="flex gap-2">
                     <input
@@ -3077,7 +3411,7 @@ export default function Home() {
                     placeholder="Costo Niño"
                   />
                 </div>
-                <div className="flex gap-4 mt-2 items-center">
+                <div className="flex gap-4 mt-2 items-center flex-wrap">
                   <label className="flex items-center gap-2 text-gray-600 text-sm">
                     <input
                       type="checkbox"
@@ -3086,8 +3420,19 @@ export default function Home() {
                     />
                     Tiene precio para niños
                   </label>
+                  <label className="flex items-center gap-2 text-gray-600 text-sm">
+                    <span>Tipo:</span>
+                    <select
+                      value={tempExcursionForm.tipo}
+                      onChange={(e) => setTempExcursionForm(prev => ({ ...prev, tipo: e.target.value as "excursion" | "traslado" }))}
+                      className="px-3 py-1 bg-gray-50 border border-gray-200 rounded-lg text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all text-sm"
+                    >
+                      <option value="excursion">Excursión</option>
+                      <option value="traslado">Traslado</option>
+                    </select>
+                  </label>
                   <button type="button" onClick={agregarTempExcursion} className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 text-sm">
-                    Agregar Excursión
+                    Agregar Servicio
                   </button>
                 </div>
               </div>
@@ -3110,13 +3455,13 @@ export default function Home() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[#0a1628] text-xl font-bold">{editingExcursionId ? "Editar Excursión" : "Nueva Excursión"}</h3>
+              <h3 className="text-[#0a1628] text-xl font-bold">{editingExcursionId ? "Editar Servicio" : "Nuevo Servicio"}</h3>
               <button onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
             </div>
             <form onSubmit={handleExcursionSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Nombre</label>
+                  <label className="text-gray-600 text-sm block mb-1">Nombre *</label>
                   <input
                     type="text"
                     value={excursionFormData.nombre}
@@ -3126,28 +3471,39 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Proveedor</label>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo</label>
                   <select
-                    value={excursionFormData.proveedorId}
-                    onChange={(e) => {
-                      const proveedor = proveedores.find(p => p.id === e.target.value);
-                      setExcursionFormData(prev => ({
-                        ...prev,
-                        proveedorId: e.target.value,
-                        proveedorNombre: proveedor?.nombre || ""
-                      }));
-                    }}
+                    value={excursionFormData.tipo}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, tipo: e.target.value as "excursion" | "traslado" }))}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    required
                   >
-                    <option value="">Seleccionar proveedor</option>
-                    {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                    <option value="excursion">Excursión</option>
+                    <option value="traslado">Traslado</option>
                   </select>
                 </div>
               </div>
+              <div>
+                <label className="text-gray-600 text-sm block mb-1">Proveedor *</label>
+                <select
+                  value={excursionFormData.proveedorId}
+                  onChange={(e) => {
+                    const proveedor = proveedores.find(p => p.id === e.target.value);
+                    setExcursionFormData(prev => ({
+                      ...prev,
+                      proveedorId: e.target.value,
+                      proveedorNombre: proveedor?.nombre || ""
+                    }));
+                  }}
+                  className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  required
+                >
+                  <option value="">Seleccionar proveedor</option>
+                  {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                </select>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Adulto (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Adulto (USD) *</label>
                   <input
                     type="number"
                     step="0.01"
@@ -3170,7 +3526,7 @@ export default function Home() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Adulto (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Adulto (USD) *</label>
                   <input
                     type="number"
                     step="0.01"
@@ -3229,7 +3585,7 @@ export default function Home() {
                   Cancelar
                 </button>
                 <button type="submit" className="px-6 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20">
-                  {editingExcursionId ? "Actualizar Excursión" : "Guardar Excursión"}
+                  {editingExcursionId ? "Actualizar Servicio" : "Guardar Servicio"}
                 </button>
               </div>
             </form>
