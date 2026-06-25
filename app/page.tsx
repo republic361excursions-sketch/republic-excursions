@@ -180,7 +180,7 @@ export default function Home() {
   });
 
   // ============================================
-  // FORM DATA - TODOS LOS CAMPOS VACIOS
+  // FORM DATA
   // ============================================
   const [formData, setFormData] = useState({
     clienteNombre: "",
@@ -365,10 +365,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v41");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v41");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v41");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v41");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v42");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v42");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v42");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v42");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -378,26 +378,26 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v41", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v42", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v41", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v42", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v41", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v42", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v41", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v42", JSON.stringify(data));
   };
 
   // ============================================
-  // CALCULAR COMISION Y TOTALES - CORREGIDO DEFINITIVO
+  // CALCULAR COMISION Y TOTALES
   // ============================================
   const calcularComision = (precioVenta: number, costoProveedor: number) => {
     return precioVenta - costoProveedor;
@@ -433,34 +433,49 @@ export default function Home() {
   };
 
   // ============================================
-  // SELECCIONAR EXCURSION
+  // SELECCIONAR EXCURSION - CORREGIDO
   // ============================================
   const selectExcursionForVenta = (excursionId: string) => {
     const excursion = excursiones.find(e => e.id === excursionId);
     if (excursion) {
       setSelectedExcursionForVenta(excursion);
       
+      const precioAdulto = excursion.precioAdultoUSD || 0;
+      const precioNino = excursion.precioNinoUSD || 0;
+      const costoAdulto = excursion.costoProveedorAdultoUSD || 0;
+      const costoNino = excursion.costoProveedorNinoUSD || 0;
+      const comisionAdulto = excursion.comisionAdultoUSD || 0;
+      const comisionNino = excursion.comisionNinoUSD || 0;
+      
       setFormData(prev => ({
         ...prev,
         excursionId: excursion.id,
         excursionNombre: excursion.nombre,
-        precioAdultoUSD: String(excursion.precioAdultoUSD || ""),
-        precioNinoUSD: String(excursion.precioNinoUSD || ""),
-        costoProveedorAdultoUSD: String(excursion.costoProveedorAdultoUSD || ""),
-        costoProveedorNinoUSD: String(excursion.costoProveedorNinoUSD || ""),
-        comisionAdultoUSD: String(excursion.comisionAdultoUSD || ""),
-        comisionNinoUSD: String(excursion.comisionNinoUSD || ""),
+        precioAdultoUSD: String(precioAdulto),
+        precioNinoUSD: String(precioNino),
+        costoProveedorAdultoUSD: String(costoAdulto),
+        costoProveedorNinoUSD: String(costoNino),
+        comisionAdultoUSD: String(comisionAdulto),
+        comisionNinoUSD: String(comisionNino),
         proveedorId: excursion.proveedorId,
         proveedorNombre: excursion.proveedorNombre,
         zona: excursion.zona || "",
       }));
       
-      setTimeout(updateCantidades, 50);
+      setTimeout(() => {
+        const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
+        setFormData(prev => ({
+          ...prev,
+          precioTotalUSD: precioTotal.toFixed(2),
+          costoTotalUSD: costoTotal.toFixed(2),
+          comisionTotalUSD: comisionTotal.toFixed(2),
+        }));
+      }, 50);
     }
   };
 
   // ============================================
-  // HANDLE CAMBIOS - TODOS CON FORCE UPDATE
+  // HANDLE CAMBIOS
   // ============================================
   const handlePrecioAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -1334,7 +1349,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-[10px] text-gray-400">v4.1 • Republic Excursions © 2026</p>
+              <p className="text-[10px] text-gray-400">v4.2 • Republic Excursions © 2026</p>
             </div>
           </div>
         </div>
@@ -2268,7 +2283,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL - FORMULARIO DE VENTA - CORREGIDO
+          MODAL - FORMULARIO DE VENTA CORREGIDO
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -2303,7 +2318,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Excursión con boton Crear */}
+              {/* Excursión con boton Crear - SEPARADO CORRECTAMENTE */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Excursión *</label>
@@ -2438,7 +2453,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Totales - se calculan automaticamente */}
+              {/* Totales */}
               <div className="grid grid-cols-3 gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-100">
                 <div>
                   <label className="text-gray-500 text-sm block mb-1">Total Venta</label>
@@ -2482,7 +2497,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL - Crear Excursión Rápida desde Venta */}
+      {/* MODAL - Crear Excursión Rápida */}
       {showCrearExcursionDesdeVenta && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6">
@@ -2823,6 +2838,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Excursiones temporales */}
               <div className="border-t border-gray-100 pt-4 mt-4">
                 <h4 className="text-[#0a1628] font-semibold mb-3">Excursiones del Proveedor</h4>
                 <div className="space-y-2 mb-3">
