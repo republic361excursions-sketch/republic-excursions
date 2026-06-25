@@ -263,7 +263,7 @@ export default function Home() {
   });
 
   // ============================================
-  // FUNCIONES DE FORMATO - CORREGIDAS
+  // FUNCIONES DE FORMATO
   // ============================================
   const formatearTelefono = (telefono: string) => {
     const numeros = telefono.replace(/\D/g, '');
@@ -365,10 +365,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v40");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v40");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v40");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v40");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v41");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v41");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v41");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v41");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -378,22 +378,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v40", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v41", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v40", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v41", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v40", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v41", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v40", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v41", JSON.stringify(data));
   };
 
   // ============================================
@@ -1334,7 +1334,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-[10px] text-gray-400">v4.0 • Republic Excursions © 2026</p>
+              <p className="text-[10px] text-gray-400">v4.1 • Republic Excursions © 2026</p>
             </div>
           </div>
         </div>
@@ -2268,7 +2268,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL - FORMULARIO DE VENTA
+          MODAL - FORMULARIO DE VENTA - CORREGIDO
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -2278,6 +2278,7 @@ export default function Home() {
               <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Cliente */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Cliente *</label>
@@ -2302,6 +2303,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Excursión con boton Crear */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Excursión *</label>
@@ -2318,7 +2320,7 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={() => setShowCrearExcursionDesdeVenta(true)}
-                      className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap"
+                      className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm"
                     >
                       + Crear
                     </button>
@@ -2351,6 +2353,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Adultos, Niños y Estado */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Adultos</label>
@@ -2387,6 +2390,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Precios */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Precio Venta Adulto (USD)</label>
@@ -2434,6 +2438,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Totales - se calculan automaticamente */}
               <div className="grid grid-cols-3 gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-100">
                 <div>
                   <label className="text-gray-500 text-sm block mb-1">Total Venta</label>
