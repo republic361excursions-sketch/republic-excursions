@@ -129,7 +129,6 @@ export default function Home() {
   const [showClienteForm, setShowClienteForm] = useState(false);
   const [showProveedorForm, setShowProveedorForm] = useState(false);
   const [showExcursionForm, setShowExcursionForm] = useState(false);
-  const [showCrearExcursionDesdeVenta, setShowCrearExcursionDesdeVenta] = useState(false);
   const [editingVentaId, setEditingVentaId] = useState<string | null>(null);
   const [editingExcursionId, setEditingExcursionId] = useState<string | null>(null);
   const [editingProveedorId, setEditingProveedorId] = useState<string | null>(null);
@@ -365,10 +364,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v34");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v34");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v34");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v34");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v35");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v35");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v35");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v35");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -378,22 +377,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v34", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v35", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v34", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v35", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v34", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v35", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v34", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v35", JSON.stringify(data));
   };
 
   // ============================================
@@ -403,11 +402,7 @@ export default function Home() {
     return precioVenta - costoProveedor;
   };
 
-  // ============================================
-  // CALCULAR TOTALES DE VENTA - CORREGIDO
-  // ============================================
   const calcularTotalesVenta = () => {
-    // Asegurar que todos los valores sean números
     const precioAdulto = Number(formData.precioAdultoUSD) || 0;
     const precioNino = Number(formData.precioNinoUSD) || 0;
     const costoAdulto = Number(formData.costoProveedorAdultoUSD) || 0;
@@ -415,28 +410,15 @@ export default function Home() {
     const cantAdultos = Number(formData.cantidadAdultos) || 0;
     const cantNinos = Number(formData.cantidadNinos) || 0;
     
-    // Calcular totales
     const precioTotal = (precioAdulto * cantAdultos) + (precioNino * cantNinos);
     const costoTotal = (costoAdulto * cantAdultos) + (costoNino * cantNinos);
     const comisionTotal = precioTotal - costoTotal;
-    
-    // 🔍 Debug - para ver qué está pasando
-    console.log('📊 Cálculo de Totales:');
-    console.log('  Precio Adulto:', precioAdulto);
-    console.log('  Costo Adulto:', costoAdulto);
-    console.log('  Cant Adultos:', cantAdultos);
-    console.log('  Precio Niño:', precioNino);
-    console.log('  Costo Niño:', costoNino);
-    console.log('  Cant Niños:', cantNinos);
-    console.log('  Precio Total:', precioTotal);
-    console.log('  Costo Total:', costoTotal);
-    console.log('  Comisión:', comisionTotal);
     
     return { precioTotal, costoTotal, comisionTotal };
   };
 
   // ============================================
-  // SELECCIONAR EXCURSION - CORREGIDO
+  // SELECCIONAR EXCURSION
   // ============================================
   const selectExcursionForVenta = (excursionId: string) => {
     const excursion = excursiones.find(e => e.id === excursionId);
@@ -527,8 +509,6 @@ export default function Home() {
     } else if (formData.pagoCliente === "pago_dia") {
       saldoPendienteUSD = precioTotal;
     }
-
-    const excursion = excursiones.find(e => e.id === formData.excursionId);
 
     const nuevaVenta: Venta = {
       id: editingVentaId || Date.now().toString(),
@@ -1200,10 +1180,10 @@ export default function Home() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">Dashboard</h2>
-            <p className="text-white/40 text-sm">Bienvenido de vuelta</p>
+            <h2 className="text-2xl font-bold text-white tracking-tight">🌴 Dashboard</h2>
+            <p className="text-white/40 text-sm">Bienvenido a Republic Excursions</p>
           </div>
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl px-6 py-3 border border-white/10 text-center">
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl px-6 py-3 border border-white/20 text-center">
             <div className="text-white text-sm font-mono font-bold">
               {currentTime.toLocaleTimeString("es-DO", { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </div>
@@ -1214,54 +1194,54 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl"></div>
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-teal-400/10 blur-2xl"></div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Total Ventas</p>
                 <p className="text-white text-2xl font-bold">{formatUSD(totalVentas)}</p>
               </div>
-              <div className="bg-blue-500/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-blue-500/30">$</div>
+              <div className="bg-teal-400/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-teal-400/30">💰</div>
             </div>
           </div>
           
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-green-500/10 blur-2xl"></div>
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-emerald-400/10 blur-2xl"></div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Comisiones</p>
                 <p className="text-white text-2xl font-bold">{formatUSD(totalComisiones)}</p>
               </div>
-              <div className="bg-green-500/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-green-500/30">%</div>
+              <div className="bg-emerald-400/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-emerald-4 00/30">📈</div>
             </div>
           </div>
           
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-yellow-500/10 blur-2xl"></div>
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-amber-400/10 blur-2xl"></div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Por Cobrar</p>
                 <p className="text-white text-2xl font-bold">{formatUSD(totalPendiente)}</p>
               </div>
-              <div className="bg-yellow-500/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-yellow-500/30">!</div>
+              <div className="bg-amber-400/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-amber-400/30">💳</div>
             </div>
           </div>
           
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-purple-500/10 blur-2xl"></div>
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-rose-400/10 blur-2xl"></div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/40 text-sm">Clientes</p>
                 <p className="text-white text-2xl font-bold">{totalClientes}</p>
               </div>
-              <div className="bg-purple-500/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-purple-500/30">👥</div>
+              <div className="bg-rose-400/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-rose-400/30">👥</div>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
-            <h3 className="text-white/60 text-sm font-semibold mb-3">Resumen de Ventas</h3>
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+            <h3 className="text-white/60 text-sm font-semibold mb-3">📊 Resumen de Ventas</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-white/40">Hoy</span>
@@ -1282,8 +1262,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
-            <h3 className="text-white/60 text-sm font-semibold mb-3">Resumen General</h3>
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+            <h3 className="text-white/60 text-sm font-semibold mb-3">📋 Resumen General</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-white/40">Excursiones</span>
@@ -1300,8 +1280,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
-            <h3 className="text-white/60 text-sm font-semibold mb-3">Ultimas Ventas</h3>
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+            <h3 className="text-white/60 text-sm font-semibold mb-3">🕐 Ultimas Ventas</h3>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {ventas.slice(-4).reverse().map(v => (
                 <div key={v.id} className="flex justify-between text-sm border-b border-white/5 pb-1">
@@ -1329,51 +1309,51 @@ export default function Home() {
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
-              placeholder="Buscar ventas..."
+              placeholder="🔍 Buscar ventas..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
             />
           </div>
           <select
             value={filterYear}
             onChange={(e) => setFilterYear(e.target.value)}
-            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400"
           >
             <option value="">Todos los años</option>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
-          <button onClick={() => { setSearchTerm(""); setFilterYear(""); }} className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
+          <button onClick={() => { setSearchTerm(""); setFilterYear(""); }} className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
             Limpiar
           </button>
-          <button onClick={exportCSV} className="px-4 py-2.5 bg-green-500/20 text-green-400 rounded-xl hover:bg-green-500/30 transition-all">
-            Exportar CSV
+          <button onClick={exportCSV} className="px-4 py-2.5 bg-emerald-400/20 text-emerald-400 rounded-xl hover:bg-emerald-400/30 transition-all">
+            📥 Exportar CSV
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/10">
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
             <p className="text-white/40 text-sm">Total Ventas</p>
             <p className="text-white text-2xl font-bold">{formatUSD(totalVentasUSD)}</p>
           </div>
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/10">
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
             <p className="text-white/40 text-sm">Comision Total</p>
-            <p className="text-green-400 text-2xl font-bold">{formatUSD(totalComision)}</p>
+            <p className="text-emerald-400 text-2xl font-bold">{formatUSD(totalComision)}</p>
           </div>
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/10">
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
             <p className="text-white/40 text-sm">Pendiente Cobrar</p>
-            <p className="text-yellow-400 text-2xl font-bold">{formatUSD(totalPendienteUSD)}</p>
+            <p className="text-amber-400 text-2xl font-bold">{formatUSD(totalPendienteUSD)}</p>
           </div>
         </div>
 
         <div className="space-y-2">
           {groupedArray.length === 0 ? (
-            <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-12 border border-white/10 text-center">
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-12 border border-white/20 text-center">
               <p className="text-white/40">No hay ventas registradas</p>
             </div>
           ) : (
             groupedArray.map((group: any) => (
-              <div key={group.key} className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
+              <div key={group.key} className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden">
                 <button onClick={() => toggleMonth(group.key)} className="w-full px-6 py-4 flex flex-wrap items-center justify-between hover:bg-white/5 transition-all">
                   <div className="flex items-center gap-4">
                     <span className="text-white font-semibold text-lg">{getMonthName(group.month - 1)} {group.year}</span>
@@ -1381,7 +1361,7 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-6">
                     <span className="text-white font-bold">{formatUSD(group.totalUSD)}</span>
-                    <span className="text-green-400 text-sm">{formatUSD(group.totalComision)}</span>
+                    <span className="text-emerald-400 text-sm">{formatUSD(group.totalComision)}</span>
                     <span className={`transform transition-transform ${expandedMonth === group.key ? 'rotate-180' : ''}`}>▼</span>
                   </div>
                 </button>
@@ -1412,7 +1392,7 @@ export default function Home() {
                             <td className="py-2 px-2 text-white/60">{venta.cantidadAdultos}</td>
                             <td className="py-2 px-2 text-white/60">{venta.cantidadNinos || 0}</td>
                             <td className="py-2 px-2 text-right text-white font-medium">{formatUSD(venta.precioVentaUSD)}</td>
-                            <td className="py-2 px-2 text-right text-green-400">{formatUSD(venta.comisionUSD)}</td>
+                            <td className="py-2 px-2 text-right text-emerald-400">{formatUSD(venta.comisionUSD)}</td>
                             <td className="py-2 px-2">
                               <span className={`px-2 py-1 rounded-lg text-xs ${getEstadoColor(venta.estado)}`}>
                                 {getEstadoText(venta.estado)}
@@ -1420,8 +1400,8 @@ export default function Home() {
                             </td>
                             <td className="py-2 px-2">
                               <div className="flex gap-1">
-                                <button onClick={() => editVenta(venta)} className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-xs transition-all">Editar</button>
-                                <button onClick={() => deleteVenta(venta.id)} className="px-2 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all">Eliminar</button>
+                                <button onClick={() => editVenta(venta)} className="px-2 py-1 bg-teal-400/20 text-teal-400 rounded-lg hover:bg-teal-400/30 text-xs transition-all">Editar</button>
+                                <button onClick={() => deleteVenta(venta.id)} className="px-2 py-1 bg-red-400/20 text-red-400 rounded-lg hover:bg-red-400/30 text-xs transition-all">Eliminar</button>
                               </div>
                             </td>
                           </tr>
@@ -1456,16 +1436,16 @@ export default function Home() {
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
-              placeholder="Buscar reservas..."
+              placeholder="🔍 Buscar reservas..."
               value={searchReservas}
               onChange={(e) => setSearchReservas(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-teal-400"
             />
           </div>
           <select
             value={filterReservaEstado}
             onChange={(e) => setFilterReservaEstado(e.target.value)}
-            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white"
           >
             <option value="todas">Todos los estados</option>
             <option value="pendiente">Pendiente</option>
@@ -1477,29 +1457,29 @@ export default function Home() {
             type="date"
             value={filterReservaFecha}
             onChange={(e) => setFilterReservaFecha(e.target.value)}
-            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white"
           />
-          <button onClick={() => { setSearchReservas(""); setFilterReservaEstado("todas"); setFilterReservaFecha(""); }} className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
+          <button onClick={() => { setSearchReservas(""); setFilterReservaEstado("todas"); setFilterReservaFecha(""); }} className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
             Limpiar
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/10">
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
             <p className="text-white/40 text-sm">Total Reservas</p>
             <p className="text-white text-2xl font-bold">{reservasFiltradas.length}</p>
           </div>
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/10">
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
             <p className="text-white/40 text-sm">Monto Total</p>
             <p className="text-white text-2xl font-bold">{formatUSD(reservasFiltradas.reduce((s, v) => s + v.precioVentaUSD, 0))}</p>
           </div>
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/10">
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
             <p className="text-white/40 text-sm">Pendientes</p>
-            <p className="text-yellow-400 text-2xl font-bold">{reservasFiltradas.filter(v => v.estado === "pendiente").length}</p>
+            <p className="text-amber-400 text-2xl font-bold">{reservasFiltradas.filter(v => v.estado === "pendiente").length}</p>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl border border-white/10 overflow-x-auto">
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-white/40 border-b border-white/10">
@@ -1534,7 +1514,7 @@ export default function Home() {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <button onClick={() => editVenta(v)} className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-xs transition-all">Editar</button>
+                      <button onClick={() => editVenta(v)} className="px-3 py-1 bg-teal-400/20 text-teal-400 rounded-lg hover:bg-teal-400/30 text-xs transition-all">Editar</button>
                     </td>
                   </tr>
                 ))
@@ -1563,26 +1543,26 @@ export default function Home() {
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
-              placeholder="Buscar clientes..."
+              placeholder="🔍 Buscar clientes..."
               value={searchClientes}
               onChange={(e) => setSearchClientes(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-teal-400"
             />
           </div>
           <select
             value={filterClienteExcursion}
             onChange={(e) => setFilterClienteExcursion(e.target.value)}
-            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white"
           >
             <option value="">Todas las excursiones</option>
             {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
           </select>
-          <button onClick={() => setShowClienteForm(true)} className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-blue-500/30">
+          <button onClick={() => setShowClienteForm(true)} className="bg-gradient-to-r from-teal-400 to-emerald-400 text-white px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-teal-400/30">
             <span className="text-lg leading-none">+</span> Nuevo Cliente
           </button>
         </div>
 
-        <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl border border-white/10 overflow-x-auto">
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-white/40 border-b border-white/10">
@@ -1606,7 +1586,7 @@ export default function Home() {
                     <td className="py-3 px-4 text-white/80 max-w-[120px] truncate">{c.excursionNombre}</td>
                     <td className="py-3 px-4 text-white/60 text-xs">{c.fechaExcursion ? new Date(c.fechaExcursion).toLocaleDateString("es-DO") : "-"}</td>
                     <td className="py-3 px-4">
-                      <button onClick={() => deleteCliente(c.id)} className="px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all">Eliminar</button>
+                      <button onClick={() => deleteCliente(c.id)} className="px-3 py-1 bg-red-400/20 text-red-400 rounded-lg hover:bg-red-400/30 text-xs transition-all">Eliminar</button>
                     </td>
                   </tr>
                 ))
@@ -1635,23 +1615,23 @@ export default function Home() {
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
-              placeholder="Buscar proveedores..."
+              placeholder="🔍 Buscar proveedores..."
               value={searchProveedores}
               onChange={(e) => setSearchProveedores(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-teal-400"
             />
           </div>
           <select
             value={filterProveedorMetodo}
             onChange={(e) => setFilterProveedorMetodo(e.target.value)}
-            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white"
           >
             <option value="todos">Todos los métodos</option>
             <option value="efectivo">Efectivo</option>
             <option value="transferencia">Transferencia</option>
             <option value="paypal">PayPal</option>
           </select>
-          <button onClick={() => { setEditingProveedorId(null); setProveedorFormData({ nombre: "", empresa: "", telefono: "", email: "", metodosPago: [], banco: "", numeroCuenta: "", monedaCuenta: "RD$", tipoCuenta: [], tipoBeneficiario: "personal", beneficiario: "", rncCedula: "", tipoDocumento: "cedula" }); setTempExcursiones([]); setShowProveedorForm(true); }} className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-blue-500/30">
+          <button onClick={() => { setEditingProveedorId(null); setProveedorFormData({ nombre: "", empresa: "", telefono: "", email: "", metodosPago: [], banco: "", numeroCuenta: "", monedaCuenta: "RD$", tipoCuenta: [], tipoBeneficiario: "personal", beneficiario: "", rncCedula: "", tipoDocumento: "cedula" }); setTempExcursiones([]); setShowProveedorForm(true); }} className="bg-gradient-to-r from-teal-400 to-emerald-400 text-white px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-teal-400/30">
             <span className="text-lg leading-none">+</span> Nuevo Proveedor
           </button>
         </div>
@@ -1661,28 +1641,28 @@ export default function Home() {
             <div className="col-span-full text-center py-12 text-white/40">No hay proveedores registrados</div>
           ) : (
             proveedoresFiltrados.map(p => (
-              <div key={p.id} className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-blue-500/5 blur-2xl"></div>
+              <div key={p.id} className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-teal-400/5 blur-2xl"></div>
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-white font-semibold">{p.nombre}</h3>
                     <p className="text-white/40 text-sm">{p.empresa || "Sin empresa"}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => editProveedor(p)} className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-xs transition-all">Editar</button>
-                    <button onClick={() => deleteProveedor(p.id)} className="px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all">Eliminar</button>
+                    <button onClick={() => editProveedor(p)} className="px-3 py-1 bg-teal-400/20 text-teal-400 rounded-lg hover:bg-teal-400/30 text-xs transition-all">Editar</button>
+                    <button onClick={() => deleteProveedor(p.id)} className="px-3 py-1 bg-red-400/20 text-red-400 rounded-lg hover:bg-red-400/30 text-xs transition-all">Eliminar</button>
                   </div>
                 </div>
                 <div className="mt-3 space-y-1 text-sm">
-                  <div className="flex items-center gap-2 text-white/60"><span>Teléfono</span> {p.telefono || "Sin teléfono"}</div>
-                  <div className="flex items-center gap-2 text-white/60"><span>Email</span> {p.email || "Sin email"}</div>
-                  <div className="flex items-center gap-2 text-white/60"><span>RNC/Cédula</span> {p.rncCedula || "Sin documento"}</div>
+                  <div className="flex items-center gap-2 text-white/60"><span>📞</span> {p.telefono || "Sin teléfono"}</div>
+                  <div className="flex items-center gap-2 text-white/60"><span>✉️</span> {p.email || "Sin email"}</div>
+                  <div className="flex items-center gap-2 text-white/60"><span>📄</span> {p.rncCedula || "Sin documento"}</div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.metodosPago.map(m => <span key={m} className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-xs">{m === "efectivo" ? "Efectivo" : m === "transferencia" ? "Transferencia" : "PayPal"}</span>)}
+                    {p.metodosPago.map(m => <span key={m} className="px-2 py-1 bg-teal-400/20 text-teal-400 rounded-lg text-xs">{m === "efectivo" ? "💵 Efectivo" : m === "transferencia" ? "🏦 Transferencia" : "💳 PayPal"}</span>)}
                   </div>
                 </div>
                 <div className="mt-3 text-xs text-white/40 border-t border-white/5 pt-2">
-                  {excursiones.filter(e => e.proveedorId === p.id).length} excursiones
+                  🏝️ {excursiones.filter(e => e.proveedorId === p.id).length} excursiones
                 </div>
               </div>
             ))
@@ -1711,16 +1691,16 @@ export default function Home() {
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
-              placeholder="Buscar bancos..."
+              placeholder="🔍 Buscar bancos..."
               value={searchBancos}
               onChange={(e) => setSearchBancos(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
             />
           </div>
           <select
             value={filterBancoTipo}
             onChange={(e) => setFilterBancoTipo(e.target.value)}
-            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
           >
             <option value="todos">Todos los tipos</option>
             <option value="corriente">Corriente</option>
@@ -1729,20 +1709,20 @@ export default function Home() {
           <select
             value={filterBancoMoneda}
             onChange={(e) => setFilterBancoMoneda(e.target.value)}
-            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
           >
             <option value="todas">Todas las monedas</option>
             <option value="USD">USD</option>
             <option value="RD$">RD$</option>
           </select>
-          <button onClick={() => { setSearchBancos(""); setFilterBancoTipo("todos"); setFilterBancoMoneda("todas"); }} className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
+          <button onClick={() => { setSearchBancos(""); setFilterBancoTipo("todos"); setFilterBancoMoneda("todas"); }} className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
             Limpiar
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {bancosFiltrados.length === 0 ? (
-            <div className="col-span-full bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-3xl p-16 border border-white/10 text-center">
+            <div className="col-span-full bg-white/10 backdrop-blur-xl rounded-3xl p-16 border border-white/20 text-center">
               <div className="text-6xl mb-4 opacity-50">🏦</div>
               <h3 className="text-white text-2xl font-semibold mb-2">No hay información bancaria</h3>
               <p className="text-white/40 text-sm max-w-md mx-auto">
@@ -1751,31 +1731,31 @@ export default function Home() {
               </p>
               <button 
                 onClick={() => setViewMode("proveedores")} 
-                className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:shadow-xl transition-all shadow-blue-500/30 inline-flex items-center gap-2"
+                className="mt-6 px-6 py-3 bg-gradient-to-r from-teal-400 to-emerald-400 text-white rounded-xl hover:shadow-xl transition-all shadow-teal-400/30 inline-flex items-center gap-2"
               >
                 <span className="text-lg leading-none">+</span> Ir a Proveedores
               </button>
             </div>
           ) : (
             bancosFiltrados.map(p => (
-              <div key={p.id} className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all">
+              <div key={p.id} className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all">
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-white font-semibold">{p.nombre}</h3>
                     <p className="text-white/40 text-sm">{p.empresa || "Proveedor"}</p>
                   </div>
-                  <span className={`px-3 py-1 rounded-lg text-xs ${p.tipoBeneficiario === "personal" ? "bg-blue-500/20 text-blue-400" : "bg-purple-500/20 text-purple-400"}`}>
-                    {p.tipoBeneficiario === "personal" ? "Personal" : "Empresarial"}
+                  <span className={`px-3 py-1 rounded-lg text-xs ${p.tipoBeneficiario === "personal" ? "bg-teal-400/20 text-teal-400" : "bg-amber-400/20 text-amber-400"}`}>
+                    {p.tipoBeneficiario === "personal" ? "👤 Personal" : "🏢 Empresarial"}
                   </span>
                 </div>
                 <div className="mt-4 space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-white/60"><span>Banco</span> <span className="text-white">{p.banco || "Sin banco"}</span></div>
-                  <div className="flex items-center gap-2 text-white/60"><span>Cuenta</span> <span className="text-white">{p.numeroCuenta || "Sin cuenta"}</span></div>
-                  <div className="flex items-center gap-2 text-white/60"><span>Moneda</span> <span className="text-white">{p.monedaCuenta || "RD$"}</span></div>
-                  <div className="flex items-center gap-2 text-white/60"><span>Beneficiario</span> <span className="text-white">{p.beneficiario || "Sin beneficiario"}</span></div>
-                  <div className="flex items-center gap-2 text-white/60"><span>RNC/Cédula</span> <span className="text-white">{p.rncCedula || "Sin documento"}</span></div>
+                  <div className="flex items-center gap-2 text-white/60"><span>🏦</span> <span className="text-white">{p.banco || "Sin banco"}</span></div>
+                  <div className="flex items-center gap-2 text-white/60"><span>🔢</span> <span className="text-white">{p.numeroCuenta || "Sin cuenta"}</span></div>
+                  <div className="flex items-center gap-2 text-white/60"><span>💱</span> <span className="text-white">{p.monedaCuenta || "RD$"}</span></div>
+                  <div className="flex items-center gap-2 text-white/60"><span>👤</span> <span className="text-white">{p.beneficiario || "Sin beneficiario"}</span></div>
+                  <div className="flex items-center gap-2 text-white/60"><span>📄</span> <span className="text-white">{p.rncCedula || "Sin documento"}</span></div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.tipoCuenta.map(t => <span key={t} className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-xs">{t === "corriente" ? "Corriente" : "Ahorros"}</span>)}
+                    {p.tipoCuenta.map(t => <span key={t} className="px-2 py-1 bg-teal-400/20 text-teal-400 rounded-lg text-xs">{t === "corriente" ? "💳 Corriente" : "🏦 Ahorros"}</span>)}
                   </div>
                 </div>
               </div>
@@ -1796,17 +1776,17 @@ export default function Home() {
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <button onClick={() => cambiarMes(-1)} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all">◀</button>
+            <button onClick={() => cambiarMes(-1)} className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all">◀</button>
             <h2 className="text-white text-xl font-bold">{getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}</h2>
-            <button onClick={() => cambiarMes(1)} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all">▶</button>
-            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all">Hoy</button>
+            <button onClick={() => cambiarMes(1)} className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all">▶</button>
+            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all">Hoy</button>
           </div>
           <div className="flex items-center gap-2 text-white/40 text-sm">
-            <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg">● Ventas</span>
+            <span className="px-2 py-1 bg-teal-400/20 text-teal-400 rounded-lg">● Ventas</span>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden">
           <div className="grid grid-cols-7 gap-0">
             {["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(day => (
               <div key={day} className="py-3 px-2 text-center text-white/40 text-sm font-medium border-b border-white/5">
@@ -1820,13 +1800,13 @@ export default function Home() {
                               day.date.getFullYear() === new Date().getFullYear();
               
               return (
-                <div key={index} className={`p-2 min-h-[80px] border-b border-r border-white/5 ${!day.isCurrentMonth ? 'opacity-30' : ''} ${isToday ? 'bg-blue-500/10 border-blue-500/30' : ''}`}>
-                  <div className={`text-sm ${isToday ? 'text-blue-400 font-bold' : 'text-white/60'}`}>
+                <div key={index} className={`p-2 min-h-[80px] border-b border-r border-white/5 ${!day.isCurrentMonth ? 'opacity-30' : ''} ${isToday ? 'bg-teal-400/10 border-teal-400/30' : ''}`}>
+                  <div className={`text-sm ${isToday ? 'text-teal-400 font-bold' : 'text-white/60'}`}>
                     {day.date.getDate()}
                   </div>
                   <div className="mt-1 space-y-1 max-h-[50px] overflow-y-auto">
                     {ventasDelDia.slice(0, 3).map(v => (
-                      <div key={v.id} className="text-[10px] bg-blue-500/20 text-blue-400 rounded px-1 truncate">
+                      <div key={v.id} className="text-[10px] bg-teal-400/20 text-teal-400 rounded px-1 truncate">
                         {v.clienteNombre} - {formatUSD(v.precioVentaUSD)}
                       </div>
                     ))}
@@ -1841,8 +1821,8 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
-            <h3 className="text-white font-semibold mb-3">Ventas del Mes</h3>
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+            <h3 className="text-white font-semibold mb-3">📅 Ventas del Mes</h3>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {getVentasDelDia(currentDate).slice(0, 10).map(v => (
                 <div key={v.id} className="flex justify-between items-center border-b border-white/5 py-2">
@@ -1858,8 +1838,8 @@ export default function Home() {
               )}
             </div>
           </div>
-          <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
-            <h3 className="text-white font-semibold mb-3">Resumen del Mes</h3>
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+            <h3 className="text-white font-semibold mb-3">📊 Resumen del Mes</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-white/60">Ventas Totales</span>
@@ -1870,7 +1850,7 @@ export default function Home() {
               </div>
               <div className="flex justify-between">
                 <span className="text-white/60">Comisiones</span>
-                <span className="text-green-400">{formatUSD(ventas.filter(v => {
+                <span className="text-emerald-400">{formatUSD(ventas.filter(v => {
                   const d = new Date(v.fechaExcursion);
                   return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
                 }).reduce((s, v) => s + v.comisionUSD, 0))}</span>
@@ -1906,21 +1886,21 @@ export default function Home() {
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
-              placeholder="Buscar excursiones..."
+              placeholder="🔍 Buscar excursiones..."
               value={searchExcursiones}
               onChange={(e) => setSearchExcursiones(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-teal-400"
             />
           </div>
           <select
             value={filterExcursionProveedor}
             onChange={(e) => setFilterExcursionProveedor(e.target.value)}
-            className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white"
           >
             <option value="">Todos los proveedores</option>
             {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
           </select>
-          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false }); setShowExcursionForm(true); }} className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-blue-500/30">
+          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false }); setShowExcursionForm(true); }} className="bg-gradient-to-r from-teal-400 to-emerald-400 text-white px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-teal-400/30">
             <span className="text-lg leading-none">+</span> Nueva Excursion
           </button>
         </div>
@@ -1930,15 +1910,15 @@ export default function Home() {
             <div className="col-span-full text-center py-12 text-white/40">No hay excursiones registradas</div>
           ) : (
             excursionesFiltradas.map(e => (
-              <div key={e.id} className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all">
+              <div key={e.id} className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-white font-semibold">{e.nombre}</h3>
+                    <h3 className="text-white font-semibold">🏝️ {e.nombre}</h3>
                     <p className="text-white/40 text-sm">{e.proveedorNombre}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => editExcursion(e)} className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-xs transition-all">Editar</button>
-                    <button onClick={() => deleteExcursion(e.id)} className="px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs transition-all">Eliminar</button>
+                    <button onClick={() => editExcursion(e)} className="px-3 py-1 bg-teal-400/20 text-teal-400 rounded-lg hover:bg-teal-400/30 text-xs transition-all">Editar</button>
+                    <button onClick={() => deleteExcursion(e.id)} className="px-3 py-1 bg-red-400/20 text-red-400 rounded-lg hover:bg-red-400/30 text-xs transition-all">Eliminar</button>
                   </div>
                 </div>
                 <div className="mt-3 space-y-1 text-sm">
@@ -1948,7 +1928,7 @@ export default function Home() {
                   </div>
                   <div className="flex justify-between text-white/60">
                     <span>🏷️ Costo Proveedor Adulto</span>
-                    <span className="text-orange-400 font-medium">{formatUSD(e.costoProveedorAdultoUSD)}</span>
+                    <span className="text-amber-400 font-medium">{formatUSD(e.costoProveedorAdultoUSD)}</span>
                   </div>
                   {e.precioNinoUSD !== null && (
                     <>
@@ -1958,13 +1938,13 @@ export default function Home() {
                       </div>
                       <div className="flex justify-between text-white/60">
                         <span>🏷️ Costo Proveedor Niño</span>
-                        <span className="text-orange-400 font-medium">{formatUSD(e.costoProveedorNinoUSD || 0)}</span>
+                        <span className="text-amber-400 font-medium">{formatUSD(e.costoProveedorNinoUSD || 0)}</span>
                       </div>
                     </>
                   )}
                   <div className="flex justify-between text-white/60">
                     <span>📈 Comision</span>
-                    <span className="text-green-400">{formatUSD(e.comisionAdultoUSD)}</span>
+                    <span className="text-emerald-400">{formatUSD(e.comisionAdultoUSD)}</span>
                   </div>
                   <div className="flex justify-between text-white/60 text-xs">
                     <span>📍 Zona</span>
@@ -1980,42 +1960,48 @@ export default function Home() {
   };
 
   // ============================================
-  // LOGIN - NUEVO DISEÑO
+  // LOGIN - NUEVO DISEÑO TROPICAL
   // ============================================
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] bg-blue-400/10 rounded-full blur-[120px]"></div>
-          <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-indigo-400/10 rounded-full blur-[120px]"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[50%] h-[50%] bg-blue-400/5 rounded-full blur-[100px]"></div>
+      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Imagen de fondo de Punta Cana con overlay */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url("https://images.unsplash.com/photo-1582547016194-2f0e3e6771a7?w=1920&q=80")`,
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-blue-900/50 to-emerald-900/70 backdrop-blur-sm"></div>
         </div>
 
         <div className="relative z-10 w-full max-w-md">
-          <div className="bg-white/5 backdrop-blur-2xl rounded-3xl p-8 border border-white/10 shadow-2xl shadow-black/30">
+          <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 shadow-2xl shadow-black/30">
             <div className="text-center mb-8">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-r from-blue-400 to-indigo-500 flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
-                <span className="text-3xl font-bold text-white">RE</span>
+              <div className="w-24 h-24 rounded-full bg-gradient-to-r from-teal-400 to-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-teal-400/30 p-1">
+                <div className="w-full h-full rounded-full bg-slate-900/50 flex items-center justify-center text-4xl">
+                  🌴
+                </div>
               </div>
-              <h1 className="text-2xl font-bold text-white mt-4 tracking-tight">Republic Excursions</h1>
-              <p className="text-white/40 text-sm mt-1">Sistema de Gestion de Excursiones</p>
+              <h1 className="text-3xl font-bold text-white mt-4 tracking-tight">Republic Excursions</h1>
+              <p className="text-white/50 text-sm mt-1">🏝️ Punta Cana · República Dominicana</p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mb-6 bg-white/5 rounded-2xl p-2 border border-white/5">
+            <div className="grid grid-cols-3 gap-3 mb-6 bg-white/5 rounded-2xl p-2 border border-white/10">
               <div className="text-center p-2 rounded-xl bg-white/5">
-                <div className="text-white/50 text-xs">Hora</div>
+                <div className="text-white/50 text-xs">🕐 Hora</div>
                 <div className="text-white font-mono text-sm font-bold">
                   {currentTime.toLocaleTimeString("es-DO", { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
               <div className="text-center p-2 rounded-xl bg-white/5">
-                <div className="text-white/50 text-xs">Fecha</div>
+                <div className="text-white/50 text-xs">📅 Fecha</div>
                 <div className="text-white text-sm font-medium">
                   {currentTime.toLocaleDateString("es-DO", { day: '2-digit', month: 'short' })}
                 </div>
               </div>
               <div className="text-center p-2 rounded-xl bg-white/5">
-                <div className="text-white/50 text-xs">Dia</div>
+                <div className="text-white/50 text-xs">☀️ Dia</div>
                 <div className="text-white text-sm font-medium">
                   {currentTime.toLocaleDateString("es-DO", { weekday: 'short' })}
                 </div>
@@ -2030,27 +2016,25 @@ export default function Home() {
               handleLogin(username, password);
             }} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-white/60 mb-1.5">Usuario</label>
+                <label className="block text-sm font-medium text-white/60 mb-1.5">👤 Usuario</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30">👤</span>
                   <input
                     type="text"
                     name="username"
                     required
-                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-white/30 transition-all"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-white placeholder-white/30 transition-all"
                     placeholder="Ingresa tu usuario"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-white/60 mb-1.5">Contraseña</label>
+                <label className="block text-sm font-medium text-white/60 mb-1.5">🔒 Contraseña</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30">🔒</span>
                   <input
                     type="password"
                     name="password"
                     required
-                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-white/30 transition-all"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-white placeholder-white/30 transition-all"
                     placeholder="Ingresa tu contraseña"
                   />
                 </div>
@@ -2062,33 +2046,33 @@ export default function Home() {
               )}
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-400 to-indigo-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-xl hover:scale-[1.02] transition-all shadow-lg shadow-blue-500/25"
+                className="w-full bg-gradient-to-r from-teal-400 to-emerald-400 text-white py-3.5 rounded-xl font-semibold hover:shadow-xl hover:scale-[1.02] transition-all shadow-lg shadow-teal-400/25"
               >
-                Iniciar Sesion
+                🌴 Iniciar Sesion
               </button>
             </form>
 
-            <div className="mt-6 p-3 bg-white/5 rounded-xl border border-white/5">
-              <div className="flex flex-wrap justify-center gap-2 text-xs text-white/30">
+            <div className="mt-6 p-3 bg-white/5 rounded-xl border border-white/10">
+              <div className="flex flex-wrap justify-center gap-3 text-xs text-white/40">
                 <span className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                  Republic
+                  <span className="w-2 h-2 rounded-full bg-teal-400"></span>
+                  👑 Republic
                 </span>
                 <span className="text-white/20">•</span>
                 <span className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                  Raul
+                  <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                  💼 Raul
                 </span>
                 <span className="text-white/20">•</span>
                 <span className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-pink-400"></span>
-                  Gabrielle
+                  <span className="w-2 h-2 rounded-full bg-rose-400"></span>
+                  ✨ Gabrielle
                 </span>
               </div>
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-[10px] text-white/20">v3.4 • Republic Excursions © 2026</p>
+              <p className="text-[10px] text-white/20">v3.5 • Republic Excursions © 2026</p>
             </div>
           </div>
         </div>
@@ -2097,63 +2081,116 @@ export default function Home() {
   }
 
   // ============================================
-  // TEMA POR USUARIO
+  // TEMA POR USUARIO - PERSONALIZADO
   // ============================================
   const isAdmin = currentUser === "republic";
   const isRaul = currentUser === "raul";
   const isGabrielle = currentUser === "gabrielle";
-  
-  const getUserRole = () => {
-    if (isAdmin) return "Administrador";
-    if (isRaul) return "Vendedor";
-    if (isGabrielle) return "Vendedora";
-    return "Usuario";
+
+  // Imagen de fondo por usuario
+  const getBackgroundImage = () => {
+    if (isAdmin) {
+      return 'url("https://images.unsplash.com/photo-1582547016194-2f0e3e6771a7?w=1920&q=80")'; // Playa Punta Cana
+    }
+    if (isRaul) {
+      return 'url("https://images.unsplash.com/photo-1582547016194-2f0e3e6771a7?w=1920&q=80")'; // Playa
+    }
+    if (isGabrielle) {
+      return 'url("https://images.unsplash.com/photo-1582547016194-2f0e3e6771a7?w=1920&q=80")'; // Playa
+    }
+    return 'url("https://images.unsplash.com/photo-1582547016194-2f0e3e6771a7?w=1920&q=80")';
   };
 
-  const getUserEmoji = () => {
+  // Avatar por usuario
+  const getUserAvatar = () => {
     if (isAdmin) return "👑";
     if (isRaul) return "💼";
     if (isGabrielle) return "✨";
     return "👤";
   };
 
-  const getThemeColors = () => {
+  const getUserFullName = () => {
+    if (isAdmin) return "Administrador";
+    if (isRaul) return "Raul";
+    if (isGabrielle) return "Gabrielle";
+    return "Usuario";
+  };
+
+  const getUserTitle = () => {
+    if (isAdmin) return "🌟 Administrador";
+    if (isRaul) return "💼 Vendedor";
+    if (isGabrielle) return "✨ Vendedora";
+    return "👤 Usuario";
+  };
+
+  // Colores por usuario
+  const getUserColors = () => {
     if (isAdmin) return {
-      bg: "from-slate-900 via-gray-900 to-slate-900",
-      accent: "blue",
-      gradient: "from-blue-500 to-indigo-600",
-      border: "border-blue-500/30",
-      text: "text-blue-400",
-      badge: "bg-blue-500/20 text-blue-400",
+      accent: "from-teal-400 to-emerald-400",
+      shadow: "shadow-teal-400/30",
+      border: "border-teal-400/30",
+      text: "text-teal-400",
+      badge: "bg-teal-400/20 text-teal-400",
+      ring: "ring-teal-400",
     };
     if (isRaul) return {
-      bg: "from-indigo-950 via-blue-950 to-indigo-950",
-      accent: "blue",
-      gradient: "from-blue-400 to-indigo-500",
-      border: "border-blue-500/30",
+      accent: "from-blue-400 to-indigo-400",
+      shadow: "shadow-blue-400/30",
+      border: "border-blue-400/30",
       text: "text-blue-400",
-      badge: "bg-blue-500/20 text-blue-400",
+      badge: "bg-blue-400/20 text-blue-400",
+      ring: "ring-blue-400",
+    };
+    if (isGabrielle) return {
+      accent: "from-rose-400 to-pink-400",
+      shadow: "shadow-rose-400/30",
+      border: "border-rose-400/30",
+      text: "text-rose-400",
+      badge: "bg-rose-400/20 text-rose-400",
+      ring: "ring-rose-400",
     };
     return {
-      bg: "from-rose-950 via-pink-950 to-rose-950",
-      accent: "pink",
-      gradient: "from-pink-400 to-rose-500",
-      border: "border-pink-500/30",
-      text: "text-pink-300",
-      badge: "bg-pink-500/20 text-pink-300",
+      accent: "from-teal-400 to-emerald-400",
+      shadow: "shadow-teal-400/30",
+      border: "border-teal-400/30",
+      text: "text-teal-400",
+      badge: "bg-teal-400/20 text-teal-400",
+      ring: "ring-teal-400",
     };
   };
 
-  const colors = getThemeColors();
+  const colors = getUserColors();
+
+  // ============================================
+  // FUNCION PARA RENDERIZAR VISTAS
+  // ============================================
+  const renderView = () => {
+    switch(viewMode) {
+      case "dashboard": return renderDashboard();
+      case "ventas": return renderVentas();
+      case "reservas": return renderReservas();
+      case "clientes": return renderClientes();
+      case "proveedores": return renderProveedores();
+      case "bancos": return renderBancos();
+      case "calendario": return renderCalendario();
+      case "excursiones": return renderExcursiones();
+      default: return renderDashboard();
+    }
+  };
 
   // ============================================
   // RENDER PRINCIPAL
   // ============================================
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${colors.bg} relative overflow-hidden`}>
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-30%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full blur-[150px]"></div>
-        <div className="absolute bottom-[-30%] left-[-10%] w-[50%] h-[50%] bg-purple-500/5 rounded-full blur-[150px]"></div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Imagen de fondo con overlay */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: getBackgroundImage(),
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-slate-900/80 backdrop-blur-sm"></div>
       </div>
 
       <div className="relative z-10">
@@ -2161,46 +2198,46 @@ export default function Home() {
         <header className="bg-white/5 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${colors.gradient} flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-blue-500/30`}>
-                RE
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${colors.accent} flex items-center justify-center text-white font-bold text-sm shadow-lg ${colors.shadow}`}>
+                🌴
               </div>
               <div>
                 <h1 className="text-white font-bold text-lg tracking-tight">Republic Excursions</h1>
-                <p className={`text-xs ${colors.text}`}>{getUserEmoji()} {getUserRole()}</p>
+                <p className={`text-xs ${colors.text}`}>{getUserAvatar()} {getUserTitle()}</p>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <button onClick={() => setViewMode("dashboard")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "dashboard" ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg shadow-blue-500/30` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-                Dashboard
+              <button onClick={() => setViewMode("dashboard")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "dashboard" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+                📊 Dashboard
               </button>
-              <button onClick={() => setViewMode("ventas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "ventas" ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg shadow-blue-500/30` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-                Ventas
+              <button onClick={() => setViewMode("ventas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "ventas" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+                💰 Ventas
               </button>
-              <button onClick={() => setViewMode("reservas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "reservas" ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg shadow-blue-500/30` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-                Reservas
+              <button onClick={() => setViewMode("reservas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "reservas" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+                📋 Reservas
               </button>
-              <button onClick={() => setViewMode("calendario")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "calendario" ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg shadow-blue-500/30` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-                Calendario
+              <button onClick={() => setViewMode("calendario")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "calendario" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+                📅 Calendario
               </button>
               {isAdmin && (
                 <>
-                  <button onClick={() => setViewMode("clientes")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "clientes" ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg shadow-blue-500/30` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-                    Clientes
+                  <button onClick={() => setViewMode("clientes")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "clientes" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+                    👥 Clientes
                   </button>
-                  <button onClick={() => setViewMode("proveedores")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "proveedores" ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg shadow-blue-500/30` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-                    Proveedores
+                  <button onClick={() => setViewMode("proveedores")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "proveedores" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+                    🤝 Proveedores
                   </button>
-                  <button onClick={() => setViewMode("excursiones")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "excursiones" ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg shadow-blue-500/30` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-                    Excursiones
+                  <button onClick={() => setViewMode("excursiones")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "excursiones" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+                    🏝️ Excursiones
                   </button>
-                  <button onClick={() => setViewMode("bancos")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "bancos" ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg shadow-blue-500/30` : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-                    Bancos
+                  <button onClick={() => setViewMode("bancos")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "bancos" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+                    🏦 Bancos
                   </button>
                 </>
               )}
               <button onClick={handleLogout} className="px-3 py-1.5 rounded-xl text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all">
-                Salir
+                🚪 Salir
               </button>
             </div>
           </div>
@@ -2211,80 +2248,71 @@ export default function Home() {
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div>
               <h2 className="text-2xl font-bold text-white">
-                {viewMode === "dashboard" && "Dashboard"}
-                {viewMode === "ventas" && "Ventas"}
-                {viewMode === "reservas" && "Reservas"}
-                {viewMode === "clientes" && "Clientes"}
-                {viewMode === "proveedores" && "Proveedores"}
-                {viewMode === "excursiones" && "Excursiones"}
-                {viewMode === "bancos" && "Bancos"}
-                {viewMode === "calendario" && "Calendario"}
+                {viewMode === "dashboard" && "📊 Dashboard"}
+                {viewMode === "ventas" && "💰 Ventas"}
+                {viewMode === "reservas" && "📋 Reservas"}
+                {viewMode === "clientes" && "👥 Clientes"}
+                {viewMode === "proveedores" && "🤝 Proveedores"}
+                {viewMode === "excursiones" && "🏝️ Excursiones"}
+                {viewMode === "bancos" && "🏦 Bancos"}
+                {viewMode === "calendario" && "📅 Calendario"}
               </h2>
             </div>
             <div className="flex gap-2">
               {viewMode !== "calendario" && viewMode !== "dashboard" && (
-                <button onClick={() => setShowForm(true)} className={`bg-gradient-to-r ${colors.gradient} text-white px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-lg shadow-blue-500/30`}>
+                <button onClick={() => setShowForm(true)} className={`bg-gradient-to-r ${colors.accent} text-white px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-lg ${colors.shadow}`}>
                   <span className="text-lg leading-none">+</span> Nueva Venta
                 </button>
               )}
             </div>
           </div>
 
-          {viewMode === "dashboard" && renderDashboard()}
-          {viewMode === "ventas" && renderVentas()}
-          {viewMode === "reservas" && renderReservas()}
-          {viewMode === "clientes" && renderClientes()}
-          {viewMode === "proveedores" && renderProveedores()}
-          {viewMode === "excursiones" && renderExcursiones()}
-          {viewMode === "bancos" && renderBancos()}
-          {viewMode === "calendario" && renderCalendario()}
+          {renderView()}
         </main>
       </div>
 
       {/* ============================================
-          MODAL - FORMULARIO DE VENTA
+          MODALES - (Mismos que antes pero con nuevo estilo)
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-3xl border border-white/10 max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+          <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white text-xl font-bold">{editingVentaId ? "Editar Venta" : "Nueva Venta"}</h3>
+              <h3 className="text-white text-xl font-bold">{editingVentaId ? "✏️ Editar Venta" : "📝 Nueva Venta"}</h3>
               <button onClick={resetForm} className="text-white/40 hover:text-white text-2xl">×</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Cliente y WhatsApp */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Cliente *</label>
+                  <label className="text-white/60 text-sm block mb-1">👤 Cliente *</label>
                   <input
                     type="text"
                     value={formData.clienteNombre}
                     onChange={(e) => setFormData(prev => ({ ...prev, clienteNombre: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     placeholder="Nombre del cliente"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">WhatsApp</label>
+                  <label className="text-white/60 text-sm block mb-1">📱 WhatsApp</label>
                   <input
                     type="text"
                     value={formData.clienteWhatsapp}
                     onChange={(e) => setFormData(prev => ({ ...prev, clienteWhatsapp: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     placeholder="WhatsApp"
                   />
                 </div>
               </div>
 
-              {/* Excursión, Fecha y Hora */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Excursión *</label>
+                  <label className="text-white/60 text-sm block mb-1">🏝️ Excursión *</label>
                   <select
                     value={formData.excursionId}
                     onChange={(e) => selectExcursionForVenta(e.target.value)}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     required
                   >
                     <option value="">Seleccionar excursión</option>
@@ -2292,115 +2320,112 @@ export default function Home() {
                   </select>
                   {formData.excursionId && (
                     <div className="mt-1 text-xs text-white/40">
-                      <span className="text-blue-400">Proveedor:</span> {formData.proveedorNombre}
+                      <span className="text-teal-400">🤝 Proveedor:</span> {formData.proveedorNombre}
                     </div>
                   )}
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Fecha *</label>
+                  <label className="text-white/60 text-sm block mb-1">📅 Fecha *</label>
                   <input
                     type="date"
                     value={formData.fechaExcursion}
                     onChange={(e) => setFormData(prev => ({ ...prev, fechaExcursion: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Hora</label>
+                  <label className="text-white/60 text-sm block mb-1">🕐 Hora</label>
                   <select
                     value={formData.horaExcursion}
                     onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   >
                     {HORAS.map(h => <option key={h} value={h}>{h}</option>)}
                   </select>
                 </div>
               </div>
 
-              {/* Adultos, Niños y Estado */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Adultos</label>
+                  <label className="text-white/60 text-sm block mb-1">👤 Adultos</label>
                   <input
                     type="number"
                     min="0"
                     value={formData.cantidadAdultos}
                     onChange={handleCantidadAdultosChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Niños</label>
+                  <label className="text-white/60 text-sm block mb-1">👶 Niños</label>
                   <input
                     type="number"
                     min="0"
                     value={formData.cantidadNinos}
                     onChange={handleCantidadNinosChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Estado</label>
+                  <label className="text-white/60 text-sm block mb-1">📊 Estado</label>
                   <select
                     value={formData.estado}
                     onChange={(e) => setFormData(prev => ({ ...prev, estado: e.target.value as any }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   >
-                    <option value="pendiente">Pendiente</option>
-                    <option value="confirmada">Confirmada</option>
-                    <option value="cancelada">Cancelada</option>
-                    <option value="completada">Completada</option>
+                    <option value="pendiente">⏳ Pendiente</option>
+                    <option value="confirmada">✅ Confirmada</option>
+                    <option value="cancelada">❌ Cancelada</option>
+                    <option value="completada">🎉 Completada</option>
                   </select>
                 </div>
               </div>
 
-              {/* Precios y Costos - TODOS EDITABLES */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">💰 Precio Venta Adulto (USD)</label>
+                  <label className="text-white/60 text-sm block mb-1">💰 Precio Venta Adulto</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.precioAdultoUSD}
                     onChange={handlePrecioAdultoChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">🏷️ Costo Proveedor Adulto (USD)</label>
+                  <label className="text-white/60 text-sm block mb-1">🏷️ Costo Proveedor Adulto</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.costoProveedorAdultoUSD}
                     onChange={handleCostoAdultoChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">💰 Precio Venta Niño (USD)</label>
+                  <label className="text-white/60 text-sm block mb-1">💰 Precio Venta Niño</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.precioNinoUSD}
                     onChange={handlePrecioNinoChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">🏷️ Costo Proveedor Niño (USD)</label>
+                  <label className="text-white/60 text-sm block mb-1">🏷️ Costo Proveedor Niño</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.costoProveedorNinoUSD}
                     onChange={handleCostoNinoChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
-              {/* Totales - RESALTADOS */}
-              <div className="grid grid-cols-3 gap-4 bg-white/5 rounded-2xl p-4 border border-white/5">
+              <div className="grid grid-cols-3 gap-4 bg-white/5 rounded-2xl p-4 border border-white/10">
                 <div>
                   <label className="text-white/40 text-sm block mb-1">💰 Total Venta</label>
                   <input
@@ -2415,7 +2440,7 @@ export default function Home() {
                   <input
                     type="text"
                     value={formData.costoTotalUSD}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-orange-400 font-bold text-lg"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-amber-400 font-bold text-lg"
                     disabled
                   />
                 </div>
@@ -2424,18 +2449,18 @@ export default function Home() {
                   <input
                     type="text"
                     value={formData.comisionTotalUSD}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-green-400 font-bold text-lg"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-emerald-400 font-bold text-lg"
                     disabled
                   />
                 </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                <button type="button" onClick={resetForm} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
-                  Cancelar
+                <button type="button" onClick={resetForm} className="px-6 py-2 bg-white/5 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
+                  ❌ Cancelar
                 </button>
-                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${colors.gradient} text-white rounded-xl hover:shadow-xl transition-all shadow-lg shadow-blue-500/30`}>
-                  {editingVentaId ? "Actualizar Venta" : "Registrar Venta"}
+                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${colors.accent} text-white rounded-xl hover:shadow-xl transition-all shadow-lg ${colors.shadow}`}>
+                  {editingVentaId ? "✅ Actualizar Venta" : "✅ Registrar Venta"}
                 </button>
               </div>
             </form>
@@ -2443,43 +2468,43 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODALES - Formulario de Cliente */}
+      {/* MODAL - Cliente */}
       {showClienteForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-3xl border border-white/10 max-w-lg w-full p-6">
+          <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 max-w-lg w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white text-xl font-bold">Nuevo Cliente</h3>
+              <h3 className="text-white text-xl font-bold">👤 Nuevo Cliente</h3>
               <button onClick={() => setShowClienteForm(false)} className="text-white/40 hover:text-white text-2xl">×</button>
             </div>
             <form onSubmit={handleClienteSubmit} className="space-y-4">
               <div>
                 <label className="text-white/60 text-sm block mb-1">Nombre</label>
-                <input type="text" name="nombre" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required />
+                <input type="text" name="nombre" className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all" required />
               </div>
               <div>
                 <label className="text-white/60 text-sm block mb-1">WhatsApp</label>
-                <input type="text" name="whatsapp" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                <input type="text" name="whatsapp" className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all" />
               </div>
               <div>
                 <label className="text-white/60 text-sm block mb-1">Email</label>
-                <input type="email" name="email" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                <input type="email" name="email" className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all" />
               </div>
               <div>
                 <label className="text-white/60 text-sm block mb-1">Excursión</label>
-                <select name="excursionId" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                <select name="excursionId" className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all">
                   <option value="">Seleccionar excursión</option>
                   {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
                 </select>
               </div>
               <div>
                 <label className="text-white/60 text-sm block mb-1">Fecha</label>
-                <input type="date" name="fechaExcursion" className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                <input type="date" name="fechaExcursion" className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all" />
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                <button type="button" onClick={() => setShowClienteForm(false)} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
+                <button type="button" onClick={() => setShowClienteForm(false)} className="px-6 py-2 bg-white/5 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
                   Cancelar
                 </button>
-                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${colors.gradient} text-white rounded-xl hover:shadow-xl transition-all shadow-lg shadow-blue-500/30`}>
+                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${colors.accent} text-white rounded-xl hover:shadow-xl transition-all shadow-lg ${colors.shadow}`}>
                   Guardar Cliente
                 </button>
               </div>
@@ -2488,12 +2513,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODALES - Formulario de Proveedor */}
+      {/* MODAL - Proveedor */}
       {showProveedorForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-3xl border border-white/10 max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+          <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white text-xl font-bold">{editingProveedorId ? "Editar Proveedor" : "Nuevo Proveedor"}</h3>
+              <h3 className="text-white text-xl font-bold">{editingProveedorId ? "✏️ Editar Proveedor" : "🤝 Nuevo Proveedor"}</h3>
               <button onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="text-white/40 hover:text-white text-2xl">×</button>
             </div>
             <form onSubmit={handleProveedorSubmit} className="space-y-4">
@@ -2504,7 +2529,7 @@ export default function Home() {
                     type="text"
                     value={proveedorFormData.nombre}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, nombre: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     required
                   />
                 </div>
@@ -2514,7 +2539,7 @@ export default function Home() {
                     type="text"
                     value={proveedorFormData.empresa}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, empresa: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
@@ -2525,7 +2550,7 @@ export default function Home() {
                     type="text"
                     value={proveedorFormData.telefono}
                     onChange={manejarCambioTelefono}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     placeholder="(XXX) XXX-XXXX"
                   />
                 </div>
@@ -2535,12 +2560,11 @@ export default function Home() {
                     type="email"
                     value={proveedorFormData.email}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
-              {/* Tipo de Documento */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-white/60 text-sm block mb-1">Tipo de Documento</label>
@@ -2553,7 +2577,7 @@ export default function Home() {
                         rncCedula: ""
                       }));
                     }}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   >
                     <option value="cedula">Cédula</option>
                     <option value="rnc">RNC</option>
@@ -2565,7 +2589,7 @@ export default function Home() {
                     type="text"
                     value={proveedorFormData.rncCedula}
                     onChange={manejarCambioRNCcedula}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     placeholder={proveedorFormData.tipoDocumento === "rnc" ? "XX-XXXXXXX-X" : "XXX-XXXXXXX-X"}
                   />
                 </div>
@@ -2574,24 +2598,25 @@ export default function Home() {
               <div>
                 <label className="text-white/60 text-sm block mb-2">Métodos de Pago</label>
                 <div className="flex gap-4 flex-wrap">
-                  <button type="button" onClick={() => toggleMetodoPago("efectivo")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("efectivo") ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg shadow-blue-500/30` : 'bg-white/5 border border-white/10 text-white/60'}`}>
-                    Efectivo
+                  <button type="button" onClick={() => toggleMetodoPago("efectivo")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("efectivo") ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'bg-white/5 border border-white/20 text-white/60'}`}>
+                    💵 Efectivo
                   </button>
-                  <button type="button" onClick={() => toggleMetodoPago("transferencia")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("transferencia") ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg shadow-blue-500/30` : 'bg-white/5 border border-white/10 text-white/60'}`}>
-                    Transferencia
+                  <button type="button" onClick={() => toggleMetodoPago("transferencia")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("transferencia") ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'bg-white/5 border border-white/20 text-white/60'}`}>
+                    🏦 Transferencia
                   </button>
-                  <button type="button" onClick={() => toggleMetodoPago("paypal")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("paypal") ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg shadow-blue-500/30` : 'bg-white/5 border border-white/10 text-white/60'}`}>
-                    PayPal
+                  <button type="button" onClick={() => toggleMetodoPago("paypal")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("paypal") ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'bg-white/5 border border-white/20 text-white/60'}`}>
+                    💳 PayPal
                   </button>
                 </div>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-white/60 text-sm block mb-1">Banco</label>
                   <select
                     value={proveedorFormData.banco}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, banco: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   >
                     <option value="">Seleccionar banco</option>
                     {BANCOS.map(b => <option key={b} value={b}>{b}</option>)}
@@ -2603,17 +2628,18 @@ export default function Home() {
                     type="text"
                     value={proveedorFormData.numeroCuenta}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, numeroCuenta: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-white/60 text-sm block mb-1">Moneda</label>
                   <select
                     value={proveedorFormData.monedaCuenta}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, monedaCuenta: e.target.value as "USD" | "RD$" }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   >
                     <option value="RD$">RD$</option>
                     <option value="USD">USD</option>
@@ -2622,25 +2648,26 @@ export default function Home() {
                 <div>
                   <label className="text-white/60 text-sm block mb-2">Tipo de Cuenta</label>
                   <div className="flex gap-4">
-                    <button type="button" onClick={() => toggleTipoCuenta("corriente")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("corriente") ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg shadow-blue-500/30` : 'bg-white/5 border border-white/10 text-white/60'}`}>
-                      Corriente
+                    <button type="button" onClick={() => toggleTipoCuenta("corriente")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("corriente") ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'bg-white/5 border border-white/20 text-white/60'}`}>
+                      💳 Corriente
                     </button>
-                    <button type="button" onClick={() => toggleTipoCuenta("ahorros")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("ahorros") ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg shadow-blue-500/30` : 'bg-white/5 border border-white/10 text-white/60'}`}>
-                      Ahorros
+                    <button type="button" onClick={() => toggleTipoCuenta("ahorros")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("ahorros") ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'bg-white/5 border border-white/20 text-white/60'}`}>
+                      🏦 Ahorros
                     </button>
                   </div>
                 </div>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-white/60 text-sm block mb-1">Tipo de Beneficiario</label>
                   <select
                     value={proveedorFormData.tipoBeneficiario}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, tipoBeneficiario: e.target.value as "personal" | "empresarial" }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   >
-                    <option value="personal">Personal</option>
-                    <option value="empresarial">Empresarial</option>
+                    <option value="personal">👤 Personal</option>
+                    <option value="empresarial">🏢 Empresarial</option>
                   </select>
                 </div>
                 <div>
@@ -2649,22 +2676,21 @@ export default function Home() {
                     type="text"
                     value={proveedorFormData.beneficiario}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, beneficiario: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
-              {/* Excursiones temporales */}
               <div className="border-t border-white/10 pt-4 mt-4">
-                <h4 className="text-white font-semibold mb-3">Excursiones del Proveedor</h4>
+                <h4 className="text-white font-semibold mb-3">🏝️ Excursiones del Proveedor</h4>
                 <div className="space-y-2 mb-3">
                   {tempExcursiones.map((e, i) => (
                     <div key={i} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2">
                       <div>
                         <span className="text-white">{e.nombre}</span>
-                        <span className="text-white/40 text-sm ml-2">💰 Precio Venta Adulto: {formatUSD(e.precioAdultoUSD)}</span>
-                        {e.precioNinoUSD !== null && <span className="text-white/40 text-sm ml-2">💰 Precio Venta Niño: {formatUSD(e.precioNinoUSD)}</span>}
-                        <span className="text-orange-400/60 text-sm ml-2">🏷️ Costo: {formatUSD(e.costoProveedorAdultoUSD)}</span>
+                        <span className="text-white/40 text-sm ml-2">💰 Precio Venta: {formatUSD(e.precioAdultoUSD)}</span>
+                        {e.precioNinoUSD !== null && <span className="text-white/40 text-sm ml-2">👶 Niño: {formatUSD(e.precioNinoUSD)}</span>}
+                        <span className="text-amber-400/60 text-sm ml-2">🏷️ Costo: {formatUSD(e.costoProveedorAdultoUSD)}</span>
                       </div>
                       <button type="button" onClick={() => eliminarTempExcursion(i)} className="text-red-400 hover:text-red-300">×</button>
                     </div>
@@ -2675,7 +2701,7 @@ export default function Home() {
                     type="text"
                     value={tempExcursionForm.nombre}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, nombre: e.target.value }))}
-                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     placeholder="Nombre de excursión"
                   />
                   <div className="flex gap-2">
@@ -2684,7 +2710,7 @@ export default function Home() {
                       step="0.01"
                       value={tempExcursionForm.precioAdultoUSD}
                       onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
-                      className="w-1/2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-1/2 px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                       placeholder="💰 Precio Venta"
                     />
                     <input
@@ -2692,8 +2718,8 @@ export default function Home() {
                       step="0.01"
                       value={tempExcursionForm.precioNinoUSD}
                       onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
-                      className="w-1/2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      placeholder="💰 Precio Niño"
+                      className="w-1/2 px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                      placeholder="👶 Precio Niño"
                     />
                   </div>
                 </div>
@@ -2703,7 +2729,7 @@ export default function Home() {
                     step="0.01"
                     value={tempExcursionForm.costoProveedorAdultoUSD}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
-                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     placeholder="🏷️ Costo Proveedor"
                   />
                   <input
@@ -2711,7 +2737,7 @@ export default function Home() {
                     step="0.01"
                     value={tempExcursionForm.costoProveedorNinoUSD}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
-                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     placeholder="🏷️ Costo Niño"
                   />
                 </div>
@@ -2724,18 +2750,18 @@ export default function Home() {
                     />
                     Tiene precio para niños
                   </label>
-                  <button type="button" onClick={agregarTempExcursion} className={`px-4 py-2 bg-gradient-to-r ${colors.gradient} text-white rounded-xl hover:shadow-xl transition-all shadow-lg shadow-blue-500/30 text-sm`}>
-                    Agregar Excursión
+                  <button type="button" onClick={agregarTempExcursion} className={`px-4 py-2 bg-gradient-to-r ${colors.accent} text-white rounded-xl hover:shadow-xl transition-all shadow-lg ${colors.shadow} text-sm`}>
+                    ➕ Agregar Excursión
                   </button>
                 </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                <button type="button" onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
-                  Cancelar
+                <button type="button" onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="px-6 py-2 bg-white/5 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
+                  ❌ Cancelar
                 </button>
-                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${colors.gradient} text-white rounded-xl hover:shadow-xl transition-all shadow-lg shadow-blue-500/30`}>
-                  {editingProveedorId ? "Actualizar Proveedor" : "Guardar Proveedor"}
+                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${colors.accent} text-white rounded-xl hover:shadow-xl transition-all shadow-lg ${colors.shadow}`}>
+                  {editingProveedorId ? "✅ Actualizar Proveedor" : "✅ Guardar Proveedor"}
                 </button>
               </div>
             </form>
@@ -2743,12 +2769,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODALES - Formulario de Excursión */}
+      {/* MODAL - Excursión */}
       {showExcursionForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl rounded-3xl border border-white/10 max-w-2xl w-full p-6">
+          <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 max-w-2xl w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white text-xl font-bold">{editingExcursionId ? "Editar Excursión" : "Nueva Excursión"}</h3>
+              <h3 className="text-white text-xl font-bold">{editingExcursionId ? "✏️ Editar Excursión" : "🏝️ Nueva Excursión"}</h3>
               <button onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="text-white/40 hover:text-white text-2xl">×</button>
             </div>
             <form onSubmit={handleExcursionSubmit} className="space-y-4">
@@ -2759,7 +2785,7 @@ export default function Home() {
                     type="text"
                     value={excursionFormData.nombre}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, nombre: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     required
                   />
                 </div>
@@ -2775,7 +2801,7 @@ export default function Home() {
                         proveedorNombre: proveedor?.nombre || ""
                       }));
                     }}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     required
                   >
                     <option value="">Seleccionar proveedor</option>
@@ -2791,7 +2817,7 @@ export default function Home() {
                     step="0.01"
                     value={excursionFormData.precioAdultoUSD}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     required
                   />
                 </div>
@@ -2802,7 +2828,7 @@ export default function Home() {
                     step="0.01"
                     value={excursionFormData.precioNinoUSD}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
@@ -2814,7 +2840,7 @@ export default function Home() {
                     step="0.01"
                     value={excursionFormData.costoProveedorAdultoUSD}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     required
                   />
                 </div>
@@ -2825,7 +2851,7 @@ export default function Home() {
                     step="0.01"
                     value={excursionFormData.costoProveedorNinoUSD}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
@@ -2835,7 +2861,7 @@ export default function Home() {
                   <select
                     value={excursionFormData.zona}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, zona: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                   >
                     <option value="">Seleccionar zona</option>
                     {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
@@ -2847,7 +2873,7 @@ export default function Home() {
                     type="text"
                     value={excursionFormData.capacidad}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, capacidad: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
                     placeholder="Ej: 20 personas"
                   />
                 </div>
@@ -2863,11 +2889,11 @@ export default function Home() {
                 </label>
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                <button type="button" onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white transition-all">
-                  Cancelar
+                <button type="button" onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="px-6 py-2 bg-white/5 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
+                  ❌ Cancelar
                 </button>
-                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${colors.gradient} text-white rounded-xl hover:shadow-xl transition-all shadow-lg shadow-blue-500/30`}>
-                  {editingExcursionId ? "Actualizar Excursión" : "Guardar Excursión"}
+                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${colors.accent} text-white rounded-xl hover:shadow-xl transition-all shadow-lg ${colors.shadow}`}>
+                  {editingExcursionId ? "✅ Actualizar Excursión" : "✅ Guardar Excursión"}
                 </button>
               </div>
             </form>
