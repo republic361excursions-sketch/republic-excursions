@@ -365,10 +365,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v33");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v33");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v33");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v33");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v34");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v34");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v34");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v34");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -378,22 +378,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v33", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v34", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v33", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v34", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v33", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v34", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v33", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v34", JSON.stringify(data));
   };
 
   // ============================================
@@ -403,17 +403,34 @@ export default function Home() {
     return precioVenta - costoProveedor;
   };
 
+  // ============================================
+  // CALCULAR TOTALES DE VENTA - CORREGIDO
+  // ============================================
   const calcularTotalesVenta = () => {
-    const precioAdulto = parseFloat(formData.precioAdultoUSD) || 0;
-    const precioNino = parseFloat(formData.precioNinoUSD) || 0;
-    const costoAdulto = parseFloat(formData.costoProveedorAdultoUSD) || 0;
-    const costoNino = parseFloat(formData.costoProveedorNinoUSD) || 0;
-    const cantAdultos = formData.cantidadAdultos || 0;
-    const cantNinos = formData.cantidadNinos || 0;
+    // Asegurar que todos los valores sean números
+    const precioAdulto = Number(formData.precioAdultoUSD) || 0;
+    const precioNino = Number(formData.precioNinoUSD) || 0;
+    const costoAdulto = Number(formData.costoProveedorAdultoUSD) || 0;
+    const costoNino = Number(formData.costoProveedorNinoUSD) || 0;
+    const cantAdultos = Number(formData.cantidadAdultos) || 0;
+    const cantNinos = Number(formData.cantidadNinos) || 0;
     
+    // Calcular totales
     const precioTotal = (precioAdulto * cantAdultos) + (precioNino * cantNinos);
     const costoTotal = (costoAdulto * cantAdultos) + (costoNino * cantNinos);
     const comisionTotal = precioTotal - costoTotal;
+    
+    // 🔍 Debug - para ver qué está pasando
+    console.log('📊 Cálculo de Totales:');
+    console.log('  Precio Adulto:', precioAdulto);
+    console.log('  Costo Adulto:', costoAdulto);
+    console.log('  Cant Adultos:', cantAdultos);
+    console.log('  Precio Niño:', precioNino);
+    console.log('  Costo Niño:', costoNino);
+    console.log('  Cant Niños:', cantNinos);
+    console.log('  Precio Total:', precioTotal);
+    console.log('  Costo Total:', costoTotal);
+    console.log('  Comisión:', comisionTotal);
     
     return { precioTotal, costoTotal, comisionTotal };
   };
@@ -430,12 +447,12 @@ export default function Home() {
         ...prev,
         excursionId: excursion.id,
         excursionNombre: excursion.nombre,
-        precioAdultoUSD: (excursion.precioAdultoUSD || 0).toString(),
-        precioNinoUSD: (excursion.precioNinoUSD || 0).toString(),
-        costoProveedorAdultoUSD: (excursion.costoProveedorAdultoUSD || 0).toString(),
-        costoProveedorNinoUSD: (excursion.costoProveedorNinoUSD || 0).toString(),
-        comisionAdultoUSD: (excursion.comisionAdultoUSD || 0).toString(),
-        comisionNinoUSD: (excursion.comisionNinoUSD || 0).toString(),
+        precioAdultoUSD: String(excursion.precioAdultoUSD || 0),
+        precioNinoUSD: String(excursion.precioNinoUSD || 0),
+        costoProveedorAdultoUSD: String(excursion.costoProveedorAdultoUSD || 0),
+        costoProveedorNinoUSD: String(excursion.costoProveedorNinoUSD || 0),
+        comisionAdultoUSD: String(excursion.comisionAdultoUSD || 0),
+        comisionNinoUSD: String(excursion.comisionNinoUSD || 0),
         proveedorId: excursion.proveedorId,
         proveedorNombre: excursion.proveedorNombre,
         zona: excursion.zona || "",
@@ -500,7 +517,7 @@ export default function Home() {
     e.preventDefault();
     
     const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
-    const montoPagadoUSD = parseFloat(formData.montoPagadoUSD) || 0;
+    const montoPagadoUSD = Number(formData.montoPagadoUSD) || 0;
     
     let saldoPendienteUSD = 0;
     if (formData.pagoCliente === "completo") {
@@ -539,10 +556,10 @@ export default function Home() {
       nombreGrupo: formData.tipoServicio === "grupo" ? formData.nombreGrupo : undefined,
       tipoRecogida: formData.tipoRecogida,
       transporte: formData.transporte,
-      precioAdultoPersonalizado: parseFloat(formData.precioAdultoUSD) || 0,
-      precioNinoPersonalizado: parseFloat(formData.precioNinoUSD) || 0,
-      costoAdultoPersonalizado: parseFloat(formData.costoProveedorAdultoUSD) || 0,
-      costoNinoPersonalizado: parseFloat(formData.costoProveedorNinoUSD) || 0,
+      precioAdultoPersonalizado: Number(formData.precioAdultoUSD) || 0,
+      precioNinoPersonalizado: Number(formData.precioNinoUSD) || 0,
+      costoAdultoPersonalizado: Number(formData.costoProveedorAdultoUSD) || 0,
+      costoNinoPersonalizado: Number(formData.costoProveedorNinoUSD) || 0,
       estado: formData.estado,
       nota: formData.nota,
     };
@@ -614,12 +631,12 @@ export default function Home() {
       excursionNombre: venta.excursionNombre,
       fechaExcursion: venta.fechaExcursion,
       horaExcursion: venta.horaExcursion || "02:00 PM",
-      precioAdultoUSD: (venta.precioAdultoPersonalizado || 0).toString(),
-      precioNinoUSD: (venta.precioNinoPersonalizado || 0).toString(),
-      costoProveedorAdultoUSD: (venta.costoAdultoPersonalizado || 0).toString(),
-      costoProveedorNinoUSD: (venta.costoNinoPersonalizado || 0).toString(),
-      comisionAdultoUSD: (excursion?.comisionAdultoUSD || 0).toString(),
-      comisionNinoUSD: (excursion?.comisionNinoUSD || 0).toString(),
+      precioAdultoUSD: String(venta.precioAdultoPersonalizado || 0),
+      precioNinoUSD: String(venta.precioNinoPersonalizado || 0),
+      costoProveedorAdultoUSD: String(venta.costoAdultoPersonalizado || 0),
+      costoProveedorNinoUSD: String(venta.costoNinoPersonalizado || 0),
+      comisionAdultoUSD: String(excursion?.comisionAdultoUSD || 0),
+      comisionNinoUSD: String(excursion?.comisionNinoUSD || 0),
       cantidadAdultos: venta.cantidadAdultos,
       cantidadNinos: venta.cantidadNinos,
       precioTotalUSD: venta.precioVentaUSD.toFixed(2),
@@ -821,8 +838,8 @@ export default function Home() {
       return;
     }
     
-    const precioAdultoUSD = parseFloat(tempExcursionForm.precioAdultoUSD) || 0;
-    const costoProveedorAdultoUSD = parseFloat(tempExcursionForm.costoProveedorAdultoUSD) || 0;
+    const precioAdultoUSD = Number(tempExcursionForm.precioAdultoUSD) || 0;
+    const costoProveedorAdultoUSD = Number(tempExcursionForm.costoProveedorAdultoUSD) || 0;
     const comisionAdultoUSD = calcularComision(precioAdultoUSD, costoProveedorAdultoUSD);
     
     let precioNinoUSD: number | null = null;
@@ -830,8 +847,8 @@ export default function Home() {
     let comisionNinoUSD: number | null = null;
     
     if (tempExcursionForm.tienePrecioNino) {
-      precioNinoUSD = parseFloat(tempExcursionForm.precioNinoUSD) || 0;
-      costoProveedorNinoUSD = parseFloat(tempExcursionForm.costoProveedorNinoUSD) || 0;
+      precioNinoUSD = Number(tempExcursionForm.precioNinoUSD) || 0;
+      costoProveedorNinoUSD = Number(tempExcursionForm.costoProveedorNinoUSD) || 0;
       comisionNinoUSD = calcularComision(precioNinoUSD, costoProveedorNinoUSD);
     }
     
@@ -874,8 +891,8 @@ export default function Home() {
   const handleExcursionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const precioAdultoUSD = parseFloat(excursionFormData.precioAdultoUSD) || 0;
-    const costoProveedorAdultoUSD = parseFloat(excursionFormData.costoProveedorAdultoUSD) || 0;
+    const precioAdultoUSD = Number(excursionFormData.precioAdultoUSD) || 0;
+    const costoProveedorAdultoUSD = Number(excursionFormData.costoProveedorAdultoUSD) || 0;
     const comisionAdultoUSD = calcularComision(precioAdultoUSD, costoProveedorAdultoUSD);
     
     let precioNinoUSD: number | null = null;
@@ -883,8 +900,8 @@ export default function Home() {
     let comisionNinoUSD: number | null = null;
     
     if (excursionFormData.tienePrecioNino) {
-      precioNinoUSD = parseFloat(excursionFormData.precioNinoUSD) || 0;
-      costoProveedorNinoUSD = parseFloat(excursionFormData.costoProveedorNinoUSD) || 0;
+      precioNinoUSD = Number(excursionFormData.precioNinoUSD) || 0;
+      costoProveedorNinoUSD = Number(excursionFormData.costoProveedorNinoUSD) || 0;
       comisionNinoUSD = calcularComision(precioNinoUSD, costoProveedorNinoUSD);
     }
     
@@ -954,11 +971,11 @@ export default function Home() {
       nombre: excursion.nombre,
       proveedorId: excursion.proveedorId,
       proveedorNombre: excursion.proveedorNombre,
-      precioAdultoUSD: excursion.precioAdultoUSD.toString(),
+      precioAdultoUSD: String(excursion.precioAdultoUSD),
       precioNinoUSD: excursion.precioNinoUSD?.toString() || "",
-      costoProveedorAdultoUSD: excursion.costoProveedorAdultoUSD.toString(),
+      costoProveedorAdultoUSD: String(excursion.costoProveedorAdultoUSD),
       costoProveedorNinoUSD: excursion.costoProveedorNinoUSD?.toString() || "",
-      comisionAdultoUSD: excursion.comisionAdultoUSD.toString(),
+      comisionAdultoUSD: String(excursion.comisionAdultoUSD),
       comisionNinoUSD: excursion.comisionNinoUSD?.toString() || "",
       zona: excursion.zona || "",
       capacidad: excursion.capacidad || "",
@@ -1676,7 +1693,7 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER BANCOS - NUEVO DISEÑO
+  // RENDER BANCOS
   // ============================================
   const renderBancos = () => {
     const bancosFiltrados = proveedores.filter(p => {
@@ -2071,7 +2088,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-[10px] text-white/20">v3.3 • Republic Excursions © 2026</p>
+              <p className="text-[10px] text-white/20">v3.4 • Republic Excursions © 2026</p>
             </div>
           </div>
         </div>
