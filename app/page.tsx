@@ -364,10 +364,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v35");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v35");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v35");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v35");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v36");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v36");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v36");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v36");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -377,39 +377,41 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v35", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v36", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v35", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v36", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v35", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v36", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v35", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v36", JSON.stringify(data));
   };
 
   // ============================================
-  // CALCULAR COMISION Y TOTALES - CORREGIDO
+  // CALCULAR COMISION Y TOTALES - CORREGIDO DEFINITIVO
   // ============================================
   const calcularComision = (precioVenta: number, costoProveedor: number) => {
     return precioVenta - costoProveedor;
   };
 
   const calcularTotalesVenta = () => {
-    const precioAdulto = Number(formData.precioAdultoUSD) || 0;
-    const precioNino = Number(formData.precioNinoUSD) || 0;
-    const costoAdulto = Number(formData.costoProveedorAdultoUSD) || 0;
-    const costoNino = Number(formData.costoProveedorNinoUSD) || 0;
-    const cantAdultos = Number(formData.cantidadAdultos) || 0;
-    const cantNinos = Number(formData.cantidadNinos) || 0;
+    // 🔥 FORZAR conversión a número usando parseFloat + 0 para evitar NaN
+    const precioAdulto = parseFloat(formData.precioAdultoUSD) || 0;
+    const precioNino = parseFloat(formData.precioNinoUSD) || 0;
+    const costoAdulto = parseFloat(formData.costoProveedorAdultoUSD) || 0;
+    const costoNino = parseFloat(formData.costoProveedorNinoUSD) || 0;
+    const cantAdultos = parseInt(formData.cantidadAdultos as any) || 0;
+    const cantNinos = parseInt(formData.cantidadNinos as any) || 0;
     
+    // 🔥 CALCULAR con valores numéricos puros
     const precioTotal = (precioAdulto * cantAdultos) + (precioNino * cantNinos);
     const costoTotal = (costoAdulto * cantAdultos) + (costoNino * cantNinos);
     const comisionTotal = precioTotal - costoTotal;
@@ -445,10 +447,11 @@ export default function Home() {
   };
 
   // ============================================
-  // ACTUALIZAR TOTALES
+  // ACTUALIZAR TOTALES - CORREGIDO
   // ============================================
   const updateCantidades = () => {
     const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
+    
     setFormData(prev => ({
       ...prev,
       precioTotalUSD: precioTotal.toFixed(2),
@@ -458,38 +461,90 @@ export default function Home() {
   };
 
   // ============================================
-  // HANDLE CAMBIOS
+  // HANDLE CAMBIOS - CORREGIDOS
   // ============================================
   const handlePrecioAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, precioAdultoUSD: e.target.value }));
-    setTimeout(updateCantidades, 10);
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, precioAdultoUSD: val }));
+    setTimeout(() => {
+      const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
+      setFormData(prev => ({
+        ...prev,
+        precioTotalUSD: precioTotal.toFixed(2),
+        costoTotalUSD: costoTotal.toFixed(2),
+        comisionTotalUSD: comisionTotal.toFixed(2),
+      }));
+    }, 10);
   };
 
   const handlePrecioNinoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, precioNinoUSD: e.target.value }));
-    setTimeout(updateCantidades, 10);
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, precioNinoUSD: val }));
+    setTimeout(() => {
+      const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
+      setFormData(prev => ({
+        ...prev,
+        precioTotalUSD: precioTotal.toFixed(2),
+        costoTotalUSD: costoTotal.toFixed(2),
+        comisionTotalUSD: comisionTotal.toFixed(2),
+      }));
+    }, 10);
   };
 
   const handleCostoAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }));
-    setTimeout(updateCantidades, 10);
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, costoProveedorAdultoUSD: val }));
+    setTimeout(() => {
+      const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
+      setFormData(prev => ({
+        ...prev,
+        precioTotalUSD: precioTotal.toFixed(2),
+        costoTotalUSD: costoTotal.toFixed(2),
+        comisionTotalUSD: comisionTotal.toFixed(2),
+      }));
+    }, 10);
   };
 
   const handleCostoNinoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }));
-    setTimeout(updateCantidades, 10);
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, costoProveedorNinoUSD: val }));
+    setTimeout(() => {
+      const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
+      setFormData(prev => ({
+        ...prev,
+        precioTotalUSD: precioTotal.toFixed(2),
+        costoTotalUSD: costoTotal.toFixed(2),
+        comisionTotalUSD: comisionTotal.toFixed(2),
+      }));
+    }, 10);
   };
 
   const handleCantidadAdultosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value) || 0;
     setFormData(prev => ({ ...prev, cantidadAdultos: val }));
-    setTimeout(updateCantidades, 10);
+    setTimeout(() => {
+      const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
+      setFormData(prev => ({
+        ...prev,
+        precioTotalUSD: precioTotal.toFixed(2),
+        costoTotalUSD: costoTotal.toFixed(2),
+        comisionTotalUSD: comisionTotal.toFixed(2),
+      }));
+    }, 10);
   };
 
   const handleCantidadNinosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value) || 0;
     setFormData(prev => ({ ...prev, cantidadNinos: val }));
-    setTimeout(updateCantidades, 10);
+    setTimeout(() => {
+      const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
+      setFormData(prev => ({
+        ...prev,
+        precioTotalUSD: precioTotal.toFixed(2),
+        costoTotalUSD: costoTotal.toFixed(2),
+        comisionTotalUSD: comisionTotal.toFixed(2),
+      }));
+    }, 10);
   };
 
   // ============================================
@@ -552,7 +607,7 @@ export default function Home() {
     }
 
     resetForm();
-    alert("✅ Venta registrada correctamente");
+    alert("Venta registrada correctamente");
   };
 
   const resetForm = () => {
@@ -688,7 +743,7 @@ export default function Home() {
       }));
       
       saveExcursiones([...excursionesSinViejas, ...nuevasExcursiones]);
-      alert("✅ Proveedor actualizado correctamente");
+      alert("Proveedor actualizado correctamente");
     } else {
       const nuevoProveedor: Proveedor = {
         id: proveedorId,
@@ -707,7 +762,7 @@ export default function Home() {
         saveExcursiones([...excursiones, ...nuevasExcursiones]);
       }
       
-      alert("✅ Proveedor agregado correctamente");
+      alert("Proveedor agregado correctamente");
     }
     
     setShowProveedorForm(false);
@@ -907,7 +962,7 @@ export default function Home() {
           : e
       );
       saveExcursiones(updated);
-      alert("✅ Excursion actualizada correctamente");
+      alert("Excursion actualizada correctamente");
     } else {
       const nuevaExcursion: Excursion = {
         id: Date.now().toString(),
@@ -924,7 +979,7 @@ export default function Home() {
         capacidad: excursionFormData.capacidad || undefined,
       };
       saveExcursiones([...excursiones, nuevaExcursion]);
-      alert("✅ Excursion agregada correctamente");
+      alert("Excursion agregada correctamente");
     }
     
     setShowExcursionForm(false);
@@ -993,7 +1048,7 @@ export default function Home() {
     
     saveClientes([...clientes, nuevoCliente]);
     setShowClienteForm(false);
-    alert("✅ Cliente agregado correctamente");
+    alert("Cliente agregado correctamente");
   };
 
   const deleteCliente = (id: string) => {
@@ -1134,12 +1189,12 @@ export default function Home() {
 
   const getEstadoColor = (estado: string) => {
     const map: any = {
-      pendiente: "bg-yellow-500/20 text-yellow-400",
-      confirmada: "bg-blue-500/20 text-blue-400",
-      cancelada: "bg-red-500/20 text-red-400",
-      completada: "bg-green-500/20 text-green-400"
+      pendiente: "bg-yellow-100 text-yellow-800",
+      confirmada: "bg-blue-100 text-blue-800",
+      cancelada: "bg-red-100 text-red-800",
+      completada: "bg-green-100 text-green-800"
     };
-    return map[estado] || "bg-gray-500/20 text-gray-400";
+    return map[estado] || "bg-gray-100 text-gray-800";
   };
 
   const exportCSV = () => {
@@ -1155,6 +1210,128 @@ export default function Home() {
     a.download = `excursiones_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
+  };
+
+  // ============================================
+  // LOGIN - DISEÑO MINIMALISTA
+  // ============================================
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0a1628]">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-2xl shadow-2xl p-8">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-full bg-[#0a1628] flex items-center justify-center mx-auto">
+                <span className="text-white text-2xl font-bold">RE</span>
+              </div>
+              <h1 className="text-2xl font-bold text-[#0a1628] mt-4">Republic Excursions</h1>
+              <p className="text-gray-500 text-sm mt-1">Sistema de Gestion de Excursiones</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const username = formData.get("username") as string;
+              const password = formData.get("password") as string;
+              handleLogin(username, password);
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+                <input
+                  type="text"
+                  name="username"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  placeholder="Ingresa tu usuario"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                <input
+                  type="password"
+                  name="password"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  placeholder="Ingresa tu contraseña"
+                />
+              </div>
+              {loginError && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-600 text-sm text-center">
+                  {loginError}
+                </div>
+              )}
+              <button
+                type="submit"
+                className="w-full bg-[#0a1628] text-white py-3.5 rounded-xl font-semibold hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20"
+              >
+                Iniciar Sesion
+              </button>
+            </form>
+
+            <div className="mt-6 p-3 bg-gray-50 rounded-xl border border-gray-100">
+              <div className="flex flex-wrap justify-center gap-2 text-xs text-gray-500">
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0a1628]"></span>
+                  Republic
+                </span>
+                <span className="text-gray-300">•</span>
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0a1628]"></span>
+                  Raul
+                </span>
+                <span className="text-gray-300">•</span>
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0a1628]"></span>
+                  Gabrielle
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-4 text-center">
+              <p className="text-[10px] text-gray-400">v3.6 • Republic Excursions © 2026</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================
+  // TEMA POR USUARIO
+  // ============================================
+  const isAdmin = currentUser === "republic";
+  const isRaul = currentUser === "raul";
+  const isGabrielle = currentUser === "gabrielle";
+
+  const getUserRole = () => {
+    if (isAdmin) return "Administrador";
+    if (isRaul) return "Vendedor";
+    if (isGabrielle) return "Vendedora";
+    return "Usuario";
+  };
+
+  const getUserBadge = () => {
+    if (isAdmin) return "bg-[#0a1628] text-white";
+    if (isRaul) return "bg-blue-100 text-blue-800";
+    if (isGabrielle) return "bg-pink-100 text-pink-800";
+    return "bg-gray-100 text-gray-800";
+  };
+
+  // ============================================
+  // FUNCION PARA RENDERIZAR VISTAS
+  // ============================================
+  const renderView = () => {
+    switch(viewMode) {
+      case "dashboard": return renderDashboard();
+      case "ventas": return renderVentas();
+      case "reservas": return renderReservas();
+      case "clientes": return renderClientes();
+      case "proveedores": return renderProveedores();
+      case "bancos": return renderBancos();
+      case "calendario": return renderCalendario();
+      case "excursiones": return renderExcursiones();
+      default: return renderDashboard();
+    }
   };
 
   // ============================================
@@ -1180,117 +1357,113 @@ export default function Home() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">🌴 Dashboard</h2>
-            <p className="text-white/40 text-sm">Bienvenido a Republic Excursions</p>
+            <h2 className="text-2xl font-bold text-[#0a1628]">Dashboard</h2>
+            <p className="text-gray-500 text-sm">Bienvenido de vuelta</p>
           </div>
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl px-6 py-3 border border-white/20 text-center">
-            <div className="text-white text-sm font-mono font-bold">
+          <div className="bg-white rounded-2xl px-6 py-3 shadow-sm border border-gray-100 text-center">
+            <div className="text-[#0a1628] text-sm font-mono font-bold">
               {currentTime.toLocaleTimeString("es-DO", { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </div>
-            <div className="text-white/30 text-xs">
+            <div className="text-gray-400 text-xs">
               {currentTime.toLocaleDateString("es-DO", { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-teal-400/10 blur-2xl"></div>
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/40 text-sm">Total Ventas</p>
-                <p className="text-white text-2xl font-bold">{formatUSD(totalVentas)}</p>
+                <p className="text-gray-500 text-sm">Total Ventas</p>
+                <p className="text-[#0a1628] text-2xl font-bold">{formatUSD(totalVentas)}</p>
               </div>
-              <div className="bg-teal-400/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-teal-400/30">💰</div>
+              <div className="bg-[#0a1628]/10 w-12 h-12 rounded-xl flex items-center justify-center text-xl">$</div>
             </div>
           </div>
           
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-emerald-400/10 blur-2xl"></div>
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/40 text-sm">Comisiones</p>
-                <p className="text-white text-2xl font-bold">{formatUSD(totalComisiones)}</p>
+                <p className="text-gray-500 text-sm">Comisiones</p>
+                <p className="text-[#0a1628] text-2xl font-bold">{formatUSD(totalComisiones)}</p>
               </div>
-              <div className="bg-emerald-400/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-emerald-4 00/30">📈</div>
+              <div className="bg-green-100 w-12 h-12 rounded-xl flex items-center justify-center text-xl">%</div>
             </div>
           </div>
           
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-amber-400/10 blur-2xl"></div>
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/40 text-sm">Por Cobrar</p>
-                <p className="text-white text-2xl font-bold">{formatUSD(totalPendiente)}</p>
+                <p className="text-gray-500 text-sm">Por Cobrar</p>
+                <p className="text-[#0a1628] text-2xl font-bold">{formatUSD(totalPendiente)}</p>
               </div>
-              <div className="bg-amber-400/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-amber-400/30">💳</div>
+              <div className="bg-yellow-100 w-12 h-12 rounded-xl flex items-center justify-center text-xl">!</div>
             </div>
           </div>
           
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-rose-400/10 blur-2xl"></div>
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/40 text-sm">Clientes</p>
-                <p className="text-white text-2xl font-bold">{totalClientes}</p>
+                <p className="text-gray-500 text-sm">Clientes</p>
+                <p className="text-[#0a1628] text-2xl font-bold">{totalClientes}</p>
               </div>
-              <div className="bg-rose-400/20 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-rose-400/30">👥</div>
+              <div className="bg-blue-100 w-12 h-12 rounded-xl flex items-center justify-center text-xl">👥</div>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-            <h3 className="text-white/60 text-sm font-semibold mb-3">📊 Resumen de Ventas</h3>
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-gray-600 text-sm font-semibold mb-3">Resumen de Ventas</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-white/40">Hoy</span>
-                <span className="text-white font-medium">{formatUSD(ventasHoy.reduce((s, v) => s + v.precioVentaUSD, 0))}</span>
+                <span className="text-gray-500">Hoy</span>
+                <span className="text-[#0a1628] font-medium">{formatUSD(ventasHoy.reduce((s, v) => s + v.precioVentaUSD, 0))}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-white/40">Pendientes</span>
-                <span className="text-yellow-400">{ventas.filter(v => v.estado === "pendiente").length}</span>
+                <span className="text-gray-500">Pendientes</span>
+                <span className="text-yellow-600">{ventas.filter(v => v.estado === "pendiente").length}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-white/40">Confirmadas</span>
-                <span className="text-blue-400">{ventas.filter(v => v.estado === "confirmada").length}</span>
+                <span className="text-gray-500">Confirmadas</span>
+                <span className="text-blue-600">{ventas.filter(v => v.estado === "confirmada").length}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-white/40">Completadas</span>
-                <span className="text-green-400">{ventas.filter(v => v.estado === "completada").length}</span>
+                <span className="text-gray-500">Completadas</span>
+                <span className="text-green-600">{ventas.filter(v => v.estado === "completada").length}</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-            <h3 className="text-white/60 text-sm font-semibold mb-3">📋 Resumen General</h3>
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-gray-600 text-sm font-semibold mb-3">Resumen General</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-white/40">Excursiones</span>
-                <span className="text-white font-medium">{totalExcursiones}</span>
+                <span className="text-gray-500">Excursiones</span>
+                <span className="text-[#0a1628] font-medium">{totalExcursiones}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-white/40">Proveedores</span>
-                <span className="text-white font-medium">{totalProveedores}</span>
+                <span className="text-gray-500">Proveedores</span>
+                <span className="text-[#0a1628] font-medium">{totalProveedores}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-white/40">Ventas Totales</span>
-                <span className="text-white font-medium">{ventas.length}</span>
+                <span className="text-gray-500">Ventas Totales</span>
+                <span className="text-[#0a1628] font-medium">{ventas.length}</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-            <h3 className="text-white/60 text-sm font-semibold mb-3">🕐 Ultimas Ventas</h3>
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-gray-600 text-sm font-semibold mb-3">Ultimas Ventas</h3>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {ventas.slice(-4).reverse().map(v => (
-                <div key={v.id} className="flex justify-between text-sm border-b border-white/5 pb-1">
-                  <span className="text-white/60 truncate max-w-[120px]">{v.clienteNombre}</span>
-                  <span className="text-white font-medium">{formatUSD(v.precioVentaUSD)}</span>
+                <div key={v.id} className="flex justify-between text-sm border-b border-gray-50 pb-1">
+                  <span className="text-gray-500 truncate max-w-[120px]">{v.clienteNombre}</span>
+                  <span className="text-[#0a1628] font-medium">{formatUSD(v.precioVentaUSD)}</span>
                 </div>
               ))}
               {ventas.length === 0 && (
-                <p className="text-white/40 text-sm text-center py-2">No hay ventas registradas</p>
+                <p className="text-gray-400 text-sm text-center py-2">No hay ventas registradas</p>
               )}
             </div>
           </div>
@@ -1309,59 +1482,59 @@ export default function Home() {
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
-              placeholder="🔍 Buscar ventas..."
+              placeholder="Buscar ventas..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628] placeholder-gray-400 focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
             />
           </div>
           <select
             value={filterYear}
             onChange={(e) => setFilterYear(e.target.value)}
-            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400"
+            className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628]"
           >
             <option value="">Todos los años</option>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
-          <button onClick={() => { setSearchTerm(""); setFilterYear(""); }} className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
+          <button onClick={() => { setSearchTerm(""); setFilterYear(""); }} className="px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
             Limpiar
           </button>
-          <button onClick={exportCSV} className="px-4 py-2.5 bg-emerald-400/20 text-emerald-400 rounded-xl hover:bg-emerald-400/30 transition-all">
-            📥 Exportar CSV
+          <button onClick={exportCSV} className="px-4 py-2.5 bg-green-50 text-green-600 border border-green-200 rounded-xl hover:bg-green-100 transition-all">
+            Exportar CSV
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
-            <p className="text-white/40 text-sm">Total Ventas</p>
-            <p className="text-white text-2xl font-bold">{formatUSD(totalVentasUSD)}</p>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <p className="text-gray-500 text-sm">Total Ventas</p>
+            <p className="text-[#0a1628] text-2xl font-bold">{formatUSD(totalVentasUSD)}</p>
           </div>
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
-            <p className="text-white/40 text-sm">Comision Total</p>
-            <p className="text-emerald-400 text-2xl font-bold">{formatUSD(totalComision)}</p>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <p className="text-gray-500 text-sm">Comision Total</p>
+            <p className="text-green-600 text-2xl font-bold">{formatUSD(totalComision)}</p>
           </div>
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
-            <p className="text-white/40 text-sm">Pendiente Cobrar</p>
-            <p className="text-amber-400 text-2xl font-bold">{formatUSD(totalPendienteUSD)}</p>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <p className="text-gray-500 text-sm">Pendiente Cobrar</p>
+            <p className="text-yellow-600 text-2xl font-bold">{formatUSD(totalPendienteUSD)}</p>
           </div>
         </div>
 
         <div className="space-y-2">
           {groupedArray.length === 0 ? (
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-12 border border-white/20 text-center">
-              <p className="text-white/40">No hay ventas registradas</p>
+            <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 text-center">
+              <p className="text-gray-400">No hay ventas registradas</p>
             </div>
           ) : (
             groupedArray.map((group: any) => (
-              <div key={group.key} className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden">
-                <button onClick={() => toggleMonth(group.key)} className="w-full px-6 py-4 flex flex-wrap items-center justify-between hover:bg-white/5 transition-all">
+              <div key={group.key} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button onClick={() => toggleMonth(group.key)} className="w-full px-6 py-4 flex flex-wrap items-center justify-between hover:bg-gray-50 transition-all">
                   <div className="flex items-center gap-4">
-                    <span className="text-white font-semibold text-lg">{getMonthName(group.month - 1)} {group.year}</span>
-                    <span className="text-white/40 text-sm">{group.ventas.length} ventas</span>
+                    <span className="text-[#0a1628] font-semibold text-lg">{getMonthName(group.month - 1)} {group.year}</span>
+                    <span className="text-gray-400 text-sm">{group.ventas.length} ventas</span>
                   </div>
                   <div className="flex items-center gap-6">
-                    <span className="text-white font-bold">{formatUSD(group.totalUSD)}</span>
-                    <span className="text-emerald-400 text-sm">{formatUSD(group.totalComision)}</span>
+                    <span className="text-[#0a1628] font-bold">{formatUSD(group.totalUSD)}</span>
+                    <span className="text-green-600 text-sm">{formatUSD(group.totalComision)}</span>
                     <span className={`transform transition-transform ${expandedMonth === group.key ? 'rotate-180' : ''}`}>▼</span>
                   </div>
                 </button>
@@ -1369,7 +1542,7 @@ export default function Home() {
                   <div className="px-6 pb-4 overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="text-white/40 border-b border-white/10">
+                        <tr className="text-gray-400 border-b border-gray-100">
                           <th className="text-left py-2 px-2">Fecha</th>
                           <th className="text-left py-2 px-2">Hora</th>
                           <th className="text-left py-2 px-2">Cliente</th>
@@ -1384,15 +1557,15 @@ export default function Home() {
                       </thead>
                       <tbody>
                         {group.ventas.map((venta: Venta) => (
-                          <tr key={venta.id} className="border-b border-white/5 hover:bg-white/5">
-                            <td className="py-2 px-2 text-white/60 text-xs">{new Date(venta.fechaExcursion).toLocaleDateString("es-DO")}</td>
-                            <td className="py-2 px-2 text-white/60 text-xs">{venta.horaExcursion}</td>
-                            <td className="py-2 px-2 text-white">{venta.clienteNombre}</td>
-                            <td className="py-2 px-2 text-white/80 text-xs max-w-[100px] truncate">{venta.excursionNombre}</td>
-                            <td className="py-2 px-2 text-white/60">{venta.cantidadAdultos}</td>
-                            <td className="py-2 px-2 text-white/60">{venta.cantidadNinos || 0}</td>
-                            <td className="py-2 px-2 text-right text-white font-medium">{formatUSD(venta.precioVentaUSD)}</td>
-                            <td className="py-2 px-2 text-right text-emerald-400">{formatUSD(venta.comisionUSD)}</td>
+                          <tr key={venta.id} className="border-b border-gray-50 hover:bg-gray-50">
+                            <td className="py-2 px-2 text-gray-500 text-xs">{new Date(venta.fechaExcursion).toLocaleDateString("es-DO")}</td>
+                            <td className="py-2 px-2 text-gray-500 text-xs">{venta.horaExcursion}</td>
+                            <td className="py-2 px-2 text-[#0a1628]">{venta.clienteNombre}</td>
+                            <td className="py-2 px-2 text-gray-600 text-xs max-w-[100px] truncate">{venta.excursionNombre}</td>
+                            <td className="py-2 px-2 text-gray-500">{venta.cantidadAdultos}</td>
+                            <td className="py-2 px-2 text-gray-500">{venta.cantidadNinos || 0}</td>
+                            <td className="py-2 px-2 text-right text-[#0a1628] font-medium">{formatUSD(venta.precioVentaUSD)}</td>
+                            <td className="py-2 px-2 text-right text-green-600">{formatUSD(venta.comisionUSD)}</td>
                             <td className="py-2 px-2">
                               <span className={`px-2 py-1 rounded-lg text-xs ${getEstadoColor(venta.estado)}`}>
                                 {getEstadoText(venta.estado)}
@@ -1400,8 +1573,8 @@ export default function Home() {
                             </td>
                             <td className="py-2 px-2">
                               <div className="flex gap-1">
-                                <button onClick={() => editVenta(venta)} className="px-2 py-1 bg-teal-400/20 text-teal-400 rounded-lg hover:bg-teal-400/30 text-xs transition-all">Editar</button>
-                                <button onClick={() => deleteVenta(venta.id)} className="px-2 py-1 bg-red-400/20 text-red-400 rounded-lg hover:bg-red-400/30 text-xs transition-all">Eliminar</button>
+                                <button onClick={() => editVenta(venta)} className="px-2 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg hover:bg-[#0a1628]/20 text-xs transition-all">Editar</button>
+                                <button onClick={() => deleteVenta(venta.id)} className="px-2 py-1 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-xs transition-all">Eliminar</button>
                               </div>
                             </td>
                           </tr>
@@ -1436,16 +1609,16 @@ export default function Home() {
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
-              placeholder="🔍 Buscar reservas..."
+              placeholder="Buscar reservas..."
               value={searchReservas}
               onChange={(e) => setSearchReservas(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-teal-400"
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628] placeholder-gray-400 focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
             />
           </div>
           <select
             value={filterReservaEstado}
             onChange={(e) => setFilterReservaEstado(e.target.value)}
-            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628]"
           >
             <option value="todas">Todos los estados</option>
             <option value="pendiente">Pendiente</option>
@@ -1457,32 +1630,32 @@ export default function Home() {
             type="date"
             value={filterReservaFecha}
             onChange={(e) => setFilterReservaFecha(e.target.value)}
-            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628]"
           />
-          <button onClick={() => { setSearchReservas(""); setFilterReservaEstado("todas"); setFilterReservaFecha(""); }} className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
+          <button onClick={() => { setSearchReservas(""); setFilterReservaEstado("todas"); setFilterReservaFecha(""); }} className="px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
             Limpiar
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
-            <p className="text-white/40 text-sm">Total Reservas</p>
-            <p className="text-white text-2xl font-bold">{reservasFiltradas.length}</p>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <p className="text-gray-500 text-sm">Total Reservas</p>
+            <p className="text-[#0a1628] text-2xl font-bold">{reservasFiltradas.length}</p>
           </div>
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
-            <p className="text-white/40 text-sm">Monto Total</p>
-            <p className="text-white text-2xl font-bold">{formatUSD(reservasFiltradas.reduce((s, v) => s + v.precioVentaUSD, 0))}</p>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <p className="text-gray-500 text-sm">Monto Total</p>
+            <p className="text-[#0a1628] text-2xl font-bold">{formatUSD(reservasFiltradas.reduce((s, v) => s + v.precioVentaUSD, 0))}</p>
           </div>
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20">
-            <p className="text-white/40 text-sm">Pendientes</p>
-            <p className="text-amber-400 text-2xl font-bold">{reservasFiltradas.filter(v => v.estado === "pendiente").length}</p>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <p className="text-gray-500 text-sm">Pendientes</p>
+            <p className="text-yellow-600 text-2xl font-bold">{reservasFiltradas.filter(v => v.estado === "pendiente").length}</p>
           </div>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-x-auto">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-white/40 border-b border-white/10">
+              <tr className="text-gray-400 border-b border-gray-100">
                 <th className="text-left py-3 px-4">Fecha</th>
                 <th className="text-left py-3 px-4">Hora</th>
                 <th className="text-left py-3 px-4">Cliente</th>
@@ -1495,26 +1668,26 @@ export default function Home() {
             </thead>
             <tbody>
               {reservasFiltradas.length === 0 ? (
-                <tr><td colSpan={8} className="text-center py-8 text-white/40">No hay reservas</td></tr>
+                <tr><td colSpan={8} className="text-center py-8 text-gray-400">No hay reservas</td></tr>
               ) : (
                 reservasFiltradas.map(v => (
-                  <tr key={v.id} className="border-b border-white/5 hover:bg-white/5">
-                    <td className="py-3 px-4 text-white/60 text-xs">{new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</td>
-                    <td className="py-3 px-4 text-white/60 text-xs">{v.horaExcursion}</td>
-                    <td className="py-3 px-4 text-white font-medium">{v.clienteNombre}</td>
-                    <td className="py-3 px-4 text-white/80 max-w-[150px] truncate">{v.excursionNombre}</td>
-                    <td className="py-3 px-4 text-white/60 text-xs">
+                  <tr key={v.id} className="border-b border-gray-50 hover:bg-gray-50">
+                    <td className="py-3 px-4 text-gray-500 text-xs">{new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</td>
+                    <td className="py-3 px-4 text-gray-500 text-xs">{v.horaExcursion}</td>
+                    <td className="py-3 px-4 text-[#0a1628] font-medium">{v.clienteNombre}</td>
+                    <td className="py-3 px-4 text-gray-600 max-w-[150px] truncate">{v.excursionNombre}</td>
+                    <td className="py-3 px-4 text-gray-500 text-xs">
                       <div>{v.clienteWhatsapp}</div>
-                      <div className="text-xs text-white/40">{v.clienteEmail}</div>
+                      <div className="text-xs text-gray-400">{v.clienteEmail}</div>
                     </td>
-                    <td className="py-3 px-4 text-right text-white font-medium">{formatUSD(v.precioVentaUSD)}</td>
+                    <td className="py-3 px-4 text-right text-[#0a1628] font-medium">{formatUSD(v.precioVentaUSD)}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 rounded-lg text-xs ${getEstadoColor(v.estado)}`}>
                         {getEstadoText(v.estado)}
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <button onClick={() => editVenta(v)} className="px-3 py-1 bg-teal-400/20 text-teal-400 rounded-lg hover:bg-teal-400/30 text-xs transition-all">Editar</button>
+                      <button onClick={() => editVenta(v)} className="px-3 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg hover:bg-[#0a1628]/20 text-xs transition-all">Editar</button>
                     </td>
                   </tr>
                 ))
@@ -1543,29 +1716,29 @@ export default function Home() {
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
-              placeholder="🔍 Buscar clientes..."
+              placeholder="Buscar clientes..."
               value={searchClientes}
               onChange={(e) => setSearchClientes(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-teal-400"
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628] placeholder-gray-400 focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
             />
           </div>
           <select
             value={filterClienteExcursion}
             onChange={(e) => setFilterClienteExcursion(e.target.value)}
-            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628]"
           >
             <option value="">Todas las excursiones</option>
             {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
           </select>
-          <button onClick={() => setShowClienteForm(true)} className="bg-gradient-to-r from-teal-400 to-emerald-400 text-white px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-teal-400/30">
+          <button onClick={() => setShowClienteForm(true)} className="bg-[#0a1628] text-white px-4 py-2.5 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
             <span className="text-lg leading-none">+</span> Nuevo Cliente
           </button>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-x-auto">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-white/40 border-b border-white/10">
+              <tr className="text-gray-400 border-b border-gray-100">
                 <th className="text-left py-3 px-4">Nombre</th>
                 <th className="text-left py-3 px-4">WhatsApp</th>
                 <th className="text-left py-3 px-4">Email</th>
@@ -1576,17 +1749,17 @@ export default function Home() {
             </thead>
             <tbody>
               {clientesFiltrados.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-8 text-white/40">No hay clientes registrados</td></tr>
+                <tr><td colSpan={6} className="text-center py-8 text-gray-400">No hay clientes registrados</td></tr>
               ) : (
                 clientesFiltrados.map(c => (
-                  <tr key={c.id} className="border-b border-white/5 hover:bg-white/5">
-                    <td className="py-3 px-4 text-white font-medium">{c.nombre}</td>
-                    <td className="py-3 px-4 text-white/60">{c.whatsapp}</td>
-                    <td className="py-3 px-4 text-white/60 text-xs">{c.email}</td>
-                    <td className="py-3 px-4 text-white/80 max-w-[120px] truncate">{c.excursionNombre}</td>
-                    <td className="py-3 px-4 text-white/60 text-xs">{c.fechaExcursion ? new Date(c.fechaExcursion).toLocaleDateString("es-DO") : "-"}</td>
+                  <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50">
+                    <td className="py-3 px-4 text-[#0a1628] font-medium">{c.nombre}</td>
+                    <td className="py-3 px-4 text-gray-500">{c.whatsapp}</td>
+                    <td className="py-3 px-4 text-gray-500 text-xs">{c.email}</td>
+                    <td className="py-3 px-4 text-gray-600 max-w-[120px] truncate">{c.excursionNombre}</td>
+                    <td className="py-3 px-4 text-gray-500 text-xs">{c.fechaExcursion ? new Date(c.fechaExcursion).toLocaleDateString("es-DO") : "-"}</td>
                     <td className="py-3 px-4">
-                      <button onClick={() => deleteCliente(c.id)} className="px-3 py-1 bg-red-400/20 text-red-400 rounded-lg hover:bg-red-400/30 text-xs transition-all">Eliminar</button>
+                      <button onClick={() => deleteCliente(c.id)} className="px-3 py-1 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-xs transition-all">Eliminar</button>
                     </td>
                   </tr>
                 ))
@@ -1615,54 +1788,53 @@ export default function Home() {
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
-              placeholder="🔍 Buscar proveedores..."
+              placeholder="Buscar proveedores..."
               value={searchProveedores}
               onChange={(e) => setSearchProveedores(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-teal-400"
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628] placeholder-gray-400 focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
             />
           </div>
           <select
             value={filterProveedorMetodo}
             onChange={(e) => setFilterProveedorMetodo(e.target.value)}
-            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628]"
           >
             <option value="todos">Todos los métodos</option>
             <option value="efectivo">Efectivo</option>
             <option value="transferencia">Transferencia</option>
             <option value="paypal">PayPal</option>
           </select>
-          <button onClick={() => { setEditingProveedorId(null); setProveedorFormData({ nombre: "", empresa: "", telefono: "", email: "", metodosPago: [], banco: "", numeroCuenta: "", monedaCuenta: "RD$", tipoCuenta: [], tipoBeneficiario: "personal", beneficiario: "", rncCedula: "", tipoDocumento: "cedula" }); setTempExcursiones([]); setShowProveedorForm(true); }} className="bg-gradient-to-r from-teal-400 to-emerald-400 text-white px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-teal-400/30">
+          <button onClick={() => { setEditingProveedorId(null); setProveedorFormData({ nombre: "", empresa: "", telefono: "", email: "", metodosPago: [], banco: "", numeroCuenta: "", monedaCuenta: "RD$", tipoCuenta: [], tipoBeneficiario: "personal", beneficiario: "", rncCedula: "", tipoDocumento: "cedula" }); setTempExcursiones([]); setShowProveedorForm(true); }} className="bg-[#0a1628] text-white px-4 py-2.5 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
             <span className="text-lg leading-none">+</span> Nuevo Proveedor
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {proveedoresFiltrados.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-white/40">No hay proveedores registrados</div>
+            <div className="col-span-full text-center py-12 text-gray-400">No hay proveedores registrados</div>
           ) : (
             proveedoresFiltrados.map(p => (
-              <div key={p.id} className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-teal-400/5 blur-2xl"></div>
+              <div key={p.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all relative overflow-hidden">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-white font-semibold">{p.nombre}</h3>
-                    <p className="text-white/40 text-sm">{p.empresa || "Sin empresa"}</p>
+                    <h3 className="text-[#0a1628] font-semibold">{p.nombre}</h3>
+                    <p className="text-gray-400 text-sm">{p.empresa || "Sin empresa"}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => editProveedor(p)} className="px-3 py-1 bg-teal-400/20 text-teal-400 rounded-lg hover:bg-teal-400/30 text-xs transition-all">Editar</button>
-                    <button onClick={() => deleteProveedor(p.id)} className="px-3 py-1 bg-red-400/20 text-red-400 rounded-lg hover:bg-red-400/30 text-xs transition-all">Eliminar</button>
+                    <button onClick={() => editProveedor(p)} className="px-3 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg hover:bg-[#0a1628]/20 text-xs transition-all">Editar</button>
+                    <button onClick={() => deleteProveedor(p.id)} className="px-3 py-1 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-xs transition-all">Eliminar</button>
                   </div>
                 </div>
                 <div className="mt-3 space-y-1 text-sm">
-                  <div className="flex items-center gap-2 text-white/60"><span>📞</span> {p.telefono || "Sin teléfono"}</div>
-                  <div className="flex items-center gap-2 text-white/60"><span>✉️</span> {p.email || "Sin email"}</div>
-                  <div className="flex items-center gap-2 text-white/60"><span>📄</span> {p.rncCedula || "Sin documento"}</div>
+                  <div className="flex items-center gap-2 text-gray-500"><span>Teléfono</span> {p.telefono || "Sin teléfono"}</div>
+                  <div className="flex items-center gap-2 text-gray-500"><span>Email</span> {p.email || "Sin email"}</div>
+                  <div className="flex items-center gap-2 text-gray-500"><span>RNC/Cédula</span> {p.rncCedula || "Sin documento"}</div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.metodosPago.map(m => <span key={m} className="px-2 py-1 bg-teal-400/20 text-teal-400 rounded-lg text-xs">{m === "efectivo" ? "💵 Efectivo" : m === "transferencia" ? "🏦 Transferencia" : "💳 PayPal"}</span>)}
+                    {p.metodosPago.map(m => <span key={m} className="px-2 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg text-xs">{m === "efectivo" ? "Efectivo" : m === "transferencia" ? "Transferencia" : "PayPal"}</span>)}
                   </div>
                 </div>
-                <div className="mt-3 text-xs text-white/40 border-t border-white/5 pt-2">
-                  🏝️ {excursiones.filter(e => e.proveedorId === p.id).length} excursiones
+                <div className="mt-3 text-xs text-gray-400 border-t border-gray-100 pt-2">
+                  {excursiones.filter(e => e.proveedorId === p.id).length} excursiones
                 </div>
               </div>
             ))
@@ -1691,16 +1863,16 @@ export default function Home() {
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
-              placeholder="🔍 Buscar bancos..."
+              placeholder="Buscar bancos..."
               value={searchBancos}
               onChange={(e) => setSearchBancos(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628] placeholder-gray-400 focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
             />
           </div>
           <select
             value={filterBancoTipo}
             onChange={(e) => setFilterBancoTipo(e.target.value)}
-            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+            className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628]"
           >
             <option value="todos">Todos los tipos</option>
             <option value="corriente">Corriente</option>
@@ -1709,53 +1881,53 @@ export default function Home() {
           <select
             value={filterBancoMoneda}
             onChange={(e) => setFilterBancoMoneda(e.target.value)}
-            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+            className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628]"
           >
             <option value="todas">Todas las monedas</option>
             <option value="USD">USD</option>
             <option value="RD$">RD$</option>
           </select>
-          <button onClick={() => { setSearchBancos(""); setFilterBancoTipo("todos"); setFilterBancoMoneda("todas"); }} className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
+          <button onClick={() => { setSearchBancos(""); setFilterBancoTipo("todos"); setFilterBancoMoneda("todas"); }} className="px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
             Limpiar
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {bancosFiltrados.length === 0 ? (
-            <div className="col-span-full bg-white/10 backdrop-blur-xl rounded-3xl p-16 border border-white/20 text-center">
+            <div className="col-span-full bg-white rounded-3xl p-16 shadow-sm border border-gray-100 text-center">
               <div className="text-6xl mb-4 opacity-50">🏦</div>
-              <h3 className="text-white text-2xl font-semibold mb-2">No hay información bancaria</h3>
-              <p className="text-white/40 text-sm max-w-md mx-auto">
+              <h3 className="text-[#0a1628] text-2xl font-semibold mb-2">No hay información bancaria</h3>
+              <p className="text-gray-400 text-sm max-w-md mx-auto">
                 Agrega proveedores con información bancaria para verlos aquí.
                 Los datos bancarios se gestionan desde el módulo de Proveedores.
               </p>
               <button 
                 onClick={() => setViewMode("proveedores")} 
-                className="mt-6 px-6 py-3 bg-gradient-to-r from-teal-400 to-emerald-400 text-white rounded-xl hover:shadow-xl transition-all shadow-teal-400/30 inline-flex items-center gap-2"
+                className="mt-6 px-6 py-3 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 inline-flex items-center gap-2"
               >
                 <span className="text-lg leading-none">+</span> Ir a Proveedores
               </button>
             </div>
           ) : (
             bancosFiltrados.map(p => (
-              <div key={p.id} className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all">
+              <div key={p.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-white font-semibold">{p.nombre}</h3>
-                    <p className="text-white/40 text-sm">{p.empresa || "Proveedor"}</p>
+                    <h3 className="text-[#0a1628] font-semibold">{p.nombre}</h3>
+                    <p className="text-gray-400 text-sm">{p.empresa || "Proveedor"}</p>
                   </div>
-                  <span className={`px-3 py-1 rounded-lg text-xs ${p.tipoBeneficiario === "personal" ? "bg-teal-400/20 text-teal-400" : "bg-amber-400/20 text-amber-400"}`}>
-                    {p.tipoBeneficiario === "personal" ? "👤 Personal" : "🏢 Empresarial"}
+                  <span className={`px-3 py-1 rounded-lg text-xs ${p.tipoBeneficiario === "personal" ? "bg-blue-50 text-blue-600" : "bg-purple-50 text-purple-600"}`}>
+                    {p.tipoBeneficiario === "personal" ? "Personal" : "Empresarial"}
                   </span>
                 </div>
                 <div className="mt-4 space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-white/60"><span>🏦</span> <span className="text-white">{p.banco || "Sin banco"}</span></div>
-                  <div className="flex items-center gap-2 text-white/60"><span>🔢</span> <span className="text-white">{p.numeroCuenta || "Sin cuenta"}</span></div>
-                  <div className="flex items-center gap-2 text-white/60"><span>💱</span> <span className="text-white">{p.monedaCuenta || "RD$"}</span></div>
-                  <div className="flex items-center gap-2 text-white/60"><span>👤</span> <span className="text-white">{p.beneficiario || "Sin beneficiario"}</span></div>
-                  <div className="flex items-center gap-2 text-white/60"><span>📄</span> <span className="text-white">{p.rncCedula || "Sin documento"}</span></div>
+                  <div className="flex items-center gap-2 text-gray-500"><span>Banco</span> <span className="text-[#0a1628]">{p.banco || "Sin banco"}</span></div>
+                  <div className="flex items-center gap-2 text-gray-500"><span>Cuenta</span> <span className="text-[#0a1628]">{p.numeroCuenta || "Sin cuenta"}</span></div>
+                  <div className="flex items-center gap-2 text-gray-500"><span>Moneda</span> <span className="text-[#0a1628]">{p.monedaCuenta || "RD$"}</span></div>
+                  <div className="flex items-center gap-2 text-gray-500"><span>Beneficiario</span> <span className="text-[#0a1628]">{p.beneficiario || "Sin beneficiario"}</span></div>
+                  <div className="flex items-center gap-2 text-gray-500"><span>RNC/Cédula</span> <span className="text-[#0a1628]">{p.rncCedula || "Sin documento"}</span></div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.tipoCuenta.map(t => <span key={t} className="px-2 py-1 bg-teal-400/20 text-teal-400 rounded-lg text-xs">{t === "corriente" ? "💳 Corriente" : "🏦 Ahorros"}</span>)}
+                    {p.tipoCuenta.map(t => <span key={t} className="px-2 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg text-xs">{t === "corriente" ? "Corriente" : "Ahorros"}</span>)}
                   </div>
                 </div>
               </div>
@@ -1776,20 +1948,17 @@ export default function Home() {
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <button onClick={() => cambiarMes(-1)} className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all">◀</button>
-            <h2 className="text-white text-xl font-bold">{getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}</h2>
-            <button onClick={() => cambiarMes(1)} className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all">▶</button>
-            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all">Hoy</button>
-          </div>
-          <div className="flex items-center gap-2 text-white/40 text-sm">
-            <span className="px-2 py-1 bg-teal-400/20 text-teal-400 rounded-lg">● Ventas</span>
+            <button onClick={() => cambiarMes(-1)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] hover:bg-gray-50 transition-all">◀</button>
+            <h2 className="text-[#0a1628] text-xl font-bold">{getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}</h2>
+            <button onClick={() => cambiarMes(1)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] hover:bg-gray-50 transition-all">▶</button>
+            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all">Hoy</button>
           </div>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="grid grid-cols-7 gap-0">
             {["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(day => (
-              <div key={day} className="py-3 px-2 text-center text-white/40 text-sm font-medium border-b border-white/5">
+              <div key={day} className="py-3 px-2 text-center text-gray-400 text-sm font-medium border-b border-gray-100">
                 {day}
               </div>
             ))}
@@ -1800,18 +1969,18 @@ export default function Home() {
                               day.date.getFullYear() === new Date().getFullYear();
               
               return (
-                <div key={index} className={`p-2 min-h-[80px] border-b border-r border-white/5 ${!day.isCurrentMonth ? 'opacity-30' : ''} ${isToday ? 'bg-teal-400/10 border-teal-400/30' : ''}`}>
-                  <div className={`text-sm ${isToday ? 'text-teal-400 font-bold' : 'text-white/60'}`}>
+                <div key={index} className={`p-2 min-h-[80px] border-b border-r border-gray-100 ${!day.isCurrentMonth ? 'opacity-30' : ''} ${isToday ? 'bg-[#0a1628]/5 border-[#0a1628]/20' : ''}`}>
+                  <div className={`text-sm ${isToday ? 'text-[#0a1628] font-bold' : 'text-gray-600'}`}>
                     {day.date.getDate()}
                   </div>
                   <div className="mt-1 space-y-1 max-h-[50px] overflow-y-auto">
                     {ventasDelDia.slice(0, 3).map(v => (
-                      <div key={v.id} className="text-[10px] bg-teal-400/20 text-teal-400 rounded px-1 truncate">
+                      <div key={v.id} className="text-[10px] bg-[#0a1628]/10 text-[#0a1628] rounded px-1 truncate">
                         {v.clienteNombre} - {formatUSD(v.precioVentaUSD)}
                       </div>
                     ))}
                     {ventasDelDia.length > 3 && (
-                      <div className="text-[10px] text-white/30">+{ventasDelDia.length - 3} más</div>
+                      <div className="text-[10px] text-gray-400">+{ventasDelDia.length - 3} más</div>
                     )}
                   </div>
                 </div>
@@ -1821,43 +1990,43 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-            <h3 className="text-white font-semibold mb-3">📅 Ventas del Mes</h3>
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-[#0a1628] font-semibold mb-3">Ventas del Mes</h3>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {getVentasDelDia(currentDate).slice(0, 10).map(v => (
-                <div key={v.id} className="flex justify-between items-center border-b border-white/5 py-2">
+                <div key={v.id} className="flex justify-between items-center border-b border-gray-50 py-2">
                   <div>
-                    <p className="text-white text-sm">{v.clienteNombre}</p>
-                    <p className="text-white/40 text-xs">{v.excursionNombre}</p>
+                    <p className="text-[#0a1628] text-sm">{v.clienteNombre}</p>
+                    <p className="text-gray-400 text-xs">{v.excursionNombre}</p>
                   </div>
-                  <span className="text-white font-medium">{formatUSD(v.precioVentaUSD)}</span>
+                  <span className="text-[#0a1628] font-medium">{formatUSD(v.precioVentaUSD)}</span>
                 </div>
               ))}
               {getVentasDelDia(currentDate).length === 0 && (
-                <p className="text-white/40 text-sm text-center py-4">No hay ventas en este mes</p>
+                <p className="text-gray-400 text-sm text-center py-4">No hay ventas en este mes</p>
               )}
             </div>
           </div>
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-            <h3 className="text-white font-semibold mb-3">📊 Resumen del Mes</h3>
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-[#0a1628] font-semibold mb-3">Resumen del Mes</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-white/60">Ventas Totales</span>
-                <span className="text-white font-bold">{formatUSD(ventas.filter(v => {
+                <span className="text-gray-500">Ventas Totales</span>
+                <span className="text-[#0a1628] font-bold">{formatUSD(ventas.filter(v => {
                   const d = new Date(v.fechaExcursion);
                   return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
                 }).reduce((s, v) => s + v.precioVentaUSD, 0))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-white/60">Comisiones</span>
-                <span className="text-emerald-400">{formatUSD(ventas.filter(v => {
+                <span className="text-gray-500">Comisiones</span>
+                <span className="text-green-600">{formatUSD(ventas.filter(v => {
                   const d = new Date(v.fechaExcursion);
                   return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
                 }).reduce((s, v) => s + v.comisionUSD, 0))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-white/60">Total Ventas</span>
-                <span className="text-white">{ventas.filter(v => {
+                <span className="text-gray-500">Total Ventas</span>
+                <span className="text-[#0a1628]">{ventas.filter(v => {
                   const d = new Date(v.fechaExcursion);
                   return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
                 }).length}</span>
@@ -1886,68 +2055,68 @@ export default function Home() {
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
-              placeholder="🔍 Buscar excursiones..."
+              placeholder="Buscar excursiones..."
               value={searchExcursiones}
               onChange={(e) => setSearchExcursiones(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:ring-2 focus:ring-teal-400"
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628] placeholder-gray-400 focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
             />
           </div>
           <select
             value={filterExcursionProveedor}
             onChange={(e) => setFilterExcursionProveedor(e.target.value)}
-            className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white"
+            className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[#0a1628]"
           >
             <option value="">Todos los proveedores</option>
             {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
           </select>
-          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false }); setShowExcursionForm(true); }} className="bg-gradient-to-r from-teal-400 to-emerald-400 text-white px-4 py-2.5 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-teal-400/30">
+          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false }); setShowExcursionForm(true); }} className="bg-[#0a1628] text-white px-4 py-2.5 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
             <span className="text-lg leading-none">+</span> Nueva Excursion
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {excursionesFiltradas.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-white/40">No hay excursiones registradas</div>
+            <div className="col-span-full text-center py-12 text-gray-400">No hay excursiones registradas</div>
           ) : (
             excursionesFiltradas.map(e => (
-              <div key={e.id} className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all">
+              <div key={e.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-white font-semibold">🏝️ {e.nombre}</h3>
-                    <p className="text-white/40 text-sm">{e.proveedorNombre}</p>
+                    <h3 className="text-[#0a1628] font-semibold">{e.nombre}</h3>
+                    <p className="text-gray-400 text-sm">{e.proveedorNombre}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => editExcursion(e)} className="px-3 py-1 bg-teal-400/20 text-teal-400 rounded-lg hover:bg-teal-400/30 text-xs transition-all">Editar</button>
-                    <button onClick={() => deleteExcursion(e.id)} className="px-3 py-1 bg-red-400/20 text-red-400 rounded-lg hover:bg-red-400/30 text-xs transition-all">Eliminar</button>
+                    <button onClick={() => editExcursion(e)} className="px-3 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg hover:bg-[#0a1628]/20 text-xs transition-all">Editar</button>
+                    <button onClick={() => deleteExcursion(e.id)} className="px-3 py-1 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-xs transition-all">Eliminar</button>
                   </div>
                 </div>
                 <div className="mt-3 space-y-1 text-sm">
-                  <div className="flex justify-between text-white/60">
-                    <span>💰 Precio Venta Adulto</span>
-                    <span className="text-white font-medium">{formatUSD(e.precioAdultoUSD)}</span>
+                  <div className="flex justify-between text-gray-500">
+                    <span>Precio Venta Adulto</span>
+                    <span className="text-[#0a1628] font-medium">{formatUSD(e.precioAdultoUSD)}</span>
                   </div>
-                  <div className="flex justify-between text-white/60">
-                    <span>🏷️ Costo Proveedor Adulto</span>
-                    <span className="text-amber-400 font-medium">{formatUSD(e.costoProveedorAdultoUSD)}</span>
+                  <div className="flex justify-between text-gray-500">
+                    <span>Costo Proveedor Adulto</span>
+                    <span className="text-orange-600 font-medium">{formatUSD(e.costoProveedorAdultoUSD)}</span>
                   </div>
                   {e.precioNinoUSD !== null && (
                     <>
-                      <div className="flex justify-between text-white/60">
-                        <span>💰 Precio Venta Niño</span>
-                        <span className="text-white font-medium">{formatUSD(e.precioNinoUSD)}</span>
+                      <div className="flex justify-between text-gray-500">
+                        <span>Precio Venta Niño</span>
+                        <span className="text-[#0a1628] font-medium">{formatUSD(e.precioNinoUSD)}</span>
                       </div>
-                      <div className="flex justify-between text-white/60">
-                        <span>🏷️ Costo Proveedor Niño</span>
-                        <span className="text-amber-400 font-medium">{formatUSD(e.costoProveedorNinoUSD || 0)}</span>
+                      <div className="flex justify-between text-gray-500">
+                        <span>Costo Proveedor Niño</span>
+                        <span className="text-orange-600 font-medium">{formatUSD(e.costoProveedorNinoUSD || 0)}</span>
                       </div>
                     </>
                   )}
-                  <div className="flex justify-between text-white/60">
-                    <span>📈 Comision</span>
-                    <span className="text-emerald-400">{formatUSD(e.comisionAdultoUSD)}</span>
+                  <div className="flex justify-between text-gray-500">
+                    <span>Comision</span>
+                    <span className="text-green-600">{formatUSD(e.comisionAdultoUSD)}</span>
                   </div>
-                  <div className="flex justify-between text-white/60 text-xs">
-                    <span>📍 Zona</span>
+                  <div className="flex justify-between text-gray-400 text-xs">
+                    <span>Zona</span>
                     <span>{e.zona || "Sin zona"}</span>
                   </div>
                 </div>
@@ -1960,347 +2129,116 @@ export default function Home() {
   };
 
   // ============================================
-  // LOGIN - NUEVO DISEÑO TROPICAL
-  // ============================================
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-        {/* Imagen de fondo de Punta Cana con overlay */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url("https://images.unsplash.com/photo-1582547016194-2f0e3e6771a7?w=1920&q=80")`,
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-blue-900/50 to-emerald-900/70 backdrop-blur-sm"></div>
-        </div>
-
-        <div className="relative z-10 w-full max-w-md">
-          <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 shadow-2xl shadow-black/30">
-            <div className="text-center mb-8">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-r from-teal-400 to-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-teal-400/30 p-1">
-                <div className="w-full h-full rounded-full bg-slate-900/50 flex items-center justify-center text-4xl">
-                  🌴
-                </div>
-              </div>
-              <h1 className="text-3xl font-bold text-white mt-4 tracking-tight">Republic Excursions</h1>
-              <p className="text-white/50 text-sm mt-1">🏝️ Punta Cana · República Dominicana</p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 mb-6 bg-white/5 rounded-2xl p-2 border border-white/10">
-              <div className="text-center p-2 rounded-xl bg-white/5">
-                <div className="text-white/50 text-xs">🕐 Hora</div>
-                <div className="text-white font-mono text-sm font-bold">
-                  {currentTime.toLocaleTimeString("es-DO", { hour: '2-digit', minute: '2-digit' })}
-                </div>
-              </div>
-              <div className="text-center p-2 rounded-xl bg-white/5">
-                <div className="text-white/50 text-xs">📅 Fecha</div>
-                <div className="text-white text-sm font-medium">
-                  {currentTime.toLocaleDateString("es-DO", { day: '2-digit', month: 'short' })}
-                </div>
-              </div>
-              <div className="text-center p-2 rounded-xl bg-white/5">
-                <div className="text-white/50 text-xs">☀️ Dia</div>
-                <div className="text-white text-sm font-medium">
-                  {currentTime.toLocaleDateString("es-DO", { weekday: 'short' })}
-                </div>
-              </div>
-            </div>
-
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              const username = formData.get("username") as string;
-              const password = formData.get("password") as string;
-              handleLogin(username, password);
-            }} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-white/60 mb-1.5">👤 Usuario</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="username"
-                    required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-white placeholder-white/30 transition-all"
-                    placeholder="Ingresa tu usuario"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-white/60 mb-1.5">🔒 Contraseña</label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    name="password"
-                    required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent text-white placeholder-white/30 transition-all"
-                    placeholder="Ingresa tu contraseña"
-                  />
-                </div>
-              </div>
-              {loginError && (
-                <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm text-center">
-                  {loginError}
-                </div>
-              )}
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-teal-400 to-emerald-400 text-white py-3.5 rounded-xl font-semibold hover:shadow-xl hover:scale-[1.02] transition-all shadow-lg shadow-teal-400/25"
-              >
-                🌴 Iniciar Sesion
-              </button>
-            </form>
-
-            <div className="mt-6 p-3 bg-white/5 rounded-xl border border-white/10">
-              <div className="flex flex-wrap justify-center gap-3 text-xs text-white/40">
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-teal-400"></span>
-                  👑 Republic
-                </span>
-                <span className="text-white/20">•</span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-blue-400"></span>
-                  💼 Raul
-                </span>
-                <span className="text-white/20">•</span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-rose-400"></span>
-                  ✨ Gabrielle
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-4 text-center">
-              <p className="text-[10px] text-white/20">v3.5 • Republic Excursions © 2026</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ============================================
-  // TEMA POR USUARIO - PERSONALIZADO
-  // ============================================
-  const isAdmin = currentUser === "republic";
-  const isRaul = currentUser === "raul";
-  const isGabrielle = currentUser === "gabrielle";
-
-  // Imagen de fondo por usuario
-  const getBackgroundImage = () => {
-    if (isAdmin) {
-      return 'url("https://images.unsplash.com/photo-1582547016194-2f0e3e6771a7?w=1920&q=80")'; // Playa Punta Cana
-    }
-    if (isRaul) {
-      return 'url("https://images.unsplash.com/photo-1582547016194-2f0e3e6771a7?w=1920&q=80")'; // Playa
-    }
-    if (isGabrielle) {
-      return 'url("https://images.unsplash.com/photo-1582547016194-2f0e3e6771a7?w=1920&q=80")'; // Playa
-    }
-    return 'url("https://images.unsplash.com/photo-1582547016194-2f0e3e6771a7?w=1920&q=80")';
-  };
-
-  // Avatar por usuario
-  const getUserAvatar = () => {
-    if (isAdmin) return "👑";
-    if (isRaul) return "💼";
-    if (isGabrielle) return "✨";
-    return "👤";
-  };
-
-  const getUserFullName = () => {
-    if (isAdmin) return "Administrador";
-    if (isRaul) return "Raul";
-    if (isGabrielle) return "Gabrielle";
-    return "Usuario";
-  };
-
-  const getUserTitle = () => {
-    if (isAdmin) return "🌟 Administrador";
-    if (isRaul) return "💼 Vendedor";
-    if (isGabrielle) return "✨ Vendedora";
-    return "👤 Usuario";
-  };
-
-  // Colores por usuario
-  const getUserColors = () => {
-    if (isAdmin) return {
-      accent: "from-teal-400 to-emerald-400",
-      shadow: "shadow-teal-400/30",
-      border: "border-teal-400/30",
-      text: "text-teal-400",
-      badge: "bg-teal-400/20 text-teal-400",
-      ring: "ring-teal-400",
-    };
-    if (isRaul) return {
-      accent: "from-blue-400 to-indigo-400",
-      shadow: "shadow-blue-400/30",
-      border: "border-blue-400/30",
-      text: "text-blue-400",
-      badge: "bg-blue-400/20 text-blue-400",
-      ring: "ring-blue-400",
-    };
-    if (isGabrielle) return {
-      accent: "from-rose-400 to-pink-400",
-      shadow: "shadow-rose-400/30",
-      border: "border-rose-400/30",
-      text: "text-rose-400",
-      badge: "bg-rose-400/20 text-rose-400",
-      ring: "ring-rose-400",
-    };
-    return {
-      accent: "from-teal-400 to-emerald-400",
-      shadow: "shadow-teal-400/30",
-      border: "border-teal-400/30",
-      text: "text-teal-400",
-      badge: "bg-teal-400/20 text-teal-400",
-      ring: "ring-teal-400",
-    };
-  };
-
-  const colors = getUserColors();
-
-  // ============================================
-  // FUNCION PARA RENDERIZAR VISTAS
-  // ============================================
-  const renderView = () => {
-    switch(viewMode) {
-      case "dashboard": return renderDashboard();
-      case "ventas": return renderVentas();
-      case "reservas": return renderReservas();
-      case "clientes": return renderClientes();
-      case "proveedores": return renderProveedores();
-      case "bancos": return renderBancos();
-      case "calendario": return renderCalendario();
-      case "excursiones": return renderExcursiones();
-      default: return renderDashboard();
-    }
-  };
-
-  // ============================================
   // RENDER PRINCIPAL
   // ============================================
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Imagen de fondo con overlay */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: getBackgroundImage(),
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-slate-900/80 backdrop-blur-sm"></div>
-      </div>
-
-      <div className="relative z-10">
-        {/* HEADER */}
-        <header className="bg-white/5 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${colors.accent} flex items-center justify-center text-white font-bold text-sm shadow-lg ${colors.shadow}`}>
-                🌴
-              </div>
-              <div>
-                <h1 className="text-white font-bold text-lg tracking-tight">Republic Excursions</h1>
-                <p className={`text-xs ${colors.text}`}>{getUserAvatar()} {getUserTitle()}</p>
-              </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* HEADER */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#0a1628] flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-[#0a1628]/20">
+              RE
             </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <button onClick={() => setViewMode("dashboard")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "dashboard" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
-                📊 Dashboard
-              </button>
-              <button onClick={() => setViewMode("ventas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "ventas" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
-                💰 Ventas
-              </button>
-              <button onClick={() => setViewMode("reservas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "reservas" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
-                📋 Reservas
-              </button>
-              <button onClick={() => setViewMode("calendario")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "calendario" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
-                📅 Calendario
-              </button>
-              {isAdmin && (
-                <>
-                  <button onClick={() => setViewMode("clientes")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "clientes" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
-                    👥 Clientes
-                  </button>
-                  <button onClick={() => setViewMode("proveedores")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "proveedores" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
-                    🤝 Proveedores
-                  </button>
-                  <button onClick={() => setViewMode("excursiones")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "excursiones" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
-                    🏝️ Excursiones
-                  </button>
-                  <button onClick={() => setViewMode("bancos")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "bancos" ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
-                    🏦 Bancos
-                  </button>
-                </>
-              )}
-              <button onClick={handleLogout} className="px-3 py-1.5 rounded-xl text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all">
-                🚪 Salir
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* MAIN CONTENT */}
-        <main className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-white">
-                {viewMode === "dashboard" && "📊 Dashboard"}
-                {viewMode === "ventas" && "💰 Ventas"}
-                {viewMode === "reservas" && "📋 Reservas"}
-                {viewMode === "clientes" && "👥 Clientes"}
-                {viewMode === "proveedores" && "🤝 Proveedores"}
-                {viewMode === "excursiones" && "🏝️ Excursiones"}
-                {viewMode === "bancos" && "🏦 Bancos"}
-                {viewMode === "calendario" && "📅 Calendario"}
-              </h2>
-            </div>
-            <div className="flex gap-2">
-              {viewMode !== "calendario" && viewMode !== "dashboard" && (
-                <button onClick={() => setShowForm(true)} className={`bg-gradient-to-r ${colors.accent} text-white px-4 py-2 rounded-xl hover:shadow-xl transition-all flex items-center gap-2 shadow-lg ${colors.shadow}`}>
-                  <span className="text-lg leading-none">+</span> Nueva Venta
-                </button>
-              )}
+              <h1 className="text-[#0a1628] font-bold text-lg tracking-tight">Republic Excursions</h1>
+              <p className={`text-xs ${getUserBadge()} px-2 py-0.5 rounded-full inline-block`}>{getUserRole()}</p>
             </div>
           </div>
 
-          {renderView()}
-        </main>
-      </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button onClick={() => setViewMode("dashboard")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "dashboard" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
+              Dashboard
+            </button>
+            <button onClick={() => setViewMode("ventas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "ventas" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
+              Ventas
+            </button>
+            <button onClick={() => setViewMode("reservas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "reservas" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
+              Reservas
+            </button>
+            <button onClick={() => setViewMode("calendario")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "calendario" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
+              Calendario
+            </button>
+            {isAdmin && (
+              <>
+                <button onClick={() => setViewMode("clientes")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "clientes" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
+                  Clientes
+                </button>
+                <button onClick={() => setViewMode("proveedores")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "proveedores" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
+                  Proveedores
+                </button>
+                <button onClick={() => setViewMode("excursiones")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "excursiones" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
+                  Excursiones
+                </button>
+                <button onClick={() => setViewMode("bancos")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "bancos" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
+                  Bancos
+                </button>
+              </>
+            )}
+            <button onClick={handleLogout} className="px-3 py-1.5 rounded-xl text-sm bg-red-50 text-red-600 hover:bg-red-100 transition-all">
+              Salir
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* MAIN CONTENT */}
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-[#0a1628]">
+              {viewMode === "dashboard" && "Dashboard"}
+              {viewMode === "ventas" && "Ventas"}
+              {viewMode === "reservas" && "Reservas"}
+              {viewMode === "clientes" && "Clientes"}
+              {viewMode === "proveedores" && "Proveedores"}
+              {viewMode === "excursiones" && "Excursiones"}
+              {viewMode === "bancos" && "Bancos"}
+              {viewMode === "calendario" && "Calendario"}
+            </h2>
+          </div>
+          <div className="flex gap-2">
+            {viewMode !== "calendario" && viewMode !== "dashboard" && (
+              <button onClick={() => setShowForm(true)} className="bg-[#0a1628] text-white px-4 py-2 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
+                <span className="text-lg leading-none">+</span> Nueva Venta
+              </button>
+            )}
+          </div>
+        </div>
+
+        {renderView()}
+      </main>
 
       {/* ============================================
-          MODALES - (Mismos que antes pero con nuevo estilo)
+          MODAL - FORMULARIO DE VENTA
       ============================================ */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white text-xl font-bold">{editingVentaId ? "✏️ Editar Venta" : "📝 Nueva Venta"}</h3>
-              <button onClick={resetForm} className="text-white/40 hover:text-white text-2xl">×</button>
+              <h3 className="text-[#0a1628] text-xl font-bold">{editingVentaId ? "Editar Venta" : "Nueva Venta"}</h3>
+              <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">👤 Cliente *</label>
+                  <label className="text-gray-600 text-sm block mb-1">Cliente *</label>
                   <input
                     type="text"
                     value={formData.clienteNombre}
                     onChange={(e) => setFormData(prev => ({ ...prev, clienteNombre: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     placeholder="Nombre del cliente"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">📱 WhatsApp</label>
+                  <label className="text-gray-600 text-sm block mb-1">WhatsApp</label>
                   <input
                     type="text"
                     value={formData.clienteWhatsapp}
                     onChange={(e) => setFormData(prev => ({ ...prev, clienteWhatsapp: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     placeholder="WhatsApp"
                   />
                 </div>
@@ -2308,38 +2246,38 @@ export default function Home() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">🏝️ Excursión *</label>
+                  <label className="text-gray-600 text-sm block mb-1">Excursión *</label>
                   <select
                     value={formData.excursionId}
                     onChange={(e) => selectExcursionForVenta(e.target.value)}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     required
                   >
                     <option value="">Seleccionar excursión</option>
                     {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {e.proveedorNombre}</option>)}
                   </select>
                   {formData.excursionId && (
-                    <div className="mt-1 text-xs text-white/40">
-                      <span className="text-teal-400">🤝 Proveedor:</span> {formData.proveedorNombre}
+                    <div className="mt-1 text-xs text-gray-400">
+                      <span className="text-[#0a1628]">Proveedor:</span> {formData.proveedorNombre}
                     </div>
                   )}
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">📅 Fecha *</label>
+                  <label className="text-gray-600 text-sm block mb-1">Fecha *</label>
                   <input
                     type="date"
                     value={formData.fechaExcursion}
                     onChange={(e) => setFormData(prev => ({ ...prev, fechaExcursion: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">🕐 Hora</label>
+                  <label className="text-gray-600 text-sm block mb-1">Hora</label>
                   <select
                     value={formData.horaExcursion}
                     onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
                     {HORAS.map(h => <option key={h} value={h}>{h}</option>)}
                   </select>
@@ -2348,119 +2286,119 @@ export default function Home() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">👤 Adultos</label>
+                  <label className="text-gray-600 text-sm block mb-1">Adultos</label>
                   <input
                     type="number"
                     min="0"
                     value={formData.cantidadAdultos}
                     onChange={handleCantidadAdultosChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">👶 Niños</label>
+                  <label className="text-gray-600 text-sm block mb-1">Niños</label>
                   <input
                     type="number"
                     min="0"
                     value={formData.cantidadNinos}
                     onChange={handleCantidadNinosChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">📊 Estado</label>
+                  <label className="text-gray-600 text-sm block mb-1">Estado</label>
                   <select
                     value={formData.estado}
                     onChange={(e) => setFormData(prev => ({ ...prev, estado: e.target.value as any }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
-                    <option value="pendiente">⏳ Pendiente</option>
-                    <option value="confirmada">✅ Confirmada</option>
-                    <option value="cancelada">❌ Cancelada</option>
-                    <option value="completada">🎉 Completada</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="confirmada">Confirmada</option>
+                    <option value="cancelada">Cancelada</option>
+                    <option value="completada">Completada</option>
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">💰 Precio Venta Adulto</label>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Adulto (USD)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.precioAdultoUSD}
                     onChange={handlePrecioAdultoChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">🏷️ Costo Proveedor Adulto</label>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Adulto (USD)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.costoProveedorAdultoUSD}
                     onChange={handleCostoAdultoChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">💰 Precio Venta Niño</label>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Niño (USD)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.precioNinoUSD}
                     onChange={handlePrecioNinoChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">🏷️ Costo Proveedor Niño</label>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.costoProveedorNinoUSD}
                     onChange={handleCostoNinoChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 bg-white/5 rounded-2xl p-4 border border-white/10">
+              <div className="grid grid-cols-3 gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-100">
                 <div>
-                  <label className="text-white/40 text-sm block mb-1">💰 Total Venta</label>
+                  <label className="text-gray-500 text-sm block mb-1">Total Venta</label>
                   <input
                     type="text"
                     value={formData.precioTotalUSD}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white font-bold text-lg"
+                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] font-bold text-lg"
                     disabled
                   />
                 </div>
                 <div>
-                  <label className="text-white/40 text-sm block mb-1">🏷️ Costo Proveedor</label>
+                  <label className="text-gray-500 text-sm block mb-1">Costo Proveedor</label>
                   <input
                     type="text"
                     value={formData.costoTotalUSD}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-amber-400 font-bold text-lg"
+                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-orange-600 font-bold text-lg"
                     disabled
                   />
                 </div>
                 <div>
-                  <label className="text-white/40 text-sm block mb-1">📈 Comisión</label>
+                  <label className="text-gray-500 text-sm block mb-1">Comisión</label>
                   <input
                     type="text"
                     value={formData.comisionTotalUSD}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-emerald-400 font-bold text-lg"
+                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-green-600 font-bold text-lg"
                     disabled
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                <button type="button" onClick={resetForm} className="px-6 py-2 bg-white/5 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
-                  ❌ Cancelar
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" onClick={resetForm} className="px-6 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
+                  Cancelar
                 </button>
-                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${colors.accent} text-white rounded-xl hover:shadow-xl transition-all shadow-lg ${colors.shadow}`}>
-                  {editingVentaId ? "✅ Actualizar Venta" : "✅ Registrar Venta"}
+                <button type="submit" className="px-6 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20">
+                  {editingVentaId ? "Actualizar Venta" : "Registrar Venta"}
                 </button>
               </div>
             </form>
@@ -2470,41 +2408,41 @@ export default function Home() {
 
       {/* MODAL - Cliente */}
       {showClienteForm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 max-w-lg w-full p-6">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white text-xl font-bold">👤 Nuevo Cliente</h3>
-              <button onClick={() => setShowClienteForm(false)} className="text-white/40 hover:text-white text-2xl">×</button>
+              <h3 className="text-[#0a1628] text-xl font-bold">Nuevo Cliente</h3>
+              <button onClick={() => setShowClienteForm(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
             </div>
             <form onSubmit={handleClienteSubmit} className="space-y-4">
               <div>
-                <label className="text-white/60 text-sm block mb-1">Nombre</label>
-                <input type="text" name="nombre" className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all" required />
+                <label className="text-gray-600 text-sm block mb-1">Nombre</label>
+                <input type="text" name="nombre" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all" required />
               </div>
               <div>
-                <label className="text-white/60 text-sm block mb-1">WhatsApp</label>
-                <input type="text" name="whatsapp" className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all" />
+                <label className="text-gray-600 text-sm block mb-1">WhatsApp</label>
+                <input type="text" name="whatsapp" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all" />
               </div>
               <div>
-                <label className="text-white/60 text-sm block mb-1">Email</label>
-                <input type="email" name="email" className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all" />
+                <label className="text-gray-600 text-sm block mb-1">Email</label>
+                <input type="email" name="email" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all" />
               </div>
               <div>
-                <label className="text-white/60 text-sm block mb-1">Excursión</label>
-                <select name="excursionId" className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all">
+                <label className="text-gray-600 text-sm block mb-1">Excursión</label>
+                <select name="excursionId" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all">
                   <option value="">Seleccionar excursión</option>
                   {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-white/60 text-sm block mb-1">Fecha</label>
-                <input type="date" name="fechaExcursion" className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all" />
+                <label className="text-gray-600 text-sm block mb-1">Fecha</label>
+                <input type="date" name="fechaExcursion" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all" />
               </div>
-              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                <button type="button" onClick={() => setShowClienteForm(false)} className="px-6 py-2 bg-white/5 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" onClick={() => setShowClienteForm(false)} className="px-6 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
                   Cancelar
                 </button>
-                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${colors.accent} text-white rounded-xl hover:shadow-xl transition-all shadow-lg ${colors.shadow}`}>
+                <button type="submit" className="px-6 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20">
                   Guardar Cliente
                 </button>
               </div>
@@ -2515,59 +2453,59 @@ export default function Home() {
 
       {/* MODAL - Proveedor */}
       {showProveedorForm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white text-xl font-bold">{editingProveedorId ? "✏️ Editar Proveedor" : "🤝 Nuevo Proveedor"}</h3>
-              <button onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="text-white/40 hover:text-white text-2xl">×</button>
+              <h3 className="text-[#0a1628] text-xl font-bold">{editingProveedorId ? "Editar Proveedor" : "Nuevo Proveedor"}</h3>
+              <button onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
             </div>
             <form onSubmit={handleProveedorSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Nombre</label>
+                  <label className="text-gray-600 text-sm block mb-1">Nombre</label>
                   <input
                     type="text"
                     value={proveedorFormData.nombre}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, nombre: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Empresa</label>
+                  <label className="text-gray-600 text-sm block mb-1">Empresa</label>
                   <input
                     type="text"
                     value={proveedorFormData.empresa}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, empresa: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Teléfono</label>
+                  <label className="text-gray-600 text-sm block mb-1">Teléfono</label>
                   <input
                     type="text"
                     value={proveedorFormData.telefono}
                     onChange={manejarCambioTelefono}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     placeholder="(XXX) XXX-XXXX"
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Email</label>
+                  <label className="text-gray-600 text-sm block mb-1">Email</label>
                   <input
                     type="email"
                     value={proveedorFormData.email}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Tipo de Documento</label>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Documento</label>
                   <select
                     value={proveedorFormData.tipoDocumento}
                     onChange={(e) => {
@@ -2577,82 +2515,82 @@ export default function Home() {
                         rncCedula: ""
                       }));
                     }}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
                     <option value="cedula">Cédula</option>
                     <option value="rnc">RNC</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">{proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cédula"}</label>
+                  <label className="text-gray-600 text-sm block mb-1">{proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cédula"}</label>
                   <input
                     type="text"
                     value={proveedorFormData.rncCedula}
                     onChange={manejarCambioRNCcedula}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     placeholder={proveedorFormData.tipoDocumento === "rnc" ? "XX-XXXXXXX-X" : "XXX-XXXXXXX-X"}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-white/60 text-sm block mb-2">Métodos de Pago</label>
+                <label className="text-gray-600 text-sm block mb-2">Métodos de Pago</label>
                 <div className="flex gap-4 flex-wrap">
-                  <button type="button" onClick={() => toggleMetodoPago("efectivo")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("efectivo") ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'bg-white/5 border border-white/20 text-white/60'}`}>
-                    💵 Efectivo
+                  <button type="button" onClick={() => toggleMetodoPago("efectivo")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("efectivo") ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'bg-gray-100 border border-gray-200 text-gray-600'}`}>
+                    Efectivo
                   </button>
-                  <button type="button" onClick={() => toggleMetodoPago("transferencia")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("transferencia") ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'bg-white/5 border border-white/20 text-white/60'}`}>
-                    🏦 Transferencia
+                  <button type="button" onClick={() => toggleMetodoPago("transferencia")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("transferencia") ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'bg-gray-100 border border-gray-200 text-gray-600'}`}>
+                    Transferencia
                   </button>
-                  <button type="button" onClick={() => toggleMetodoPago("paypal")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("paypal") ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'bg-white/5 border border-white/20 text-white/60'}`}>
-                    💳 PayPal
+                  <button type="button" onClick={() => toggleMetodoPago("paypal")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("paypal") ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'bg-gray-100 border border-gray-200 text-gray-600'}`}>
+                    PayPal
                   </button>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Banco</label>
+                  <label className="text-gray-600 text-sm block mb-1">Banco</label>
                   <select
                     value={proveedorFormData.banco}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, banco: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
                     <option value="">Seleccionar banco</option>
                     {BANCOS.map(b => <option key={b} value={b}>{b}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Número de Cuenta</label>
+                  <label className="text-gray-600 text-sm block mb-1">Número de Cuenta</label>
                   <input
                     type="text"
                     value={proveedorFormData.numeroCuenta}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, numeroCuenta: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Moneda</label>
+                  <label className="text-gray-600 text-sm block mb-1">Moneda</label>
                   <select
                     value={proveedorFormData.monedaCuenta}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, monedaCuenta: e.target.value as "USD" | "RD$" }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
                     <option value="RD$">RD$</option>
                     <option value="USD">USD</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-2">Tipo de Cuenta</label>
+                  <label className="text-gray-600 text-sm block mb-2">Tipo de Cuenta</label>
                   <div className="flex gap-4">
-                    <button type="button" onClick={() => toggleTipoCuenta("corriente")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("corriente") ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'bg-white/5 border border-white/20 text-white/60'}`}>
-                      💳 Corriente
+                    <button type="button" onClick={() => toggleTipoCuenta("corriente")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("corriente") ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'bg-gray-100 border border-gray-200 text-gray-600'}`}>
+                      Corriente
                     </button>
-                    <button type="button" onClick={() => toggleTipoCuenta("ahorros")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("ahorros") ? `bg-gradient-to-r ${colors.accent} text-white shadow-lg ${colors.shadow}` : 'bg-white/5 border border-white/20 text-white/60'}`}>
-                      🏦 Ahorros
+                    <button type="button" onClick={() => toggleTipoCuenta("ahorros")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("ahorros") ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'bg-gray-100 border border-gray-200 text-gray-600'}`}>
+                      Ahorros
                     </button>
                   </div>
                 </div>
@@ -2660,39 +2598,40 @@ export default function Home() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Tipo de Beneficiario</label>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Beneficiario</label>
                   <select
                     value={proveedorFormData.tipoBeneficiario}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, tipoBeneficiario: e.target.value as "personal" | "empresarial" }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
-                    <option value="personal">👤 Personal</option>
-                    <option value="empresarial">🏢 Empresarial</option>
+                    <option value="personal">Personal</option>
+                    <option value="empresarial">Empresarial</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Beneficiario</label>
+                  <label className="text-gray-600 text-sm block mb-1">Beneficiario</label>
                   <input
                     type="text"
                     value={proveedorFormData.beneficiario}
                     onChange={(e) => setProveedorFormData(prev => ({ ...prev, beneficiario: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
-              <div className="border-t border-white/10 pt-4 mt-4">
-                <h4 className="text-white font-semibold mb-3">🏝️ Excursiones del Proveedor</h4>
+              {/* Excursiones temporales */}
+              <div className="border-t border-gray-100 pt-4 mt-4">
+                <h4 className="text-[#0a1628] font-semibold mb-3">Excursiones del Proveedor</h4>
                 <div className="space-y-2 mb-3">
                   {tempExcursiones.map((e, i) => (
-                    <div key={i} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2">
+                    <div key={i} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-2">
                       <div>
-                        <span className="text-white">{e.nombre}</span>
-                        <span className="text-white/40 text-sm ml-2">💰 Precio Venta: {formatUSD(e.precioAdultoUSD)}</span>
-                        {e.precioNinoUSD !== null && <span className="text-white/40 text-sm ml-2">👶 Niño: {formatUSD(e.precioNinoUSD)}</span>}
-                        <span className="text-amber-400/60 text-sm ml-2">🏷️ Costo: {formatUSD(e.costoProveedorAdultoUSD)}</span>
+                        <span className="text-[#0a1628]">{e.nombre}</span>
+                        <span className="text-gray-500 text-sm ml-2">Precio Venta: {formatUSD(e.precioAdultoUSD)}</span>
+                        {e.precioNinoUSD !== null && <span className="text-gray-500 text-sm ml-2">Niño: {formatUSD(e.precioNinoUSD)}</span>}
+                        <span className="text-orange-600 text-sm ml-2">Costo: {formatUSD(e.costoProveedorAdultoUSD)}</span>
                       </div>
-                      <button type="button" onClick={() => eliminarTempExcursion(i)} className="text-red-400 hover:text-red-300">×</button>
+                      <button type="button" onClick={() => eliminarTempExcursion(i)} className="text-red-400 hover:text-red-600">×</button>
                     </div>
                   ))}
                 </div>
@@ -2701,7 +2640,7 @@ export default function Home() {
                     type="text"
                     value={tempExcursionForm.nombre}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, nombre: e.target.value }))}
-                    className="px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     placeholder="Nombre de excursión"
                   />
                   <div className="flex gap-2">
@@ -2710,16 +2649,16 @@ export default function Home() {
                       step="0.01"
                       value={tempExcursionForm.precioAdultoUSD}
                       onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
-                      className="w-1/2 px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
-                      placeholder="💰 Precio Venta"
+                      className="w-1/2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Precio Venta"
                     />
                     <input
                       type="number"
                       step="0.01"
                       value={tempExcursionForm.precioNinoUSD}
                       onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
-                      className="w-1/2 px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
-                      placeholder="👶 Precio Niño"
+                      className="w-1/2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Precio Niño"
                     />
                   </div>
                 </div>
@@ -2729,20 +2668,20 @@ export default function Home() {
                     step="0.01"
                     value={tempExcursionForm.costoProveedorAdultoUSD}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
-                    className="px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
-                    placeholder="🏷️ Costo Proveedor"
+                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    placeholder="Costo Proveedor"
                   />
                   <input
                     type="number"
                     step="0.01"
                     value={tempExcursionForm.costoProveedorNinoUSD}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
-                    className="px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
-                    placeholder="🏷️ Costo Niño"
+                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    placeholder="Costo Niño"
                   />
                 </div>
                 <div className="flex gap-4 mt-2 items-center">
-                  <label className="flex items-center gap-2 text-white/60 text-sm">
+                  <label className="flex items-center gap-2 text-gray-600 text-sm">
                     <input
                       type="checkbox"
                       checked={tempExcursionForm.tienePrecioNino}
@@ -2750,18 +2689,18 @@ export default function Home() {
                     />
                     Tiene precio para niños
                   </label>
-                  <button type="button" onClick={agregarTempExcursion} className={`px-4 py-2 bg-gradient-to-r ${colors.accent} text-white rounded-xl hover:shadow-xl transition-all shadow-lg ${colors.shadow} text-sm`}>
-                    ➕ Agregar Excursión
+                  <button type="button" onClick={agregarTempExcursion} className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 text-sm">
+                    Agregar Excursión
                   </button>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                <button type="button" onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="px-6 py-2 bg-white/5 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
-                  ❌ Cancelar
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="px-6 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
+                  Cancelar
                 </button>
-                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${colors.accent} text-white rounded-xl hover:shadow-xl transition-all shadow-lg ${colors.shadow}`}>
-                  {editingProveedorId ? "✅ Actualizar Proveedor" : "✅ Guardar Proveedor"}
+                <button type="submit" className="px-6 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20">
+                  {editingProveedorId ? "Actualizar Proveedor" : "Guardar Proveedor"}
                 </button>
               </div>
             </form>
@@ -2771,26 +2710,26 @@ export default function Home() {
 
       {/* MODAL - Excursión */}
       {showExcursionForm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 max-w-2xl w-full p-6">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white text-xl font-bold">{editingExcursionId ? "✏️ Editar Excursión" : "🏝️ Nueva Excursión"}</h3>
-              <button onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="text-white/40 hover:text-white text-2xl">×</button>
+              <h3 className="text-[#0a1628] text-xl font-bold">{editingExcursionId ? "Editar Excursión" : "Nueva Excursión"}</h3>
+              <button onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
             </div>
             <form onSubmit={handleExcursionSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Nombre</label>
+                  <label className="text-gray-600 text-sm block mb-1">Nombre</label>
                   <input
                     type="text"
                     value={excursionFormData.nombre}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, nombre: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Proveedor</label>
+                  <label className="text-gray-600 text-sm block mb-1">Proveedor</label>
                   <select
                     value={excursionFormData.proveedorId}
                     onChange={(e) => {
@@ -2801,7 +2740,7 @@ export default function Home() {
                         proveedorNombre: proveedor?.nombre || ""
                       }));
                     }}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     required
                   >
                     <option value="">Seleccionar proveedor</option>
@@ -2811,75 +2750,75 @@ export default function Home() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">💰 Precio Venta Adulto (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Adulto (USD)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={excursionFormData.precioAdultoUSD}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">💰 Precio Venta Niño (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Niño (USD)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={excursionFormData.precioNinoUSD}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">🏷️ Costo Proveedor Adulto (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Adulto (USD)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={excursionFormData.costoProveedorAdultoUSD}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">🏷️ Costo Proveedor Niño (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={excursionFormData.costoProveedorNinoUSD}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Zona</label>
+                  <label className="text-gray-600 text-sm block mb-1">Zona</label>
                   <select
                     value={excursionFormData.zona}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, zona: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
                     <option value="">Seleccionar zona</option>
                     {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-white/60 text-sm block mb-1">Capacidad</label>
+                  <label className="text-gray-600 text-sm block mb-1">Capacidad</label>
                   <input
                     type="text"
                     value={excursionFormData.capacidad}
                     onChange={(e) => setExcursionFormData(prev => ({ ...prev, capacidad: e.target.value }))}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     placeholder="Ej: 20 personas"
                   />
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2 text-white/60 text-sm">
+                <label className="flex items-center gap-2 text-gray-600 text-sm">
                   <input
                     type="checkbox"
                     checked={excursionFormData.tienePrecioNino}
@@ -2888,12 +2827,12 @@ export default function Home() {
                   Tiene precio para niños
                 </label>
               </div>
-              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                <button type="button" onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="px-6 py-2 bg-white/5 border border-white/20 rounded-xl text-white/60 hover:text-white transition-all">
-                  ❌ Cancelar
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="px-6 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
+                  Cancelar
                 </button>
-                <button type="submit" className={`px-6 py-2 bg-gradient-to-r ${colors.accent} text-white rounded-xl hover:shadow-xl transition-all shadow-lg ${colors.shadow}`}>
-                  {editingExcursionId ? "✅ Actualizar Excursión" : "✅ Guardar Excursión"}
+                <button type="submit" className="px-6 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20">
+                  {editingExcursionId ? "Actualizar Excursión" : "Guardar Excursión"}
                 </button>
               </div>
             </form>
