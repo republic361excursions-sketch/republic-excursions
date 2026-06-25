@@ -71,12 +71,23 @@ interface Venta {
   cantidadNinos: number;
   tipoServicio: "compartido" | "privado" | "grupo";
   nombreGrupo?: string;
-  tipoRecogida: "hotel" | "airbnb" | "sin_recogida";
+  tipoRecogida: "hotel" | "airbnb" | "sin_recogida" | "aeropuerto";
   transporte: "si" | "no";
   hotelNombre: string;
+  hotelHabitacion: string;
   airbnbUbicacion: string;
-  apartamento: string;
+  airbnbApartamento: string;
   horaRecogida: string;
+  aeropuertoOrigen: string;
+  aeropuertoDestino: string;
+  destinoViaje: string;
+  tipoViaje: "ida" | "ida_vuelta";
+  fechaRegreso: string;
+  horaRegreso: string;
+  numeroVuelo: string;
+  tipoVehiculo: string;
+  idiomaConductor: string;
+  maletas: number;
   precioAdultoPersonalizado: number;
   precioNinoPersonalizado: number;
   costoAdultoPersonalizado: number;
@@ -128,6 +139,34 @@ const HORAS_RECOGIDA = [
   "10:00 PM"
 ];
 
+const AEROPUERTOS = [
+  "PUJ - Punta Cana",
+  "SDQ - Santo Domingo",
+  "STI - Santiago",
+  "POP - Puerto Plata",
+  "LRM - La Romana",
+  "AZS - Samana",
+  "JBQ - La Isabela"
+];
+
+const TIPOS_VEHICULO = [
+  "Sedan (4 pasajeros, 2 maletas)",
+  "SUV (6 pasajeros, 4 maletas)",
+  "Minivan (8 pasajeros, 6 maletas)",
+  "Bus (15 pasajeros, 10 maletas)",
+  "Limusina (4 pasajeros, 2 maletas)"
+];
+
+const IDIOMAS = [
+  "Español",
+  "Ingles",
+  "Frances",
+  "Aleman",
+  "Italiano",
+  "Portugues",
+  "Ruso"
+];
+
 // ============================================
 // COMPONENTE PRINCIPAL
 // ============================================
@@ -152,7 +191,7 @@ export default function Home() {
   const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
   const [filterYear, setFilterYear] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones" | "bancos" | "calendario" | "reservas">("dashboard");
+  const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones" | "bancos" | "calendario" | "reservas" | "transporte">("dashboard");
   const [selectedExcursionForVenta, setSelectedExcursionForVenta] = useState<Excursion | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -228,12 +267,23 @@ export default function Home() {
     metodoPagoProveedor: "efectivo" as "efectivo" | "transferencia" | "paypal",
     tipoServicio: "compartido" as "compartido" | "privado" | "grupo",
     nombreGrupo: "",
-    tipoRecogida: "sin_recogida" as "hotel" | "airbnb" | "sin_recogida",
+    tipoRecogida: "sin_recogida" as "hotel" | "airbnb" | "sin_recogida" | "aeropuerto",
     transporte: "no" as "si" | "no",
     hotelNombre: "",
+    hotelHabitacion: "",
     airbnbUbicacion: "",
-    apartamento: "",
+    airbnbApartamento: "",
     horaRecogida: "",
+    aeropuertoOrigen: "",
+    aeropuertoDestino: "",
+    destinoViaje: "",
+    tipoViaje: "ida" as "ida" | "ida_vuelta",
+    fechaRegreso: "",
+    horaRegreso: "",
+    numeroVuelo: "",
+    tipoVehiculo: "",
+    idiomaConductor: "",
+    maletas: 0,
     estado: "pendiente" as "pendiente" | "confirmada" | "cancelada" | "completada",
     nota: "",
     zona: "",
@@ -386,10 +436,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v43");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v43");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v43");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v43");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v45");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v45");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v45");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v45");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -399,22 +449,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v43", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v45", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v43", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v45", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v43", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v45", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v43", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v45", JSON.stringify(data));
   };
 
   // ============================================
@@ -595,9 +645,20 @@ export default function Home() {
       tipoRecogida: formData.tipoRecogida,
       transporte: formData.transporte,
       hotelNombre: formData.hotelNombre || "",
+      hotelHabitacion: formData.hotelHabitacion || "",
       airbnbUbicacion: formData.airbnbUbicacion || "",
-      apartamento: formData.apartamento || "",
+      airbnbApartamento: formData.airbnbApartamento || "",
       horaRecogida: formData.horaRecogida || "",
+      aeropuertoOrigen: formData.aeropuertoOrigen || "",
+      aeropuertoDestino: formData.aeropuertoDestino || "",
+      destinoViaje: formData.destinoViaje || "",
+      tipoViaje: formData.tipoViaje || "ida",
+      fechaRegreso: formData.fechaRegreso || "",
+      horaRegreso: formData.horaRegreso || "",
+      numeroVuelo: formData.numeroVuelo || "",
+      tipoVehiculo: formData.tipoVehiculo || "",
+      idiomaConductor: formData.idiomaConductor || "",
+      maletas: formData.maletas || 0,
       precioAdultoPersonalizado: Number(formData.precioAdultoUSD) || 0,
       precioNinoPersonalizado: Number(formData.precioNinoUSD) || 0,
       costoAdultoPersonalizado: Number(formData.costoProveedorAdultoUSD) || 0,
@@ -651,9 +712,20 @@ export default function Home() {
       tipoRecogida: "sin_recogida",
       transporte: "no",
       hotelNombre: "",
+      hotelHabitacion: "",
       airbnbUbicacion: "",
-      apartamento: "",
+      airbnbApartamento: "",
       horaRecogida: "",
+      aeropuertoOrigen: "",
+      aeropuertoDestino: "",
+      destinoViaje: "",
+      tipoViaje: "ida",
+      fechaRegreso: "",
+      horaRegreso: "",
+      numeroVuelo: "",
+      tipoVehiculo: "",
+      idiomaConductor: "",
+      maletas: 0,
       estado: "pendiente",
       nota: "",
       zona: "",
@@ -703,9 +775,20 @@ export default function Home() {
       tipoRecogida: venta.tipoRecogida || "sin_recogida",
       transporte: venta.transporte || "no",
       hotelNombre: venta.hotelNombre || "",
+      hotelHabitacion: venta.hotelHabitacion || "",
       airbnbUbicacion: venta.airbnbUbicacion || "",
-      apartamento: venta.apartamento || "",
+      airbnbApartamento: venta.airbnbApartamento || "",
       horaRecogida: venta.horaRecogida || "",
+      aeropuertoOrigen: venta.aeropuertoOrigen || "",
+      aeropuertoDestino: venta.aeropuertoDestino || "",
+      destinoViaje: venta.destinoViaje || "",
+      tipoViaje: venta.tipoViaje || "ida",
+      fechaRegreso: venta.fechaRegreso || "",
+      horaRegreso: venta.horaRegreso || "",
+      numeroVuelo: venta.numeroVuelo || "",
+      tipoVehiculo: venta.tipoVehiculo || "",
+      idiomaConductor: venta.idiomaConductor || "",
+      maletas: venta.maletas || 0,
       estado: venta.estado || "pendiente",
       nota: venta.nota,
       zona: excursion?.zona || "",
@@ -1280,7 +1363,8 @@ export default function Home() {
     const map: any = {
       hotel: "Hotel",
       airbnb: "Airbnb",
-      sin_recogida: "Sin Recogida"
+      sin_recogida: "Sin Recogida",
+      aeropuerto: "Aeropuerto"
     };
     return map[tipo] || tipo;
   };
@@ -1314,7 +1398,8 @@ export default function Home() {
     let csv = "Fecha,Hora,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Recogida,Transporte,Hotel/Airbnb,Estado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
     ventas.forEach(v => {
       const recogidaInfo = v.tipoRecogida === "hotel" ? v.hotelNombre : 
-                           v.tipoRecogida === "airbnb" ? v.airbnbUbicacion : "Sin recogida";
+                           v.tipoRecogida === "airbnb" ? v.airbnbUbicacion : 
+                           v.tipoRecogida === "aeropuerto" ? v.aeropuertoOrigen : "Sin recogida";
       csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -1402,7 +1487,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-[10px] text-gray-400">v4.3 • Republic Excursions © 2026</p>
+              <p className="text-[10px] text-gray-400">v4.4 • Republic Excursions © 2026</p>
             </div>
           </div>
         </div>
@@ -1451,9 +1536,10 @@ export default function Home() {
       case "reservas": return renderReservas();
       case "clientes": return renderClientes();
       case "proveedores": return renderProveedores();
+      case "excursiones": return renderExcursiones();
       case "bancos": return renderBancos();
       case "calendario": return renderCalendario();
-      case "excursiones": return renderExcursiones();
+      case "transporte": return renderTransporte();
       default: return renderDashboard();
     }
   };
@@ -2210,6 +2296,7 @@ export default function Home() {
                   <div>
                     <h3 className="text-[#0a1628] font-semibold">{e.nombre}</h3>
                     <p className="text-gray-400 text-sm">{e.proveedorNombre}</p>
+                    <p className="text-xs text-gray-500">Zona: {e.zona || "Sin zona"}</p>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => editExcursion(e)} className="px-3 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg hover:bg-[#0a1628]/20 text-xs transition-all">Editar</button>
@@ -2245,9 +2332,204 @@ export default function Home() {
                     <span>Zona</span>
                     <span>{e.zona || "Sin zona"}</span>
                   </div>
+                  {e.capacidad && (
+                    <div className="flex justify-between text-gray-400 text-xs">
+                      <span>Capacidad</span>
+                      <span>{e.capacidad}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================
+  // RENDER TRANSPORTE
+  // ============================================
+  const renderTransporte = () => {
+    return (
+      <div className="space-y-4">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h3 className="text-[#0a1628] text-xl font-bold mb-4">Datos del Viaje</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-gray-600 text-sm block mb-1">Aeropuerto Origen *</label>
+              <select
+                value={formData.aeropuertoOrigen}
+                onChange={(e) => setFormData(prev => ({ ...prev, aeropuertoOrigen: e.target.value }))}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+              >
+                <option value="">Seleccionar aeropuerto</option>
+                {AEROPUERTOS.map(a => <option key={a} value={a}>{a}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-gray-600 text-sm block mb-1">Destino *</label>
+              <select
+                value={formData.destinoViaje}
+                onChange={(e) => setFormData(prev => ({ ...prev, destinoViaje: e.target.value }))}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+              >
+                <option value="">Seleccionar destino</option>
+                {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-gray-600 text-sm block mb-1">Hotel, Airbnb o Residencia *</label>
+              <input
+                type="text"
+                value={formData.hotelNombre}
+                onChange={(e) => setFormData(prev => ({ ...prev, hotelNombre: e.target.value }))}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                placeholder="Seleccione de la lista"
+              />
+            </div>
+            <div>
+              <label className="text-gray-600 text-sm block mb-1">Tipo de Viaje *</label>
+              <select
+                value={formData.tipoViaje}
+                onChange={(e) => {
+                  const val = e.target.value as "ida" | "ida_vuelta";
+                  setFormData(prev => ({ ...prev, tipoViaje: val }));
+                }}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+              >
+                <option value="ida">Ida</option>
+                <option value="ida_vuelta">Ida y vuelta</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-gray-600 text-sm block mb-1">Fecha Ida *</label>
+              <input
+                type="date"
+                value={formData.fechaExcursion}
+                onChange={(e) => setFormData(prev => ({ ...prev, fechaExcursion: e.target.value }))}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+              />
+            </div>
+            <div>
+              <label className="text-gray-600 text-sm block mb-1">Hora Ida</label>
+              <input
+                type="time"
+                value={formData.horaExcursion}
+                onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+              />
+            </div>
+            <div>
+              <label className="text-gray-600 text-sm block mb-1">Número de Vuelo</label>
+              <input
+                type="text"
+                value={formData.numeroVuelo}
+                onChange={(e) => setFormData(prev => ({ ...prev, numeroVuelo: e.target.value }))}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                placeholder="Ej: AA1234"
+              />
+            </div>
+            <div>
+              <label className="text-gray-600 text-sm block mb-1">Tipo de Vehículo</label>
+              <select
+                value={formData.tipoVehiculo}
+                onChange={(e) => setFormData(prev => ({ ...prev, tipoVehiculo: e.target.value }))}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+              >
+                <option value="">Seleccionar vehículo</option>
+                {TIPOS_VEHICULO.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-gray-600 text-sm block mb-1">Idioma del Conductor</label>
+              <select
+                value={formData.idiomaConductor}
+                onChange={(e) => setFormData(prev => ({ ...prev, idiomaConductor: e.target.value }))}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+              >
+                <option value="">Seleccionar idioma</option>
+                {IDIOMAS.map(i => <option key={i} value={i}>{i}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-gray-600 text-sm block mb-1">Adultos *</label>
+              <input
+                type="number"
+                min="0"
+                value={formData.cantidadAdultos}
+                onChange={handleCantidadAdultosChange}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+              />
+            </div>
+            <div>
+              <label className="text-gray-600 text-sm block mb-1">Niños (0-12 años)</label>
+              <input
+                type="number"
+                min="0"
+                value={formData.cantidadNinos}
+                onChange={handleCantidadNinosChange}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+              />
+            </div>
+            <div>
+              <label className="text-gray-600 text-sm block mb-1">Maletas</label>
+              <input
+                type="number"
+                min="0"
+                value={formData.maletas}
+                onChange={(e) => setFormData(prev => ({ ...prev, maletas: parseInt(e.target.value) || 0 }))}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+              />
+            </div>
+          </div>
+
+          {/* Datos de regreso - solo si es ida y vuelta */}
+          {formData.tipoViaje === "ida_vuelta" && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h4 className="text-[#0a1628] font-semibold mb-4">Datos del Regreso</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Aeropuerto de Salida</label>
+                  <select
+                    value={formData.aeropuertoDestino}
+                    onChange={(e) => setFormData(prev => ({ ...prev, aeropuertoDestino: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  >
+                    <option value="">Seleccionar aeropuerto</option>
+                    {AEROPUERTOS.map(a => <option key={a} value={a}>{a}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Alojamiento Recogida Regreso</label>
+                  <input
+                    type="text"
+                    value={formData.hotelHabitacion}
+                    onChange={(e) => setFormData(prev => ({ ...prev, hotelHabitacion: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    placeholder="Hotel, Airbnb o residencia"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Fecha Regreso</label>
+                  <input
+                    type="date"
+                    value={formData.fechaRegreso}
+                    onChange={(e) => setFormData(prev => ({ ...prev, fechaRegreso: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Hora Regreso</label>
+                  <input
+                    type="time"
+                    value={formData.horaRegreso}
+                    onChange={(e) => setFormData(prev => ({ ...prev, horaRegreso: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -2299,6 +2581,9 @@ export default function Home() {
                 <button onClick={() => setViewMode("bancos")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "bancos" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
                   Bancos
                 </button>
+                <button onClick={() => setViewMode("transporte")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "transporte" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
+                  Transporte
+                </button>
               </>
             )}
             <button onClick={handleLogout} className="px-3 py-1.5 rounded-xl text-sm bg-red-50 text-red-600 hover:bg-red-100 transition-all">
@@ -2321,10 +2606,11 @@ export default function Home() {
               {viewMode === "excursiones" && "Excursiones"}
               {viewMode === "bancos" && "Bancos"}
               {viewMode === "calendario" && "Calendario"}
+              {viewMode === "transporte" && "Transporte"}
             </h2>
           </div>
           <div className="flex gap-2">
-            {viewMode !== "calendario" && viewMode !== "dashboard" && (
+            {viewMode !== "calendario" && viewMode !== "dashboard" && viewMode !== "transporte" && (
               <button onClick={() => setShowForm(true)} className="bg-[#0a1628] text-white px-4 py-2 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
                 <span className="text-lg leading-none">+</span> Nueva Venta
               </button>
@@ -2336,7 +2622,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL - FORMULARIO DE VENTA CON CLIENTES Y TRANSPORTE
+          MODAL - FORMULARIO DE VENTA CON TRANSPORTE
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -2346,7 +2632,7 @@ export default function Home() {
               <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Cliente - con selector de clientes existentes */}
+              {/* Cliente */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Cliente *</label>
@@ -2380,7 +2666,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Excursión con boton Crear */}
+              {/* Excursión y Fechas */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Excursión *</label>
@@ -2420,15 +2706,172 @@ export default function Home() {
                 </div>
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Hora</label>
-                  <select
+                  <input
+                    type="time"
                     value={formData.horaExcursion}
                     onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Transporte y Recogida */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Transporte</label>
+                  <select
+                    value={formData.transporte}
+                    onChange={(e) => {
+                      const val = e.target.value as "si" | "no";
+                      setFormData(prev => ({ ...prev, transporte: val }));
+                      if (val === "no") {
+                        setFormData(prev => ({ ...prev, tipoRecogida: "sin_recogida", hotelNombre: "", airbnbUbicacion: "", apartamento: "", horaRecogida: "" }));
+                      }
+                    }}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
-                    {HORAS.map(h => <option key={h} value={h}>{h}</option>)}
+                    <option value="no">No</option>
+                    <option value="si">Si</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Recogida</label>
+                  <select
+                    value={formData.tipoRecogida}
+                    onChange={(e) => {
+                      const val = e.target.value as "hotel" | "airbnb" | "sin_recogida" | "aeropuerto";
+                      setFormData(prev => ({ ...prev, tipoRecogida: val }));
+                      // Limpiar campos al cambiar
+                      setFormData(prev => ({ ...prev, hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", airbnbApartamento: "", horaRecogida: "" }));
+                    }}
+                    disabled={formData.transporte === "no"}
+                    className={`w-full px-4 py-2 border rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all ${formData.transporte === "no" ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'bg-gray-50 border-gray-200'}`}
+                  >
+                    <option value="sin_recogida">Sin Recogida</option>
+                    <option value="hotel">Hotel</option>
+                    <option value="airbnb">Airbnb</option>
+                    <option value="aeropuerto">Aeropuerto</option>
                   </select>
                 </div>
               </div>
+
+              {/* Campos condicionales */}
+              {formData.transporte === "si" && formData.tipoRecogida === "hotel" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Hotel *</label>
+                    <input
+                      type="text"
+                      value={formData.hotelNombre}
+                      onChange={(e) => setFormData(prev => ({ ...prev, hotelNombre: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Ej: Hyatt Ziva Cap Cana"
+                      required={formData.tipoRecogida === "hotel"}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Habitación</label>
+                    <input
+                      type="text"
+                      value={formData.hotelHabitacion}
+                      onChange={(e) => setFormData(prev => ({ ...prev, hotelHabitacion: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Ej: 305, Suite 12"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
+                    <select
+                      value={formData.horaRecogida}
+                      onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    >
+                      <option value="">Seleccionar hora</option>
+                      {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {formData.transporte === "si" && formData.tipoRecogida === "airbnb" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Ubicación Airbnb *</label>
+                    <input
+                      type="text"
+                      value={formData.airbnbUbicacion}
+                      onChange={(e) => setFormData(prev => ({ ...prev, airbnbUbicacion: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Ej: Parque Central, Pueblo Bavaro"
+                      required={formData.tipoRecogida === "airbnb"}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Apartamento</label>
+                    <input
+                      type="text"
+                      value={formData.airbnbApartamento}
+                      onChange={(e) => setFormData(prev => ({ ...prev, airbnbApartamento: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Ej: Apt 3B, Casa 5"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
+                    <select
+                      value={formData.horaRecogida}
+                      onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    >
+                      <option value="">Seleccionar hora</option>
+                      {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {formData.transporte === "si" && formData.tipoRecogida === "sin_recogida" && (
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-4 border-l-4 border-[#0a1628] pl-4">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Apartamento *</label>
+                    <input
+                      type="text"
+                      value={formData.apartamento}
+                      onChange={(e) => setFormData(prev => ({ ...prev, apartamento: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Ej: Villa B12, Casa 5, Apt 3B"
+                      required={formData.tipoRecogida === "sin_recogida" && formData.transporte === "si"}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {formData.transporte === "si" && formData.tipoRecogida === "aeropuerto" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Aeropuerto Origen *</label>
+                    <select
+                      value={formData.aeropuertoOrigen}
+                      onChange={(e) => setFormData(prev => ({ ...prev, aeropuertoOrigen: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    >
+                      <option value="">Seleccionar aeropuerto</option>
+                      {AEROPUERTOS.map(a => <option key={a} value={a}>{a}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
+                    <select
+                      value={formData.horaRecogida}
+                      onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    >
+                      <option value="">Seleccionar hora</option>
+                      {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
 
               {/* Adultos, Niños y Estado */}
               <div className="grid grid-cols-3 gap-4">
@@ -2466,117 +2909,6 @@ export default function Home() {
                   </select>
                 </div>
               </div>
-
-              {/* Transporte y Recogida */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Transporte</label>
-                  <select
-                    value={formData.transporte}
-                    onChange={(e) => {
-                      const val = e.target.value as "si" | "no";
-                      setFormData(prev => ({ ...prev, transporte: val }));
-                      if (val === "no") {
-                        setFormData(prev => ({ ...prev, tipoRecogida: "sin_recogida", hotelNombre: "", airbnbUbicacion: "", apartamento: "", horaRecogida: "" }));
-                      }
-                    }}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  >
-                    <option value="no">No</option>
-                    <option value="si">Si</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Tipo de Recogida</label>
-                  <select
-                    value={formData.tipoRecogida}
-                    onChange={(e) => {
-                      const val = e.target.value as "hotel" | "airbnb" | "sin_recogida";
-                      setFormData(prev => ({ ...prev, tipoRecogida: val }));
-                      if (val === "sin_recogida") {
-                        setFormData(prev => ({ ...prev, hotelNombre: "", airbnbUbicacion: "", apartamento: "" }));
-                      }
-                    }}
-                    disabled={formData.transporte === "no"}
-                    className={`w-full px-4 py-2 border rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all ${formData.transporte === "no" ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'bg-gray-50 border-gray-200'}`}
-                  >
-                    <option value="sin_recogida">Sin Recogida</option>
-                    <option value="hotel">Hotel</option>
-                    <option value="airbnb">Airbnb</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Campos condicionales según tipo de recogida */}
-              {formData.transporte === "si" && formData.tipoRecogida === "hotel" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
-                  <div>
-                    <label className="text-gray-600 text-sm block mb-1">Hotel *</label>
-                    <input
-                      type="text"
-                      value={formData.hotelNombre}
-                      onChange={(e) => setFormData(prev => ({ ...prev, hotelNombre: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      placeholder="Ej: Hyatt Ziva Cap Cana, Riu Bavaro"
-                      required={formData.tipoRecogida === "hotel"}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
-                    <select
-                      value={formData.horaRecogida}
-                      onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    >
-                      <option value="">Seleccionar hora</option>
-                      {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
-                    </select>
-                  </div>
-                </div>
-              )}
-
-              {formData.transporte === "si" && formData.tipoRecogida === "airbnb" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
-                  <div>
-                    <label className="text-gray-600 text-sm block mb-1">Airbnb *</label>
-                    <input
-                      type="text"
-                      value={formData.airbnbUbicacion}
-                      onChange={(e) => setFormData(prev => ({ ...prev, airbnbUbicacion: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      placeholder="Ej: Parque Central, Pueblo Bavaro"
-                      required={formData.tipoRecogida === "airbnb"}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
-                    <select
-                      value={formData.horaRecogida}
-                      onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    >
-                      <option value="">Seleccionar hora</option>
-                      {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
-                    </select>
-                  </div>
-                </div>
-              )}
-
-              {formData.transporte === "si" && formData.tipoRecogida === "sin_recogida" && (
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-4 border-l-4 border-[#0a1628] pl-4">
-                  <div>
-                    <label className="text-gray-600 text-sm block mb-1">Apartamento *</label>
-                    <input
-                      type="text"
-                      value={formData.apartamento}
-                      onChange={(e) => setFormData(prev => ({ ...prev, apartamento: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      placeholder="Ej: Villa B12, Casa 5, Apt 3B"
-                      required={formData.tipoRecogida === "sin_recogida" && formData.transporte === "si"}
-                    />
-                  </div>
-                </div>
-              )}
 
               {/* Precios */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -3021,6 +3353,7 @@ export default function Home() {
                         <span className="text-gray-500 text-sm ml-2">Precio Venta: {formatUSD(e.precioAdultoUSD)}</span>
                         {e.precioNinoUSD !== null && <span className="text-gray-500 text-sm ml-2">Niño: {formatUSD(e.precioNinoUSD)}</span>}
                         <span className="text-orange-600 text-sm ml-2">Costo: {formatUSD(e.costoProveedorAdultoUSD)}</span>
+                        <span className="text-gray-400 text-xs ml-2">Zona: {e.zona || "Sin zona"}</span>
                       </div>
                       <button type="button" onClick={() => eliminarTempExcursion(i)} className="text-red-400 hover:text-red-600">×</button>
                     </div>
