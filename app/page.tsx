@@ -75,7 +75,9 @@ interface Venta {
   tipoRecogida: "hotel" | "airbnb" | "sin_recogida";
   transporte: "si" | "no";
   hotelNombre: string;
+  hotelHabitacion: string;
   airbnbUbicacion: string;
+  airbnbApartamento: string;
   apartamento: string;
   horaRecogida: string;
   precioAdultoPersonalizado: number;
@@ -121,6 +123,12 @@ const HORAS = [
 const TIPO_PRECIO = [
   { value: "persona", label: "Por Persona" },
   { value: "maquina", label: "Por Máquina" }
+];
+
+const TIPO_SERVICIO = [
+  { value: "compartido", label: "Compartido" },
+  { value: "privado", label: "Privado" },
+  { value: "grupo", label: "Grupo" }
 ];
 
 // ============================================
@@ -227,7 +235,9 @@ export default function Home() {
     tipoRecogida: "sin_recogida" as "hotel" | "airbnb" | "sin_recogida",
     transporte: "no" as "si" | "no",
     hotelNombre: "",
+    hotelHabitacion: "",
     airbnbUbicacion: "",
+    airbnbApartamento: "",
     apartamento: "",
     horaRecogida: "",
     estado: "pendiente" as "pendiente" | "confirmada" | "cancelada" | "completada",
@@ -352,6 +362,15 @@ export default function Home() {
 
   const getTipoPrecioLabel = (tipo: string) => {
     return tipo === "persona" ? "Por Persona" : "Por Máquina";
+  };
+
+  const getTipoServicioLabel = (tipo: string) => {
+    const map: any = {
+      compartido: "Compartido",
+      privado: "Privado",
+      grupo: "Grupo"
+    };
+    return map[tipo] || tipo;
   };
 
   // ============================================
@@ -599,7 +618,9 @@ export default function Home() {
       tipoRecogida: formData.tipoRecogida,
       transporte: formData.transporte,
       hotelNombre: formData.hotelNombre || "",
+      hotelHabitacion: formData.hotelHabitacion || "",
       airbnbUbicacion: formData.airbnbUbicacion || "",
+      airbnbApartamento: formData.airbnbApartamento || "",
       apartamento: formData.apartamento || "",
       horaRecogida: formData.horaRecogida || "",
       precioAdultoPersonalizado: Number(formData.precioAdultoUSD) || 0,
@@ -656,7 +677,9 @@ export default function Home() {
       tipoRecogida: "sin_recogida",
       transporte: "no",
       hotelNombre: "",
+      hotelHabitacion: "",
       airbnbUbicacion: "",
+      airbnbApartamento: "",
       apartamento: "",
       horaRecogida: "",
       estado: "pendiente",
@@ -709,7 +732,9 @@ export default function Home() {
       tipoRecogida: venta.tipoRecogida || "sin_recogida",
       transporte: venta.transporte || "no",
       hotelNombre: venta.hotelNombre || "",
+      hotelHabitacion: venta.hotelHabitacion || "",
       airbnbUbicacion: venta.airbnbUbicacion || "",
+      airbnbApartamento: venta.airbnbApartamento || "",
       apartamento: venta.apartamento || "",
       horaRecogida: venta.horaRecogida || "",
       estado: venta.estado || "pendiente",
@@ -1331,9 +1356,9 @@ export default function Home() {
     if (ventas.length === 0) { alert("No hay datos"); return; }
     let csv = "Fecha,Hora,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Recogida,Transporte,Hotel/Airbnb,Estado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
     ventas.forEach(v => {
-      const recogidaInfo = v.tipoRecogida === "hotel" ? v.hotelNombre : 
-                           v.tipoRecogida === "airbnb" ? v.airbnbUbicacion : "Sin recogida";
-      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      const recogidaInfo = v.tipoRecogida === "hotel" ? `${v.hotelNombre} - Hab: ${v.hotelHabitacion}` : 
+                           v.tipoRecogida === "airbnb" ? `${v.airbnbUbicacion} - Apt: ${v.airbnbApartamento}` : "Sin recogida";
+      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${getTipoServicioLabel(v.tipoServicio)}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -1817,10 +1842,10 @@ export default function Home() {
                   let trasladoInfo = "Sin traslado";
                   if (v.transporte === "si") {
                     if (v.tipoRecogida === "hotel") {
-                      trasladoInfo = `Hotel: ${v.hotelNombre || "N/A"}`;
+                      trasladoInfo = `Hotel: ${v.hotelNombre || "N/A"} - Hab: ${v.hotelHabitacion || "N/A"}`;
                       if (v.horaRecogida) trasladoInfo += ` (${v.horaRecogida})`;
                     } else if (v.tipoRecogida === "airbnb") {
-                      trasladoInfo = `Airbnb: ${v.airbnbUbicacion || "N/A"}`;
+                      trasladoInfo = `Airbnb: ${v.airbnbUbicacion || "N/A"} - Apt: ${v.airbnbApartamento || "N/A"}`;
                       if (v.horaRecogida) trasladoInfo += ` (${v.horaRecogida})`;
                     } else {
                       trasladoInfo = "Sin recogida";
@@ -1833,7 +1858,7 @@ export default function Home() {
                       <td className="py-3 px-4 text-gray-500 text-xs">{v.horaExcursion}</td>
                       <td className="py-3 px-4 text-[#0a1628] font-medium">{v.clienteNombre}</td>
                       <td className="py-3 px-4 text-gray-600 max-w-[150px] truncate">{v.excursionNombre}</td>
-                      <td className="py-3 px-4 text-gray-500 text-xs max-w-[120px] truncate">{trasladoInfo}</td>
+                      <td className="py-3 px-4 text-gray-500 text-xs max-w-[150px] truncate">{trasladoInfo}</td>
                       <td className="py-3 px-4 text-gray-500 text-xs">
                         <div>{v.clienteWhatsapp}</div>
                         <div className="text-xs text-gray-400">{v.clienteEmail}</div>
@@ -2375,7 +2400,9 @@ export default function Home() {
         {renderView()}
       </main>
 
-      {/* MODALES - Solo los más importantes */}
+      {/* ============================================
+          MODAL - FORMULARIO DE VENTA COMPLETO
+      ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
@@ -2457,7 +2484,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Fecha y Hora */}
+              {/* Fecha y Hora - Hora editable */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Fecha *</label>
@@ -2470,15 +2497,48 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Hora</label>
+                  <label className="text-gray-600 text-sm block mb-1">Hora *</label>
                   <input
                     type="text"
                     value={formData.horaExcursion}
                     onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     placeholder="Ej: 02:00 PM"
+                    required
                   />
                 </div>
+              </div>
+
+              {/* Tipo de Servicio - Compartido/Privado/Grupo */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Servicio</label>
+                  <select
+                    value={formData.tipoServicio}
+                    onChange={(e) => {
+                      const val = e.target.value as "compartido" | "privado" | "grupo";
+                      setFormData(prev => ({ ...prev, tipoServicio: val }));
+                      if (val !== "grupo") {
+                        setFormData(prev => ({ ...prev, nombreGrupo: "" }));
+                      }
+                    }}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  >
+                    {TIPO_SERVICIO.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
+                {formData.tipoServicio === "grupo" && (
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Nombre del Grupo</label>
+                    <input
+                      type="text"
+                      value={formData.nombreGrupo}
+                      onChange={(e) => setFormData(prev => ({ ...prev, nombreGrupo: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Ej: Grupo Familiar"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Transporte */}
@@ -2491,7 +2551,7 @@ export default function Home() {
                       const val = e.target.value as "si" | "no";
                       setFormData(prev => ({ ...prev, transporte: val }));
                       if (val === "no") {
-                        setFormData(prev => ({ ...prev, tipoRecogida: "sin_recogida", hotelNombre: "", airbnbUbicacion: "", apartamento: "", horaRecogida: "" }));
+                        setFormData(prev => ({ ...prev, tipoRecogida: "sin_recogida", hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", airbnbApartamento: "", apartamento: "", horaRecogida: "" }));
                       }
                     }}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
@@ -2507,7 +2567,7 @@ export default function Home() {
                     onChange={(e) => {
                       const val = e.target.value as "hotel" | "airbnb" | "sin_recogida";
                       setFormData(prev => ({ ...prev, tipoRecogida: val }));
-                      setFormData(prev => ({ ...prev, hotelNombre: "", airbnbUbicacion: "", apartamento: "", horaRecogida: "" }));
+                      setFormData(prev => ({ ...prev, hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", airbnbApartamento: "", apartamento: "", horaRecogida: "" }));
                     }}
                     disabled={formData.transporte === "no"}
                     className={`w-full px-4 py-2 border rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all ${formData.transporte === "no" ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'bg-gray-50 border-gray-200'}`}
@@ -2519,9 +2579,9 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Campos de traslado */}
+              {/* Campos de traslado - HOTEL con Habitación */}
               {formData.transporte === "si" && formData.tipoRecogida === "hotel" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-l-4 border-[#0a1628] pl-4">
                   <div>
                     <label className="text-gray-600 text-sm block mb-1">Hotel *</label>
                     <input
@@ -2534,21 +2594,32 @@ export default function Home() {
                     />
                   </div>
                   <div>
+                    <label className="text-gray-600 text-sm block mb-1">Habitación *</label>
+                    <input
+                      type="text"
+                      value={formData.hotelHabitacion}
+                      onChange={(e) => setFormData(prev => ({ ...prev, hotelHabitacion: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Ej: 301, Villa 5"
+                      required={formData.tipoRecogida === "hotel"}
+                    />
+                  </div>
+                  <div>
                     <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
-                    <select
+                    <input
+                      type="text"
                       value={formData.horaRecogida}
                       onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
                       className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    >
-                      <option value="">Seleccionar hora</option>
-                      {HORAS.map(h => <option key={h} value={h}>{h}</option>)}
-                    </select>
+                      placeholder="Ej: 08:30 AM"
+                    />
                   </div>
                 </div>
               )}
 
+              {/* Campos de traslado - AIRBNB con Apartamento */}
               {formData.transporte === "si" && formData.tipoRecogida === "airbnb" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-l-4 border-[#0a1628] pl-4">
                   <div>
                     <label className="text-gray-600 text-sm block mb-1">Ubicación Airbnb *</label>
                     <input
@@ -2561,15 +2632,25 @@ export default function Home() {
                     />
                   </div>
                   <div>
+                    <label className="text-gray-600 text-sm block mb-1">Apartamento *</label>
+                    <input
+                      type="text"
+                      value={formData.airbnbApartamento}
+                      onChange={(e) => setFormData(prev => ({ ...prev, airbnbApartamento: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Ej: Apt 3B, Casa 5"
+                      required={formData.tipoRecogida === "airbnb"}
+                    />
+                  </div>
+                  <div>
                     <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
-                    <select
+                    <input
+                      type="text"
                       value={formData.horaRecogida}
                       onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
                       className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    >
-                      <option value="">Seleccionar hora</option>
-                      {HORAS.map(h => <option key={h} value={h}>{h}</option>)}
-                    </select>
+                      placeholder="Ej: 08:30 AM"
+                    />
                   </div>
                 </div>
               )}
@@ -2975,7 +3056,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL - Proveedor con Zona y Capacidad en Servicios */}
+      {/* MODAL - Proveedor */}
       {showProveedorForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
@@ -3155,7 +3236,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* SERVICIOS DEL PROVEEDOR - CON ZONA Y CAPACIDAD */}
+              {/* SERVICIOS DEL PROVEEDOR */}
               <div className="border-t border-gray-200 pt-4 mt-4">
                 <h4 className="text-[#0a1628] font-semibold mb-3">Servicios del Proveedor</h4>
                 
