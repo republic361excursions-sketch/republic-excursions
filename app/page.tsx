@@ -30,7 +30,7 @@ interface Proveedor {
   banco: string;
   numeroCuenta: string;
   monedaCuenta: "USD" | "RD$";
-  tipoCuenta: ("corriente" | "ahorros")[];
+  tipoCuenta: ("corriente" | "ahorros" | "corriente_us" | "ahorros_us")[];
   tipoBeneficiario: "personal" | "empresarial";
   beneficiario: string;
   rncCedula: string;
@@ -242,7 +242,7 @@ export default function Home() {
     banco: "",
     numeroCuenta: "",
     monedaCuenta: "RD$" as "USD" | "RD$",
-    tipoCuenta: [] as ("corriente" | "ahorros")[],
+    tipoCuenta: [] as ("corriente" | "ahorros" | "corriente_us" | "ahorros_us")[],
     tipoBeneficiario: "personal" as "personal" | "empresarial",
     beneficiario: "",
     rncCedula: "",
@@ -365,10 +365,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v39");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v39");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v39");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v39");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v40");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v40");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v40");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v40");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -378,22 +378,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v39", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v40", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v39", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v40", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v39", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v40", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v39", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v40", JSON.stringify(data));
   };
 
   // ============================================
@@ -804,7 +804,7 @@ export default function Home() {
     });
   };
 
-  const toggleTipoCuenta = (tipo: "corriente" | "ahorros") => {
+  const toggleTipoCuenta = (tipo: "corriente" | "ahorros" | "corriente_us" | "ahorros_us") => {
     setProveedorFormData(prev => {
       const tipos = prev.tipoCuenta;
       if (tipos.includes(tipo)) {
@@ -1042,7 +1042,7 @@ export default function Home() {
         banco: "",
         numeroCuenta: "",
         monedaCuenta: "RD$",
-        tipoCuenta: ["corriente"],
+        tipoCuenta: [],
         tipoBeneficiario: "personal",
         beneficiario: "",
         rncCedula: "",
@@ -1334,7 +1334,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-[10px] text-gray-400">v3.9 • Republic Excursions © 2026</p>
+              <p className="text-[10px] text-gray-400">v4.0 • Republic Excursions © 2026</p>
             </div>
           </div>
         </div>
@@ -1361,6 +1361,16 @@ export default function Home() {
     if (isRaul) return "bg-blue-100 text-blue-800";
     if (isGabrielle) return "bg-pink-100 text-pink-800";
     return "bg-gray-100 text-gray-800";
+  };
+
+  const getTipoCuentaLabel = (tipo: string) => {
+    const map: any = {
+      corriente: "Corriente",
+      ahorros: "Ahorros",
+      corriente_us: "Corriente US",
+      ahorros_us: "Ahorros US"
+    };
+    return map[tipo] || tipo;
   };
 
   // ============================================
@@ -1923,6 +1933,8 @@ export default function Home() {
             <option value="todos">Todos los tipos</option>
             <option value="corriente">Corriente</option>
             <option value="ahorros">Ahorros</option>
+            <option value="corriente_us">Corriente US</option>
+            <option value="ahorros_us">Ahorros US</option>
           </select>
           <select
             value={filterBancoMoneda}
@@ -1973,7 +1985,7 @@ export default function Home() {
                   <div className="flex items-center gap-2 text-gray-500"><span>Beneficiario</span> <span className="text-[#0a1628]">{p.beneficiario || "Sin beneficiario"}</span></div>
                   <div className="flex items-center gap-2 text-gray-500"><span>RNC/Cédula</span> <span className="text-[#0a1628]">{p.rncCedula || "Sin documento"}</span></div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.tipoCuenta.map(t => <span key={t} className="px-2 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg text-xs">{t === "corriente" ? "Corriente US" : "Ahorros US"}</span>)}
+                    {p.tipoCuenta.map(t => <span key={t} className="px-2 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg text-xs">{getTipoCuentaLabel(t)}</span>)}
                   </div>
                 </div>
               </div>
@@ -2766,12 +2778,18 @@ export default function Home() {
                 </div>
                 <div>
                   <label className="text-gray-600 text-sm block mb-2">Tipo de Cuenta</label>
-                  <div className="flex gap-4">
+                  <div className="flex flex-wrap gap-2">
                     <button type="button" onClick={() => toggleTipoCuenta("corriente")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("corriente") ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'bg-gray-100 border border-gray-200 text-gray-600'}`}>
                       Corriente
                     </button>
                     <button type="button" onClick={() => toggleTipoCuenta("ahorros")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("ahorros") ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'bg-gray-100 border border-gray-200 text-gray-600'}`}>
                       Ahorros
+                    </button>
+                    <button type="button" onClick={() => toggleTipoCuenta("corriente_us")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("corriente_us") ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'bg-gray-100 border border-gray-200 text-gray-600'}`}>
+                      Corriente US
+                    </button>
+                    <button type="button" onClick={() => toggleTipoCuenta("ahorros_us")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("ahorros_us") ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'bg-gray-100 border border-gray-200 text-gray-600'}`}>
+                      Ahorros US
                     </button>
                   </div>
                 </div>
