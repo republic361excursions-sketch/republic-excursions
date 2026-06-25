@@ -16,13 +16,13 @@ interface Excursion {
   costoProveedorNinoUSD: number | null;
   comisionAdultoUSD: number;
   comisionNinoUSD: number | null;
-  zona: string;
+  zona: string[]; // Ahora es un array de strings
   capacidad?: string;
   tipoPrecio: "persona" | "maquina";
-  precioGrupoPrivado?: number; // Precio fijo para grupo privado
-  costoGrupoPrivado?: number; // Costo fijo para grupo privado
-  capacidadGrupoPrivado?: number; // Capacidad máxima incluida en el precio
-  extraPorPersona?: number; // Costo extra por persona adicional
+  precioGrupoPrivado?: number;
+  costoGrupoPrivado?: number;
+  capacidadGrupoPrivado?: number;
+  extraPorPersona?: number;
 }
 
 interface Proveedor {
@@ -95,15 +95,45 @@ interface Venta {
 }
 
 // ============================================
-// LISTAS
+// LISTAS - ZONAS INICIALES
 // ============================================
-const ZONAS = [
+const ZONAS_INICIALES = [
   "Bavaro", "Punta Cana Village", "Cap Cana", "Uvero Alto",
   "Cabeza de Toro", "El Cortecito", "Los Corales", "Bibijagua",
   "Arena Gorda", "Melia", "Riu", "Hard Rock", "Iberostar",
   "Bahia Principe", "Sirenis", "Dreams", "Excellence",
   "San Juan", "Veron", "La Otra Banda", "Playa Bavaro"
 ];
+
+// Estado global para zonas (se puede modificar dinámicamente)
+let ZONAS_GLOBALES = [...ZONAS_INICIALES];
+
+// Función para agregar una nueva zona
+const agregarZonaGlobal = (nuevaZona: string) => {
+  if (nuevaZona.trim() && !ZONAS_GLOBALES.includes(nuevaZona.trim())) {
+    ZONAS_GLOBALES.push(nuevaZona.trim());
+    return true;
+  }
+  return false;
+};
+
+// Función para eliminar una zona
+const eliminarZonaGlobal = (zona: string) => {
+  // No permitir eliminar si solo queda una zona
+  if (ZONAS_GLOBALES.length <= 1) {
+    alert("Debe haber al menos una zona disponible");
+    return false;
+  }
+  const index = ZONAS_GLOBALES.indexOf(zona);
+  if (index > -1) {
+    ZONAS_GLOBALES.splice(index, 1);
+    return true;
+  }
+  return false;
+};
+
+// Función para obtener las zonas actuales
+const getZonasGlobales = () => [...ZONAS_GLOBALES];
 
 const BANCOS = [
   "Banco BHD", "Banreservas", "Banco Popular Dominicano",
@@ -170,12 +200,36 @@ export default function Home() {
   const [filterReservaEstado, setFilterReservaEstado] = useState("todas");
   const [filterReservaFecha, setFilterReservaFecha] = useState("");
 
+  // Estado para mostrar/ocultar el modal de gestión de zonas
+  const [showZonasModal, setShowZonasModal] = useState(false);
+  const [nuevaZonaInput, setNuevaZonaInput] = useState("");
+  const [zonasActuales, setZonasActuales] = useState<string[]>([]);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Cargar zonas guardadas de localStorage
+  useEffect(() => {
+    const savedZonas = localStorage.getItem("excursiones_zonas_v44");
+    if (savedZonas) {
+      const zonas = JSON.parse(savedZonas);
+      if (zonas.length > 0) {
+        ZONAS_GLOBALES = zonas;
+      }
+    }
+    setZonasActuales(getZonasGlobales());
+  }, []);
+
+  // Guardar zonas en localStorage cuando cambien
+  const guardarZonas = (zonas: string[]) => {
+    ZONAS_GLOBALES = zonas;
+    localStorage.setItem("excursiones_zonas_v44", JSON.stringify(zonas));
+    setZonasActuales([...zonas]);
+  };
 
   const [tempExcursiones, setTempExcursiones] = useState<any[]>([]);
   const [tempExcursionForm, setTempExcursionForm] = useState({
@@ -186,7 +240,7 @@ export default function Home() {
     costoProveedorNinoUSD: "",
     comisionAdultoUSD: "",
     comisionNinoUSD: "",
-    zona: "",
+    zona: [] as string[],
     capacidad: "",
     tienePrecioNino: false,
     tipoPrecio: "persona" as "persona" | "maquina",
@@ -240,7 +294,7 @@ export default function Home() {
     horaRecogida: "",
     estado: "pendiente" as "pendiente" | "confirmada" | "cancelada" | "completada",
     nota: "",
-    zona: "",
+    zona: [] as string[],
     tipoPrecio: "persona" as "persona" | "maquina",
     precioGrupoPrivado: "",
     costoGrupoPrivado: "",
@@ -258,7 +312,7 @@ export default function Home() {
     costoProveedorNinoUSD: "",
     comisionAdultoUSD: "",
     comisionNinoUSD: "",
-    zona: "",
+    zona: [] as string[],
     capacidad: "",
     tienePrecioNino: false,
     tipoPrecio: "persona" as "persona" | "maquina",
@@ -293,7 +347,7 @@ export default function Home() {
     tienePrecioNino: false,
     proveedorId: "",
     proveedorNombre: "",
-    zona: "",
+    zona: [] as string[],
     capacidad: "",
     tipoPrecio: "persona" as "persona" | "maquina",
     precioGrupoPrivado: "",
@@ -301,6 +355,34 @@ export default function Home() {
     capacidadGrupoPrivado: "",
     extraPorPersona: "",
   });
+
+  // ============================================
+  // FUNCIONES PARA GESTIONAR ZONAS
+  // ============================================
+  const handleAgregarZona = () => {
+    const zona = nuevaZonaInput.trim();
+    if (!zona) {
+      alert("Por favor escribe el nombre de la zona");
+      return;
+    }
+    if (ZONAS_GLOBALES.includes(zona)) {
+      alert("Esta zona ya existe");
+      return;
+    }
+    const nuevasZonas = [...ZONAS_GLOBALES, zona];
+    guardarZonas(nuevasZonas);
+    setNuevaZonaInput("");
+  };
+
+  const handleEliminarZona = (zona: string) => {
+    if (ZONAS_GLOBALES.length <= 1) {
+      alert("Debe haber al menos una zona disponible");
+      return;
+    }
+    if (!confirm(`¿Eliminar la zona "${zona}"?`)) return;
+    const nuevasZonas = ZONAS_GLOBALES.filter(z => z !== zona);
+    guardarZonas(nuevasZonas);
+  };
 
   // ============================================
   // FUNCIONES DE FORMATO
@@ -383,6 +465,11 @@ export default function Home() {
     return map[tipo] || tipo;
   };
 
+  const getZonasString = (zonas: string[]) => {
+    if (!zonas || zonas.length === 0) return "Sin zona";
+    return zonas.join(", ");
+  };
+
   // ============================================
   // LOGIN
   // ============================================
@@ -426,7 +513,15 @@ export default function Home() {
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
     if (savedProveedores) setProveedores(JSON.parse(savedProveedores));
-    if (savedExcursiones) setExcursiones(JSON.parse(savedExcursiones));
+    if (savedExcursiones) {
+      const excursionesData = JSON.parse(savedExcursiones);
+      // Asegurar que zona sea array
+      const normalized = excursionesData.map((e: any) => ({
+        ...e,
+        zona: Array.isArray(e.zona) ? e.zona : (e.zona ? [e.zona] : [])
+      }));
+      setExcursiones(normalized);
+    }
   }, []);
 
   const saveVentas = (data: Venta[]) => {
@@ -467,20 +562,15 @@ export default function Home() {
     let costoTotal = 0;
     
     if (formData.tipoServicio === "privado") {
-      // Precio fijo para el grupo
       precioTotal = precioGrupoFijo;
       costoTotal = costoGrupoFijo;
       
-      // Si excede la capacidad, se cobra extra por persona adicional
       if (capacidadGrupo > 0 && cantPersonasPrivado > capacidadGrupo) {
         const personasExtras = cantPersonasPrivado - capacidadGrupo;
         precioTotal += personasExtras * extraPorPersona;
-        // El costo del proveedor también aumenta por persona extra
-        // Asumimos que el costo extra por persona es el mismo que el extra de venta
         costoTotal += personasExtras * extraPorPersona;
       }
     } else {
-      // Para compartido o grupo: (adultos × precio adulto) + (niños × precio niño)
       const precioAdulto = Number(formData.precioAdultoUSD) || 0;
       const precioNino = Number(formData.precioNinoUSD) || 0;
       const costoAdulto = Number(formData.costoProveedorAdultoUSD) || 0;
@@ -554,7 +644,7 @@ export default function Home() {
         comisionNinoUSD: String(comisionNino),
         proveedorId: excursion.proveedorId,
         proveedorNombre: excursion.proveedorNombre,
-        zona: excursion.zona || "",
+        zona: excursion.zona || [],
         tipoPrecio: excursion.tipoPrecio || "persona",
         precioGrupoPrivado: String(excursion.precioGrupoPrivado || ""),
         costoGrupoPrivado: String(excursion.costoGrupoPrivado || ""),
@@ -641,6 +731,18 @@ export default function Home() {
     const val = e.target.value;
     setFormData(prev => ({ ...prev, extraPorPersona: val }));
     setTimeout(updateCantidades, 10);
+  };
+
+  // Manejo de zona en el formulario de venta (multiselect)
+  const toggleZonaEnForm = (zona: string) => {
+    setFormData(prev => {
+      const zonas = prev.zona || [];
+      if (zonas.includes(zona)) {
+        return { ...prev, zona: zonas.filter(z => z !== zona) };
+      } else {
+        return { ...prev, zona: [...zonas, zona] };
+      }
+    });
   };
 
   // ============================================
@@ -756,7 +858,7 @@ export default function Home() {
       horaRecogida: "",
       estado: "pendiente",
       nota: "",
-      zona: "",
+      zona: [],
       tipoPrecio: "persona",
       precioGrupoPrivado: "",
       costoGrupoPrivado: "",
@@ -816,7 +918,7 @@ export default function Home() {
       horaRecogida: venta.horaRecogida || "",
       estado: venta.estado || "pendiente",
       nota: venta.nota,
-      zona: excursion?.zona || "",
+      zona: excursion?.zona || [],
       tipoPrecio: venta.tipoPrecio || "persona",
       precioGrupoPrivado: String(excursion?.precioGrupoPrivado || ""),
       costoGrupoPrivado: String(excursion?.costoGrupoPrivado || ""),
@@ -921,7 +1023,7 @@ export default function Home() {
       costoProveedorNinoUSD: "",
       comisionAdultoUSD: "",
       comisionNinoUSD: "",
-      zona: "",
+      zona: [],
       capacidad: "",
       tienePrecioNino: false,
       tipoPrecio: "persona",
@@ -959,7 +1061,7 @@ export default function Home() {
       costoProveedorNinoUSD: e.costoProveedorNinoUSD,
       comisionAdultoUSD: e.comisionAdultoUSD,
       comisionNinoUSD: e.comisionNinoUSD,
-      zona: e.zona || "",
+      zona: e.zona || [],
       capacidad: e.capacidad || "",
       tipoPrecio: e.tipoPrecio || "persona",
       precioGrupoPrivado: (e as any).precioGrupoPrivado || "",
@@ -1037,7 +1139,7 @@ export default function Home() {
         costoProveedorNinoUSD,
         comisionAdultoUSD,
         comisionNinoUSD,
-        zona: tempExcursionForm.zona || "Bavaro",
+        zona: tempExcursionForm.zona.length > 0 ? tempExcursionForm.zona : ["Bavaro"],
         capacidad: tempExcursionForm.capacidad || undefined,
         tipoPrecio: tempExcursionForm.tipoPrecio || "persona",
         precioGrupoPrivado: Number(tempExcursionForm.precioGrupoPrivado) || undefined,
@@ -1055,7 +1157,7 @@ export default function Home() {
       costoProveedorNinoUSD: "",
       comisionAdultoUSD: "",
       comisionNinoUSD: "",
-      zona: "",
+      zona: [],
       capacidad: "",
       tienePrecioNino: false,
       tipoPrecio: "persona",
@@ -1068,6 +1170,42 @@ export default function Home() {
 
   const eliminarTempExcursion = (index: number) => {
     setTempExcursiones(tempExcursiones.filter((_, i) => i !== index));
+  };
+
+  // Manejo de zona en temp excursion
+  const toggleZonaTemp = (zona: string) => {
+    setTempExcursionForm(prev => {
+      const zonas = prev.zona || [];
+      if (zonas.includes(zona)) {
+        return { ...prev, zona: zonas.filter(z => z !== zona) };
+      } else {
+        return { ...prev, zona: [...zonas, zona] };
+      }
+    });
+  };
+
+  // Manejo de zona en excursionFormData
+  const toggleZonaExcursion = (zona: string) => {
+    setExcursionFormData(prev => {
+      const zonas = prev.zona || [];
+      if (zonas.includes(zona)) {
+        return { ...prev, zona: zonas.filter(z => z !== zona) };
+      } else {
+        return { ...prev, zona: [...zonas, zona] };
+      }
+    });
+  };
+
+  // Manejo de zona en nuevaExcursionDesdeVenta
+  const toggleZonaNuevaExcursion = (zona: string) => {
+    setNuevaExcursionDesdeVenta(prev => {
+      const zonas = prev.zona || [];
+      if (zonas.includes(zona)) {
+        return { ...prev, zona: zonas.filter(z => z !== zona) };
+      } else {
+        return { ...prev, zona: [...zonas, zona] };
+      }
+    });
   };
 
   // ============================================
@@ -1092,6 +1230,8 @@ export default function Home() {
     
     const proveedor = proveedores.find(p => p.id === excursionFormData.proveedorId);
     
+    const zonas = excursionFormData.zona.length > 0 ? excursionFormData.zona : ["Bavaro"];
+    
     if (editingExcursionId) {
       const updated = excursiones.map(e => 
         e.id === editingExcursionId 
@@ -1106,7 +1246,7 @@ export default function Home() {
               costoProveedorNinoUSD,
               comisionAdultoUSD,
               comisionNinoUSD,
-              zona: excursionFormData.zona || "Bavaro",
+              zona: zonas,
               capacidad: excursionFormData.capacidad || undefined,
               tipoPrecio: excursionFormData.tipoPrecio || "persona",
               precioGrupoPrivado: Number(excursionFormData.precioGrupoPrivado) || undefined,
@@ -1130,7 +1270,7 @@ export default function Home() {
         costoProveedorNinoUSD,
         comisionAdultoUSD,
         comisionNinoUSD,
-        zona: excursionFormData.zona || "Bavaro",
+        zona: zonas,
         capacidad: excursionFormData.capacidad || undefined,
         tipoPrecio: excursionFormData.tipoPrecio || "persona",
         precioGrupoPrivado: Number(excursionFormData.precioGrupoPrivado) || undefined,
@@ -1154,7 +1294,7 @@ export default function Home() {
       costoProveedorNinoUSD: "",
       comisionAdultoUSD: "",
       comisionNinoUSD: "",
-      zona: "",
+      zona: [],
       capacidad: "",
       tienePrecioNino: false,
       tipoPrecio: "persona",
@@ -1177,7 +1317,7 @@ export default function Home() {
       costoProveedorNinoUSD: excursion.costoProveedorNinoUSD?.toString() || "",
       comisionAdultoUSD: String(excursion.comisionAdultoUSD),
       comisionNinoUSD: excursion.comisionNinoUSD?.toString() || "",
-      zona: excursion.zona || "",
+      zona: excursion.zona || [],
       capacidad: excursion.capacidad || "",
       tienePrecioNino: excursion.precioNinoUSD !== null,
       tipoPrecio: excursion.tipoPrecio || "persona",
@@ -1272,6 +1412,8 @@ export default function Home() {
       proveedorNombre = nuevoProveedor.nombre;
     }
     
+    const zonas = nuevaExcursionDesdeVenta.zona.length > 0 ? nuevaExcursionDesdeVenta.zona : ["Bavaro"];
+    
     const nuevaExcursion: Excursion = {
       id: Date.now().toString(),
       nombre: nuevaExcursionDesdeVenta.nombre,
@@ -1283,7 +1425,7 @@ export default function Home() {
       costoProveedorNinoUSD,
       comisionAdultoUSD,
       comisionNinoUSD,
-      zona: nuevaExcursionDesdeVenta.zona || "Bavaro",
+      zona: zonas,
       capacidad: nuevaExcursionDesdeVenta.capacidad || undefined,
       tipoPrecio: nuevaExcursionDesdeVenta.tipoPrecio || "persona",
       precioGrupoPrivado: Number(nuevaExcursionDesdeVenta.precioGrupoPrivado) || undefined,
@@ -1324,7 +1466,7 @@ export default function Home() {
       tienePrecioNino: false,
       proveedorId: "",
       proveedorNombre: "",
-      zona: "",
+      zona: [],
       capacidad: "",
       tipoPrecio: "persona",
       precioGrupoPrivado: "",
@@ -2380,8 +2522,14 @@ export default function Home() {
             <option value="">Todos los proveedores</option>
             {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
           </select>
-          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false, tipoPrecio: "persona", precioGrupoPrivado: "", costoGrupoPrivado: "", capacidadGrupoPrivado: "", extraPorPersona: "" }); setShowExcursionForm(true); }} className="bg-[#0a1628] text-white px-4 py-2.5 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
+          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: [], capacidad: "", tienePrecioNino: false, tipoPrecio: "persona", precioGrupoPrivado: "", costoGrupoPrivado: "", capacidadGrupoPrivado: "", extraPorPersona: "" }); setShowExcursionForm(true); }} className="bg-[#0a1628] text-white px-4 py-2.5 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
             <span className="text-lg leading-none">+</span> Nueva Excursion
+          </button>
+          <button 
+            onClick={() => setShowZonasModal(true)} 
+            className="px-4 py-2.5 bg-[#0a1628]/10 text-[#0a1628] border border-[#0a1628]/20 rounded-xl hover:bg-[#0a1628]/20 transition-all flex items-center gap-2"
+          >
+            <span className="text-lg leading-none">📍</span> Gestionar Zonas
           </button>
         </div>
 
@@ -2395,7 +2543,7 @@ export default function Home() {
                   <div>
                     <h3 className="text-[#0a1628] font-semibold">{e.nombre}</h3>
                     <p className="text-gray-400 text-sm">{e.proveedorNombre}</p>
-                    <p className="text-xs text-gray-500">Zona: {e.zona || "Sin zona"}</p>
+                    <p className="text-xs text-gray-500">Zonas: {getZonasString(e.zona)}</p>
                     {(e as any).precioGrupoPrivado && (
                       <p className="text-xs text-[#0a1628] font-medium">Precio Grupo Privado: {formatUSD((e as any).precioGrupoPrivado)}</p>
                     )}
@@ -2457,6 +2605,65 @@ export default function Home() {
             ))
           )}
         </div>
+
+        {/* MODAL - Gestionar Zonas */}
+        {showZonasModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[#0a1628] text-xl font-bold">Gestionar Zonas</h3>
+                <button onClick={() => setShowZonasModal(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={nuevaZonaInput}
+                    onChange={(e) => setNuevaZonaInput(e.target.value)}
+                    placeholder="Nombre de la nueva zona"
+                    className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    onKeyPress={(e) => e.key === "Enter" && handleAgregarZona()}
+                  />
+                  <button
+                    onClick={handleAgregarZona}
+                    className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20"
+                  >
+                    Agregar
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto p-2 bg-gray-50 rounded-xl">
+                  {ZONAS_GLOBALES.map((zona) => (
+                    <div key={zona} className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
+                      <span className="text-[#0a1628] text-sm">{zona}</span>
+                      <button
+                        onClick={() => handleEliminarZona(zona)}
+                        className="text-red-400 hover:text-red-600 text-sm font-bold"
+                        title="Eliminar zona"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="text-xs text-gray-400">
+                  {ZONAS_GLOBALES.length} zonas disponibles
+                </div>
+
+                <div className="flex justify-end pt-4 border-t border-gray-100">
+                  <button
+                    onClick={() => setShowZonasModal(false)}
+                    className="px-6 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -2614,13 +2821,32 @@ export default function Home() {
                   )}
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Zona</label>
-                  <input
-                    type="text"
-                    value={formData.zona}
-                    className="w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-xl text-[#0a1628] cursor-not-allowed"
-                    disabled
-                  />
+                  <label className="text-gray-600 text-sm block mb-1">Zonas</label>
+                  <div className="flex flex-wrap gap-1 p-2 bg-gray-100 rounded-xl min-h-[42px] border border-gray-200">
+                    {formData.zona && formData.zona.length > 0 ? (
+                      formData.zona.map(z => (
+                        <span key={z} className="px-2 py-0.5 bg-[#0a1628]/10 text-[#0a1628] rounded-lg text-xs">{z}</span>
+                      ))
+                    ) : (
+                      <span className="text-gray-400 text-sm">Sin zona seleccionada</span>
+                    )}
+                  </div>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {getZonasGlobales().map(zona => (
+                      <button
+                        key={zona}
+                        type="button"
+                        onClick={() => toggleZonaEnForm(zona)}
+                        className={`px-2 py-0.5 rounded-lg text-xs transition-all ${
+                          (formData.zona || []).includes(zona)
+                            ? 'bg-[#0a1628] text-white'
+                            : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        }`}
+                      >
+                        {zona}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -3118,15 +3344,32 @@ export default function Home() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Zona</label>
-                  <select
-                    value={nuevaExcursionDesdeVenta.zona}
-                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, zona: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  >
-                    <option value="">Seleccionar zona</option>
-                    {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
-                  </select>
+                  <label className="text-gray-600 text-sm block mb-1">Zonas</label>
+                  <div className="flex flex-wrap gap-1 p-2 bg-gray-100 rounded-xl min-h-[42px] border border-gray-200">
+                    {nuevaExcursionDesdeVenta.zona && nuevaExcursionDesdeVenta.zona.length > 0 ? (
+                      nuevaExcursionDesdeVenta.zona.map(z => (
+                        <span key={z} className="px-2 py-0.5 bg-[#0a1628]/10 text-[#0a1628] rounded-lg text-xs">{z}</span>
+                      ))
+                    ) : (
+                      <span className="text-gray-400 text-sm">Sin zona seleccionada</span>
+                    )}
+                  </div>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {getZonasGlobales().map(zona => (
+                      <button
+                        key={zona}
+                        type="button"
+                        onClick={() => toggleZonaNuevaExcursion(zona)}
+                        className={`px-2 py-0.5 rounded-lg text-xs transition-all ${
+                          (nuevaExcursionDesdeVenta.zona || []).includes(zona)
+                            ? 'bg-[#0a1628] text-white'
+                            : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        }`}
+                      >
+                        {zona}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -3510,7 +3753,7 @@ export default function Home() {
                         {e.precioNinoUSD !== null && <span className="text-gray-500 text-sm ml-2">Niño: {formatUSD(e.precioNinoUSD)}</span>}
                         <span className="text-orange-600 text-sm ml-2">Costo: {formatUSD(e.costoProveedorAdultoUSD)}</span>
                         {e.precioGrupoPrivado && <span className="text-[#0a1628] text-sm ml-2">Grupo: {formatUSD(e.precioGrupoPrivado)}</span>}
-                        <span className="text-gray-400 text-xs ml-2">Zona: {e.zona || "Sin zona"}</span>
+                        <span className="text-gray-400 text-xs ml-2">Zonas: {getZonasString(e.zona || [])}</span>
                         {e.capacidad && <span className="text-gray-400 text-xs ml-2">Cap: {e.capacidad}</span>}
                         <span className="text-gray-400 text-xs ml-2">Tipo: {getTipoPrecioLabel(e.tipoPrecio)}</span>
                       </div>
@@ -3584,15 +3827,32 @@ export default function Home() {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-gray-500 text-xs block mb-1">Zona</label>
-                      <select
-                        value={tempExcursionForm.zona}
-                        onChange={(e) => setTempExcursionForm(prev => ({ ...prev, zona: e.target.value }))}
-                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all text-sm"
-                      >
-                        <option value="">Seleccionar</option>
-                        {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
-                      </select>
+                      <label className="text-gray-500 text-xs block mb-1">Zonas</label>
+                      <div className="flex flex-wrap gap-1 p-1 bg-gray-100 rounded-lg min-h-[32px]">
+                        {tempExcursionForm.zona && tempExcursionForm.zona.length > 0 ? (
+                          tempExcursionForm.zona.map(z => (
+                            <span key={z} className="px-1.5 py-0.5 bg-[#0a1628]/10 text-[#0a1628] rounded text-[10px]">{z}</span>
+                          ))
+                        ) : (
+                          <span className="text-gray-400 text-[10px]">Sin zona</span>
+                        )}
+                      </div>
+                      <div className="mt-1 flex flex-wrap gap-0.5">
+                        {getZonasGlobales().map(zona => (
+                          <button
+                            key={zona}
+                            type="button"
+                            onClick={() => toggleZonaTemp(zona)}
+                            className={`px-1.5 py-0.5 rounded text-[10px] transition-all ${
+                              (tempExcursionForm.zona || []).includes(zona)
+                                ? 'bg-[#0a1628] text-white'
+                                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                            }`}
+                          >
+                            {zona}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                     <div>
                       <label className="text-gray-500 text-xs block mb-1">Capacidad</label>
@@ -3839,18 +4099,37 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Zona</label>
-                  <select
-                    value={excursionFormData.zona}
-                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, zona: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  >
-                    <option value="">Seleccionar zona</option>
-                    {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
-                  </select>
+              {/* Zonas - Multiselect */}
+              <div>
+                <label className="text-gray-600 text-sm block mb-1">Zonas</label>
+                <div className="flex flex-wrap gap-1 p-2 bg-gray-100 rounded-xl min-h-[42px] border border-gray-200">
+                  {excursionFormData.zona && excursionFormData.zona.length > 0 ? (
+                    excursionFormData.zona.map(z => (
+                      <span key={z} className="px-2 py-0.5 bg-[#0a1628]/10 text-[#0a1628] rounded-lg text-xs">{z}</span>
+                    ))
+                  ) : (
+                    <span className="text-gray-400 text-sm">Selecciona una o más zonas</span>
+                  )}
                 </div>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {getZonasGlobales().map(zona => (
+                    <button
+                      key={zona}
+                      type="button"
+                      onClick={() => toggleZonaExcursion(zona)}
+                      className={`px-2 py-0.5 rounded-lg text-xs transition-all ${
+                        (excursionFormData.zona || []).includes(zona)
+                          ? 'bg-[#0a1628] text-white'
+                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}
+                    >
+                      {zona}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Capacidad</label>
                   <input
@@ -3861,9 +4140,6 @@ export default function Home() {
                     placeholder="Ej: 20 personas"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Tipo de Precio</label>
                   <select
@@ -3874,16 +4150,17 @@ export default function Home() {
                     {TIPO_PRECIO.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
                 </div>
-                <div className="flex items-center">
-                  <label className="flex items-center gap-2 text-gray-600 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={excursionFormData.tienePrecioNino}
-                      onChange={(e) => setExcursionFormData(prev => ({ ...prev, tienePrecioNino: e.target.checked }))}
-                    />
-                    Tiene precio para niños
-                  </label>
-                </div>
+              </div>
+
+              <div className="flex items-center">
+                <label className="flex items-center gap-2 text-gray-600 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={excursionFormData.tienePrecioNino}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, tienePrecioNino: e.target.checked }))}
+                  />
+                  Tiene precio para niños
+                </label>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
