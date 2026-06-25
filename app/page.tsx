@@ -364,10 +364,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v36");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v36");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v36");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v36");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v37");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v37");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v37");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v37");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -377,22 +377,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v36", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v37", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v36", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v37", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v36", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v37", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v36", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v37", JSON.stringify(data));
   };
 
   // ============================================
@@ -403,13 +403,13 @@ export default function Home() {
   };
 
   const calcularTotalesVenta = () => {
-    // 🔥 FORZAR conversión a número usando parseFloat + 0 para evitar NaN
-    const precioAdulto = parseFloat(formData.precioAdultoUSD) || 0;
-    const precioNino = parseFloat(formData.precioNinoUSD) || 0;
-    const costoAdulto = parseFloat(formData.costoProveedorAdultoUSD) || 0;
-    const costoNino = parseFloat(formData.costoProveedorNinoUSD) || 0;
-    const cantAdultos = parseInt(formData.cantidadAdultos as any) || 0;
-    const cantNinos = parseInt(formData.cantidadNinos as any) || 0;
+    // 🔥 CONVERTIR A NÚMERO USANDO Number() - MÁS SEGURO
+    const precioAdulto = Number(formData.precioAdultoUSD) || 0;
+    const precioNino = Number(formData.precioNinoUSD) || 0;
+    const costoAdulto = Number(formData.costoProveedorAdultoUSD) || 0;
+    const costoNino = Number(formData.costoProveedorNinoUSD) || 0;
+    const cantAdultos = Number(formData.cantidadAdultos) || 0;
+    const cantNinos = Number(formData.cantidadNinos) || 0;
     
     // 🔥 CALCULAR con valores numéricos puros
     const precioTotal = (precioAdulto * cantAdultos) + (precioNino * cantNinos);
@@ -442,12 +442,12 @@ export default function Home() {
         zona: excursion.zona || "",
       }));
       
-      setTimeout(updateCantidades, 10);
+      setTimeout(updateCantidades, 50);
     }
   };
 
   // ============================================
-  // ACTUALIZAR TOTALES - CORREGIDO
+  // ACTUALIZAR TOTALES
   // ============================================
   const updateCantidades = () => {
     const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
@@ -466,85 +466,37 @@ export default function Home() {
   const handlePrecioAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setFormData(prev => ({ ...prev, precioAdultoUSD: val }));
-    setTimeout(() => {
-      const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
-      setFormData(prev => ({
-        ...prev,
-        precioTotalUSD: precioTotal.toFixed(2),
-        costoTotalUSD: costoTotal.toFixed(2),
-        comisionTotalUSD: comisionTotal.toFixed(2),
-      }));
-    }, 10);
+    setTimeout(updateCantidades, 50);
   };
 
   const handlePrecioNinoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setFormData(prev => ({ ...prev, precioNinoUSD: val }));
-    setTimeout(() => {
-      const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
-      setFormData(prev => ({
-        ...prev,
-        precioTotalUSD: precioTotal.toFixed(2),
-        costoTotalUSD: costoTotal.toFixed(2),
-        comisionTotalUSD: comisionTotal.toFixed(2),
-      }));
-    }, 10);
+    setTimeout(updateCantidades, 50);
   };
 
   const handleCostoAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setFormData(prev => ({ ...prev, costoProveedorAdultoUSD: val }));
-    setTimeout(() => {
-      const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
-      setFormData(prev => ({
-        ...prev,
-        precioTotalUSD: precioTotal.toFixed(2),
-        costoTotalUSD: costoTotal.toFixed(2),
-        comisionTotalUSD: comisionTotal.toFixed(2),
-      }));
-    }, 10);
+    setTimeout(updateCantidades, 50);
   };
 
   const handleCostoNinoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setFormData(prev => ({ ...prev, costoProveedorNinoUSD: val }));
-    setTimeout(() => {
-      const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
-      setFormData(prev => ({
-        ...prev,
-        precioTotalUSD: precioTotal.toFixed(2),
-        costoTotalUSD: costoTotal.toFixed(2),
-        comisionTotalUSD: comisionTotal.toFixed(2),
-      }));
-    }, 10);
+    setTimeout(updateCantidades, 50);
   };
 
   const handleCantidadAdultosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value) || 0;
     setFormData(prev => ({ ...prev, cantidadAdultos: val }));
-    setTimeout(() => {
-      const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
-      setFormData(prev => ({
-        ...prev,
-        precioTotalUSD: precioTotal.toFixed(2),
-        costoTotalUSD: costoTotal.toFixed(2),
-        comisionTotalUSD: comisionTotal.toFixed(2),
-      }));
-    }, 10);
+    setTimeout(updateCantidades, 50);
   };
 
   const handleCantidadNinosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value) || 0;
     setFormData(prev => ({ ...prev, cantidadNinos: val }));
-    setTimeout(() => {
-      const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
-      setFormData(prev => ({
-        ...prev,
-        precioTotalUSD: precioTotal.toFixed(2),
-        costoTotalUSD: costoTotal.toFixed(2),
-        comisionTotalUSD: comisionTotal.toFixed(2),
-      }));
-    }, 10);
+    setTimeout(updateCantidades, 50);
   };
 
   // ============================================
@@ -1288,7 +1240,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-[10px] text-gray-400">v3.6 • Republic Excursions © 2026</p>
+              <p className="text-[10px] text-gray-400">v3.7 • Republic Excursions © 2026</p>
             </div>
           </div>
         </div>
