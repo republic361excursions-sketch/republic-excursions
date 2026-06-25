@@ -73,6 +73,10 @@ interface Venta {
   nombreGrupo?: string;
   tipoRecogida: "hotel" | "airbnb" | "sin_recogida";
   transporte: "si" | "no";
+  hotelNombre: string;
+  airbnbUbicacion: string;
+  apartamento: string;
+  horaRecogida: string;
   precioAdultoPersonalizado: number;
   precioNinoPersonalizado: number;
   costoAdultoPersonalizado: number;
@@ -101,6 +105,18 @@ const BANCOS = [
 ];
 
 const HORAS = [
+  "06:00 AM", "06:30 AM", "07:00 AM", "07:30 AM",
+  "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
+  "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
+  "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM",
+  "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM",
+  "04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM",
+  "06:00 PM", "06:30 PM", "07:00 PM", "07:30 PM",
+  "08:00 PM", "08:30 PM", "09:00 PM", "09:30 PM",
+  "10:00 PM"
+];
+
+const HORAS_RECOGIDA = [
   "06:00 AM", "06:30 AM", "07:00 AM", "07:30 AM",
   "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
   "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
@@ -186,6 +202,7 @@ export default function Home() {
     clienteNombre: "",
     clienteWhatsapp: "",
     clienteEmail: "",
+    clienteId: "",
     excursionId: "",
     excursionNombre: "",
     fechaExcursion: "",
@@ -213,6 +230,10 @@ export default function Home() {
     nombreGrupo: "",
     tipoRecogida: "sin_recogida" as "hotel" | "airbnb" | "sin_recogida",
     transporte: "no" as "si" | "no",
+    hotelNombre: "",
+    airbnbUbicacion: "",
+    apartamento: "",
+    horaRecogida: "",
     estado: "pendiente" as "pendiente" | "confirmada" | "cancelada" | "completada",
     nota: "",
     zona: "",
@@ -365,10 +386,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v42");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v42");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v42");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v42");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v43");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v43");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v43");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v43");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -378,22 +399,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v42", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v43", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v42", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v43", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v42", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v43", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v42", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v43", JSON.stringify(data));
   };
 
   // ============================================
@@ -433,7 +454,23 @@ export default function Home() {
   };
 
   // ============================================
-  // SELECCIONAR EXCURSION - CORREGIDO
+  // SELECCIONAR CLIENTE EXISTENTE
+  // ============================================
+  const selectCliente = (clienteId: string) => {
+    const cliente = clientes.find(c => c.id === clienteId);
+    if (cliente) {
+      setFormData(prev => ({
+        ...prev,
+        clienteId: cliente.id,
+        clienteNombre: cliente.nombre,
+        clienteWhatsapp: cliente.whatsapp,
+        clienteEmail: cliente.email,
+      }));
+    }
+  };
+
+  // ============================================
+  // SELECCIONAR EXCURSION
   // ============================================
   const selectExcursionForVenta = (excursionId: string) => {
     const excursion = excursiones.find(e => e.id === excursionId);
@@ -557,6 +594,10 @@ export default function Home() {
       nombreGrupo: formData.tipoServicio === "grupo" ? formData.nombreGrupo : undefined,
       tipoRecogida: formData.tipoRecogida,
       transporte: formData.transporte,
+      hotelNombre: formData.hotelNombre || "",
+      airbnbUbicacion: formData.airbnbUbicacion || "",
+      apartamento: formData.apartamento || "",
+      horaRecogida: formData.horaRecogida || "",
       precioAdultoPersonalizado: Number(formData.precioAdultoUSD) || 0,
       precioNinoPersonalizado: Number(formData.precioNinoUSD) || 0,
       costoAdultoPersonalizado: Number(formData.costoProveedorAdultoUSD) || 0,
@@ -581,6 +622,7 @@ export default function Home() {
       clienteNombre: "",
       clienteWhatsapp: "",
       clienteEmail: "",
+      clienteId: "",
       excursionId: "",
       excursionNombre: "",
       fechaExcursion: "",
@@ -608,6 +650,10 @@ export default function Home() {
       nombreGrupo: "",
       tipoRecogida: "sin_recogida",
       transporte: "no",
+      hotelNombre: "",
+      airbnbUbicacion: "",
+      apartamento: "",
+      horaRecogida: "",
       estado: "pendiente",
       nota: "",
       zona: "",
@@ -628,6 +674,7 @@ export default function Home() {
       clienteNombre: venta.clienteNombre,
       clienteWhatsapp: venta.clienteWhatsapp,
       clienteEmail: venta.clienteEmail,
+      clienteId: "",
       excursionId: venta.excursionId,
       excursionNombre: venta.excursionNombre,
       fechaExcursion: venta.fechaExcursion,
@@ -653,8 +700,12 @@ export default function Home() {
       metodoPagoProveedor: venta.metodoPagoProveedor,
       tipoServicio: venta.tipoServicio,
       nombreGrupo: venta.nombreGrupo || "",
-      tipoRecogida: venta.tipoRecogida,
-      transporte: venta.transporte,
+      tipoRecogida: venta.tipoRecogida || "sin_recogida",
+      transporte: venta.transporte || "no",
+      hotelNombre: venta.hotelNombre || "",
+      airbnbUbicacion: venta.airbnbUbicacion || "",
+      apartamento: venta.apartamento || "",
+      horaRecogida: venta.horaRecogida || "",
       estado: venta.estado || "pendiente",
       nota: venta.nota,
       zona: excursion?.zona || "",
@@ -1229,7 +1280,7 @@ export default function Home() {
     const map: any = {
       hotel: "Hotel",
       airbnb: "Airbnb",
-      sin_recogida: "Sin recogida"
+      sin_recogida: "Sin Recogida"
     };
     return map[tipo] || tipo;
   };
@@ -1260,9 +1311,11 @@ export default function Home() {
 
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Hora,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Recogida,Transporte,Estado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
+    let csv = "Fecha,Hora,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Recogida,Transporte,Hotel/Airbnb,Estado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
     ventas.forEach(v => {
-      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      const recogidaInfo = v.tipoRecogida === "hotel" ? v.hotelNombre : 
+                           v.tipoRecogida === "airbnb" ? v.airbnbUbicacion : "Sin recogida";
+      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -1274,7 +1327,7 @@ export default function Home() {
   };
 
   // ============================================
-  // LOGIN - DISEÑO MINIMALISTA
+  // LOGIN
   // ============================================
   if (!isLoggedIn) {
     return (
@@ -1349,7 +1402,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-[10px] text-gray-400">v4.2 • Republic Excursions © 2026</p>
+              <p className="text-[10px] text-gray-400">v4.3 • Republic Excursions © 2026</p>
             </div>
           </div>
         </div>
@@ -2283,7 +2336,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL - FORMULARIO DE VENTA CORREGIDO
+          MODAL - FORMULARIO DE VENTA CON CLIENTES Y TRANSPORTE
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -2293,18 +2346,27 @@ export default function Home() {
               <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Cliente */}
+              {/* Cliente - con selector de clientes existentes */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Cliente *</label>
-                  <input
-                    type="text"
-                    value={formData.clienteNombre}
-                    onChange={(e) => setFormData(prev => ({ ...prev, clienteNombre: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="Nombre del cliente"
-                    required
-                  />
+                  <div className="flex gap-2">
+                    <select
+                      value={formData.clienteId}
+                      onChange={(e) => selectCliente(e.target.value)}
+                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    >
+                      <option value="">Seleccionar cliente existente</option>
+                      {clientes.map(c => <option key={c.id} value={c.id}>{c.nombre} - {c.whatsapp}</option>)}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowClienteForm(true)}
+                      className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm"
+                    >
+                      + Nuevo
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">WhatsApp</label>
@@ -2318,7 +2380,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Excursión con boton Crear - SEPARADO CORRECTAMENTE */}
+              {/* Excursión con boton Crear */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Excursión *</label>
@@ -2404,6 +2466,117 @@ export default function Home() {
                   </select>
                 </div>
               </div>
+
+              {/* Transporte y Recogida */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Transporte</label>
+                  <select
+                    value={formData.transporte}
+                    onChange={(e) => {
+                      const val = e.target.value as "si" | "no";
+                      setFormData(prev => ({ ...prev, transporte: val }));
+                      if (val === "no") {
+                        setFormData(prev => ({ ...prev, tipoRecogida: "sin_recogida", hotelNombre: "", airbnbUbicacion: "", apartamento: "", horaRecogida: "" }));
+                      }
+                    }}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  >
+                    <option value="no">No</option>
+                    <option value="si">Si</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Recogida</label>
+                  <select
+                    value={formData.tipoRecogida}
+                    onChange={(e) => {
+                      const val = e.target.value as "hotel" | "airbnb" | "sin_recogida";
+                      setFormData(prev => ({ ...prev, tipoRecogida: val }));
+                      if (val === "sin_recogida") {
+                        setFormData(prev => ({ ...prev, hotelNombre: "", airbnbUbicacion: "", apartamento: "" }));
+                      }
+                    }}
+                    disabled={formData.transporte === "no"}
+                    className={`w-full px-4 py-2 border rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all ${formData.transporte === "no" ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'bg-gray-50 border-gray-200'}`}
+                  >
+                    <option value="sin_recogida">Sin Recogida</option>
+                    <option value="hotel">Hotel</option>
+                    <option value="airbnb">Airbnb</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Campos condicionales según tipo de recogida */}
+              {formData.transporte === "si" && formData.tipoRecogida === "hotel" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Hotel *</label>
+                    <input
+                      type="text"
+                      value={formData.hotelNombre}
+                      onChange={(e) => setFormData(prev => ({ ...prev, hotelNombre: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Ej: Hyatt Ziva Cap Cana, Riu Bavaro"
+                      required={formData.tipoRecogida === "hotel"}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
+                    <select
+                      value={formData.horaRecogida}
+                      onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    >
+                      <option value="">Seleccionar hora</option>
+                      {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {formData.transporte === "si" && formData.tipoRecogida === "airbnb" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Airbnb *</label>
+                    <input
+                      type="text"
+                      value={formData.airbnbUbicacion}
+                      onChange={(e) => setFormData(prev => ({ ...prev, airbnbUbicacion: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Ej: Parque Central, Pueblo Bavaro"
+                      required={formData.tipoRecogida === "airbnb"}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
+                    <select
+                      value={formData.horaRecogida}
+                      onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    >
+                      <option value="">Seleccionar hora</option>
+                      {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {formData.transporte === "si" && formData.tipoRecogida === "sin_recogida" && (
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-4 border-l-4 border-[#0a1628] pl-4">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Apartamento *</label>
+                    <input
+                      type="text"
+                      value={formData.apartamento}
+                      onChange={(e) => setFormData(prev => ({ ...prev, apartamento: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Ej: Villa B12, Casa 5, Apt 3B"
+                      required={formData.tipoRecogida === "sin_recogida" && formData.transporte === "si"}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Precios */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -2838,7 +3011,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Excursiones temporales */}
               <div className="border-t border-gray-100 pt-4 mt-4">
                 <h4 className="text-[#0a1628] font-semibold mb-3">Excursiones del Proveedor</h4>
                 <div className="space-y-2 mb-3">
