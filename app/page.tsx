@@ -179,7 +179,7 @@ export default function Home() {
   });
 
   // ============================================
-  // FORM DATA
+  // FORM DATA - TODOS LOS CAMPOS VACÍOS
   // ============================================
   const [formData, setFormData] = useState({
     clienteNombre: "",
@@ -189,17 +189,17 @@ export default function Home() {
     excursionNombre: "",
     fechaExcursion: "",
     horaExcursion: "02:00 PM",
-    precioAdultoUSD: "0",
-    precioNinoUSD: "0",
-    costoProveedorAdultoUSD: "0",
-    costoProveedorNinoUSD: "0",
-    comisionAdultoUSD: "0",
-    comisionNinoUSD: "0",
+    precioAdultoUSD: "",
+    precioNinoUSD: "",
+    costoProveedorAdultoUSD: "",
+    costoProveedorNinoUSD: "",
+    comisionAdultoUSD: "",
+    comisionNinoUSD: "",
     cantidadAdultos: 1,
     cantidadNinos: 0,
-    precioTotalUSD: "0",
-    costoTotalUSD: "0",
-    comisionTotalUSD: "0",
+    precioTotalUSD: "0.00",
+    costoTotalUSD: "0.00",
+    comisionTotalUSD: "0.00",
     pagoCliente: "completo" as "completo" | "deposito_25" | "pago_dia",
     montoPagadoUSD: "",
     saldoPendienteUSD: "",
@@ -364,10 +364,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v37");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v37");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v37");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v37");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v38");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v38");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v38");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v38");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -377,22 +377,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v37", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v38", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v37", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v38", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v37", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v38", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v37", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v38", JSON.stringify(data));
   };
 
   // ============================================
@@ -403,7 +403,7 @@ export default function Home() {
   };
 
   const calcularTotalesVenta = () => {
-    // 🔥 CONVERTIR A NÚMERO USANDO Number() - MÁS SEGURO
+    // 🔥 CONVERTIR A NÚMERO CORRECTAMENTE
     const precioAdulto = Number(formData.precioAdultoUSD) || 0;
     const precioNino = Number(formData.precioNinoUSD) || 0;
     const costoAdulto = Number(formData.costoProveedorAdultoUSD) || 0;
@@ -411,12 +411,25 @@ export default function Home() {
     const cantAdultos = Number(formData.cantidadAdultos) || 0;
     const cantNinos = Number(formData.cantidadNinos) || 0;
     
-    // 🔥 CALCULAR con valores numéricos puros
     const precioTotal = (precioAdulto * cantAdultos) + (precioNino * cantNinos);
     const costoTotal = (costoAdulto * cantAdultos) + (costoNino * cantNinos);
     const comisionTotal = precioTotal - costoTotal;
     
     return { precioTotal, costoTotal, comisionTotal };
+  };
+
+  // ============================================
+  // ACTUALIZAR TOTALES - CON FORCE UPDATE
+  // ============================================
+  const updateCantidades = () => {
+    const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
+    
+    setFormData(prev => ({
+      ...prev,
+      precioTotalUSD: precioTotal.toFixed(2),
+      costoTotalUSD: costoTotal.toFixed(2),
+      comisionTotalUSD: comisionTotal.toFixed(2),
+    }));
   };
 
   // ============================================
@@ -431,12 +444,12 @@ export default function Home() {
         ...prev,
         excursionId: excursion.id,
         excursionNombre: excursion.nombre,
-        precioAdultoUSD: String(excursion.precioAdultoUSD || 0),
-        precioNinoUSD: String(excursion.precioNinoUSD || 0),
-        costoProveedorAdultoUSD: String(excursion.costoProveedorAdultoUSD || 0),
-        costoProveedorNinoUSD: String(excursion.costoProveedorNinoUSD || 0),
-        comisionAdultoUSD: String(excursion.comisionAdultoUSD || 0),
-        comisionNinoUSD: String(excursion.comisionNinoUSD || 0),
+        precioAdultoUSD: String(excursion.precioAdultoUSD || ""),
+        precioNinoUSD: String(excursion.precioNinoUSD || ""),
+        costoProveedorAdultoUSD: String(excursion.costoProveedorAdultoUSD || ""),
+        costoProveedorNinoUSD: String(excursion.costoProveedorNinoUSD || ""),
+        comisionAdultoUSD: String(excursion.comisionAdultoUSD || ""),
+        comisionNinoUSD: String(excursion.comisionNinoUSD || ""),
         proveedorId: excursion.proveedorId,
         proveedorNombre: excursion.proveedorNombre,
         zona: excursion.zona || "",
@@ -447,56 +460,42 @@ export default function Home() {
   };
 
   // ============================================
-  // ACTUALIZAR TOTALES
-  // ============================================
-  const updateCantidades = () => {
-    const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
-    
-    setFormData(prev => ({
-      ...prev,
-      precioTotalUSD: precioTotal.toFixed(2),
-      costoTotalUSD: costoTotal.toFixed(2),
-      comisionTotalUSD: comisionTotal.toFixed(2),
-    }));
-  };
-
-  // ============================================
-  // HANDLE CAMBIOS - CORREGIDOS
+  // HANDLE CAMBIOS - TODOS CON FORCE UPDATE
   // ============================================
   const handlePrecioAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setFormData(prev => ({ ...prev, precioAdultoUSD: val }));
-    setTimeout(updateCantidades, 50);
+    setTimeout(updateCantidades, 10);
   };
 
   const handlePrecioNinoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setFormData(prev => ({ ...prev, precioNinoUSD: val }));
-    setTimeout(updateCantidades, 50);
+    setTimeout(updateCantidades, 10);
   };
 
   const handleCostoAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setFormData(prev => ({ ...prev, costoProveedorAdultoUSD: val }));
-    setTimeout(updateCantidades, 50);
+    setTimeout(updateCantidades, 10);
   };
 
   const handleCostoNinoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setFormData(prev => ({ ...prev, costoProveedorNinoUSD: val }));
-    setTimeout(updateCantidades, 50);
+    setTimeout(updateCantidades, 10);
   };
 
   const handleCantidadAdultosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value) || 0;
     setFormData(prev => ({ ...prev, cantidadAdultos: val }));
-    setTimeout(updateCantidades, 50);
+    setTimeout(updateCantidades, 10);
   };
 
   const handleCantidadNinosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value) || 0;
     setFormData(prev => ({ ...prev, cantidadNinos: val }));
-    setTimeout(updateCantidades, 50);
+    setTimeout(updateCantidades, 10);
   };
 
   // ============================================
@@ -571,17 +570,17 @@ export default function Home() {
       excursionNombre: "",
       fechaExcursion: "",
       horaExcursion: "02:00 PM",
-      precioAdultoUSD: "0",
-      precioNinoUSD: "0",
-      costoProveedorAdultoUSD: "0",
-      costoProveedorNinoUSD: "0",
-      comisionAdultoUSD: "0",
-      comisionNinoUSD: "0",
+      precioAdultoUSD: "",
+      precioNinoUSD: "",
+      costoProveedorAdultoUSD: "",
+      costoProveedorNinoUSD: "",
+      comisionAdultoUSD: "",
+      comisionNinoUSD: "",
       cantidadAdultos: 1,
       cantidadNinos: 0,
-      precioTotalUSD: "0",
-      costoTotalUSD: "0",
-      comisionTotalUSD: "0",
+      precioTotalUSD: "0.00",
+      costoTotalUSD: "0.00",
+      comisionTotalUSD: "0.00",
       pagoCliente: "completo",
       montoPagadoUSD: "",
       saldoPendienteUSD: "",
@@ -618,12 +617,12 @@ export default function Home() {
       excursionNombre: venta.excursionNombre,
       fechaExcursion: venta.fechaExcursion,
       horaExcursion: venta.horaExcursion || "02:00 PM",
-      precioAdultoUSD: String(venta.precioAdultoPersonalizado || 0),
-      precioNinoUSD: String(venta.precioNinoPersonalizado || 0),
-      costoProveedorAdultoUSD: String(venta.costoAdultoPersonalizado || 0),
-      costoProveedorNinoUSD: String(venta.costoNinoPersonalizado || 0),
-      comisionAdultoUSD: String(excursion?.comisionAdultoUSD || 0),
-      comisionNinoUSD: String(excursion?.comisionNinoUSD || 0),
+      precioAdultoUSD: String(venta.precioAdultoPersonalizado || ""),
+      precioNinoUSD: String(venta.precioNinoPersonalizado || ""),
+      costoProveedorAdultoUSD: String(venta.costoAdultoPersonalizado || ""),
+      costoProveedorNinoUSD: String(venta.costoNinoPersonalizado || ""),
+      comisionAdultoUSD: String(excursion?.comisionAdultoUSD || ""),
+      comisionNinoUSD: String(excursion?.comisionNinoUSD || ""),
       cantidadAdultos: venta.cantidadAdultos,
       cantidadNinos: venta.cantidadNinos,
       precioTotalUSD: venta.precioVentaUSD.toFixed(2),
@@ -1240,7 +1239,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-[10px] text-gray-400">v3.7 • Republic Excursions © 2026</p>
+              <p className="text-[10px] text-gray-400">v3.8 • Republic Excursions © 2026</p>
             </div>
           </div>
         </div>
@@ -2272,6 +2271,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* CAMPOS DE PRECIOS - TODOS VACÍOS POR DEFECTO */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Precio Venta Adulto (USD)</label>
@@ -2281,6 +2281,7 @@ export default function Home() {
                     value={formData.precioAdultoUSD}
                     onChange={handlePrecioAdultoChange}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    placeholder="0.00"
                   />
                 </div>
                 <div>
@@ -2291,6 +2292,7 @@ export default function Home() {
                     value={formData.costoProveedorAdultoUSD}
                     onChange={handleCostoAdultoChange}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    placeholder="0.00"
                   />
                 </div>
                 <div>
@@ -2301,6 +2303,7 @@ export default function Home() {
                     value={formData.precioNinoUSD}
                     onChange={handlePrecioNinoChange}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    placeholder="0.00"
                   />
                 </div>
                 <div>
@@ -2311,10 +2314,12 @@ export default function Home() {
                     value={formData.costoProveedorNinoUSD}
                     onChange={handleCostoNinoChange}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    placeholder="0.00"
                   />
                 </div>
               </div>
 
+              {/* TOTALES - SE ACTUALIZAN AUTOMÁTICAMENTE */}
               <div className="grid grid-cols-3 gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-100">
                 <div>
                   <label className="text-gray-500 text-sm block mb-1">Total Venta</label>
@@ -2571,7 +2576,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Excursiones temporales */}
               <div className="border-t border-gray-100 pt-4 mt-4">
                 <h4 className="text-[#0a1628] font-semibold mb-3">Excursiones del Proveedor</h4>
                 <div className="space-y-2 mb-3">
