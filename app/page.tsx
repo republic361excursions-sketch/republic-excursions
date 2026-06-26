@@ -97,7 +97,7 @@ interface Venta {
 }
 
 // ============================================
-// ZONAS - Solo 5 iniciales
+// LISTAS
 // ============================================
 const ZONAS_INICIALES = [
   "Bavaro", "Los Corales", "Punta Cana", "Jellyfish", "Macao"
@@ -112,9 +112,6 @@ const guardarZonasGlobales = (zonas: string[]) => {
   localStorage.setItem("excursiones_zonas_v44", JSON.stringify(zonas));
 };
 
-// ============================================
-// EXCURSIONES PREDEFINIDAS
-// ============================================
 const EXCURSIONES_PREDEFINIDAS = [
   { id: "party-boat", nombre: "Party Boat Privado" },
   { id: "snorkel-catalina", nombre: "Snorkel en Catalina" },
@@ -175,17 +172,13 @@ export default function Home() {
 
   const [searchClientes, setSearchClientes] = useState("");
   const [filterClienteExcursion, setFilterClienteExcursion] = useState("");
-
   const [searchProveedores, setSearchProveedores] = useState("");
   const [filterProveedorMetodo, setFilterProveedorMetodo] = useState("todos");
-
   const [searchExcursiones, setSearchExcursiones] = useState("");
   const [filterExcursionProveedor, setFilterExcursionProveedor] = useState("");
-
   const [searchBancos, setSearchBancos] = useState("");
   const [filterBancoTipo, setFilterBancoTipo] = useState("todos");
   const [filterBancoMoneda, setFilterBancoMoneda] = useState("todas");
-
   const [searchReservas, setSearchReservas] = useState("");
   const [filterReservaEstado, setFilterReservaEstado] = useState("todas");
   const [filterReservaFecha, setFilterReservaFecha] = useState("");
@@ -348,94 +341,8 @@ export default function Home() {
   });
 
   // ============================================
-  // FUNCIONES PARA GESTIONAR ZONAS
-  // ============================================
-  const handleAgregarZona = () => {
-    const zona = nuevaZonaInput.trim();
-    if (!zona) {
-      alert("Por favor escribe el nombre de la zona");
-      return;
-    }
-    if (ZONAS_GLOBALES.includes(zona)) {
-      alert("Esta zona ya existe");
-      return;
-    }
-    const nuevasZonas = [...ZONAS_GLOBALES, zona];
-    guardarZonasGlobales(nuevasZonas);
-    setZonasActuales([...nuevasZonas]);
-    setNuevaZonaInput("");
-  };
-
-  const handleEliminarZona = (zona: string) => {
-    if (ZONAS_GLOBALES.length <= 1) {
-      alert("Debe haber al menos una zona disponible");
-      return;
-    }
-    if (!confirm(`¿Eliminar la zona "${zona}"?`)) return;
-    const nuevasZonas = ZONAS_GLOBALES.filter(z => z !== zona);
-    guardarZonasGlobales(nuevasZonas);
-    setZonasActuales([...nuevasZonas]);
-  };
-
-  // ============================================
   // FUNCIONES DE FORMATO
   // ============================================
-  const formatearTelefono = (telefono: string) => {
-    const numeros = telefono.replace(/\D/g, '');
-    if (numeros.length === 10) {
-      return `(${numeros.slice(0, 3)}) ${numeros.slice(3, 6)}-${numeros.slice(6, 10)}`;
-    }
-    return numeros;
-  };
-
-  const manejarCambioTelefono = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const valor = e.target.value;
-    const numeros = valor.replace(/\D/g, '');
-    const numerosLimitados = numeros.slice(0, 10);
-    const telefonoFormateado = formatearTelefono(numerosLimitados);
-    setProveedorFormData(prev => ({
-      ...prev,
-      telefono: telefonoFormateado
-    }));
-  };
-
-  const formatearRNC = (rnc: string) => {
-    const numeros = rnc.replace(/\D/g, '');
-    if (numeros.length <= 2) return numeros;
-    if (numeros.length <= 9) {
-      return `${numeros.slice(0, 2)}-${numeros.slice(2)}`;
-    }
-    return `${numeros.slice(0, 2)}-${numeros.slice(2, 9)}-${numeros.slice(9, 10)}`;
-  };
-
-  const formatearCedula = (cedula: string) => {
-    const numeros = cedula.replace(/\D/g, '');
-    if (numeros.length <= 3) return numeros;
-    if (numeros.length <= 10) {
-      return `${numeros.slice(0, 3)}-${numeros.slice(3)}`;
-    }
-    return `${numeros.slice(0, 3)}-${numeros.slice(3, 10)}-${numeros.slice(10, 11)}`;
-  };
-
-  const manejarCambioRNCcedula = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const valor = e.target.value;
-    const numeros = valor.replace(/\D/g, '');
-    
-    let formateado = numeros;
-    if (proveedorFormData.tipoDocumento === "rnc") {
-      const numerosLimitados = numeros.slice(0, 11);
-      formateado = formatearRNC(numerosLimitados);
-    } else {
-      const numerosLimitados = numeros.slice(0, 11);
-      formateado = formatearCedula(numerosLimitados);
-    }
-    
-    setProveedorFormData(prev => ({
-      ...prev,
-      rncCedula: formateado
-    }));
-  };
-
   const formatUSD = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -461,6 +368,39 @@ export default function Home() {
   const getZonasString = (zonas: string[]) => {
     if (!zonas || zonas.length === 0) return "Sin zona";
     return zonas.join(", ");
+  };
+
+  const getEstadoText = (estado: string) => {
+    const map: any = {
+      pendiente: "Pendiente",
+      confirmada: "Confirmada",
+      cancelada: "Cancelada",
+      completada: "Completada"
+    };
+    return map[estado] || estado;
+  };
+
+  const getEstadoColor = (estado: string) => {
+    const map: any = {
+      pendiente: "bg-yellow-100 text-yellow-800",
+      confirmada: "bg-blue-100 text-blue-800",
+      cancelada: "bg-red-100 text-red-800",
+      completada: "bg-green-100 text-green-800"
+    };
+    return map[estado] || "bg-gray-100 text-gray-800";
+  };
+
+  const getTipoRecogidaText = (tipo: string) => {
+    const map: any = {
+      hotel: "Hotel",
+      airbnb: "Airbnb",
+      sin_recogida: "Sin Recogida"
+    };
+    return map[tipo] || tipo;
+  };
+
+  const getTransporteText = (valor: string) => {
+    return valor === "si" ? "Si" : "No";
   };
 
   // ============================================
@@ -537,6 +477,36 @@ export default function Home() {
   };
 
   // ============================================
+  // FUNCIONES PARA GESTIONAR ZONAS
+  // ============================================
+  const handleAgregarZona = () => {
+    const zona = nuevaZonaInput.trim();
+    if (!zona) {
+      alert("Por favor escribe el nombre de la zona");
+      return;
+    }
+    if (ZONAS_GLOBALES.includes(zona)) {
+      alert("Esta zona ya existe");
+      return;
+    }
+    const nuevasZonas = [...ZONAS_GLOBALES, zona];
+    guardarZonasGlobales(nuevasZonas);
+    setZonasActuales([...nuevasZonas]);
+    setNuevaZonaInput("");
+  };
+
+  const handleEliminarZona = (zona: string) => {
+    if (ZONAS_GLOBALES.length <= 1) {
+      alert("Debe haber al menos una zona disponible");
+      return;
+    }
+    if (!confirm(`¿Eliminar la zona "${zona}"?`)) return;
+    const nuevasZonas = ZONAS_GLOBALES.filter(z => z !== zona);
+    guardarZonasGlobales(nuevasZonas);
+    setZonasActuales([...nuevasZonas]);
+  };
+
+  // ============================================
   // CALCULAR COMISION Y TOTALES
   // ============================================
   const calcularComision = (precioVenta: number, costoProveedor: number) => {
@@ -579,9 +549,6 @@ export default function Home() {
     return { precioTotal, costoTotal, comisionTotal };
   };
 
-  // ============================================
-  // ACTUALIZAR TOTALES
-  // ============================================
   const updateCantidades = () => {
     const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
     
@@ -594,22 +561,6 @@ export default function Home() {
   };
 
   // ============================================
-  // SELECCIONAR CLIENTE EXISTENTE
-  // ============================================
-  const selectCliente = (clienteId: string) => {
-    const cliente = clientes.find(c => c.id === clienteId);
-    if (cliente) {
-      setFormData(prev => ({
-        ...prev,
-        clienteId: cliente.id,
-        clienteNombre: cliente.nombre,
-        clienteWhatsapp: cliente.whatsapp,
-        clienteEmail: cliente.email,
-      }));
-    }
-  };
-
-  // ============================================
   // SELECCIONAR EXCURSION
   // ============================================
   const handleSelectExcursion = (excursionId: string, customName?: string) => {
@@ -618,24 +569,6 @@ export default function Home() {
     if (excursionId === "otro") {
       const nombreFinal = customName || "";
       setNombrePersonalizado(nombreFinal);
-      
-      const excursionTemp: Excursion = {
-        id: "otro-temp",
-        nombre: nombreFinal || "Otro (especificar)",
-        proveedorId: "",
-        proveedorNombre: "",
-        precioAdultoUSD: 0,
-        precioNinoUSD: null,
-        costoProveedorAdultoUSD: 0,
-        costoProveedorNinoUSD: null,
-        comisionAdultoUSD: 0,
-        comisionNinoUSD: null,
-        zona: [],
-        tipoPrecio: "persona",
-        esOtro: true,
-        nombrePersonalizado: nombreFinal
-      };
-      setSelectedExcursionForVenta(excursionTemp);
       
       setFormData(prev => ({
         ...prev,
@@ -694,75 +627,6 @@ export default function Home() {
         }));
       }, 50);
     }
-  };
-
-  // ============================================
-  // HANDLE CAMBIOS
-  // ============================================
-  const handlePrecioAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setFormData(prev => ({ ...prev, precioAdultoUSD: val }));
-    setTimeout(updateCantidades, 10);
-  };
-
-  const handlePrecioNinoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setFormData(prev => ({ ...prev, precioNinoUSD: val }));
-    setTimeout(updateCantidades, 10);
-  };
-
-  const handleCostoAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setFormData(prev => ({ ...prev, costoProveedorAdultoUSD: val }));
-    setTimeout(updateCantidades, 10);
-  };
-
-  const handleCostoNinoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setFormData(prev => ({ ...prev, costoProveedorNinoUSD: val }));
-    setTimeout(updateCantidades, 10);
-  };
-
-  const handleCantidadAdultosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value) || 0;
-    setFormData(prev => ({ ...prev, cantidadAdultos: val }));
-    setTimeout(updateCantidades, 10);
-  };
-
-  const handleCantidadNinosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value) || 0;
-    setFormData(prev => ({ ...prev, cantidadNinos: val }));
-    setTimeout(updateCantidades, 10);
-  };
-
-  const handleCantidadPersonasPrivadoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value) || 0;
-    setFormData(prev => ({ ...prev, cantidadPersonasPrivado: val }));
-    setTimeout(updateCantidades, 10);
-  };
-
-  const handlePrecioGrupoPrivadoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setFormData(prev => ({ ...prev, precioGrupoPrivado: val }));
-    setTimeout(updateCantidades, 10);
-  };
-
-  const handleCostoGrupoPrivadoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setFormData(prev => ({ ...prev, costoGrupoPrivado: val }));
-    setTimeout(updateCantidades, 10);
-  };
-
-  const handleCapacidadGrupoPrivadoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setFormData(prev => ({ ...prev, capacidadGrupoPrivado: val }));
-    setTimeout(updateCantidades, 10);
-  };
-
-  const handleExtraPorPersonaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setFormData(prev => ({ ...prev, extraPorPersona: val }));
-    setTimeout(updateCantidades, 10);
   };
 
   // ============================================
@@ -893,625 +757,6 @@ export default function Home() {
   };
 
   // ============================================
-  // HANDLE VENTA EDIT
-  // ============================================
-  const editVenta = (venta: Venta) => {
-    setEditingVentaId(venta.id);
-    const excursion = excursiones.find(e => e.id === venta.excursionId);
-    
-    setFormData({
-      clienteNombre: venta.clienteNombre,
-      clienteWhatsapp: venta.clienteWhatsapp,
-      clienteEmail: venta.clienteEmail,
-      clienteId: "",
-      excursionId: venta.excursionId,
-      excursionNombre: venta.excursionNombre,
-      fechaExcursion: venta.fechaExcursion,
-      horaExcursion: venta.horaExcursion || "02:00 PM",
-      precioAdultoUSD: String(venta.precioAdultoPersonalizado || ""),
-      precioNinoUSD: String(venta.precioNinoPersonalizado || ""),
-      costoProveedorAdultoUSD: String(venta.costoAdultoPersonalizado || ""),
-      costoProveedorNinoUSD: String(venta.costoNinoPersonalizado || ""),
-      comisionAdultoUSD: String(excursion?.comisionAdultoUSD || ""),
-      comisionNinoUSD: String(excursion?.comisionNinoUSD || ""),
-      cantidadAdultos: venta.cantidadAdultos,
-      cantidadNinos: venta.cantidadNinos,
-      cantidadPersonasPrivado: venta.cantidadPersonasPrivado || 1,
-      precioTotalUSD: venta.precioVentaUSD.toFixed(2),
-      costoTotalUSD: venta.costoProveedorUSD.toFixed(2),
-      comisionTotalUSD: venta.comisionUSD.toFixed(2),
-      pagoCliente: venta.pagoCliente,
-      montoPagadoUSD: venta.montoPagadoUSD.toString(),
-      saldoPendienteUSD: venta.saldoPendienteUSD.toString(),
-      metodoPagoCliente: venta.metodoPagoCliente,
-      proveedorId: venta.proveedorId,
-      proveedorNombre: venta.proveedorNombre,
-      proveedorPagado: venta.proveedorPagado,
-      metodoPagoProveedor: venta.metodoPagoProveedor,
-      tipoServicio: venta.tipoServicio,
-      nombreGrupo: venta.nombreGrupo || "",
-      tipoRecogida: venta.tipoRecogida || "sin_recogida",
-      transporte: venta.transporte || "no",
-      hotelNombre: venta.hotelNombre || "",
-      hotelHabitacion: venta.hotelHabitacion || "",
-      airbnbUbicacion: venta.airbnbUbicacion || "",
-      airbnbApartamento: venta.airbnbApartamento || "",
-      apartamento: venta.apartamento || "",
-      horaRecogida: venta.horaRecogida || "",
-      estado: venta.estado || "pendiente",
-      nota: venta.nota,
-      zona: excursion?.zona || [],
-      tipoPrecio: venta.tipoPrecio || "persona",
-      precioGrupoPrivado: String(excursion?.precioGrupoPrivado || ""),
-      costoGrupoPrivado: String(excursion?.costoGrupoPrivado || ""),
-      capacidadGrupoPrivado: String(excursion?.capacidadGrupoPrivado || ""),
-      extraPorPersona: String(excursion?.extraPorPersona || ""),
-    });
-    setShowForm(true);
-  };
-
-  const deleteVenta = (id: string) => {
-    if (!confirm("Eliminar esta venta?")) return;
-    const updated = ventas.filter(v => v.id !== id);
-    saveVentas(updated);
-  };
-
-  // ============================================
-  // HANDLE PROVEEDOR
-  // ============================================
-  const handleProveedorSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const proveedorId = editingProveedorId || Date.now().toString();
-    
-    if (editingProveedorId) {
-      const updated = proveedores.map(p => 
-        p.id === editingProveedorId 
-          ? { 
-              ...p, 
-              nombre: proveedorFormData.nombre,
-              empresa: proveedorFormData.empresa,
-              telefono: proveedorFormData.telefono,
-              email: proveedorFormData.email,
-              metodosPago: proveedorFormData.metodosPago,
-              banco: proveedorFormData.banco,
-              numeroCuenta: proveedorFormData.numeroCuenta,
-              monedaCuenta: proveedorFormData.monedaCuenta,
-              tipoCuenta: proveedorFormData.tipoCuenta,
-              tipoBeneficiario: proveedorFormData.tipoBeneficiario,
-              beneficiario: proveedorFormData.beneficiario,
-              rncCedula: proveedorFormData.rncCedula,
-              tipoDocumento: proveedorFormData.tipoDocumento,
-            }
-          : p
-      );
-      saveProveedores(updated);
-      
-      const excursionesSinViejas = excursiones.filter(e => e.proveedorId !== editingProveedorId);
-      
-      const nuevasExcursiones = tempExcursiones.map((e, index) => ({
-        id: Date.now().toString() + index,
-        ...e,
-        proveedorId: editingProveedorId,
-        proveedorNombre: proveedorFormData.nombre,
-      }));
-      
-      saveExcursiones([...excursionesSinViejas, ...nuevasExcursiones]);
-      alert("Proveedor actualizado correctamente");
-    } else {
-      const nuevoProveedor: Proveedor = {
-        id: proveedorId,
-        ...proveedorFormData,
-      };
-      saveProveedores([...proveedores, nuevoProveedor]);
-      
-      const nuevasExcursiones = tempExcursiones.map((e, index) => ({
-        id: Date.now().toString() + index,
-        ...e,
-        proveedorId: proveedorId,
-        proveedorNombre: proveedorFormData.nombre,
-      }));
-      
-      if (nuevasExcursiones.length > 0) {
-        saveExcursiones([...excursiones, ...nuevasExcursiones]);
-      }
-      
-      alert("Proveedor agregado correctamente");
-    }
-    
-    setShowProveedorForm(false);
-    setEditingProveedorId(null);
-    setProveedorFormData({
-      nombre: "",
-      empresa: "",
-      telefono: "",
-      email: "",
-      metodosPago: [],
-      banco: "",
-      numeroCuenta: "",
-      monedaCuenta: "RD$",
-      tipoCuenta: [],
-      tipoBeneficiario: "personal",
-      beneficiario: "",
-      rncCedula: "",
-      tipoDocumento: "cedula",
-    });
-    setTempExcursiones([]);
-    setTempExcursionForm({
-      nombre: "",
-      precioAdultoUSD: "",
-      precioNinoUSD: "",
-      costoProveedorAdultoUSD: "",
-      costoProveedorNinoUSD: "",
-      comisionAdultoUSD: "",
-      comisionNinoUSD: "",
-      zona: [],
-      capacidad: "",
-      tienePrecioNino: false,
-      tipoPrecio: "persona",
-      precioGrupoPrivado: "",
-      costoGrupoPrivado: "",
-      capacidadGrupoPrivado: "",
-      extraPorPersona: "",
-    });
-  };
-
-  const editProveedor = (proveedor: Proveedor) => {
-    setEditingProveedorId(proveedor.id);
-    setProveedorFormData({
-      nombre: proveedor.nombre,
-      empresa: proveedor.empresa || "",
-      telefono: proveedor.telefono,
-      email: proveedor.email,
-      metodosPago: proveedor.metodosPago,
-      banco: proveedor.banco,
-      numeroCuenta: proveedor.numeroCuenta,
-      monedaCuenta: proveedor.monedaCuenta || "RD$",
-      tipoCuenta: proveedor.tipoCuenta || [],
-      tipoBeneficiario: proveedor.tipoBeneficiario || "personal",
-      beneficiario: proveedor.beneficiario,
-      rncCedula: proveedor.rncCedula || "",
-      tipoDocumento: proveedor.tipoDocumento || "cedula",
-    });
-    
-    const excursionesDelProveedor = excursiones.filter(e => e.proveedorId === proveedor.id);
-    setTempExcursiones(excursionesDelProveedor.map(e => ({
-      nombre: e.nombre,
-      precioAdultoUSD: e.precioAdultoUSD,
-      precioNinoUSD: e.precioNinoUSD,
-      costoProveedorAdultoUSD: e.costoProveedorAdultoUSD,
-      costoProveedorNinoUSD: e.costoProveedorNinoUSD,
-      comisionAdultoUSD: e.comisionAdultoUSD,
-      comisionNinoUSD: e.comisionNinoUSD,
-      zona: e.zona || [],
-      capacidad: e.capacidad || "",
-      tipoPrecio: e.tipoPrecio || "persona",
-      precioGrupoPrivado: (e as any).precioGrupoPrivado || "",
-      costoGrupoPrivado: (e as any).costoGrupoPrivado || "",
-      capacidadGrupoPrivado: (e as any).capacidadGrupoPrivado || "",
-      extraPorPersona: (e as any).extraPorPersona || "",
-    })));
-    
-    setShowProveedorForm(true);
-  };
-
-  const deleteProveedor = (id: string) => {
-    if (!confirm("Eliminar este proveedor y todas sus excursiones?")) return;
-    const updated = proveedores.filter(p => p.id !== id);
-    saveProveedores(updated);
-    const excursionesActualizadas = excursiones.filter(e => e.proveedorId !== id);
-    saveExcursiones(excursionesActualizadas);
-  };
-
-  // ============================================
-  // MANEJAR METODOS DE PAGO
-  // ============================================
-  const toggleMetodoPago = (metodo: "efectivo" | "transferencia" | "paypal") => {
-    setProveedorFormData(prev => {
-      const metodos = prev.metodosPago;
-      if (metodos.includes(metodo)) {
-        return { ...prev, metodosPago: metodos.filter(m => m !== metodo) };
-      } else {
-        return { ...prev, metodosPago: [...metodos, metodo] };
-      }
-    });
-  };
-
-  const toggleTipoCuenta = (tipo: "corriente" | "ahorros" | "corriente_us" | "ahorros_us") => {
-    setProveedorFormData(prev => {
-      const tipos = prev.tipoCuenta;
-      if (tipos.includes(tipo)) {
-        return { ...prev, tipoCuenta: tipos.filter(t => t !== tipo) };
-      } else {
-        return { ...prev, tipoCuenta: [...tipos, tipo] };
-      }
-    });
-  };
-
-  // ============================================
-  // MANEJAR EXCURSIONES TEMPORALES
-  // ============================================
-  const agregarTempExcursion = () => {
-    if (!tempExcursionForm.nombre) {
-      alert("Debes escribir el nombre de la excursion");
-      return;
-    }
-    
-    const precioAdultoUSD = Number(tempExcursionForm.precioAdultoUSD) || 0;
-    const costoProveedorAdultoUSD = Number(tempExcursionForm.costoProveedorAdultoUSD) || 0;
-    const comisionAdultoUSD = calcularComision(precioAdultoUSD, costoProveedorAdultoUSD);
-    
-    let precioNinoUSD: number | null = null;
-    let costoProveedorNinoUSD: number | null = null;
-    let comisionNinoUSD: number | null = null;
-    
-    if (tempExcursionForm.tienePrecioNino) {
-      precioNinoUSD = Number(tempExcursionForm.precioNinoUSD) || 0;
-      costoProveedorNinoUSD = Number(tempExcursionForm.costoProveedorNinoUSD) || 0;
-      comisionNinoUSD = calcularComision(precioNinoUSD, costoProveedorNinoUSD);
-    }
-    
-    setTempExcursiones([
-      ...tempExcursiones,
-      {
-        nombre: tempExcursionForm.nombre,
-        precioAdultoUSD,
-        precioNinoUSD,
-        costoProveedorAdultoUSD,
-        costoProveedorNinoUSD,
-        comisionAdultoUSD,
-        comisionNinoUSD,
-        zona: tempExcursionForm.zona.length > 0 ? tempExcursionForm.zona : ["Bavaro"],
-        capacidad: tempExcursionForm.capacidad || undefined,
-        tipoPrecio: tempExcursionForm.tipoPrecio || "persona",
-        precioGrupoPrivado: Number(tempExcursionForm.precioGrupoPrivado) || undefined,
-        costoGrupoPrivado: Number(tempExcursionForm.costoGrupoPrivado) || undefined,
-        capacidadGrupoPrivado: Number(tempExcursionForm.capacidadGrupoPrivado) || undefined,
-        extraPorPersona: Number(tempExcursionForm.extraPorPersona) || undefined,
-      }
-    ]);
-    
-    setTempExcursionForm({
-      nombre: "",
-      precioAdultoUSD: "",
-      precioNinoUSD: "",
-      costoProveedorAdultoUSD: "",
-      costoProveedorNinoUSD: "",
-      comisionAdultoUSD: "",
-      comisionNinoUSD: "",
-      zona: [],
-      capacidad: "",
-      tienePrecioNino: false,
-      tipoPrecio: "persona",
-      precioGrupoPrivado: "",
-      costoGrupoPrivado: "",
-      capacidadGrupoPrivado: "",
-      extraPorPersona: "",
-    });
-  };
-
-  const eliminarTempExcursion = (index: number) => {
-    setTempExcursiones(tempExcursiones.filter((_, i) => i !== index));
-  };
-
-  const toggleZonaTemp = (zona: string) => {
-    setTempExcursionForm(prev => {
-      const zonas = prev.zona || [];
-      if (zonas.includes(zona)) {
-        return { ...prev, zona: zonas.filter(z => z !== zona) };
-      } else {
-        return { ...prev, zona: [...zonas, zona] };
-      }
-    });
-  };
-
-  const toggleZonaExcursion = (zona: string) => {
-    setExcursionFormData(prev => {
-      const zonas = prev.zona || [];
-      if (zonas.includes(zona)) {
-        return { ...prev, zona: zonas.filter(z => z !== zona) };
-      } else {
-        return { ...prev, zona: [...zonas, zona] };
-      }
-    });
-  };
-
-  const toggleZonaNuevaExcursion = (zona: string) => {
-    setNuevaExcursionDesdeVenta(prev => {
-      const zonas = prev.zona || [];
-      if (zonas.includes(zona)) {
-        return { ...prev, zona: zonas.filter(z => z !== zona) };
-      } else {
-        return { ...prev, zona: [...zonas, zona] };
-      }
-    });
-  };
-
-  // ============================================
-  // HANDLE EXCURSION
-  // ============================================
-  const handleExcursionSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    let nombreFinal = excursionFormData.nombre;
-    if (excursionFormData.esOtro && excursionFormData.nombrePersonalizado) {
-      nombreFinal = excursionFormData.nombrePersonalizado;
-    }
-    
-    const precioAdultoUSD = Number(excursionFormData.precioAdultoUSD) || 0;
-    const costoProveedorAdultoUSD = Number(excursionFormData.costoProveedorAdultoUSD) || 0;
-    const comisionAdultoUSD = calcularComision(precioAdultoUSD, costoProveedorAdultoUSD);
-    
-    let precioNinoUSD: number | null = null;
-    let costoProveedorNinoUSD: number | null = null;
-    let comisionNinoUSD: number | null = null;
-    
-    if (excursionFormData.tienePrecioNino) {
-      precioNinoUSD = Number(excursionFormData.precioNinoUSD) || 0;
-      costoProveedorNinoUSD = Number(excursionFormData.costoProveedorNinoUSD) || 0;
-      comisionNinoUSD = calcularComision(precioNinoUSD, costoProveedorNinoUSD);
-    }
-    
-    const proveedor = proveedores.find(p => p.id === excursionFormData.proveedorId);
-    
-    const zonas = excursionFormData.zona.length > 0 ? excursionFormData.zona : ["Bavaro"];
-    
-    if (editingExcursionId) {
-      const updated = excursiones.map(e => 
-        e.id === editingExcursionId 
-          ? { 
-              ...e, 
-              nombre: nombreFinal,
-              proveedorId: excursionFormData.proveedorId,
-              proveedorNombre: proveedor?.nombre || "",
-              precioAdultoUSD,
-              precioNinoUSD,
-              costoProveedorAdultoUSD,
-              costoProveedorNinoUSD,
-              comisionAdultoUSD,
-              comisionNinoUSD,
-              zona: zonas,
-              capacidad: excursionFormData.capacidad || undefined,
-              tipoPrecio: excursionFormData.tipoPrecio || "persona",
-              precioGrupoPrivado: Number(excursionFormData.precioGrupoPrivado) || undefined,
-              costoGrupoPrivado: Number(excursionFormData.costoGrupoPrivado) || undefined,
-              capacidadGrupoPrivado: Number(excursionFormData.capacidadGrupoPrivado) || undefined,
-              extraPorPersona: Number(excursionFormData.extraPorPersona) || undefined,
-              esOtro: excursionFormData.esOtro,
-              nombrePersonalizado: excursionFormData.esOtro ? excursionFormData.nombrePersonalizado : undefined,
-            }
-          : e
-      );
-      saveExcursiones(updated);
-      alert("Excursion actualizada correctamente");
-    } else {
-      const nuevaExcursion: Excursion = {
-        id: Date.now().toString(),
-        nombre: nombreFinal,
-        proveedorId: excursionFormData.proveedorId,
-        proveedorNombre: proveedor?.nombre || "",
-        precioAdultoUSD,
-        precioNinoUSD,
-        costoProveedorAdultoUSD,
-        costoProveedorNinoUSD,
-        comisionAdultoUSD,
-        comisionNinoUSD,
-        zona: zonas,
-        capacidad: excursionFormData.capacidad || undefined,
-        tipoPrecio: excursionFormData.tipoPrecio || "persona",
-        precioGrupoPrivado: Number(excursionFormData.precioGrupoPrivado) || undefined,
-        costoGrupoPrivado: Number(excursionFormData.costoGrupoPrivado) || undefined,
-        capacidadGrupoPrivado: Number(excursionFormData.capacidadGrupoPrivado) || undefined,
-        extraPorPersona: Number(excursionFormData.extraPorPersona) || undefined,
-        esOtro: excursionFormData.esOtro,
-        nombrePersonalizado: excursionFormData.esOtro ? excursionFormData.nombrePersonalizado : undefined,
-      };
-      saveExcursiones([...excursiones, nuevaExcursion]);
-      alert("Excursion agregada correctamente");
-    }
-    
-    setShowExcursionForm(false);
-    setEditingExcursionId(null);
-    setExcursionFormData({
-      nombre: "",
-      proveedorId: "",
-      proveedorNombre: "",
-      precioAdultoUSD: "",
-      precioNinoUSD: "",
-      costoProveedorAdultoUSD: "",
-      costoProveedorNinoUSD: "",
-      comisionAdultoUSD: "",
-      comisionNinoUSD: "",
-      zona: [],
-      capacidad: "",
-      tienePrecioNino: false,
-      tipoPrecio: "persona",
-      precioGrupoPrivado: "",
-      costoGrupoPrivado: "",
-      capacidadGrupoPrivado: "",
-      extraPorPersona: "",
-      esOtro: false,
-      nombrePersonalizado: "",
-    });
-  };
-
-  const editExcursion = (excursion: Excursion) => {
-    setEditingExcursionId(excursion.id);
-    setExcursionFormData({
-      nombre: excursion.nombre,
-      proveedorId: excursion.proveedorId,
-      proveedorNombre: excursion.proveedorNombre,
-      precioAdultoUSD: String(excursion.precioAdultoUSD),
-      precioNinoUSD: excursion.precioNinoUSD?.toString() || "",
-      costoProveedorAdultoUSD: String(excursion.costoProveedorAdultoUSD),
-      costoProveedorNinoUSD: excursion.costoProveedorNinoUSD?.toString() || "",
-      comisionAdultoUSD: String(excursion.comisionAdultoUSD),
-      comisionNinoUSD: excursion.comisionNinoUSD?.toString() || "",
-      zona: excursion.zona || [],
-      capacidad: excursion.capacidad || "",
-      tienePrecioNino: excursion.precioNinoUSD !== null,
-      tipoPrecio: excursion.tipoPrecio || "persona",
-      precioGrupoPrivado: String((excursion as any).precioGrupoPrivado || ""),
-      costoGrupoPrivado: String((excursion as any).costoGrupoPrivado || ""),
-      capacidadGrupoPrivado: String((excursion as any).capacidadGrupoPrivado || ""),
-      extraPorPersona: String((excursion as any).extraPorPersona || ""),
-      esOtro: (excursion as any).esOtro || false,
-      nombrePersonalizado: (excursion as any).nombrePersonalizado || "",
-    });
-    setShowExcursionForm(true);
-  };
-
-  const deleteExcursion = (id: string) => {
-    if (!confirm("Eliminar esta excursion?")) return;
-    const updated = excursiones.filter(e => e.id !== id);
-    saveExcursiones(updated);
-  };
-
-  // ============================================
-  // HANDLE CLIENTE
-  // ============================================
-  const handleClienteSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const data = new FormData(form);
-    
-    const excursionId = data.get("excursionId") as string;
-    const excursion = excursiones.find(e => e.id === excursionId);
-    
-    const nuevoCliente: Cliente = {
-      id: Date.now().toString(),
-      nombre: data.get("nombre") as string,
-      whatsapp: data.get("whatsapp") as string,
-      email: data.get("email") as string,
-      excursionId: excursionId || "",
-      excursionNombre: excursion?.nombre || "Sin excursion asignada",
-      fechaExcursion: data.get("fechaExcursion") as string || "",
-    };
-    
-    saveClientes([...clientes, nuevoCliente]);
-    setShowClienteForm(false);
-    alert("Cliente agregado correctamente");
-  };
-
-  const deleteCliente = (id: string) => {
-    if (!confirm("Eliminar este cliente?")) return;
-    const updated = clientes.filter(c => c.id !== id);
-    saveClientes(updated);
-  };
-
-  // ============================================
-  // CREAR EXCURSION DESDE VENTA - RAPIDO
-  // ============================================
-  const handleCrearExcursionDesdeVenta = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const precioAdultoUSD = Number(nuevaExcursionDesdeVenta.precioAdultoUSD) || 0;
-    const costoProveedorAdultoUSD = Number(nuevaExcursionDesdeVenta.costoProveedorAdultoUSD) || 0;
-    const comisionAdultoUSD = calcularComision(precioAdultoUSD, costoProveedorAdultoUSD);
-    
-    let precioNinoUSD: number | null = null;
-    let costoProveedorNinoUSD: number | null = null;
-    let comisionNinoUSD: number | null = null;
-    
-    if (nuevaExcursionDesdeVenta.tienePrecioNino) {
-      precioNinoUSD = Number(nuevaExcursionDesdeVenta.precioNinoUSD) || 0;
-      costoProveedorNinoUSD = Number(nuevaExcursionDesdeVenta.costoProveedorNinoUSD) || 0;
-      comisionNinoUSD = calcularComision(precioNinoUSD, costoProveedorNinoUSD);
-    }
-    
-    let proveedorId = nuevaExcursionDesdeVenta.proveedorId;
-    let proveedorNombre = nuevaExcursionDesdeVenta.proveedorNombre;
-    
-    if (!proveedorId) {
-      const nuevoProveedor: Proveedor = {
-        id: Date.now().toString(),
-        nombre: proveedorNombre || "Proveedor Temporal",
-        empresa: "",
-        telefono: "",
-        email: "",
-        metodosPago: [],
-        banco: "",
-        numeroCuenta: "",
-        monedaCuenta: "RD$",
-        tipoCuenta: [],
-        tipoBeneficiario: "personal",
-        beneficiario: "",
-        rncCedula: "",
-        tipoDocumento: "cedula",
-      };
-      saveProveedores([...proveedores, nuevoProveedor]);
-      proveedorId = nuevoProveedor.id;
-      proveedorNombre = nuevoProveedor.nombre;
-    }
-    
-    const zonas = nuevaExcursionDesdeVenta.zona.length > 0 ? nuevaExcursionDesdeVenta.zona : ["Bavaro"];
-    
-    const nuevaExcursion: Excursion = {
-      id: Date.now().toString(),
-      nombre: nuevaExcursionDesdeVenta.nombre,
-      proveedorId: proveedorId,
-      proveedorNombre: proveedorNombre,
-      precioAdultoUSD,
-      precioNinoUSD,
-      costoProveedorAdultoUSD,
-      costoProveedorNinoUSD,
-      comisionAdultoUSD,
-      comisionNinoUSD,
-      zona: zonas,
-      capacidad: nuevaExcursionDesdeVenta.capacidad || undefined,
-      tipoPrecio: nuevaExcursionDesdeVenta.tipoPrecio || "persona",
-      precioGrupoPrivado: Number(nuevaExcursionDesdeVenta.precioGrupoPrivado) || undefined,
-      costoGrupoPrivado: Number(nuevaExcursionDesdeVenta.costoGrupoPrivado) || undefined,
-      capacidadGrupoPrivado: Number(nuevaExcursionDesdeVenta.capacidadGrupoPrivado) || undefined,
-      extraPorPersona: Number(nuevaExcursionDesdeVenta.extraPorPersona) || undefined,
-    };
-    
-    saveExcursiones([...excursiones, nuevaExcursion]);
-    
-    setFormData({
-      ...formData,
-      excursionId: nuevaExcursion.id,
-      excursionNombre: nuevaExcursion.nombre,
-      precioAdultoUSD: String(nuevaExcursion.precioAdultoUSD || ""),
-      precioNinoUSD: String(nuevaExcursion.precioNinoUSD || ""),
-      costoProveedorAdultoUSD: String(nuevaExcursion.costoProveedorAdultoUSD || ""),
-      costoProveedorNinoUSD: String(nuevaExcursion.costoProveedorNinoUSD || ""),
-      comisionAdultoUSD: String(nuevaExcursion.comisionAdultoUSD || ""),
-      comisionNinoUSD: String(nuevaExcursion.comisionNinoUSD || ""),
-      proveedorId: nuevaExcursion.proveedorId,
-      proveedorNombre: nuevaExcursion.proveedorNombre,
-      zona: nuevaExcursion.zona,
-      tipoPrecio: nuevaExcursion.tipoPrecio || "persona",
-      precioGrupoPrivado: String((nuevaExcursion as any).precioGrupoPrivado || ""),
-      costoGrupoPrivado: String((nuevaExcursion as any).costoGrupoPrivado || ""),
-      capacidadGrupoPrivado: String((nuevaExcursion as any).capacidadGrupoPrivado || ""),
-      extraPorPersona: String((nuevaExcursion as any).extraPorPersona || ""),
-    });
-    
-    setShowCrearExcursionDesdeVenta(false);
-    setNuevaExcursionDesdeVenta({
-      nombre: "",
-      precioAdultoUSD: "",
-      precioNinoUSD: "",
-      costoProveedorAdultoUSD: "",
-      costoProveedorNinoUSD: "",
-      tienePrecioNino: false,
-      proveedorId: "",
-      proveedorNombre: "",
-      zona: [],
-      capacidad: "",
-      tipoPrecio: "persona",
-      precioGrupoPrivado: "",
-      costoGrupoPrivado: "",
-      capacidadGrupoPrivado: "",
-      extraPorPersona: "",
-    });
-    
-    setTimeout(updateCantidades, 50);
-    alert("Excursion creada correctamente");
-  };
-
-  // ============================================
   // FUNCIONES DEL CALENDARIO
   // ============================================
   const getDaysInMonth = (date: Date) => {
@@ -1562,7 +807,7 @@ export default function Home() {
   };
 
   // ============================================
-  // FILTROS Y AGRUPACIONES
+  // FILTROS
   // ============================================
   let filtered = ventas;
   
@@ -1609,55 +854,13 @@ export default function Home() {
     setExpandedMonth(expandedMonth === key ? null : key);
   };
 
-  const getPagoClienteText = (tipo: string) => {
-    const map: any = {
-      completo: "Pago completo (USD)",
-      deposito_25: "Deposito 25% (USD)",
-      pago_dia: "Pago el dia (USD)"
-    };
-    return map[tipo] || tipo;
-  };
-
-  const getTipoRecogidaText = (tipo: string) => {
-    const map: any = {
-      hotel: "Hotel",
-      airbnb: "Airbnb",
-      sin_recogida: "Sin Recogida"
-    };
-    return map[tipo] || tipo;
-  };
-
-  const getTransporteText = (valor: string) => {
-    return valor === "si" ? "Si" : "No";
-  };
-
-  const getEstadoText = (estado: string) => {
-    const map: any = {
-      pendiente: "Pendiente",
-      confirmada: "Confirmada",
-      cancelada: "Cancelada",
-      completada: "Completada"
-    };
-    return map[estado] || estado;
-  };
-
-  const getEstadoColor = (estado: string) => {
-    const map: any = {
-      pendiente: "bg-yellow-100 text-yellow-800",
-      confirmada: "bg-blue-100 text-blue-800",
-      cancelada: "bg-red-100 text-red-800",
-      completada: "bg-green-100 text-green-800"
-    };
-    return map[estado] || "bg-gray-100 text-gray-800";
-  };
-
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
     let csv = "Fecha,Hora,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Recogida,Transporte,Hotel/Airbnb,Estado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
     ventas.forEach(v => {
       const recogidaInfo = v.tipoRecogida === "hotel" ? `${v.hotelNombre} - Hab: ${v.hotelHabitacion}` : 
                            v.tipoRecogida === "airbnb" ? `${v.airbnbUbicacion} - Apt: ${v.airbnbApartamento}` : "Sin recogida";
-      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${getTipoServicioLabel(v.tipoServicio)}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${getTipoServicioLabel(v.tipoServicio)}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${v.pagoCliente}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -1669,91 +872,7 @@ export default function Home() {
   };
 
   // ============================================
-  // LOGIN
-  // ============================================
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0a1628]">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-2xl p-8">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-full bg-[#0a1628] flex items-center justify-center mx-auto">
-                <span className="text-white text-2xl font-bold">RE</span>
-              </div>
-              <h1 className="text-2xl font-bold text-[#0a1628] mt-4">Republic Excursions</h1>
-              <p className="text-gray-500 text-sm mt-1">Sistema de Gestion de Excursiones</p>
-            </div>
-
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              const username = formData.get("username") as string;
-              const password = formData.get("password") as string;
-              handleLogin(username, password);
-            }} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
-                <input
-                  type="text"
-                  name="username"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  placeholder="Ingresa tu usuario"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-                <input
-                  type="password"
-                  name="password"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  placeholder="Ingresa tu contraseña"
-                />
-              </div>
-              {loginError && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-600 text-sm text-center">
-                  {loginError}
-                </div>
-              )}
-              <button
-                type="submit"
-                className="w-full bg-[#0a1628] text-white py-3.5 rounded-xl font-semibold hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20"
-              >
-                Iniciar Sesion
-              </button>
-            </form>
-
-            <div className="mt-6 p-3 bg-gray-50 rounded-xl border border-gray-100">
-              <div className="flex flex-wrap justify-center gap-2 text-xs text-gray-500">
-                <span className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0a1628]"></span>
-                  Republic
-                </span>
-                <span className="text-gray-300">•</span>
-                <span className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0a1628]"></span>
-                  Raul
-                </span>
-                <span className="text-gray-300">•</span>
-                <span className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0a1628]"></span>
-                  Gabrielle
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-4 text-center">
-              <p className="text-[10px] text-gray-400">v4.4 • Republic Excursions © 2026</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ============================================
-  // TEMA POR USUARIO
+  // RENDER FUNCTIONS
   // ============================================
   const isAdmin = currentUser === "republic";
   const isRaul = currentUser === "raul";
@@ -1784,7 +903,7 @@ export default function Home() {
   };
 
   // ============================================
-  // FUNCION PARA RENDERIZAR VISTAS
+  // RENDER VIEWS
   // ============================================
   const renderView = () => {
     switch(viewMode) {
@@ -1800,9 +919,6 @@ export default function Home() {
     }
   };
 
-  // ============================================
-  // RENDER DASHBOARD
-  // ============================================
   const renderDashboard = () => {
     const totalVentas = ventas.reduce((sum, v) => sum + v.precioVentaUSD, 0);
     const totalComisiones = ventas.reduce((sum, v) => sum + v.comisionUSD, 0);
@@ -1938,9 +1054,6 @@ export default function Home() {
     );
   };
 
-  // ============================================
-  // RENDER VENTAS
-  // ============================================
   const renderVentas = () => {
     return (
       <div className="space-y-4">
@@ -2057,9 +1170,6 @@ export default function Home() {
     );
   };
 
-  // ============================================
-  // RENDER RESERVAS
-  // ============================================
   const renderReservas = () => {
     const reservasFiltradas = ventas.filter(v => {
       const matchesSearch = v.clienteNombre.toLowerCase().includes(searchReservas.toLowerCase()) ||
@@ -2182,9 +1292,6 @@ export default function Home() {
     );
   };
 
-  // ============================================
-  // RENDER CLIENTES
-  // ============================================
   const renderClientes = () => {
     const clientesFiltrados = clientes.filter(c => {
       const matchesSearch = c.nombre.toLowerCase().includes(searchClientes.toLowerCase()) ||
@@ -2254,9 +1361,6 @@ export default function Home() {
     );
   };
 
-  // ============================================
-  // RENDER PROVEEDORES
-  // ============================================
   const renderProveedores = () => {
     const proveedoresFiltrados = proveedores.filter(p => {
       const matchesSearch = p.nombre.toLowerCase().includes(searchProveedores.toLowerCase()) ||
@@ -2327,9 +1431,6 @@ export default function Home() {
     );
   };
 
-  // ============================================
-  // RENDER BANCOS
-  // ============================================
   const renderBancos = () => {
     const bancosFiltrados = proveedores.filter(p => {
       const matchesSearch = p.nombre.toLowerCase().includes(searchBancos.toLowerCase()) ||
@@ -2423,9 +1524,6 @@ export default function Home() {
     );
   };
 
-  // ============================================
-  // RENDER CALENDARIO
-  // ============================================
   const renderCalendario = () => {
     const days = getDaysInMonth(currentDate);
 
@@ -2523,9 +1621,6 @@ export default function Home() {
     );
   };
 
-  // ============================================
-  // RENDER EXCURSIONES
-  // ============================================
   const renderExcursiones = () => {
     const excursionesFiltradas = excursiones.filter(e => {
       const matchesSearch = e.nombre.toLowerCase().includes(searchExcursiones.toLowerCase()) ||
@@ -2576,12 +1671,6 @@ export default function Home() {
                     <h3 className="text-[#0a1628] font-semibold">{e.nombre}</h3>
                     <p className="text-gray-400 text-sm">{e.proveedorNombre}</p>
                     <p className="text-xs text-gray-500">Zonas: {getZonasString(e.zona)}</p>
-                    {(e as any).esOtro && (
-                      <p className="text-xs text-[#0a1628] font-medium">🔹 Personalizada</p>
-                    )}
-                    {(e as any).precioGrupoPrivado && (
-                      <p className="text-xs text-[#0a1628] font-medium">Precio Grupo Privado: {formatUSD((e as any).precioGrupoPrivado)}</p>
-                    )}
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => editExcursion(e)} className="px-3 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg hover:bg-[#0a1628]/20 text-xs transition-all">Editar</button>
@@ -2617,18 +1706,6 @@ export default function Home() {
                     <span>Tipo de Precio</span>
                     <span className="text-[#0a1628]">{getTipoPrecioLabel(e.tipoPrecio)}</span>
                   </div>
-                  {(e as any).capacidadGrupoPrivado && (
-                    <div className="flex justify-between text-gray-400 text-xs">
-                      <span>Capacidad Grupo Privado</span>
-                      <span>{(e as any).capacidadGrupoPrivado} personas</span>
-                    </div>
-                  )}
-                  {(e as any).extraPorPersona && (
-                    <div className="flex justify-between text-gray-400 text-xs">
-                      <span>Extra por persona</span>
-                      <span>{formatUSD((e as any).extraPorPersona)}</span>
-                    </div>
-                  )}
                   {e.capacidad && (
                     <div className="flex justify-between text-gray-400 text-xs">
                       <span>Capacidad</span>
@@ -2717,6 +1794,99 @@ export default function Home() {
     );
   };
 
+  // Funciones vacías para evitar errores (se completarán con los modales)
+  const editVenta = (venta: Venta) => { setEditingVentaId(venta.id); setShowForm(true); };
+  const deleteVenta = (id: string) => { if (!confirm("Eliminar esta venta?")) return; const updated = ventas.filter(v => v.id !== id); saveVentas(updated); };
+  const deleteCliente = (id: string) => { if (!confirm("Eliminar este cliente?")) return; const updated = clientes.filter(c => c.id !== id); saveClientes(updated); };
+  const editProveedor = (proveedor: Proveedor) => { setEditingProveedorId(proveedor.id); setShowProveedorForm(true); };
+  const deleteProveedor = (id: string) => { if (!confirm("Eliminar este proveedor?")) return; const updated = proveedores.filter(p => p.id !== id); saveProveedores(updated); };
+  const editExcursion = (excursion: Excursion) => { setEditingExcursionId(excursion.id); setShowExcursionForm(true); };
+  const deleteExcursion = (id: string) => { if (!confirm("Eliminar esta excursion?")) return; const updated = excursiones.filter(e => e.id !== id); saveExcursiones(updated); };
+
+  // ============================================
+  // LOGIN
+  // ============================================
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0a1628]">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-2xl shadow-2xl p-8">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-full bg-[#0a1628] flex items-center justify-center mx-auto">
+                <span className="text-white text-2xl font-bold">RE</span>
+              </div>
+              <h1 className="text-2xl font-bold text-[#0a1628] mt-4">Republic Excursions</h1>
+              <p className="text-gray-500 text-sm mt-1">Sistema de Gestion de Excursiones</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const username = formData.get("username") as string;
+              const password = formData.get("password") as string;
+              handleLogin(username, password);
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+                <input
+                  type="text"
+                  name="username"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  placeholder="Ingresa tu usuario"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                <input
+                  type="password"
+                  name="password"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  placeholder="Ingresa tu contraseña"
+                />
+              </div>
+              {loginError && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-600 text-sm text-center">
+                  {loginError}
+                </div>
+              )}
+              <button
+                type="submit"
+                className="w-full bg-[#0a1628] text-white py-3.5 rounded-xl font-semibold hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20"
+              >
+                Iniciar Sesion
+              </button>
+            </form>
+
+            <div className="mt-6 p-3 bg-gray-50 rounded-xl border border-gray-100">
+              <div className="flex flex-wrap justify-center gap-2 text-xs text-gray-500">
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0a1628]"></span>
+                  Republic
+                </span>
+                <span className="text-gray-300">•</span>
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0a1628]"></span>
+                  Raul
+                </span>
+                <span className="text-gray-300">•</span>
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0a1628]"></span>
+                  Gabrielle
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-4 text-center">
+              <p className="text-[10px] text-gray-400">v4.4 • Republic Excursions © 2026</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ============================================
   // RENDER PRINCIPAL
   // ============================================
@@ -2787,14 +1957,9 @@ export default function Home() {
             </h2>
           </div>
           <div className="flex gap-2">
-            {viewMode !== "calendario" && viewMode !== "dashboard" && viewMode !== "reservas" && (
+            {viewMode !== "calendario" && viewMode !== "dashboard" && (
               <button onClick={() => setShowForm(true)} className="bg-[#0a1628] text-white px-4 py-2 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
                 <span className="text-lg leading-none">+</span> Nueva Venta
-              </button>
-            )}
-            {viewMode === "reservas" && (
-              <button onClick={() => setShowForm(true)} className="bg-[#0a1628] text-white px-4 py-2 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
-                <span className="text-lg leading-none">+</span> Nueva Reserva
               </button>
             )}
           </div>
@@ -2802,9 +1967,6 @@ export default function Home() {
 
         {renderView()}
       </main>
-
-      {/* Los modales (showForm, showClienteForm, showProveedorForm, showExcursionForm, showCrearExcursionDesdeVenta) 
-          se han omitido por brevedad, pero están incluidos en el código completo que te envié anteriormente */}
     </div>
   );
 }
