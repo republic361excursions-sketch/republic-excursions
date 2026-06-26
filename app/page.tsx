@@ -440,23 +440,34 @@ export default function Home() {
   };
 
   // ============================================
-  // LOGIN
+  // LOGIN - CORREGIDO
   // ============================================
   const handleLogin = (username: string, password: string) => {
+    // Limpiar estados anteriores
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+    setLoginError("");
+    
     if (username === "Republic" && password === "Admin2026") {
       setIsLoggedIn(true);
       setCurrentUser("republic");
       setLoginError("");
+      setSelectedUser("");
+      setLoginPassword("");
       return true;
     } else if (username === "Raul" && password === "Republ1c$$") {
       setIsLoggedIn(true);
       setCurrentUser("raul");
       setLoginError("");
+      setSelectedUser("");
+      setLoginPassword("");
       return true;
     } else if (username === "Gabrielle" && password === "Republ1c$$") {
       setIsLoggedIn(true);
       setCurrentUser("gabrielle");
       setLoginError("");
+      setSelectedUser("");
+      setLoginPassword("");
       return true;
     } else {
       setLoginError("Usuario o contraseña incorrectos");
@@ -479,12 +490,95 @@ export default function Home() {
     handleLogin(selectedUser, loginPassword);
   };
 
+  // ============================================
+  // HANDLE LOGOUT - CORREGIDO (Limpia todos los estados)
+  // ============================================
   const handleLogout = () => {
+    // Limpiar estados de autenticación
     setIsLoggedIn(false);
     setCurrentUser(null);
     setLoginError("");
     setSelectedUser("");
     setLoginPassword("");
+    
+    // Limpiar estados del formulario
+    setFormData({
+      clienteNombre: "",
+      clienteWhatsapp: "",
+      clienteEmail: "",
+      clienteId: "",
+      excursionId: "",
+      excursionNombre: "",
+      fechaExcursion: "",
+      horaExcursion: "02:00 PM",
+      precioAdultoUSD: "",
+      precioNinoUSD: "",
+      costoProveedorAdultoUSD: "",
+      costoProveedorNinoUSD: "",
+      comisionAdultoUSD: "",
+      comisionNinoUSD: "",
+      cantidadAdultos: 1,
+      cantidadNinos: 0,
+      precioTotalUSD: "0.00",
+      costoTotalUSD: "0.00",
+      comisionTotalUSD: "0.00",
+      pagoCliente: "completo",
+      montoPagadoUSD: "",
+      saldoPendienteUSD: "",
+      metodoPagoCliente: "efectivo",
+      proveedorId: "",
+      proveedorNombre: "",
+      proveedorPagado: "pendiente",
+      metodoPagoProveedor: "efectivo",
+      tipoServicio: "compartido",
+      nombreGrupo: "",
+      capacidadGrupo: "",
+      tipoRecogida: "sin_recogida",
+      transporte: "no",
+      hotelNombre: "",
+      hotelHabitacion: "",
+      airbnbUbicacion: "",
+      horaRecogida: "",
+      estado: "pendiente",
+      nota: "",
+      zona: "",
+      tipoPrecio: "persona",
+    });
+    
+    // Cerrar todos los modales
+    setShowForm(false);
+    setShowClienteForm(false);
+    setShowProveedorForm(false);
+    setShowExcursionForm(false);
+    
+    // Limpiar IDs de edición
+    setEditingVentaId(null);
+    setEditingExcursionId(null);
+    setEditingProveedorId(null);
+    setSelectedExcursionForVenta(null);
+    
+    // Resetear vista a dashboard
+    setViewMode("dashboard");
+    setExpandedMonth(null);
+    setSearchTerm("");
+    setFilterYear("");
+    
+    // Limpiar búsquedas de todas las vistas
+    setSearchClientes("");
+    setFilterClienteExcursion("");
+    setSearchProveedores("");
+    setFilterProveedorMetodo("todos");
+    setSearchExcursiones("");
+    setFilterExcursionProveedor("");
+    setSearchBancos("");
+    setFilterBancoTipo("todos");
+    setFilterBancoMoneda("todas");
+    setSearchReservas("");
+    setFilterReservaEstado("todas");
+    setFilterReservaFecha("");
+    
+    // Resetear fecha del calendario
+    setCurrentDate(new Date());
   };
 
   // ============================================
