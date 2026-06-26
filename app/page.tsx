@@ -23,8 +23,8 @@ interface Excursion {
   costoGrupoPrivado?: number;
   capacidadGrupoPrivado?: number;
   extraPorPersona?: number;
-  esOtro?: boolean; // Para identificar si es "Otro (especificar)"
-  nombrePersonalizado?: string; // Para el nombre personalizado
+  esOtro?: boolean;
+  nombrePersonalizado?: string;
 }
 
 interface Proveedor {
@@ -103,31 +103,14 @@ const ZONAS_INICIALES = [
   "Bavaro", "Los Corales", "Punta Cana", "Jellyfish", "Macao"
 ];
 
-// Estado global para zonas
 let ZONAS_GLOBALES = [...ZONAS_INICIALES];
 
-const agregarZonaGlobal = (nuevaZona: string) => {
-  if (nuevaZona.trim() && !ZONAS_GLOBALES.includes(nuevaZona.trim())) {
-    ZONAS_GLOBALES.push(nuevaZona.trim());
-    return true;
-  }
-  return false;
-};
-
-const eliminarZonaGlobal = (zona: string) => {
-  if (ZONAS_GLOBALES.length <= 1) {
-    alert("Debe haber al menos una zona disponible");
-    return false;
-  }
-  const index = ZONAS_GLOBALES.indexOf(zona);
-  if (index > -1) {
-    ZONAS_GLOBALES.splice(index, 1);
-    return true;
-  }
-  return false;
-};
-
 const getZonasGlobales = () => [...ZONAS_GLOBALES];
+
+const guardarZonasGlobales = (zonas: string[]) => {
+  ZONAS_GLOBALES = zonas;
+  localStorage.setItem("excursiones_zonas_v44", JSON.stringify(zonas));
+};
 
 // ============================================
 // EXCURSIONES PREDEFINIDAS + "Otro (especificar)"
@@ -212,7 +195,6 @@ export default function Home() {
   const [zonasActuales, setZonasActuales] = useState<string[]>([]);
   const [searchZona, setSearchZona] = useState("");
 
-  // Estado para el selector de excursión en venta
   const [excursionSeleccionadaId, setExcursionSeleccionadaId] = useState<string>("");
   const [nombrePersonalizado, setNombrePersonalizado] = useState<string>("");
 
@@ -233,12 +215,6 @@ export default function Home() {
     }
     setZonasActuales(getZonasGlobales());
   }, []);
-
-  const guardarZonas = (zonas: string[]) => {
-    ZONAS_GLOBALES = zonas;
-    localStorage.setItem("excursiones_zonas_v44", JSON.stringify(zonas));
-    setZonasActuales([...zonas]);
-  };
 
   const zonasFiltradas = getZonasGlobales().filter(zona =>
     zona.toLowerCase().includes(searchZona.toLowerCase())
@@ -385,7 +361,8 @@ export default function Home() {
       return;
     }
     const nuevasZonas = [...ZONAS_GLOBALES, zona];
-    guardarZonas(nuevasZonas);
+    guardarZonasGlobales(nuevasZonas);
+    setZonasActuales([...nuevasZonas]);
     setNuevaZonaInput("");
   };
 
@@ -396,7 +373,8 @@ export default function Home() {
     }
     if (!confirm(`¿Eliminar la zona "${zona}"?`)) return;
     const nuevasZonas = ZONAS_GLOBALES.filter(z => z !== zona);
-    guardarZonas(nuevasZonas);
+    guardarZonasGlobales(nuevasZonas);
+    setZonasActuales([...nuevasZonas]);
   };
 
   // ============================================
@@ -638,11 +616,9 @@ export default function Home() {
     setExcursionSeleccionadaId(excursionId);
     
     if (excursionId === "otro") {
-      // Si es "Otro (especificar)", mostrar campo de texto
       const nombreFinal = customName || "";
       setNombrePersonalizado(nombreFinal);
       
-      // Crear una excursión temporal con el nombre personalizado
       const excursionTemp: Excursion = {
         id: "otro-temp",
         nombre: nombreFinal || "Otro (especificar)",
@@ -677,7 +653,6 @@ export default function Home() {
       return;
     }
     
-    // Buscar en excursiones existentes
     const excursion = excursiones.find(e => e.id === excursionId);
     if (excursion) {
       setSelectedExcursionForVenta(excursion);
@@ -1269,7 +1244,6 @@ export default function Home() {
   const handleExcursionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Determinar el nombre final
     let nombreFinal = excursionFormData.nombre;
     if (excursionFormData.esOtro && excursionFormData.nombrePersonalizado) {
       nombreFinal = excursionFormData.nombrePersonalizado;
@@ -2888,8 +2862,6 @@ export default function Home() {
                       const value = e.target.value;
                       setExcursionSeleccionadaId(value);
                       if (value === "otro") {
-                        // Mostrar campo para nombre personalizado
-                        setShowNombrePersonalizado(true);
                         setFormData(prev => ({
                           ...prev,
                           excursionId: "otro-temp",
@@ -2905,8 +2877,6 @@ export default function Home() {
                         }));
                         setSelectedExcursionForVenta(null);
                       } else {
-                        setShowNombrePersonalizado(false);
-                        // Buscar la excursión seleccionada
                         const excursion = excursiones.find(e => e.id === value);
                         if (excursion) {
                           handleSelectExcursion(value);
