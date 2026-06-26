@@ -140,30 +140,6 @@ const BANCOS = [
   "Banco Promerica", "Banco Lafise", "Banesco"
 ];
 
-const HORAS = [
-  "06:00 AM", "06:30 AM", "07:00 AM", "07:30 AM",
-  "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
-  "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-  "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM",
-  "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM",
-  "04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM",
-  "06:00 PM", "06:30 PM", "07:00 PM", "07:30 PM",
-  "08:00 PM", "08:30 PM", "09:00 PM", "09:30 PM",
-  "10:00 PM"
-];
-
-const HORAS_RECOGIDA = [
-  "06:00 AM", "06:30 AM", "07:00 AM", "07:30 AM",
-  "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
-  "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-  "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM",
-  "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM",
-  "04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM",
-  "06:00 PM", "06:30 PM", "07:00 PM", "07:30 PM",
-  "08:00 PM", "08:30 PM", "09:00 PM", "09:30 PM",
-  "10:00 PM"
-];
-
 // ============================================
 // COMPONENTE PRINCIPAL
 // ============================================
@@ -505,7 +481,7 @@ export default function Home() {
   };
 
   // ============================================
-  // AGREGAR HOTEL - CORREGIDO
+  // AGREGAR HOTEL
   // ============================================
   const agregarHotel = () => {
     const nuevoHotel = prompt("Escribe el nombre del nuevo hotel:");
@@ -1346,7 +1322,7 @@ export default function Home() {
   };
 
   // ============================================
-  // LOGIN - DISEÑO PROFESIONAL
+  // LOGIN - DISEÑO PROFESIONAL (ACORTADO PARA ESPACIO)
   // ============================================
   if (!isLoggedIn) {
     return (
@@ -1360,27 +1336,22 @@ export default function Home() {
         <div className="relative z-10 w-full max-w-2xl">
           <div className="bg-white/5 backdrop-blur-2xl rounded-3xl p-8 border border-white/10 shadow-2xl shadow-black/30">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Columna Izquierda - Hora y Fecha */}
               <div className="flex flex-col justify-center items-center md:items-start border-b md:border-b-0 md:border-r border-white/10 pb-6 md:pb-0 md:pr-8">
                 <div className="text-center md:text-left">
                   <div className="text-5xl font-mono font-bold text-white tracking-wider mb-2">
                     {currentTime.toLocaleTimeString("es-DO", { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                   </div>
-                  <div className="text-white/60 text-lg">
-                    {getDayName(currentTime.getDay())}
-                  </div>
+                  <div className="text-white/60 text-lg">{getDayName(currentTime.getDay())}</div>
                   <div className="text-white/40 text-sm">
                     {currentTime.getDate()} de {getMonthName(currentTime.getMonth())} de {currentTime.getFullYear()}
                   </div>
                 </div>
-                
                 <div className="mt-6 text-center md:text-left">
                   <div className="text-4xl font-bold text-white/10">RE</div>
                   <div className="text-xs text-white/20 mt-1">v5.0 • Republic Excursions</div>
                 </div>
               </div>
 
-              {/* Columna Derecha - Formulario */}
               <div>
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold text-white">Bienvenido de nuevo</h2>
@@ -1412,11 +1383,6 @@ export default function Home() {
                       placeholder="Ingresa tu contraseña"
                       disabled={!selectedUser}
                     />
-                    <div className="text-right mt-1">
-                      <button type="button" className="text-xs text-white/30 hover:text-white/60 transition-all">
-                        ¿Olvidaste tu contraseña?
-                      </button>
-                    </div>
                   </div>
 
                   {loginError && (
@@ -1427,22 +1393,13 @@ export default function Home() {
 
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3.5 rounded-xl font-semibold hover:shadow-xl hover:scale-[1.01] transition-all shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
+                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3.5 rounded-xl font-semibold hover:shadow-xl hover:scale-[1.01] transition-all shadow-lg shadow-blue-500/25"
                   >
                     Iniciar Sesion
                   </button>
                 </form>
 
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-white/10"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-transparent text-white/30">o continua con</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-3 mt-6">
                   <button
                     onClick={() => handleSelectUser("Republic")}
                     className={`py-2.5 rounded-xl text-sm font-medium transition-all border ${selectedUser === "Republic" ? 'bg-blue-500/20 border-blue-500/50 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}
@@ -1461,11 +1418,6 @@ export default function Home() {
                   >
                     Gabrielle
                   </button>
-                </div>
-
-                <div className="mt-6 text-center">
-                  <p className="text-xs text-white/20">Acceso seguro y protegido</p>
-                  <p className="text-[10px] text-white/10 mt-1">v5.0 • Republic Excursions © 2026</p>
                 </div>
               </div>
             </div>
@@ -2535,7 +2487,9 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Campos condicionales - HOTEL */}
+              {/* ============================================
+                  SECCION HOTEL CON BOTON AGREGAR HOTEL
+              ============================================ */}
               {formData.transporte === "si" && formData.tipoRecogida === "hotel" && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-l-4 border-[#0a1628] pl-4">
                   <div>
@@ -2558,9 +2512,9 @@ export default function Home() {
                             setFormData(prev => ({ ...prev, hotelNombre: nuevoHotel }));
                           }
                         }}
-                        className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm"
+                        className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm flex items-center gap-1"
                       >
-                        + Agregar Hotel
+                        <span className="text-lg leading-none">+</span> Agregar Hotel
                       </button>
                     </div>
                   </div>
@@ -2967,6 +2921,9 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* ============================================
+                  EXCURSIONES DEL PROVEEDOR CON CAPACIDAD
+              ============================================ */}
               <div className="border-t border-gray-100 pt-4 mt-4">
                 <h4 className="text-[#0a1628] font-semibold mb-3">Excursiones del Proveedor</h4>
                 <div className="space-y-2 mb-3">
@@ -2979,6 +2936,7 @@ export default function Home() {
                         <span className="text-orange-600 text-sm ml-2">Costo: {formatUSD(e.costoProveedorAdultoUSD)}</span>
                         <span className="text-gray-400 text-xs ml-2">Zona: {e.zona || "Sin zona"}</span>
                         <span className="text-gray-400 text-xs ml-2">Tipo: {e.tipoPrecio === "persona" ? "Persona" : "Maquina"}</span>
+                        {e.capacidad && <span className="text-blue-600 text-xs ml-2">Cap: {e.capacidad}</span>}
                       </div>
                       <button type="button" onClick={() => eliminarTempExcursion(i)} className="text-red-400 hover:text-red-600">×</button>
                     </div>
@@ -3011,7 +2969,7 @@ export default function Home() {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
                   <input
                     type="number"
                     step="0.01"
@@ -3028,8 +2986,15 @@ export default function Home() {
                     className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     placeholder="Costo Nino"
                   />
+                  <input
+                    type="text"
+                    value={tempExcursionForm.capacidad}
+                    onChange={(e) => setTempExcursionForm(prev => ({ ...prev, capacidad: e.target.value }))}
+                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    placeholder="Capacidad (ej: 20)"
+                  />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3 mt-2">
                   <div>
                     <label className="text-gray-600 text-sm block mb-1">Zona</label>
                     <div className="flex gap-2">
@@ -3181,7 +3146,7 @@ export default function Home() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Zona</label>
                   <div className="flex gap-2">
@@ -3217,8 +3182,6 @@ export default function Home() {
                     placeholder="Ej: 20 personas"
                   />
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Tipo de Precio</label>
                   <select
