@@ -1194,6 +1194,56 @@ const cambiarMes = (delta: number) => {
   newDate.setMonth(newDate.getMonth() + delta);
   setCurrentDate(newDate);
 };
+  
+  // ============================================
+// FILTROS Y AGRUPACIONES
+// ============================================
+let filtered = ventas;
+
+if (filterYear) {
+  filtered = filtered.filter(v => new Date(v.fechaExcursion).getFullYear().toString() === filterYear);
+}
+if (searchTerm) {
+  filtered = filtered.filter(v => 
+    v.clienteNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    v.excursionNombre.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+}
+
+const grouped = filtered.reduce((acc: any, venta) => {
+  const fecha = new Date(venta.fechaExcursion);
+  const year = fecha.getFullYear();
+  const month = fecha.getMonth() + 1;
+  const key = `${year}-${String(month).padStart(2, "0")}`;
+  
+  if (!acc[key]) {
+    acc[key] = { year, month, totalUSD: 0, totalComision: 0, totalCosto: 0, ventas: [] };
+  }
+  acc[key].totalUSD += venta.precioVentaUSD;
+  acc[key].totalComision += venta.comisionUSD;
+  acc[key].totalCosto += venta.costoProveedorUSD;
+  acc[key].ventas.push(venta);
+  return acc;
+}, {});
+
+let groupedArray = Object.entries(grouped)
+  .map(([key, value]: [string, any]) => ({ ...value, key }))
+  .sort((a, b) => {
+    if (a.year !== b.year) return b.year - a.year;
+    return b.month - a.month;
+  });
+
+const totalVentasUSD = filtered.reduce((sum, v) => sum + v.precioVentaUSD, 0);
+const totalComision = filtered.reduce((sum, v) => sum + v.comisionUSD, 0);
+const totalPendienteUSD = filtered.reduce((sum, v) => sum + v.saldoPendienteUSD, 0);
+
+// ✅ AÑADE ESTA LÍNEA - es la que falta
+const years = [...new Set(ventas.map(v => new Date(v.fechaExcursion).getFullYear().toString()))].sort().reverse();
+
+const toggleMonth = (key: string) => {
+  setExpandedMonth(expandedMonth === key ? null : key);
+};
+  
   // ============================================
   // LOGIN - DISEÑO PROFESIONAL
   // ============================================
