@@ -99,11 +99,10 @@ interface Venta {
 // ============================================
 // LISTAS
 // ============================================
-const ZONAS_INICIALES = [
-  "Bavaro", "Los Corales", "Punta Cana", "Jellyfish", "Macao"
-];
+// Zonas iniciales - el usuario puede agregar más
+const ZONAS_INICIALES: string[] = [];
 
-let ZONAS_GLOBALES = [...ZONAS_INICIALES];
+let ZONAS_GLOBALES: string[] = [...ZONAS_INICIALES];
 
 const getZonasGlobales = () => [...ZONAS_GLOBALES];
 
@@ -190,6 +189,16 @@ export default function Home() {
 
   const [excursionSeleccionadaId, setExcursionSeleccionadaId] = useState<string>("");
   const [nombrePersonalizado, setNombrePersonalizado] = useState<string>("");
+
+  // Estados para el input de zona en los formularios
+  const [zonaInputVenta, setZonaInputVenta] = useState<string>("");
+  const [showZonaSuggestionsVenta, setShowZonaSuggestionsVenta] = useState(false);
+  const [zonaInputTemp, setZonaInputTemp] = useState<string>("");
+  const [showZonaSuggestionsTemp, setShowZonaSuggestionsTemp] = useState(false);
+  const [zonaInputExcursion, setZonaInputExcursion] = useState<string>("");
+  const [showZonaSuggestionsExcursion, setShowZonaSuggestionsExcursion] = useState(false);
+  const [zonaInputNuevaExcursion, setZonaInputNuevaExcursion] = useState<string>("");
+  const [showZonaSuggestionsNuevaExcursion, setShowZonaSuggestionsNuevaExcursion] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -403,6 +412,15 @@ export default function Home() {
     return valor === "si" ? "Si" : "No";
   };
 
+  const getPagoClienteText = (tipo: string) => {
+    const map: any = {
+      completo: "Pago completo",
+      deposito_25: "Depósito 25%",
+      pago_dia: "Pago el día"
+    };
+    return map[tipo] || tipo;
+  };
+
   // ============================================
   // LOGIN
   // ============================================
@@ -507,6 +525,97 @@ export default function Home() {
   };
 
   // ============================================
+  // FUNCIONES PARA AGREGAR ZONAS DESDE INPUTS
+  // ============================================
+  const handleAddZonaVenta = (zona: string) => {
+    const zonaTrim = zona.trim();
+    if (!zonaTrim) return;
+    if (!ZONAS_GLOBALES.includes(zonaTrim)) {
+      ZONAS_GLOBALES.push(zonaTrim);
+      guardarZonasGlobales(ZONAS_GLOBALES);
+    }
+    setFormData(prev => {
+      if (prev.zona.includes(zonaTrim)) return prev;
+      return { ...prev, zona: [...prev.zona, zonaTrim] };
+    });
+    setZonaInputVenta("");
+    setShowZonaSuggestionsVenta(false);
+  };
+
+  const handleRemoveZonaVenta = (zona: string) => {
+    setFormData(prev => ({
+      ...prev,
+      zona: prev.zona.filter(z => z !== zona)
+    }));
+  };
+
+  const handleAddZonaTemp = (zona: string) => {
+    const zonaTrim = zona.trim();
+    if (!zonaTrim) return;
+    if (!ZONAS_GLOBALES.includes(zonaTrim)) {
+      ZONAS_GLOBALES.push(zonaTrim);
+      guardarZonasGlobales(ZONAS_GLOBALES);
+    }
+    setTempExcursionForm(prev => {
+      if (prev.zona.includes(zonaTrim)) return prev;
+      return { ...prev, zona: [...prev.zona, zonaTrim] };
+    });
+    setZonaInputTemp("");
+    setShowZonaSuggestionsTemp(false);
+  };
+
+  const handleRemoveZonaTemp = (zona: string) => {
+    setTempExcursionForm(prev => ({
+      ...prev,
+      zona: prev.zona.filter(z => z !== zona)
+    }));
+  };
+
+  const handleAddZonaExcursion = (zona: string) => {
+    const zonaTrim = zona.trim();
+    if (!zonaTrim) return;
+    if (!ZONAS_GLOBALES.includes(zonaTrim)) {
+      ZONAS_GLOBALES.push(zonaTrim);
+      guardarZonasGlobales(ZONAS_GLOBALES);
+    }
+    setExcursionFormData(prev => {
+      if (prev.zona.includes(zonaTrim)) return prev;
+      return { ...prev, zona: [...prev.zona, zonaTrim] };
+    });
+    setZonaInputExcursion("");
+    setShowZonaSuggestionsExcursion(false);
+  };
+
+  const handleRemoveZonaExcursion = (zona: string) => {
+    setExcursionFormData(prev => ({
+      ...prev,
+      zona: prev.zona.filter(z => z !== zona)
+    }));
+  };
+
+  const handleAddZonaNuevaExcursion = (zona: string) => {
+    const zonaTrim = zona.trim();
+    if (!zonaTrim) return;
+    if (!ZONAS_GLOBALES.includes(zonaTrim)) {
+      ZONAS_GLOBALES.push(zonaTrim);
+      guardarZonasGlobales(ZONAS_GLOBALES);
+    }
+    setNuevaExcursionDesdeVenta(prev => {
+      if (prev.zona.includes(zonaTrim)) return prev;
+      return { ...prev, zona: [...prev.zona, zonaTrim] };
+    });
+    setZonaInputNuevaExcursion("");
+    setShowZonaSuggestionsNuevaExcursion(false);
+  };
+
+  const handleRemoveZonaNuevaExcursion = (zona: string) => {
+    setNuevaExcursionDesdeVenta(prev => ({
+      ...prev,
+      zona: prev.zona.filter(z => z !== zona)
+    }));
+  };
+
+  // ============================================
   // CALCULAR COMISION Y TOTALES
   // ============================================
   const calcularComision = (precioVenta: number, costoProveedor: number) => {
@@ -561,19 +670,33 @@ export default function Home() {
   };
 
   // ============================================
+  // SELECCIONAR CLIENTE EXISTENTE
+  // ============================================
+  const selectCliente = (clienteId: string) => {
+    const cliente = clientes.find(c => c.id === clienteId);
+    if (cliente) {
+      setFormData(prev => ({
+        ...prev,
+        clienteId: cliente.id,
+        clienteNombre: cliente.nombre,
+        clienteWhatsapp: cliente.whatsapp,
+        clienteEmail: cliente.email,
+      }));
+    }
+  };
+
+  // ============================================
   // SELECCIONAR EXCURSION
   // ============================================
-  const handleSelectExcursion = (excursionId: string, customName?: string) => {
+  const handleSelectExcursion = (excursionId: string) => {
     setExcursionSeleccionadaId(excursionId);
     
     if (excursionId === "otro") {
-      const nombreFinal = customName || "";
-      setNombrePersonalizado(nombreFinal);
-      
+      setNombrePersonalizado("");
       setFormData(prev => ({
         ...prev,
         excursionId: "otro-temp",
-        excursionNombre: nombreFinal || "Otro (especificar)",
+        excursionNombre: "",
         precioAdultoUSD: "",
         precioNinoUSD: "",
         costoProveedorAdultoUSD: "",
@@ -627,6 +750,75 @@ export default function Home() {
         }));
       }, 50);
     }
+  };
+
+  // ============================================
+  // HANDLE CAMBIOS
+  // ============================================
+  const handlePrecioAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, precioAdultoUSD: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handlePrecioNinoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, precioNinoUSD: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handleCostoAdultoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, costoProveedorAdultoUSD: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handleCostoNinoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, costoProveedorNinoUSD: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handleCantidadAdultosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value) || 0;
+    setFormData(prev => ({ ...prev, cantidadAdultos: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handleCantidadNinosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value) || 0;
+    setFormData(prev => ({ ...prev, cantidadNinos: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handleCantidadPersonasPrivadoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value) || 0;
+    setFormData(prev => ({ ...prev, cantidadPersonasPrivado: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handlePrecioGrupoPrivadoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, precioGrupoPrivado: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handleCostoGrupoPrivadoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, costoGrupoPrivado: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handleCapacidadGrupoPrivadoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, capacidadGrupoPrivado: val }));
+    setTimeout(updateCantidades, 10);
+  };
+
+  const handleExtraPorPersonaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, extraPorPersona: val }));
+    setTimeout(updateCantidades, 10);
   };
 
   // ============================================
@@ -754,6 +946,8 @@ export default function Home() {
     setSelectedExcursionForVenta(null);
     setExcursionSeleccionadaId("");
     setNombrePersonalizado("");
+    setZonaInputVenta("");
+    setShowZonaSuggestionsVenta(false);
   };
 
   // ============================================
@@ -860,7 +1054,7 @@ export default function Home() {
     ventas.forEach(v => {
       const recogidaInfo = v.tipoRecogida === "hotel" ? `${v.hotelNombre} - Hab: ${v.hotelHabitacion}` : 
                            v.tipoRecogida === "airbnb" ? `${v.airbnbUbicacion} - Apt: ${v.airbnbApartamento}` : "Sin recogida";
-      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${getTipoServicioLabel(v.tipoServicio)}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${v.pagoCliente}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${getTipoServicioLabel(v.tipoServicio)}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -900,6 +1094,391 @@ export default function Home() {
       ahorros_us: "Ahorros US"
     };
     return map[tipo] || tipo;
+  };
+
+  // ============================================
+  // FUNCIONES PARA EXCURSIONES
+  // ============================================
+  const handleExcursionSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    let nombreFinal = excursionFormData.nombre;
+    if (excursionFormData.esOtro && excursionFormData.nombrePersonalizado) {
+      nombreFinal = excursionFormData.nombrePersonalizado;
+    }
+    
+    const precioAdultoUSD = Number(excursionFormData.precioAdultoUSD) || 0;
+    const costoProveedorAdultoUSD = Number(excursionFormData.costoProveedorAdultoUSD) || 0;
+    const comisionAdultoUSD = calcularComision(precioAdultoUSD, costoProveedorAdultoUSD);
+    
+    let precioNinoUSD: number | null = null;
+    let costoProveedorNinoUSD: number | null = null;
+    let comisionNinoUSD: number | null = null;
+    
+    if (excursionFormData.tienePrecioNino) {
+      precioNinoUSD = Number(excursionFormData.precioNinoUSD) || 0;
+      costoProveedorNinoUSD = Number(excursionFormData.costoProveedorNinoUSD) || 0;
+      comisionNinoUSD = calcularComision(precioNinoUSD, costoProveedorNinoUSD);
+    }
+    
+    const proveedor = proveedores.find(p => p.id === excursionFormData.proveedorId);
+    
+    const zonas = excursionFormData.zona.length > 0 ? excursionFormData.zona : [];
+    
+    if (editingExcursionId) {
+      const updated = excursiones.map(e => 
+        e.id === editingExcursionId 
+          ? { 
+              ...e, 
+              nombre: nombreFinal,
+              proveedorId: excursionFormData.proveedorId,
+              proveedorNombre: proveedor?.nombre || "",
+              precioAdultoUSD,
+              precioNinoUSD,
+              costoProveedorAdultoUSD,
+              costoProveedorNinoUSD,
+              comisionAdultoUSD,
+              comisionNinoUSD,
+              zona: zonas,
+              capacidad: excursionFormData.capacidad || undefined,
+              tipoPrecio: excursionFormData.tipoPrecio || "persona",
+              precioGrupoPrivado: Number(excursionFormData.precioGrupoPrivado) || undefined,
+              costoGrupoPrivado: Number(excursionFormData.costoGrupoPrivado) || undefined,
+              capacidadGrupoPrivado: Number(excursionFormData.capacidadGrupoPrivado) || undefined,
+              extraPorPersona: Number(excursionFormData.extraPorPersona) || undefined,
+              esOtro: excursionFormData.esOtro,
+              nombrePersonalizado: excursionFormData.esOtro ? excursionFormData.nombrePersonalizado : undefined,
+            }
+          : e
+      );
+      saveExcursiones(updated);
+      alert("Excursion actualizada correctamente");
+    } else {
+      const nuevaExcursion: Excursion = {
+        id: Date.now().toString(),
+        nombre: nombreFinal,
+        proveedorId: excursionFormData.proveedorId,
+        proveedorNombre: proveedor?.nombre || "",
+        precioAdultoUSD,
+        precioNinoUSD,
+        costoProveedorAdultoUSD,
+        costoProveedorNinoUSD,
+        comisionAdultoUSD,
+        comisionNinoUSD,
+        zona: zonas,
+        capacidad: excursionFormData.capacidad || undefined,
+        tipoPrecio: excursionFormData.tipoPrecio || "persona",
+        precioGrupoPrivado: Number(excursionFormData.precioGrupoPrivado) || undefined,
+        costoGrupoPrivado: Number(excursionFormData.costoGrupoPrivado) || undefined,
+        capacidadGrupoPrivado: Number(excursionFormData.capacidadGrupoPrivado) || undefined,
+        extraPorPersona: Number(excursionFormData.extraPorPersona) || undefined,
+        esOtro: excursionFormData.esOtro,
+        nombrePersonalizado: excursionFormData.esOtro ? excursionFormData.nombrePersonalizado : undefined,
+      };
+      saveExcursiones([...excursiones, nuevaExcursion]);
+      alert("Excursion agregada correctamente");
+    }
+    
+    setShowExcursionForm(false);
+    setEditingExcursionId(null);
+    setExcursionFormData({
+      nombre: "",
+      proveedorId: "",
+      proveedorNombre: "",
+      precioAdultoUSD: "",
+      precioNinoUSD: "",
+      costoProveedorAdultoUSD: "",
+      costoProveedorNinoUSD: "",
+      comisionAdultoUSD: "",
+      comisionNinoUSD: "",
+      zona: [],
+      capacidad: "",
+      tienePrecioNino: false,
+      tipoPrecio: "persona",
+      precioGrupoPrivado: "",
+      costoGrupoPrivado: "",
+      capacidadGrupoPrivado: "",
+      extraPorPersona: "",
+      esOtro: false,
+      nombrePersonalizado: "",
+    });
+  };
+
+  const editExcursion = (excursion: Excursion) => {
+    setEditingExcursionId(excursion.id);
+    setExcursionFormData({
+      nombre: excursion.nombre,
+      proveedorId: excursion.proveedorId,
+      proveedorNombre: excursion.proveedorNombre,
+      precioAdultoUSD: String(excursion.precioAdultoUSD),
+      precioNinoUSD: excursion.precioNinoUSD?.toString() || "",
+      costoProveedorAdultoUSD: String(excursion.costoProveedorAdultoUSD),
+      costoProveedorNinoUSD: excursion.costoProveedorNinoUSD?.toString() || "",
+      comisionAdultoUSD: String(excursion.comisionAdultoUSD),
+      comisionNinoUSD: excursion.comisionNinoUSD?.toString() || "",
+      zona: excursion.zona || [],
+      capacidad: excursion.capacidad || "",
+      tienePrecioNino: excursion.precioNinoUSD !== null,
+      tipoPrecio: excursion.tipoPrecio || "persona",
+      precioGrupoPrivado: String((excursion as any).precioGrupoPrivado || ""),
+      costoGrupoPrivado: String((excursion as any).costoGrupoPrivado || ""),
+      capacidadGrupoPrivado: String((excursion as any).capacidadGrupoPrivado || ""),
+      extraPorPersona: String((excursion as any).extraPorPersona || ""),
+      esOtro: (excursion as any).esOtro || false,
+      nombrePersonalizado: (excursion as any).nombrePersonalizado || "",
+    });
+    setShowExcursionForm(true);
+  };
+
+  const deleteExcursion = (id: string) => {
+    if (!confirm("Eliminar esta excursion?")) return;
+    const updated = excursiones.filter(e => e.id !== id);
+    saveExcursiones(updated);
+  };
+
+  // ============================================
+  // FUNCIONES PARA CLIENTES
+  // ============================================
+  const handleClienteSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const data = new FormData(form);
+    
+    const excursionId = data.get("excursionId") as string;
+    const excursion = excursiones.find(e => e.id === excursionId);
+    
+    const nuevoCliente: Cliente = {
+      id: Date.now().toString(),
+      nombre: data.get("nombre") as string,
+      whatsapp: data.get("whatsapp") as string,
+      email: data.get("email") as string,
+      excursionId: excursionId || "",
+      excursionNombre: excursion?.nombre || "Sin excursion asignada",
+      fechaExcursion: data.get("fechaExcursion") as string || "",
+    };
+    
+    saveClientes([...clientes, nuevoCliente]);
+    setShowClienteForm(false);
+    alert("Cliente agregado correctamente");
+  };
+
+  const deleteCliente = (id: string) => {
+    if (!confirm("Eliminar este cliente?")) return;
+    const updated = clientes.filter(c => c.id !== id);
+    saveClientes(updated);
+  };
+
+  // ============================================
+  // FUNCIONES PARA PROVEEDORES
+  // ============================================
+  const handleProveedorSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const proveedorId = editingProveedorId || Date.now().toString();
+    
+    if (editingProveedorId) {
+      const updated = proveedores.map(p => 
+        p.id === editingProveedorId 
+          ? { 
+              ...p, 
+              nombre: proveedorFormData.nombre,
+              empresa: proveedorFormData.empresa,
+              telefono: proveedorFormData.telefono,
+              email: proveedorFormData.email,
+              metodosPago: proveedorFormData.metodosPago,
+              banco: proveedorFormData.banco,
+              numeroCuenta: proveedorFormData.numeroCuenta,
+              monedaCuenta: proveedorFormData.monedaCuenta,
+              tipoCuenta: proveedorFormData.tipoCuenta,
+              tipoBeneficiario: proveedorFormData.tipoBeneficiario,
+              beneficiario: proveedorFormData.beneficiario,
+              rncCedula: proveedorFormData.rncCedula,
+              tipoDocumento: proveedorFormData.tipoDocumento,
+            }
+          : p
+      );
+      saveProveedores(updated);
+      
+      const excursionesSinViejas = excursiones.filter(e => e.proveedorId !== editingProveedorId);
+      
+      const nuevasExcursiones = tempExcursiones.map((e, index) => ({
+        id: Date.now().toString() + index,
+        ...e,
+        proveedorId: editingProveedorId,
+        proveedorNombre: proveedorFormData.nombre,
+      }));
+      
+      saveExcursiones([...excursionesSinViejas, ...nuevasExcursiones]);
+      alert("Proveedor actualizado correctamente");
+    } else {
+      const nuevoProveedor: Proveedor = {
+        id: proveedorId,
+        ...proveedorFormData,
+      };
+      saveProveedores([...proveedores, nuevoProveedor]);
+      
+      const nuevasExcursiones = tempExcursiones.map((e, index) => ({
+        id: Date.now().toString() + index,
+        ...e,
+        proveedorId: proveedorId,
+        proveedorNombre: proveedorFormData.nombre,
+      }));
+      
+      if (nuevasExcursiones.length > 0) {
+        saveExcursiones([...excursiones, ...nuevasExcursiones]);
+      }
+      
+      alert("Proveedor agregado correctamente");
+    }
+    
+    setShowProveedorForm(false);
+    setEditingProveedorId(null);
+    setProveedorFormData({
+      nombre: "",
+      empresa: "",
+      telefono: "",
+      email: "",
+      metodosPago: [],
+      banco: "",
+      numeroCuenta: "",
+      monedaCuenta: "RD$",
+      tipoCuenta: [],
+      tipoBeneficiario: "personal",
+      beneficiario: "",
+      rncCedula: "",
+      tipoDocumento: "cedula",
+    });
+    setTempExcursiones([]);
+    setTempExcursionForm({
+      nombre: "",
+      precioAdultoUSD: "",
+      precioNinoUSD: "",
+      costoProveedorAdultoUSD: "",
+      costoProveedorNinoUSD: "",
+      comisionAdultoUSD: "",
+      comisionNinoUSD: "",
+      zona: [],
+      capacidad: "",
+      tienePrecioNino: false,
+      tipoPrecio: "persona",
+      precioGrupoPrivado: "",
+      costoGrupoPrivado: "",
+      capacidadGrupoPrivado: "",
+      extraPorPersona: "",
+    });
+  };
+
+  const editProveedor = (proveedor: Proveedor) => {
+    setEditingProveedorId(proveedor.id);
+    setProveedorFormData({
+      nombre: proveedor.nombre,
+      empresa: proveedor.empresa || "",
+      telefono: proveedor.telefono,
+      email: proveedor.email,
+      metodosPago: proveedor.metodosPago,
+      banco: proveedor.banco,
+      numeroCuenta: proveedor.numeroCuenta,
+      monedaCuenta: proveedor.monedaCuenta || "RD$",
+      tipoCuenta: proveedor.tipoCuenta || [],
+      tipoBeneficiario: proveedor.tipoBeneficiario || "personal",
+      beneficiario: proveedor.beneficiario,
+      rncCedula: proveedor.rncCedula || "",
+      tipoDocumento: proveedor.tipoDocumento || "cedula",
+    });
+    
+    const excursionesDelProveedor = excursiones.filter(e => e.proveedorId === proveedor.id);
+    setTempExcursiones(excursionesDelProveedor.map(e => ({
+      nombre: e.nombre,
+      precioAdultoUSD: e.precioAdultoUSD,
+      precioNinoUSD: e.precioNinoUSD,
+      costoProveedorAdultoUSD: e.costoProveedorAdultoUSD,
+      costoProveedorNinoUSD: e.costoProveedorNinoUSD,
+      comisionAdultoUSD: e.comisionAdultoUSD,
+      comisionNinoUSD: e.comisionNinoUSD,
+      zona: e.zona || [],
+      capacidad: e.capacidad || "",
+      tipoPrecio: e.tipoPrecio || "persona",
+      precioGrupoPrivado: (e as any).precioGrupoPrivado || "",
+      costoGrupoPrivado: (e as any).costoGrupoPrivado || "",
+      capacidadGrupoPrivado: (e as any).capacidadGrupoPrivado || "",
+      extraPorPersona: (e as any).extraPorPersona || "",
+    })));
+    
+    setShowProveedorForm(true);
+  };
+
+  const deleteProveedor = (id: string) => {
+    if (!confirm("Eliminar este proveedor y todas sus excursiones?")) return;
+    const updated = proveedores.filter(p => p.id !== id);
+    saveProveedores(updated);
+    const excursionesActualizadas = excursiones.filter(e => e.proveedorId !== id);
+    saveExcursiones(excursionesActualizadas);
+  };
+
+  // ============================================
+  // FUNCIONES PARA EXCURSIONES TEMPORALES
+  // ============================================
+  const agregarTempExcursion = () => {
+    if (!tempExcursionForm.nombre) {
+      alert("Debes escribir el nombre de la excursion");
+      return;
+    }
+    
+    const precioAdultoUSD = Number(tempExcursionForm.precioAdultoUSD) || 0;
+    const costoProveedorAdultoUSD = Number(tempExcursionForm.costoProveedorAdultoUSD) || 0;
+    const comisionAdultoUSD = calcularComision(precioAdultoUSD, costoProveedorAdultoUSD);
+    
+    let precioNinoUSD: number | null = null;
+    let costoProveedorNinoUSD: number | null = null;
+    let comisionNinoUSD: number | null = null;
+    
+    if (tempExcursionForm.tienePrecioNino) {
+      precioNinoUSD = Number(tempExcursionForm.precioNinoUSD) || 0;
+      costoProveedorNinoUSD = Number(tempExcursionForm.costoProveedorNinoUSD) || 0;
+      comisionNinoUSD = calcularComision(precioNinoUSD, costoProveedorNinoUSD);
+    }
+    
+    setTempExcursiones([
+      ...tempExcursiones,
+      {
+        nombre: tempExcursionForm.nombre,
+        precioAdultoUSD,
+        precioNinoUSD,
+        costoProveedorAdultoUSD,
+        costoProveedorNinoUSD,
+        comisionAdultoUSD,
+        comisionNinoUSD,
+        zona: tempExcursionForm.zona.length > 0 ? tempExcursionForm.zona : [],
+        capacidad: tempExcursionForm.capacidad || undefined,
+        tipoPrecio: tempExcursionForm.tipoPrecio || "persona",
+        precioGrupoPrivado: Number(tempExcursionForm.precioGrupoPrivado) || undefined,
+        costoGrupoPrivado: Number(tempExcursionForm.costoGrupoPrivado) || undefined,
+        capacidadGrupoPrivado: Number(tempExcursionForm.capacidadGrupoPrivado) || undefined,
+        extraPorPersona: Number(tempExcursionForm.extraPorPersona) || undefined,
+      }
+    ]);
+    
+    setTempExcursionForm({
+      nombre: "",
+      precioAdultoUSD: "",
+      precioNinoUSD: "",
+      costoProveedorAdultoUSD: "",
+      costoProveedorNinoUSD: "",
+      comisionAdultoUSD: "",
+      comisionNinoUSD: "",
+      zona: [],
+      capacidad: "",
+      tienePrecioNino: false,
+      tipoPrecio: "persona",
+      precioGrupoPrivado: "",
+      costoGrupoPrivado: "",
+      capacidadGrupoPrivado: "",
+      extraPorPersona: "",
+    });
+  };
+
+  const eliminarTempExcursion = (index: number) => {
+    setTempExcursiones(tempExcursiones.filter((_, i) => i !== index));
   };
 
   // ============================================
@@ -1671,6 +2250,12 @@ export default function Home() {
                     <h3 className="text-[#0a1628] font-semibold">{e.nombre}</h3>
                     <p className="text-gray-400 text-sm">{e.proveedorNombre}</p>
                     <p className="text-xs text-gray-500">Zonas: {getZonasString(e.zona)}</p>
+                    {(e as any).esOtro && (
+                      <p className="text-xs text-[#0a1628] font-medium">🔹 Personalizada</p>
+                    )}
+                    {(e as any).precioGrupoPrivado && (
+                      <p className="text-xs text-[#0a1628] font-medium">Precio Grupo Privado: {formatUSD((e as any).precioGrupoPrivado)}</p>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => editExcursion(e)} className="px-3 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg hover:bg-[#0a1628]/20 text-xs transition-all">Editar</button>
@@ -1706,6 +2291,18 @@ export default function Home() {
                     <span>Tipo de Precio</span>
                     <span className="text-[#0a1628]">{getTipoPrecioLabel(e.tipoPrecio)}</span>
                   </div>
+                  {(e as any).capacidadGrupoPrivado && (
+                    <div className="flex justify-between text-gray-400 text-xs">
+                      <span>Capacidad Grupo Privado</span>
+                      <span>{(e as any).capacidadGrupoPrivado} personas</span>
+                    </div>
+                  )}
+                  {(e as any).extraPorPersona && (
+                    <div className="flex justify-between text-gray-400 text-xs">
+                      <span>Extra por persona</span>
+                      <span>{formatUSD((e as any).extraPorPersona)}</span>
+                    </div>
+                  )}
                   {e.capacidad && (
                     <div className="flex justify-between text-gray-400 text-xs">
                       <span>Capacidad</span>
@@ -1794,14 +2391,69 @@ export default function Home() {
     );
   };
 
-  // Funciones vacías para evitar errores (se completarán con los modales)
-  const editVenta = (venta: Venta) => { setEditingVentaId(venta.id); setShowForm(true); };
-  const deleteVenta = (id: string) => { if (!confirm("Eliminar esta venta?")) return; const updated = ventas.filter(v => v.id !== id); saveVentas(updated); };
-  const deleteCliente = (id: string) => { if (!confirm("Eliminar este cliente?")) return; const updated = clientes.filter(c => c.id !== id); saveClientes(updated); };
-  const editProveedor = (proveedor: Proveedor) => { setEditingProveedorId(proveedor.id); setShowProveedorForm(true); };
-  const deleteProveedor = (id: string) => { if (!confirm("Eliminar este proveedor?")) return; const updated = proveedores.filter(p => p.id !== id); saveProveedores(updated); };
-  const editExcursion = (excursion: Excursion) => { setEditingExcursionId(excursion.id); setShowExcursionForm(true); };
-  const deleteExcursion = (id: string) => { if (!confirm("Eliminar esta excursion?")) return; const updated = excursiones.filter(e => e.id !== id); saveExcursiones(updated); };
+  // ============================================
+  // FUNCIONES PARA VENTAS (editar y eliminar)
+  // ============================================
+  const editVenta = (venta: Venta) => {
+    setEditingVentaId(venta.id);
+    const excursion = excursiones.find(e => e.id === venta.excursionId);
+    
+    setFormData({
+      clienteNombre: venta.clienteNombre,
+      clienteWhatsapp: venta.clienteWhatsapp,
+      clienteEmail: venta.clienteEmail,
+      clienteId: "",
+      excursionId: venta.excursionId,
+      excursionNombre: venta.excursionNombre,
+      fechaExcursion: venta.fechaExcursion,
+      horaExcursion: venta.horaExcursion || "02:00 PM",
+      precioAdultoUSD: String(venta.precioAdultoPersonalizado || ""),
+      precioNinoUSD: String(venta.precioNinoPersonalizado || ""),
+      costoProveedorAdultoUSD: String(venta.costoAdultoPersonalizado || ""),
+      costoProveedorNinoUSD: String(venta.costoNinoPersonalizado || ""),
+      comisionAdultoUSD: String(excursion?.comisionAdultoUSD || ""),
+      comisionNinoUSD: String(excursion?.comisionNinoUSD || ""),
+      cantidadAdultos: venta.cantidadAdultos,
+      cantidadNinos: venta.cantidadNinos,
+      cantidadPersonasPrivado: venta.cantidadPersonasPrivado || 1,
+      precioTotalUSD: venta.precioVentaUSD.toFixed(2),
+      costoTotalUSD: venta.costoProveedorUSD.toFixed(2),
+      comisionTotalUSD: venta.comisionUSD.toFixed(2),
+      pagoCliente: venta.pagoCliente,
+      montoPagadoUSD: venta.montoPagadoUSD.toString(),
+      saldoPendienteUSD: venta.saldoPendienteUSD.toString(),
+      metodoPagoCliente: venta.metodoPagoCliente,
+      proveedorId: venta.proveedorId,
+      proveedorNombre: venta.proveedorNombre,
+      proveedorPagado: venta.proveedorPagado,
+      metodoPagoProveedor: venta.metodoPagoProveedor,
+      tipoServicio: venta.tipoServicio,
+      nombreGrupo: venta.nombreGrupo || "",
+      tipoRecogida: venta.tipoRecogida || "sin_recogida",
+      transporte: venta.transporte || "no",
+      hotelNombre: venta.hotelNombre || "",
+      hotelHabitacion: venta.hotelHabitacion || "",
+      airbnbUbicacion: venta.airbnbUbicacion || "",
+      airbnbApartamento: venta.airbnbApartamento || "",
+      apartamento: venta.apartamento || "",
+      horaRecogida: venta.horaRecogida || "",
+      estado: venta.estado || "pendiente",
+      nota: venta.nota,
+      zona: excursion?.zona || [],
+      tipoPrecio: venta.tipoPrecio || "persona",
+      precioGrupoPrivado: String(excursion?.precioGrupoPrivado || ""),
+      costoGrupoPrivado: String(excursion?.costoGrupoPrivado || ""),
+      capacidadGrupoPrivado: String(excursion?.capacidadGrupoPrivado || ""),
+      extraPorPersona: String(excursion?.extraPorPersona || ""),
+    });
+    setShowForm(true);
+  };
+
+  const deleteVenta = (id: string) => {
+    if (!confirm("Eliminar esta venta?")) return;
+    const updated = ventas.filter(v => v.id !== id);
+    saveVentas(updated);
+  };
 
   // ============================================
   // LOGIN
@@ -1967,6 +2619,11 @@ export default function Home() {
 
         {renderView()}
       </main>
+
+      {/* ============================================
+          MODALES - SERÁN AGREGADOS EN LA SIGUIENTE PARTE
+          PARA NO EXCEDER EL LÍMITE DE CARACTERES
+      ============================================ */}
     </div>
   );
 }
