@@ -98,40 +98,6 @@ const ZONAS_DEFAULT = [
   "San Juan", "Veron"
 ];
 
-const HOTELES_DEFAULT = [
-  "Hyatt Ziva Cap Cana", "Hyatt Zilara Cap Cana", "Riu Palace Bavaro",
-  "Riu Republica", "Riu Bambu", "Riu Naiboa", "Riu Palace Macao",
-  "Hard Rock Hotel & Casino", "Iberostar Bavaro Suites",
-  "Iberostar Punta Cana", "Iberostar Dominicana", "Iberostar Selection",
-  "Bahia Principe Ambar", "Bahia Principe Esmeralda", "Bahia Principe Aquamarine",
-  "Bahia Principe Fantasia", "Bahia Principe Grand Bavaro", "Bahia Principe Turquesa",
-  "Dreams Punta Cana", "Dreams Royal Beach", "Dreams Palm Beach",
-  "Excellence Punta Cana", "Excellence El Carmen", "Sanctuary Cap Cana",
-  "Margaritaville Island Reserve", "Nickelodeon Hotels & Resorts",
-  "Barcelo Bavaro Palace", "Barcelo Bavaro Beach", "Barcelo Bavaro Caribe",
-  "Ocean Blue & Sand", "Ocean El Faro", "Ocean Riviera Paradise",
-  "Grand Sirenis Punta Cana", "Sirenis Tropical Suites",
-  "Catalonia Royal Bavaro", "Catalonia Punta Cana", "Catalonia Bavaro",
-  "Majestic Elegance", "Majestic Mirage", "Majestic Colonial",
-  "Secrets Royal Beach", "Secrets Tides", "Secrets Cap Cana",
-  "Now Onyx Punta Cana", "Breathless Punta Cana", "Breathless Cabarete",
-  "Xeliter Vista Sol", "Xeliter St. John", "Vista Sol Punta Cana",
-  "BlueBay Villas Doradas", "BlueBay Grand Esmeralda", "BlueBay Golden Beach",
-  "Lopesan Costa Bavaro", "Lopesan Bavaro Resort", "Lopesan Punta Cana",
-  "Be Live Collection Punta Cana", "Be Live Experience Punta Cana",
-  "Grand Palladium Palace", "Grand Palladium Punta Cana", "Grand Palladium Bavaro",
-  "Whala Bavaro", "Whala Punta Cana", "Whala Tropical",
-  "Sunscape Bavaro", "Sunscape Punta Cana", "Sunscape Mares",
-  "La Pargua", "El Cortecito", "Los Corales", "Bibijagua",
-  "Melia Caribe Beach", "Melia Punta Cana Beach", "Paradisus Punta Cana",
-  "Paradisus Grand Cana", "The Reserve at Paradisus", "Punta Cana Princess",
-  "Royalton Punta Cana", "Royalton Bavaro", "Royalton Splash",
-  "CHIC Punta Cana", "CHIC Royal", "CHIC Sunset",
-  "Boho Punta Cana", "Boho Palms", "Boho Resort",
-  "Tanama Hotel", "Kukua Beach Club", "Natura Park",
-  "Portillo", "Bayahibe", "La Romana", "Casa de Campo"
-];
-
 const BANCOS = [
   "Banco BHD", "Banreservas", "Banco Popular Dominicano",
   "Scotiabank", "Banco Santa Cruz", "Banco Vimenca",
@@ -155,7 +121,6 @@ export default function Home() {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [excursiones, setExcursiones] = useState<Excursion[]>([]);
   const [zonas, setZonas] = useState<string[]>(ZONAS_DEFAULT);
-  const [hoteles, setHoteles] = useState<string[]>(HOTELES_DEFAULT);
   
   const [showForm, setShowForm] = useState(false);
   const [showClienteForm, setShowClienteForm] = useState(false);
@@ -423,14 +388,12 @@ export default function Home() {
     const savedProveedores = localStorage.getItem("excursiones_proveedores_v50");
     const savedExcursiones = localStorage.getItem("excursiones_excursiones_v50");
     const savedZonas = localStorage.getItem("excursiones_zonas_v50");
-    const savedHoteles = localStorage.getItem("excursiones_hoteles_v50");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
     if (savedProveedores) setProveedores(JSON.parse(savedProveedores));
     if (savedExcursiones) setExcursiones(JSON.parse(savedExcursiones));
     if (savedZonas) setZonas(JSON.parse(savedZonas));
-    if (savedHoteles) setHoteles(JSON.parse(savedHoteles));
   }, []);
 
   const saveVentas = (data: Venta[]) => {
@@ -458,11 +421,6 @@ export default function Home() {
     localStorage.setItem("excursiones_zonas_v50", JSON.stringify(data));
   };
 
-  const saveHoteles = (data: string[]) => {
-    setHoteles(data);
-    localStorage.setItem("excursiones_hoteles_v50", JSON.stringify(data));
-  };
-
   // ============================================
   // AGREGAR ZONA
   // ============================================
@@ -476,26 +434,6 @@ export default function Home() {
       alert("Esta zona ya existe");
     } else if (nuevaZona && !nuevaZona.trim()) {
       alert("Por favor escribe un nombre de zona");
-    }
-    return null;
-  };
-
-  // ============================================
-  // AGREGAR HOTEL
-  // ============================================
-  const agregarHotel = () => {
-    const nuevoHotel = prompt("Escribe el nombre del nuevo hotel:");
-    if (nuevoHotel && nuevoHotel.trim()) {
-      const hotelTrimmed = nuevoHotel.trim();
-      if (!hoteles.includes(hotelTrimmed)) {
-        const nuevosHoteles = [...hoteles, hotelTrimmed];
-        saveHoteles(nuevosHoteles);
-        return hotelTrimmed;
-      } else {
-        alert("Este hotel ya existe");
-      }
-    } else if (nuevoHotel !== null && !nuevoHotel.trim()) {
-      alert("Por favor escribe un nombre de hotel");
     }
     return null;
   };
@@ -1322,7 +1260,7 @@ export default function Home() {
   };
 
   // ============================================
-  // LOGIN - DISEÑO PROFESIONAL (ACORTADO PARA ESPACIO)
+  // LOGIN - DISEÑO PROFESIONAL
   // ============================================
   if (!isLoggedIn) {
     return (
@@ -2488,35 +2426,20 @@ export default function Home() {
               </div>
 
               {/* ============================================
-                  SECCION HOTEL CON BOTON AGREGAR HOTEL
+                  SECCION HOTEL - INPUT DE TEXTO LIBRE
               ============================================ */}
               {formData.transporte === "si" && formData.tipoRecogida === "hotel" && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-l-4 border-[#0a1628] pl-4">
                   <div>
                     <label className="text-gray-600 text-sm block mb-1">Hotel *</label>
-                    <div className="flex gap-2">
-                      <select
-                        value={formData.hotelNombre}
-                        onChange={(e) => setFormData(prev => ({ ...prev, hotelNombre: e.target.value }))}
-                        className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                        required={formData.tipoRecogida === "hotel"}
-                      >
-                        <option value="">Seleccionar hotel</option>
-                        {hoteles.map(h => <option key={h} value={h}>{h}</option>)}
-                      </select>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const nuevoHotel = agregarHotel();
-                          if (nuevoHotel) {
-                            setFormData(prev => ({ ...prev, hotelNombre: nuevoHotel }));
-                          }
-                        }}
-                        className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm flex items-center gap-1"
-                      >
-                        <span className="text-lg leading-none">+</span> Agregar Hotel
-                      </button>
-                    </div>
+                    <input
+                      type="text"
+                      value={formData.hotelNombre}
+                      onChange={(e) => setFormData(prev => ({ ...prev, hotelNombre: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Escribe el nombre del hotel"
+                      required={formData.tipoRecogida === "hotel"}
+                    />
                   </div>
                   <div>
                     <label className="text-gray-600 text-sm block mb-1">Habitacion</label>
@@ -2991,7 +2914,7 @@ export default function Home() {
                     value={tempExcursionForm.capacidad}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, capacidad: e.target.value }))}
                     className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="Capacidad (ej: 20)"
+                    placeholder="Capacidad (ej: 20 personas)"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3 mt-2">
