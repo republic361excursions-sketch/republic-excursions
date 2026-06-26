@@ -16,7 +16,7 @@ interface Excursion {
   costoProveedorNinoUSD: number | null;
   comisionAdultoUSD: number;
   comisionNinoUSD: number | null;
-  zona: string[]; // Ahora es un array de strings
+  zona: string[];
   capacidad?: string;
   tipoPrecio: "persona" | "maquina";
   precioGrupoPrivado?: number;
@@ -95,14 +95,14 @@ interface Venta {
 }
 
 // ============================================
-// LISTAS - ZONAS INICIALES
+// LISTAS - ZONAS (sin La Otra Banda y Playa Bavaro)
 // ============================================
 const ZONAS_INICIALES = [
   "Bavaro", "Punta Cana Village", "Cap Cana", "Uvero Alto",
   "Cabeza de Toro", "El Cortecito", "Los Corales", "Bibijagua",
   "Arena Gorda", "Melia", "Riu", "Hard Rock", "Iberostar",
   "Bahia Principe", "Sirenis", "Dreams", "Excellence",
-  "San Juan", "Veron", "La Otra Banda", "Playa Bavaro"
+  "San Juan", "Veron"
 ];
 
 // Estado global para zonas (se puede modificar dinámicamente)
@@ -119,7 +119,6 @@ const agregarZonaGlobal = (nuevaZona: string) => {
 
 // Función para eliminar una zona
 const eliminarZonaGlobal = (zona: string) => {
-  // No permitir eliminar si solo queda una zona
   if (ZONAS_GLOBALES.length <= 1) {
     alert("Debe haber al menos una zona disponible");
     return false;
@@ -204,6 +203,7 @@ export default function Home() {
   const [showZonasModal, setShowZonasModal] = useState(false);
   const [nuevaZonaInput, setNuevaZonaInput] = useState("");
   const [zonasActuales, setZonasActuales] = useState<string[]>([]);
+  const [searchZona, setSearchZona] = useState("");
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -230,6 +230,11 @@ export default function Home() {
     localStorage.setItem("excursiones_zonas_v44", JSON.stringify(zonas));
     setZonasActuales([...zonas]);
   };
+
+  // Zonas filtradas para búsqueda
+  const zonasFiltradas = getZonasGlobales().filter(zona =>
+    zona.toLowerCase().includes(searchZona.toLowerCase())
+  );
 
   const [tempExcursiones, setTempExcursiones] = useState<any[]>([]);
   const [tempExcursionForm, setTempExcursionForm] = useState({
@@ -515,7 +520,6 @@ export default function Home() {
     if (savedProveedores) setProveedores(JSON.parse(savedProveedores));
     if (savedExcursiones) {
       const excursionesData = JSON.parse(savedExcursiones);
-      // Asegurar que zona sea array
       const normalized = excursionesData.map((e: any) => ({
         ...e,
         zona: Array.isArray(e.zona) ? e.zona : (e.zona ? [e.zona] : [])
@@ -2606,22 +2610,33 @@ export default function Home() {
           )}
         </div>
 
-        {/* MODAL - Gestionar Zonas */}
+        {/* MODAL - Gestionar Zonas con Búsqueda */}
         {showZonasModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[#0a1628] text-xl font-bold">Gestionar Zonas</h3>
-                <button onClick={() => setShowZonasModal(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+                <button onClick={() => { setShowZonasModal(false); setSearchZona(""); }} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
               </div>
               
               <div className="space-y-4">
+                {/* Buscador de zonas */}
+                <div>
+                  <input
+                    type="text"
+                    value={searchZona}
+                    onChange={(e) => setSearchZona(e.target.value)}
+                    placeholder="Buscar zona..."
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  />
+                </div>
+
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={nuevaZonaInput}
                     onChange={(e) => setNuevaZonaInput(e.target.value)}
-                    placeholder="Nombre de la nueva zona"
+                    placeholder="Nueva zona"
                     className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     onKeyPress={(e) => e.key === "Enter" && handleAgregarZona()}
                   />
@@ -2634,27 +2649,31 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto p-2 bg-gray-50 rounded-xl">
-                  {ZONAS_GLOBALES.map((zona) => (
-                    <div key={zona} className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
-                      <span className="text-[#0a1628] text-sm">{zona}</span>
-                      <button
-                        onClick={() => handleEliminarZona(zona)}
-                        className="text-red-400 hover:text-red-600 text-sm font-bold"
-                        title="Eliminar zona"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                  {zonasFiltradas.length === 0 ? (
+                    <p className="text-gray-400 text-sm w-full text-center py-4">No se encontraron zonas</p>
+                  ) : (
+                    zonasFiltradas.map((zona) => (
+                      <div key={zona} className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
+                        <span className="text-[#0a1628] text-sm">{zona}</span>
+                        <button
+                          onClick={() => handleEliminarZona(zona)}
+                          className="text-red-400 hover:text-red-600 text-sm font-bold"
+                          title="Eliminar zona"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))
+                  )}
                 </div>
 
                 <div className="text-xs text-gray-400">
-                  {ZONAS_GLOBALES.length} zonas disponibles
+                  {ZONAS_GLOBALES.length} zonas disponibles • {zonasFiltradas.length} filtradas
                 </div>
 
                 <div className="flex justify-end pt-4 border-t border-gray-100">
                   <button
-                    onClick={() => setShowZonasModal(false)}
+                    onClick={() => { setShowZonasModal(false); setSearchZona(""); }}
                     className="px-6 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20"
                   >
                     Cerrar
@@ -2831,7 +2850,7 @@ export default function Home() {
                       <span className="text-gray-400 text-sm">Sin zona seleccionada</span>
                     )}
                   </div>
-                  <div className="mt-1 flex flex-wrap gap-1">
+                  <div className="mt-1 flex flex-wrap gap-1 max-h-24 overflow-y-auto">
                     {getZonasGlobales().map(zona => (
                       <button
                         key={zona}
@@ -3354,7 +3373,7 @@ export default function Home() {
                       <span className="text-gray-400 text-sm">Sin zona seleccionada</span>
                     )}
                   </div>
-                  <div className="mt-1 flex flex-wrap gap-1">
+                  <div className="mt-1 flex flex-wrap gap-1 max-h-24 overflow-y-auto">
                     {getZonasGlobales().map(zona => (
                       <button
                         key={zona}
@@ -3837,7 +3856,7 @@ export default function Home() {
                           <span className="text-gray-400 text-[10px]">Sin zona</span>
                         )}
                       </div>
-                      <div className="mt-1 flex flex-wrap gap-0.5">
+                      <div className="mt-1 flex flex-wrap gap-0.5 max-h-16 overflow-y-auto">
                         {getZonasGlobales().map(zona => (
                           <button
                             key={zona}
@@ -4099,7 +4118,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Zonas - Multiselect */}
+              {/* Zonas - Multiselect con scroll */}
               <div>
                 <label className="text-gray-600 text-sm block mb-1">Zonas</label>
                 <div className="flex flex-wrap gap-1 p-2 bg-gray-100 rounded-xl min-h-[42px] border border-gray-200">
@@ -4111,7 +4130,7 @@ export default function Home() {
                     <span className="text-gray-400 text-sm">Selecciona una o más zonas</span>
                   )}
                 </div>
-                <div className="mt-1 flex flex-wrap gap-1">
+                <div className="mt-1 flex flex-wrap gap-1 max-h-24 overflow-y-auto">
                   {getZonasGlobales().map(zona => (
                     <button
                       key={zona}
