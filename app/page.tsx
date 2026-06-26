@@ -72,14 +72,13 @@ interface Venta {
   cantidadNinos: number;
   tipoServicio: "compartido" | "privado" | "grupo";
   nombreGrupo?: string;
-  tipoRecogida: "hotel" | "airbnb" | "sin_recogida";
+  tipoRecogida: "hotel" | "airbnb";
   transporte: "si" | "no";
   hotelNombre: string;
   hotelHabitacion: string;
   airbnbUbicacion: string;
-  airbnbApartamento: string;
-  apartamento: string;
   horaRecogida: string;
+  zona: string;
   precioAdultoPersonalizado: number;
   precioNinoPersonalizado: number;
   costoAdultoPersonalizado: number;
@@ -96,7 +95,41 @@ const ZONAS_DEFAULT = [
   "Cabeza de Toro", "El Cortecito", "Los Corales", "Bibijagua",
   "Arena Gorda", "Melia", "Riu", "Hard Rock", "Iberostar",
   "Bahia Principe", "Sirenis", "Dreams", "Excellence",
-  "San Juan", "Veron", "La Otra Banda", "Playa Bavaro"
+  "San Juan", "Veron"
+];
+
+const HOTELES = [
+  "Hyatt Ziva Cap Cana", "Hyatt Zilara Cap Cana", "Riu Palace Bavaro",
+  "Riu Republica", "Riu Bambu", "Riu Naiboa", "Riu Palace Macao",
+  "Hard Rock Hotel & Casino", "Iberostar Bavaro Suites",
+  "Iberostar Punta Cana", "Iberostar Dominicana", "Iberostar Selection",
+  "Bahia Principe Ambar", "Bahia Principe Esmeralda", "Bahia Principe Aquamarine",
+  "Bahia Principe Fantasia", "Bahia Principe Grand Bavaro", "Bahia Principe Turquesa",
+  "Dreams Punta Cana", "Dreams Royal Beach", "Dreams Palm Beach",
+  "Excellence Punta Cana", "Excellence El Carmen", "Sanctuary Cap Cana",
+  "Margaritaville Island Reserve", "Nickelodeon Hotels & Resorts",
+  "Barcelo Bavaro Palace", "Barcelo Bavaro Beach", "Barcelo Bavaro Caribe",
+  "Ocean Blue & Sand", "Ocean El Faro", "Ocean Riviera Paradise",
+  "Grand Sirenis Punta Cana", "Sirenis Tropical Suites",
+  "Catalonia Royal Bavaro", "Catalonia Punta Cana", "Catalonia Bavaro",
+  "Majestic Elegance", "Majestic Mirage", "Majestic Colonial",
+  "Secrets Royal Beach", "Secrets Tides", "Secrets Cap Cana",
+  "Now Onyx Punta Cana", "Breathless Punta Cana", "Breathless Cabarete",
+  "Xeliter Vista Sol", "Xeliter St. John", "Vista Sol Punta Cana",
+  "BlueBay Villas Doradas", "BlueBay Grand Esmeralda", "BlueBay Golden Beach",
+  "Lopesan Costa Bavaro", "Lopesan Bavaro Resort", "Lopesan Punta Cana",
+  "Be Live Collection Punta Cana", "Be Live Experience Punta Cana",
+  "Grand Palladium Palace", "Grand Palladium Punta Cana", "Grand Palladium Bavaro",
+  "Whala Bavaro", "Whala Punta Cana", "Whala Tropical",
+  "Sunscape Bavaro", "Sunscape Punta Cana", "Sunscape Mares",
+  "La Pargua", "El Cortecito", "Los Corales", "Bibijagua",
+  "Melia Caribe Beach", "Melia Punta Cana Beach", "Paradisus Punta Cana",
+  "Paradisus Grand Cana", "The Reserve at Paradisus", "Punta Cana Princess",
+  "Royalton Punta Cana", "Royalton Bavaro", "Royalton Splash",
+  "CHIC Punta Cana", "CHIC Royal", "CHIC Sunset",
+  "Boho Punta Cana", "Boho Palms", "Boho Resort",
+  "Tanama Hotel", "Kukua Beach Club", "Natura Park",
+  "Portillo", "Bayahibe", "La Romana", "Casa de Campo"
 ];
 
 const BANCOS = [
@@ -138,13 +171,14 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<"raul" | "gabrielle" | "republic" | null>(null);
   const [loginError, setLoginError] = useState("");
+  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [loginPassword, setLoginPassword] = useState("");
   
   const [ventas, setVentas] = useState<Venta[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [excursiones, setExcursiones] = useState<Excursion[]>([]);
   const [zonas, setZonas] = useState<string[]>(ZONAS_DEFAULT);
-  const [nuevaZona, setNuevaZona] = useState("");
   
   const [showForm, setShowForm] = useState(false);
   const [showClienteForm, setShowClienteForm] = useState(false);
@@ -234,13 +268,11 @@ export default function Home() {
     metodoPagoProveedor: "efectivo" as "efectivo" | "transferencia" | "paypal",
     tipoServicio: "compartido" as "compartido" | "privado" | "grupo",
     nombreGrupo: "",
-    tipoRecogida: "sin_recogida" as "hotel" | "airbnb" | "sin_recogida",
+    tipoRecogida: "hotel" as "hotel" | "airbnb",
     transporte: "no" as "si" | "no",
     hotelNombre: "",
     hotelHabitacion: "",
     airbnbUbicacion: "",
-    airbnbApartamento: "",
-    apartamento: "",
     horaRecogida: "",
     estado: "pendiente" as "pendiente" | "confirmada" | "cancelada" | "completada",
     nota: "",
@@ -362,16 +394,14 @@ export default function Home() {
     }).format(amount);
   };
 
-  const agregarZona = () => {
-    if (nuevaZona.trim() && !zonas.includes(nuevaZona.trim())) {
-      setZonas([...zonas, nuevaZona.trim()]);
-      setNuevaZona("");
-      alert(`Zona "${nuevaZona.trim()}" agregada correctamente`);
-    } else if (zonas.includes(nuevaZona.trim())) {
-      alert("Esta zona ya existe");
-    } else {
-      alert("Por favor escribe un nombre de zona");
-    }
+  const getMonthName = (month: number) => {
+    const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    return months[month];
+  };
+
+  const getDayName = (day: number) => {
+    const days = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];
+    return days[day];
   };
 
   // ============================================
@@ -399,21 +429,38 @@ export default function Home() {
     }
   };
 
+  const handleSelectUser = (user: string) => {
+    setSelectedUser(user);
+    setLoginPassword("");
+    setLoginError("");
+  };
+
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUser) {
+      setLoginError("Selecciona un usuario");
+      return;
+    }
+    handleLogin(selectedUser, loginPassword);
+  };
+
   const handleLogout = () => {
     setIsLoggedIn(false);
     setCurrentUser(null);
     setLoginError("");
+    setSelectedUser("");
+    setLoginPassword("");
   };
 
   // ============================================
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v48");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v48");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v48");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v48");
-    const savedZonas = localStorage.getItem("excursiones_zonas_v48");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v49");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v49");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v49");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v49");
+    const savedZonas = localStorage.getItem("excursiones_zonas_v49");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -424,27 +471,44 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v48", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v49", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v48", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v49", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v48", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v49", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v48", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v49", JSON.stringify(data));
   };
 
   const saveZonas = (data: string[]) => {
     setZonas(data);
-    localStorage.setItem("excursiones_zonas_v48", JSON.stringify(data));
+    localStorage.setItem("excursiones_zonas_v49", JSON.stringify(data));
+  };
+
+  // ============================================
+  // AGREGAR ZONA
+  // ============================================
+  const agregarZona = () => {
+    const nuevaZona = prompt("Escribe el nombre de la nueva zona:");
+    if (nuevaZona && nuevaZona.trim() && !zonas.includes(nuevaZona.trim())) {
+      const nuevasZonas = [...zonas, nuevaZona.trim()];
+      saveZonas(nuevasZonas);
+      return nuevaZona.trim();
+    } else if (zonas.includes(nuevaZona?.trim() || "")) {
+      alert("Esta zona ya existe");
+    } else if (nuevaZona && !nuevaZona.trim()) {
+      alert("Por favor escribe un nombre de zona");
+    }
+    return null;
   };
 
   // ============================================
@@ -628,9 +692,8 @@ export default function Home() {
       hotelNombre: formData.hotelNombre || "",
       hotelHabitacion: formData.hotelHabitacion || "",
       airbnbUbicacion: formData.airbnbUbicacion || "",
-      airbnbApartamento: formData.airbnbApartamento || "",
-      apartamento: formData.apartamento || "",
       horaRecogida: formData.horaRecogida || "",
+      zona: formData.zona || "",
       precioAdultoPersonalizado: Number(formData.precioAdultoUSD) || 0,
       precioNinoPersonalizado: Number(formData.precioNinoUSD) || 0,
       costoAdultoPersonalizado: Number(formData.costoProveedorAdultoUSD) || 0,
@@ -681,13 +744,11 @@ export default function Home() {
       metodoPagoProveedor: "efectivo",
       tipoServicio: "compartido",
       nombreGrupo: "",
-      tipoRecogida: "sin_recogida",
+      tipoRecogida: "hotel",
       transporte: "no",
       hotelNombre: "",
       hotelHabitacion: "",
       airbnbUbicacion: "",
-      airbnbApartamento: "",
-      apartamento: "",
       horaRecogida: "",
       estado: "pendiente",
       nota: "",
@@ -736,13 +797,11 @@ export default function Home() {
       metodoPagoProveedor: venta.metodoPagoProveedor,
       tipoServicio: venta.tipoServicio,
       nombreGrupo: venta.nombreGrupo || "",
-      tipoRecogida: venta.tipoRecogida || "sin_recogida",
+      tipoRecogida: venta.tipoRecogida || "hotel",
       transporte: venta.transporte || "no",
       hotelNombre: venta.hotelNombre || "",
       hotelHabitacion: venta.hotelHabitacion || "",
       airbnbUbicacion: venta.airbnbUbicacion || "",
-      airbnbApartamento: venta.airbnbApartamento || "",
-      apartamento: venta.apartamento || "",
       horaRecogida: venta.horaRecogida || "",
       estado: venta.estado || "pendiente",
       nota: venta.nota,
@@ -1264,11 +1323,6 @@ export default function Home() {
     setCurrentDate(newDate);
   };
 
-  const getMonthName = (month: number) => {
-    const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    return months[month];
-  };
-
   // ============================================
   // FILTROS Y AGRUPACIONES
   // ============================================
@@ -1329,8 +1383,7 @@ export default function Home() {
   const getTipoRecogidaText = (tipo: string) => {
     const map: any = {
       hotel: "Hotel",
-      airbnb: "Airbnb",
-      sin_recogida: "Sin Recogida"
+      airbnb: "Airbnb"
     };
     return map[tipo] || tipo;
   };
@@ -1361,11 +1414,10 @@ export default function Home() {
 
   const exportCSV = () => {
     if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Hora,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Recogida,Transporte,Hotel/Airbnb,Estado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Nota\n";
+    let csv = "Fecha,Hora,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Recogida,Transporte,Hotel/Airbnb,Estado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Zona,Nota\n";
     ventas.forEach(v => {
-      const recogidaInfo = v.tipoRecogida === "hotel" ? v.hotelNombre : 
-                           v.tipoRecogida === "airbnb" ? v.airbnbUbicacion : "Sin recogida";
-      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.nota || ""}"\n`;
+      const recogidaInfo = v.tipoRecogida === "hotel" ? v.hotelNombre : v.airbnbUbicacion;
+      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.zona || ""}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -1377,82 +1429,128 @@ export default function Home() {
   };
 
   // ============================================
-  // LOGIN
+  // LOGIN - DISEÑO PROFESIONAL
   // ============================================
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0a1628]">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-2xl p-8">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-full bg-[#0a1628] flex items-center justify-center mx-auto">
-                <span className="text-white text-2xl font-bold">RE</span>
-              </div>
-              <h1 className="text-2xl font-bold text-[#0a1628] mt-4">Republic Excursions</h1>
-              <p className="text-gray-500 text-sm mt-1">Sistema de Gestion de Excursiones</p>
-            </div>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-[-30%] left-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[150px]"></div>
+          <div className="absolute bottom-[-30%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[150px]"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-blue-400/5 rounded-full blur-[120px]"></div>
+        </div>
 
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              const username = formData.get("username") as string;
-              const password = formData.get("password") as string;
-              handleLogin(username, password);
-            }} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
-                <input
-                  type="text"
-                  name="username"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  placeholder="Ingresa tu usuario"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-                <input
-                  type="password"
-                  name="password"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  placeholder="Ingresa tu contraseña"
-                />
-              </div>
-              {loginError && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-600 text-sm text-center">
-                  {loginError}
+        <div className="relative z-10 w-full max-w-2xl">
+          <div className="bg-white/5 backdrop-blur-2xl rounded-3xl p-8 border border-white/10 shadow-2xl shadow-black/30">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Columna Izquierda - Hora y Fecha */}
+              <div className="flex flex-col justify-center items-center md:items-start border-b md:border-b-0 md:border-r border-white/10 pb-6 md:pb-0 md:pr-8">
+                <div className="text-center md:text-left">
+                  <div className="text-5xl font-mono font-bold text-white tracking-wider mb-2">
+                    {currentTime.toLocaleTimeString("es-DO", { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                  </div>
+                  <div className="text-white/60 text-lg">
+                    {getDayName(currentTime.getDay())}
+                  </div>
+                  <div className="text-white/40 text-sm">
+                    {currentTime.getDate()} de {getMonthName(currentTime.getMonth())} de {currentTime.getFullYear()}
+                  </div>
                 </div>
-              )}
-              <button
-                type="submit"
-                className="w-full bg-[#0a1628] text-white py-3.5 rounded-xl font-semibold hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20"
-              >
-                Iniciar Sesion
-              </button>
-            </form>
-
-            <div className="mt-6 p-3 bg-gray-50 rounded-xl border border-gray-100">
-              <div className="flex flex-wrap justify-center gap-2 text-xs text-gray-500">
-                <span className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0a1628]"></span>
-                  Republic
-                </span>
-                <span className="text-gray-300">•</span>
-                <span className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0a1628]"></span>
-                  Raul
-                </span>
-                <span className="text-gray-300">•</span>
-                <span className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0a1628]"></span>
-                  Gabrielle
-                </span>
+                
+                <div className="mt-6 text-center md:text-left">
+                  <div className="text-4xl font-bold text-white/10">RE</div>
+                  <div className="text-xs text-white/20 mt-1">v4.9 • Republic Excursions</div>
+                </div>
               </div>
-            </div>
 
-            <div className="mt-4 text-center">
-              <p className="text-[10px] text-gray-400">v4.8 • Republic Excursions © 2026</p>
+              {/* Columna Derecha - Formulario */}
+              <div>
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-white">Bienvenido de nuevo</h2>
+                  <p className="text-white/40 text-sm">Inicia sesion para continuar</p>
+                </div>
+
+                <form onSubmit={handleLoginSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white/60 mb-1.5">Usuario</label>
+                    <select
+                      value={selectedUser}
+                      onChange={(e) => handleSelectUser(e.target.value)}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-white/30 transition-all appearance-none"
+                    >
+                      <option value="">Seleccionar usuario</option>
+                      <option value="Republic">Republic - Administrador</option>
+                      <option value="Raul">Raul - Vendedor</option>
+                      <option value="Gabrielle">Gabrielle - Vendedora</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-white/60 mb-1.5">Contraseña</label>
+                    <input
+                      type="password"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-white/30 transition-all"
+                      placeholder="Ingresa tu contraseña"
+                      disabled={!selectedUser}
+                    />
+                    <div className="text-right mt-1">
+                      <button type="button" className="text-xs text-white/30 hover:text-white/60 transition-all">
+                        ¿Olvidaste tu contraseña?
+                      </button>
+                    </div>
+                  </div>
+
+                  {loginError && (
+                    <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm text-center">
+                      {loginError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3.5 rounded-xl font-semibold hover:shadow-xl hover:scale-[1.01] transition-all shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
+                  >
+                    Iniciar Sesion
+                  </button>
+                </form>
+
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/10"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-4 bg-transparent text-white/30">o continua con</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <button
+                    onClick={() => handleSelectUser("Republic")}
+                    className={`py-2.5 rounded-xl text-sm font-medium transition-all border ${selectedUser === "Republic" ? 'bg-blue-500/20 border-blue-500/50 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}
+                  >
+                    Republic
+                  </button>
+                  <button
+                    onClick={() => handleSelectUser("Raul")}
+                    className={`py-2.5 rounded-xl text-sm font-medium transition-all border ${selectedUser === "Raul" ? 'bg-blue-500/20 border-blue-500/50 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}
+                  >
+                    Raul
+                  </button>
+                  <button
+                    onClick={() => handleSelectUser("Gabrielle")}
+                    className={`py-2.5 rounded-xl text-sm font-medium transition-all border ${selectedUser === "Gabrielle" ? 'bg-blue-500/20 border-blue-500/50 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}
+                  >
+                    Gabrielle
+                  </button>
+                </div>
+
+                <div className="mt-6 text-center">
+                  <p className="text-xs text-white/20">Acceso seguro y protegido</p>
+                  <p className="text-[10px] text-white/10 mt-1">v4.9 • Republic Excursions © 2026</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1509,13 +1607,23 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER DASHBOARD (simplificado por espacio)
+  // RENDER DASHBOARD
   // ============================================
   const renderDashboard = () => {
     const totalVentas = ventas.reduce((sum, v) => sum + v.precioVentaUSD, 0);
     const totalComisiones = ventas.reduce((sum, v) => sum + v.comisionUSD, 0);
     const totalPendiente = ventas.reduce((sum, v) => sum + v.saldoPendienteUSD, 0);
     const totalClientes = clientes.length;
+    const totalProveedores = proveedores.length;
+    const totalExcursiones = excursiones.length;
+    
+    const ventasHoy = ventas.filter(v => {
+      const hoy = new Date();
+      const fechaV = new Date(v.fechaExcursion);
+      return fechaV.getDate() === hoy.getDate() &&
+             fechaV.getMonth() === hoy.getMonth() &&
+             fechaV.getFullYear() === hoy.getFullYear();
+    });
 
     return (
       <div className="space-y-6">
@@ -1572,6 +1680,63 @@ export default function Home() {
                 <p className="text-[#0a1628] text-2xl font-bold">{totalClientes}</p>
               </div>
               <div className="bg-blue-100 w-12 h-12 rounded-xl flex items-center justify-center text-xl">👥</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-gray-600 text-sm font-semibold mb-3">Resumen de Ventas</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Hoy</span>
+                <span className="text-[#0a1628] font-medium">{formatUSD(ventasHoy.reduce((s, v) => s + v.precioVentaUSD, 0))}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Pendientes</span>
+                <span className="text-yellow-600">{ventas.filter(v => v.estado === "pendiente").length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Confirmadas</span>
+                <span className="text-blue-600">{ventas.filter(v => v.estado === "confirmada").length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Completadas</span>
+                <span className="text-green-600">{ventas.filter(v => v.estado === "completada").length}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-gray-600 text-sm font-semibold mb-3">Resumen General</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Excursiones</span>
+                <span className="text-[#0a1628] font-medium">{totalExcursiones}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Proveedores</span>
+                <span className="text-[#0a1628] font-medium">{totalProveedores}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Ventas Totales</span>
+                <span className="text-[#0a1628] font-medium">{ventas.length}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-gray-600 text-sm font-semibold mb-3">Ultimas Ventas</h3>
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {ventas.slice(-4).reverse().map(v => (
+                <div key={v.id} className="flex justify-between text-sm border-b border-gray-50 pb-1">
+                  <span className="text-gray-500 truncate max-w-[120px]">{v.clienteNombre}</span>
+                  <span className="text-[#0a1628] font-medium">{formatUSD(v.precioVentaUSD)}</span>
+                </div>
+              ))}
+              {ventas.length === 0 && (
+                <p className="text-gray-400 text-sm text-center py-2">No hay ventas registradas</p>
+              )}
             </div>
           </div>
         </div>
@@ -2194,7 +2359,7 @@ export default function Home() {
                     <h3 className="text-[#0a1628] font-semibold">{e.nombre}</h3>
                     <p className="text-gray-400 text-sm">{e.proveedorNombre}</p>
                     <p className="text-xs text-gray-500">Zona: {e.zona || "Sin zona"}</p>
-                    <p className="text-xs text-gray-500">Tipo: {e.tipoPrecio === "persona" ? "Por Persona" : "Por Máquina"}</p>
+                    <p className="text-xs text-gray-500">Tipo: {e.tipoPrecio === "persona" ? "Por Persona" : "Por Maquina"}</p>
                     {e.capacidad && <p className="text-xs text-gray-500">Capacidad: {e.capacidad}</p>}
                   </div>
                   <div className="flex gap-2">
@@ -2214,11 +2379,11 @@ export default function Home() {
                   {e.precioNinoUSD !== null && (
                     <>
                       <div className="flex justify-between text-gray-500">
-                        <span>Precio Venta Niño</span>
+                        <span>Precio Venta Nino</span>
                         <span className="text-[#0a1628] font-medium">{formatUSD(e.precioNinoUSD)}</span>
                       </div>
                       <div className="flex justify-between text-gray-500">
-                        <span>Costo Proveedor Niño</span>
+                        <span>Costo Proveedor Nino</span>
                         <span className="text-orange-600 font-medium">{formatUSD(e.costoProveedorNinoUSD || 0)}</span>
                       </div>
                     </>
@@ -2318,7 +2483,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL - FORMULARIO DE VENTA COMPLETO
+          MODAL - FORMULARIO DE VENTA
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -2362,10 +2527,10 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Excursión */}
+              {/* Excursión con boton Crear separado */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Excursión *</label>
+                <div className="md:col-span-1">
+                  <label className="text-gray-600 text-sm block mb-1">Excursion *</label>
                   <div className="flex gap-2">
                     <select
                       value={formData.excursionId}
@@ -2373,8 +2538,8 @@ export default function Home() {
                       className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                       required
                     >
-                      <option value="">Seleccionar excursión</option>
-                      {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {e.proveedorNombre} ({e.tipoPrecio === "persona" ? "Por Persona" : "Por Máquina"})</option>)}
+                      <option value="">Seleccionar excursion</option>
+                      {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {e.proveedorNombre} ({e.tipoPrecio === "persona" ? "Por Persona" : "Por Maquina"})</option>)}
                     </select>
                     <button
                       type="button"
@@ -2387,7 +2552,7 @@ export default function Home() {
                   {formData.excursionId && (
                     <div className="mt-1 text-xs text-gray-400">
                       <span className="text-[#0a1628]">Proveedor:</span> {formData.proveedorNombre}
-                      {formData.tipoPrecio && <span className="ml-2">Tipo: {formData.tipoPrecio === "persona" ? "Por Persona" : "Por Máquina"}</span>}
+                      {formData.tipoPrecio && <span className="ml-2">Tipo: {formData.tipoPrecio === "persona" ? "Por Persona" : "Por Maquina"}</span>}
                     </div>
                   )}
                 </div>
@@ -2412,6 +2577,19 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Zona */}
+              <div>
+                <label className="text-gray-600 text-sm block mb-1">Zona</label>
+                <select
+                  value={formData.zona}
+                  onChange={(e) => setFormData(prev => ({ ...prev, zona: e.target.value }))}
+                  className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                >
+                  <option value="">Seleccionar zona</option>
+                  {zonas.map(z => <option key={z} value={z}>{z}</option>)}
+                </select>
+              </div>
+
               {/* Transporte */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -2422,7 +2600,7 @@ export default function Home() {
                       const val = e.target.value as "si" | "no";
                       setFormData(prev => ({ ...prev, transporte: val }));
                       if (val === "no") {
-                        setFormData(prev => ({ ...prev, tipoRecogida: "sin_recogida", hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", airbnbApartamento: "", apartamento: "", horaRecogida: "" }));
+                        setFormData(prev => ({ ...prev, tipoRecogida: "hotel", hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", horaRecogida: "" }));
                       }
                     }}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
@@ -2436,14 +2614,13 @@ export default function Home() {
                   <select
                     value={formData.tipoRecogida}
                     onChange={(e) => {
-                      const val = e.target.value as "hotel" | "airbnb" | "sin_recogida";
+                      const val = e.target.value as "hotel" | "airbnb";
                       setFormData(prev => ({ ...prev, tipoRecogida: val }));
-                      setFormData(prev => ({ ...prev, hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", airbnbApartamento: "", apartamento: "", horaRecogida: "" }));
+                      setFormData(prev => ({ ...prev, hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", horaRecogida: "" }));
                     }}
                     disabled={formData.transporte === "no"}
                     className={`w-full px-4 py-2 border rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all ${formData.transporte === "no" ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'bg-gray-50 border-gray-200'}`}
                   >
-                    <option value="sin_recogida">Sin Recogida</option>
                     <option value="hotel">Hotel</option>
                     <option value="airbnb">Airbnb</option>
                   </select>
@@ -2455,17 +2632,18 @@ export default function Home() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-l-4 border-[#0a1628] pl-4">
                   <div>
                     <label className="text-gray-600 text-sm block mb-1">Hotel *</label>
-                    <input
-                      type="text"
+                    <select
                       value={formData.hotelNombre}
                       onChange={(e) => setFormData(prev => ({ ...prev, hotelNombre: e.target.value }))}
                       className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      placeholder="Ej: Hyatt Ziva Cap Cana"
                       required={formData.tipoRecogida === "hotel"}
-                    />
+                    >
+                      <option value="">Seleccionar hotel</option>
+                      {HOTELES.map(h => <option key={h} value={h}>{h}</option>)}
+                    </select>
                   </div>
                   <div>
-                    <label className="text-gray-600 text-sm block mb-1">Habitación</label>
+                    <label className="text-gray-600 text-sm block mb-1">Habitacion</label>
                     <input
                       type="text"
                       value={formData.hotelHabitacion}
@@ -2490,9 +2668,9 @@ export default function Home() {
 
               {/* Campos condicionales - AIRBNB */}
               {formData.transporte === "si" && formData.tipoRecogida === "airbnb" && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-l-4 border-[#0a1628] pl-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
                   <div>
-                    <label className="text-gray-600 text-sm block mb-1">Ubicación Airbnb *</label>
+                    <label className="text-gray-600 text-sm block mb-1">Ubicacion Airbnb *</label>
                     <input
                       type="text"
                       value={formData.airbnbUbicacion}
@@ -2500,16 +2678,6 @@ export default function Home() {
                       className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                       placeholder="Ej: Parque Central, Pueblo Bavaro"
                       required={formData.tipoRecogida === "airbnb"}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-gray-600 text-sm block mb-1">Apartamento</label>
-                    <input
-                      type="text"
-                      value={formData.airbnbApartamento}
-                      onChange={(e) => setFormData(prev => ({ ...prev, airbnbApartamento: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      placeholder="Ej: Apt 3B, Casa 5"
                     />
                   </div>
                   <div>
@@ -2522,23 +2690,6 @@ export default function Home() {
                       <option value="">Seleccionar hora</option>
                       {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
                     </select>
-                  </div>
-                </div>
-              )}
-
-              {/* Campos condicionales - SIN RECOGIDA */}
-              {formData.transporte === "si" && formData.tipoRecogida === "sin_recogida" && (
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-4 border-l-4 border-[#0a1628] pl-4">
-                  <div>
-                    <label className="text-gray-600 text-sm block mb-1">Apartamento *</label>
-                    <input
-                      type="text"
-                      value={formData.apartamento}
-                      onChange={(e) => setFormData(prev => ({ ...prev, apartamento: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      placeholder="Ej: Villa B12, Casa 5, Apt 3B"
-                      required={formData.tipoRecogida === "sin_recogida" && formData.transporte === "si"}
-                    />
                   </div>
                 </div>
               )}
@@ -2605,7 +2756,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Niño (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Nino (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2616,7 +2767,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Nino (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2649,7 +2800,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-500 text-sm block mb-1">Comisión</label>
+                  <label className="text-gray-500 text-sm block mb-1">Comision</label>
                   <input
                     type="text"
                     value={formData.comisionTotalUSD}
@@ -2672,17 +2823,17 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL - Crear Excursión Rápida */}
+      {/* MODAL - Crear Excursion Rapida */}
       {showCrearExcursionDesdeVenta && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[#0a1628] text-xl font-bold">Crear Excursión Rápida</h3>
+              <h3 className="text-[#0a1628] text-xl font-bold">Crear Excursion Rapida</h3>
               <button onClick={() => setShowCrearExcursionDesdeVenta(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
             </div>
             <form onSubmit={handleCrearExcursionDesdeVenta} className="space-y-4">
               <div>
-                <label className="text-gray-600 text-sm block mb-1">Nombre de la Excursión *</label>
+                <label className="text-gray-600 text-sm block mb-1">Nombre de la Excursion *</label>
                 <input
                   type="text"
                   value={nuevaExcursionDesdeVenta.nombre}
@@ -2725,16 +2876,9 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={() => {
-                        const nuevaZonaPrompt = prompt("Escribe el nombre de la nueva zona:");
-                        if (nuevaZonaPrompt && nuevaZonaPrompt.trim() && !zonas.includes(nuevaZonaPrompt.trim())) {
-                          const nuevasZonas = [...zonas, nuevaZonaPrompt.trim()];
-                          saveZonas(nuevasZonas);
-                          setNuevaExcursionDesdeVenta(prev => ({ ...prev, zona: nuevaZonaPrompt.trim() }));
-                          alert(`Zona "${nuevaZonaPrompt.trim()}" agregada correctamente`);
-                        } else if (zonas.includes(nuevaZonaPrompt?.trim() || "")) {
-                          alert("Esta zona ya existe");
-                        } else if (nuevaZonaPrompt && !nuevaZonaPrompt.trim()) {
-                          alert("Por favor escribe un nombre de zona");
+                        const nuevaZona = agregarZona();
+                        if (nuevaZona) {
+                          setNuevaExcursionDesdeVenta(prev => ({ ...prev, zona: nuevaZona }));
                         }
                       }}
                       className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm"
@@ -2770,7 +2914,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Niño (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Nino (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2781,7 +2925,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Nino (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2801,7 +2945,7 @@ export default function Home() {
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
                     <option value="persona">Por Persona</option>
-                    <option value="maquina">Por Máquina</option>
+                    <option value="maquina">Por Maquina</option>
                   </select>
                 </div>
                 <div>
@@ -2830,7 +2974,7 @@ export default function Home() {
                   Cancelar
                 </button>
                 <button type="submit" className="px-6 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20">
-                  Crear Excursión
+                  Crear Excursion
                 </button>
               </div>
             </form>
@@ -2860,9 +3004,9 @@ export default function Home() {
                 <input type="email" name="email" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all" />
               </div>
               <div>
-                <label className="text-gray-600 text-sm block mb-1">Excursión</label>
+                <label className="text-gray-600 text-sm block mb-1">Excursion</label>
                 <select name="excursionId" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all">
-                  <option value="">Seleccionar excursión</option>
+                  <option value="">Seleccionar excursion</option>
                   {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
                 </select>
               </div>
@@ -2915,7 +3059,7 @@ export default function Home() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Teléfono</label>
+                  <label className="text-gray-600 text-sm block mb-1">Telefono</label>
                   <input
                     type="text"
                     value={proveedorFormData.telefono}
@@ -2935,7 +3079,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Resto del formulario de proveedor */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Tipo de Documento</label>
@@ -2950,12 +3093,12 @@ export default function Home() {
                     }}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
-                    <option value="cedula">Cédula</option>
+                    <option value="cedula">Cedula</option>
                     <option value="rnc">RNC</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">{proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cédula"}</label>
+                  <label className="text-gray-600 text-sm block mb-1">{proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cedula"}</label>
                   <input
                     type="text"
                     value={proveedorFormData.rncCedula}
@@ -2967,7 +3110,7 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="text-gray-600 text-sm block mb-2">Métodos de Pago</label>
+                <label className="text-gray-600 text-sm block mb-2">Metodos de Pago</label>
                 <div className="flex gap-4 flex-wrap">
                   <button type="button" onClick={() => toggleMetodoPago("efectivo")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("efectivo") ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'bg-gray-100 border border-gray-200 text-gray-600'}`}>
                     Efectivo
@@ -2994,7 +3137,7 @@ export default function Home() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Número de Cuenta</label>
+                  <label className="text-gray-600 text-sm block mb-1">Numero de Cuenta</label>
                   <input
                     type="text"
                     value={proveedorFormData.numeroCuenta}
@@ -3066,10 +3209,10 @@ export default function Home() {
                       <div>
                         <span className="text-[#0a1628]">{e.nombre}</span>
                         <span className="text-gray-500 text-sm ml-2">Precio Venta: {formatUSD(e.precioAdultoUSD)}</span>
-                        {e.precioNinoUSD !== null && <span className="text-gray-500 text-sm ml-2">Niño: {formatUSD(e.precioNinoUSD)}</span>}
+                        {e.precioNinoUSD !== null && <span className="text-gray-500 text-sm ml-2">Nino: {formatUSD(e.precioNinoUSD)}</span>}
                         <span className="text-orange-600 text-sm ml-2">Costo: {formatUSD(e.costoProveedorAdultoUSD)}</span>
                         <span className="text-gray-400 text-xs ml-2">Zona: {e.zona || "Sin zona"}</span>
-                        <span className="text-gray-400 text-xs ml-2">Tipo: {e.tipoPrecio === "persona" ? "Persona" : "Máquina"}</span>
+                        <span className="text-gray-400 text-xs ml-2">Tipo: {e.tipoPrecio === "persona" ? "Persona" : "Maquina"}</span>
                       </div>
                       <button type="button" onClick={() => eliminarTempExcursion(i)} className="text-red-400 hover:text-red-600">×</button>
                     </div>
@@ -3081,7 +3224,7 @@ export default function Home() {
                     value={tempExcursionForm.nombre}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, nombre: e.target.value }))}
                     className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="Nombre de excursión"
+                    placeholder="Nombre de excursion"
                   />
                   <div className="flex gap-2">
                     <input
@@ -3098,7 +3241,7 @@ export default function Home() {
                       value={tempExcursionForm.precioNinoUSD}
                       onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
                       className="w-1/2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      placeholder="Precio Niño"
+                      placeholder="Precio Nino"
                     />
                   </div>
                 </div>
@@ -3117,20 +3260,34 @@ export default function Home() {
                     value={tempExcursionForm.costoProveedorNinoUSD}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
                     className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="Costo Niño"
+                    placeholder="Costo Nino"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-gray-600 text-sm block mb-1">Zona</label>
-                    <select
-                      value={tempExcursionForm.zona}
-                      onChange={(e) => setTempExcursionForm(prev => ({ ...prev, zona: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    >
-                      <option value="">Seleccionar zona</option>
-                      {zonas.map(z => <option key={z} value={z}>{z}</option>)}
-                    </select>
+                    <div className="flex gap-2">
+                      <select
+                        value={tempExcursionForm.zona}
+                        onChange={(e) => setTempExcursionForm(prev => ({ ...prev, zona: e.target.value }))}
+                        className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      >
+                        <option value="">Seleccionar zona</option>
+                        {zonas.map(z => <option key={z} value={z}>{z}</option>)}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nuevaZona = agregarZona();
+                          if (nuevaZona) {
+                            setTempExcursionForm(prev => ({ ...prev, zona: nuevaZona }));
+                          }
+                        }}
+                        className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm"
+                      >
+                        + Agregar Zona
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <label className="text-gray-600 text-sm block mb-1">Tipo de Precio</label>
@@ -3140,7 +3297,7 @@ export default function Home() {
                       className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     >
                       <option value="persona">Por Persona</option>
-                      <option value="maquina">Por Máquina</option>
+                      <option value="maquina">Por Maquina</option>
                     </select>
                   </div>
                 </div>
@@ -3154,7 +3311,7 @@ export default function Home() {
                     Tiene precio para niños
                   </label>
                   <button type="button" onClick={agregarTempExcursion} className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 text-sm">
-                    Agregar Excursión
+                    Agregar Excursion
                   </button>
                 </div>
               </div>
@@ -3172,12 +3329,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL - Excursión */}
+      {/* MODAL - Excursion */}
       {showExcursionForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[#0a1628] text-xl font-bold">{editingExcursionId ? "Editar Excursión" : "Nueva Excursión"}</h3>
+              <h3 className="text-[#0a1628] text-xl font-bold">{editingExcursionId ? "Editar Excursion" : "Nueva Excursion"}</h3>
               <button onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
             </div>
             <form onSubmit={handleExcursionSubmit} className="space-y-4">
@@ -3225,7 +3382,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Niño (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Nino (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -3248,7 +3405,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Nino (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -3273,16 +3430,9 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={() => {
-                        const nuevaZonaPrompt = prompt("Escribe el nombre de la nueva zona:");
-                        if (nuevaZonaPrompt && nuevaZonaPrompt.trim() && !zonas.includes(nuevaZonaPrompt.trim())) {
-                          const nuevasZonas = [...zonas, nuevaZonaPrompt.trim()];
-                          saveZonas(nuevasZonas);
-                          setExcursionFormData(prev => ({ ...prev, zona: nuevaZonaPrompt.trim() }));
-                          alert(`Zona "${nuevaZonaPrompt.trim()}" agregada correctamente`);
-                        } else if (zonas.includes(nuevaZonaPrompt?.trim() || "")) {
-                          alert("Esta zona ya existe");
-                        } else if (nuevaZonaPrompt && !nuevaZonaPrompt.trim()) {
-                          alert("Por favor escribe un nombre de zona");
+                        const nuevaZona = agregarZona();
+                        if (nuevaZona) {
+                          setExcursionFormData(prev => ({ ...prev, zona: nuevaZona }));
                         }
                       }}
                       className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm"
@@ -3311,7 +3461,7 @@ export default function Home() {
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
                     <option value="persona">Por Persona</option>
-                    <option value="maquina">Por Máquina</option>
+                    <option value="maquina">Por Maquina</option>
                   </select>
                 </div>
               </div>
@@ -3330,7 +3480,7 @@ export default function Home() {
                   Cancelar
                 </button>
                 <button type="submit" className="px-6 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20">
-                  {editingExcursionId ? "Actualizar Excursión" : "Guardar Excursión"}
+                  {editingExcursionId ? "Actualizar Excursion" : "Guardar Excursion"}
                 </button>
               </div>
             </form>
