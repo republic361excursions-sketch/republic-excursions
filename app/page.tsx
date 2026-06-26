@@ -23,6 +23,8 @@ interface Excursion {
   costoGrupoPrivado?: number;
   capacidadGrupoPrivado?: number;
   extraPorPersona?: number;
+  esOtro?: boolean; // Para identificar si es "Otro (especificar)"
+  nombrePersonalizado?: string; // Para el nombre personalizado
 }
 
 interface Proveedor {
@@ -95,20 +97,15 @@ interface Venta {
 }
 
 // ============================================
-// LISTAS - ZONAS (sin La Otra Banda y Playa Bavaro)
+// ZONAS - Solo 5 iniciales, el resto se agregan manualmente
 // ============================================
 const ZONAS_INICIALES = [
-  "Bavaro", "Punta Cana Village", "Cap Cana", "Uvero Alto",
-  "Cabeza de Toro", "El Cortecito", "Los Corales", "Bibijagua",
-  "Arena Gorda", "Melia", "Riu", "Hard Rock", "Iberostar",
-  "Bahia Principe", "Sirenis", "Dreams", "Excellence",
-  "San Juan", "Veron"
+  "Bavaro", "Los Corales", "Punta Cana", "Jellyfish", "Macao"
 ];
 
-// Estado global para zonas (se puede modificar dinámicamente)
+// Estado global para zonas
 let ZONAS_GLOBALES = [...ZONAS_INICIALES];
 
-// Función para agregar una nueva zona
 const agregarZonaGlobal = (nuevaZona: string) => {
   if (nuevaZona.trim() && !ZONAS_GLOBALES.includes(nuevaZona.trim())) {
     ZONAS_GLOBALES.push(nuevaZona.trim());
@@ -117,7 +114,6 @@ const agregarZonaGlobal = (nuevaZona: string) => {
   return false;
 };
 
-// Función para eliminar una zona
 const eliminarZonaGlobal = (zona: string) => {
   if (ZONAS_GLOBALES.length <= 1) {
     alert("Debe haber al menos una zona disponible");
@@ -131,8 +127,20 @@ const eliminarZonaGlobal = (zona: string) => {
   return false;
 };
 
-// Función para obtener las zonas actuales
 const getZonasGlobales = () => [...ZONAS_GLOBALES];
+
+// ============================================
+// EXCURSIONES PREDEFINIDAS + "Otro (especificar)"
+// ============================================
+const EXCURSIONES_PREDEFINIDAS = [
+  { id: "party-boat", nombre: "Party Boat Privado" },
+  { id: "snorkel-catalina", nombre: "Snorkel en Catalina" },
+  { id: "safari-buggy", nombre: "Safari en Dune Buggy" },
+  { id: "catamaran", nombre: "Paseo en Catamarán" },
+  { id: "isla-saona", nombre: "Excursión a Isla Saona" },
+  { id: "paseo-caballo", nombre: "Paseo a Caballo" },
+  { id: "otro", nombre: "Otro (especificar)" }
+];
 
 const BANCOS = [
   "Banco BHD", "Banreservas", "Banco Popular Dominicano",
@@ -199,11 +207,14 @@ export default function Home() {
   const [filterReservaEstado, setFilterReservaEstado] = useState("todas");
   const [filterReservaFecha, setFilterReservaFecha] = useState("");
 
-  // Estado para mostrar/ocultar el modal de gestión de zonas
   const [showZonasModal, setShowZonasModal] = useState(false);
   const [nuevaZonaInput, setNuevaZonaInput] = useState("");
   const [zonasActuales, setZonasActuales] = useState<string[]>([]);
   const [searchZona, setSearchZona] = useState("");
+
+  // Estado para el selector de excursión en venta
+  const [excursionSeleccionadaId, setExcursionSeleccionadaId] = useState<string>("");
+  const [nombrePersonalizado, setNombrePersonalizado] = useState<string>("");
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -212,7 +223,6 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  // Cargar zonas guardadas de localStorage
   useEffect(() => {
     const savedZonas = localStorage.getItem("excursiones_zonas_v44");
     if (savedZonas) {
@@ -224,14 +234,12 @@ export default function Home() {
     setZonasActuales(getZonasGlobales());
   }, []);
 
-  // Guardar zonas en localStorage cuando cambien
   const guardarZonas = (zonas: string[]) => {
     ZONAS_GLOBALES = zonas;
     localStorage.setItem("excursiones_zonas_v44", JSON.stringify(zonas));
     setZonasActuales([...zonas]);
   };
 
-  // Zonas filtradas para búsqueda
   const zonasFiltradas = getZonasGlobales().filter(zona =>
     zona.toLowerCase().includes(searchZona.toLowerCase())
   );
@@ -325,6 +333,8 @@ export default function Home() {
     costoGrupoPrivado: "",
     capacidadGrupoPrivado: "",
     extraPorPersona: "",
+    esOtro: false,
+    nombrePersonalizado: "",
   });
 
   const [proveedorFormData, setProveedorFormData] = useState({
@@ -622,9 +632,52 @@ export default function Home() {
   };
 
   // ============================================
-  // SELECCIONAR EXCURSION
+  // SELECCIONAR EXCURSION (desde el selector de venta)
   // ============================================
-  const selectExcursionForVenta = (excursionId: string) => {
+  const handleSelectExcursion = (excursionId: string, customName?: string) => {
+    setExcursionSeleccionadaId(excursionId);
+    
+    if (excursionId === "otro") {
+      // Si es "Otro (especificar)", mostrar campo de texto
+      const nombreFinal = customName || "";
+      setNombrePersonalizado(nombreFinal);
+      
+      // Crear una excursión temporal con el nombre personalizado
+      const excursionTemp: Excursion = {
+        id: "otro-temp",
+        nombre: nombreFinal || "Otro (especificar)",
+        proveedorId: "",
+        proveedorNombre: "",
+        precioAdultoUSD: 0,
+        precioNinoUSD: null,
+        costoProveedorAdultoUSD: 0,
+        costoProveedorNinoUSD: null,
+        comisionAdultoUSD: 0,
+        comisionNinoUSD: null,
+        zona: [],
+        tipoPrecio: "persona",
+        esOtro: true,
+        nombrePersonalizado: nombreFinal
+      };
+      setSelectedExcursionForVenta(excursionTemp);
+      
+      setFormData(prev => ({
+        ...prev,
+        excursionId: "otro-temp",
+        excursionNombre: nombreFinal || "Otro (especificar)",
+        precioAdultoUSD: "",
+        precioNinoUSD: "",
+        costoProveedorAdultoUSD: "",
+        costoProveedorNinoUSD: "",
+        comisionAdultoUSD: "",
+        comisionNinoUSD: "",
+        proveedorId: "",
+        proveedorNombre: "",
+      }));
+      return;
+    }
+    
+    // Buscar en excursiones existentes
     const excursion = excursiones.find(e => e.id === excursionId);
     if (excursion) {
       setSelectedExcursionForVenta(excursion);
@@ -737,7 +790,6 @@ export default function Home() {
     setTimeout(updateCantidades, 10);
   };
 
-  // Manejo de zona en el formulario de venta (multiselect)
   const toggleZonaEnForm = (zona: string) => {
     setFormData(prev => {
       const zonas = prev.zona || [];
@@ -872,6 +924,8 @@ export default function Home() {
     setShowForm(false);
     setEditingVentaId(null);
     setSelectedExcursionForVenta(null);
+    setExcursionSeleccionadaId("");
+    setNombrePersonalizado("");
   };
 
   // ============================================
@@ -1176,7 +1230,6 @@ export default function Home() {
     setTempExcursiones(tempExcursiones.filter((_, i) => i !== index));
   };
 
-  // Manejo de zona en temp excursion
   const toggleZonaTemp = (zona: string) => {
     setTempExcursionForm(prev => {
       const zonas = prev.zona || [];
@@ -1188,7 +1241,6 @@ export default function Home() {
     });
   };
 
-  // Manejo de zona en excursionFormData
   const toggleZonaExcursion = (zona: string) => {
     setExcursionFormData(prev => {
       const zonas = prev.zona || [];
@@ -1200,7 +1252,6 @@ export default function Home() {
     });
   };
 
-  // Manejo de zona en nuevaExcursionDesdeVenta
   const toggleZonaNuevaExcursion = (zona: string) => {
     setNuevaExcursionDesdeVenta(prev => {
       const zonas = prev.zona || [];
@@ -1217,6 +1268,12 @@ export default function Home() {
   // ============================================
   const handleExcursionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Determinar el nombre final
+    let nombreFinal = excursionFormData.nombre;
+    if (excursionFormData.esOtro && excursionFormData.nombrePersonalizado) {
+      nombreFinal = excursionFormData.nombrePersonalizado;
+    }
     
     const precioAdultoUSD = Number(excursionFormData.precioAdultoUSD) || 0;
     const costoProveedorAdultoUSD = Number(excursionFormData.costoProveedorAdultoUSD) || 0;
@@ -1241,7 +1298,7 @@ export default function Home() {
         e.id === editingExcursionId 
           ? { 
               ...e, 
-              nombre: excursionFormData.nombre,
+              nombre: nombreFinal,
               proveedorId: excursionFormData.proveedorId,
               proveedorNombre: proveedor?.nombre || "",
               precioAdultoUSD,
@@ -1257,6 +1314,8 @@ export default function Home() {
               costoGrupoPrivado: Number(excursionFormData.costoGrupoPrivado) || undefined,
               capacidadGrupoPrivado: Number(excursionFormData.capacidadGrupoPrivado) || undefined,
               extraPorPersona: Number(excursionFormData.extraPorPersona) || undefined,
+              esOtro: excursionFormData.esOtro,
+              nombrePersonalizado: excursionFormData.esOtro ? excursionFormData.nombrePersonalizado : undefined,
             }
           : e
       );
@@ -1265,7 +1324,7 @@ export default function Home() {
     } else {
       const nuevaExcursion: Excursion = {
         id: Date.now().toString(),
-        nombre: excursionFormData.nombre,
+        nombre: nombreFinal,
         proveedorId: excursionFormData.proveedorId,
         proveedorNombre: proveedor?.nombre || "",
         precioAdultoUSD,
@@ -1281,6 +1340,8 @@ export default function Home() {
         costoGrupoPrivado: Number(excursionFormData.costoGrupoPrivado) || undefined,
         capacidadGrupoPrivado: Number(excursionFormData.capacidadGrupoPrivado) || undefined,
         extraPorPersona: Number(excursionFormData.extraPorPersona) || undefined,
+        esOtro: excursionFormData.esOtro,
+        nombrePersonalizado: excursionFormData.esOtro ? excursionFormData.nombrePersonalizado : undefined,
       };
       saveExcursiones([...excursiones, nuevaExcursion]);
       alert("Excursion agregada correctamente");
@@ -1306,6 +1367,8 @@ export default function Home() {
       costoGrupoPrivado: "",
       capacidadGrupoPrivado: "",
       extraPorPersona: "",
+      esOtro: false,
+      nombrePersonalizado: "",
     });
   };
 
@@ -1329,6 +1392,8 @@ export default function Home() {
       costoGrupoPrivado: String((excursion as any).costoGrupoPrivado || ""),
       capacidadGrupoPrivado: String((excursion as any).capacidadGrupoPrivado || ""),
       extraPorPersona: String((excursion as any).extraPorPersona || ""),
+      esOtro: (excursion as any).esOtro || false,
+      nombrePersonalizado: (excursion as any).nombrePersonalizado || "",
     });
     setShowExcursionForm(true);
   };
@@ -2526,7 +2591,7 @@ export default function Home() {
             <option value="">Todos los proveedores</option>
             {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
           </select>
-          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: [], capacidad: "", tienePrecioNino: false, tipoPrecio: "persona", precioGrupoPrivado: "", costoGrupoPrivado: "", capacidadGrupoPrivado: "", extraPorPersona: "" }); setShowExcursionForm(true); }} className="bg-[#0a1628] text-white px-4 py-2.5 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
+          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: [], capacidad: "", tienePrecioNino: false, tipoPrecio: "persona", precioGrupoPrivado: "", costoGrupoPrivado: "", capacidadGrupoPrivado: "", extraPorPersona: "", esOtro: false, nombrePersonalizado: "" }); setShowExcursionForm(true); }} className="bg-[#0a1628] text-white px-4 py-2.5 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
             <span className="text-lg leading-none">+</span> Nueva Excursion
           </button>
           <button 
@@ -2548,6 +2613,9 @@ export default function Home() {
                     <h3 className="text-[#0a1628] font-semibold">{e.nombre}</h3>
                     <p className="text-gray-400 text-sm">{e.proveedorNombre}</p>
                     <p className="text-xs text-gray-500">Zonas: {getZonasString(e.zona)}</p>
+                    {(e as any).esOtro && (
+                      <p className="text-xs text-[#0a1628] font-medium">🔹 Personalizada</p>
+                    )}
                     {(e as any).precioGrupoPrivado && (
                       <p className="text-xs text-[#0a1628] font-medium">Precio Grupo Privado: {formatUSD((e as any).precioGrupoPrivado)}</p>
                     )}
@@ -2620,7 +2688,6 @@ export default function Home() {
               </div>
               
               <div className="space-y-4">
-                {/* Buscador de zonas */}
                 <div>
                   <input
                     type="text"
@@ -2811,33 +2878,50 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Excursión */}
+              {/* Excursión - Selector con opciones predefinidas + Otro */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Excursión *</label>
-                  <div className="flex gap-2">
-                    <select
-                      value={formData.excursionId}
-                      onChange={(e) => selectExcursionForVenta(e.target.value)}
-                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      required
-                    >
-                      <option value="">Seleccionar excursion</option>
-                      {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {e.proveedorNombre}</option>)}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => setShowCrearExcursionDesdeVenta(true)}
-                      className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm"
-                    >
-                      + Crear
-                    </button>
-                  </div>
-                  {formData.excursionId && (
-                    <div className="mt-1 text-xs text-gray-400">
-                      <span className="text-[#0a1628]">Proveedor:</span> {formData.proveedorNombre}
-                    </div>
-                  )}
+                  <select
+                    value={excursionSeleccionadaId || formData.excursionId}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setExcursionSeleccionadaId(value);
+                      if (value === "otro") {
+                        // Mostrar campo para nombre personalizado
+                        setShowNombrePersonalizado(true);
+                        setFormData(prev => ({
+                          ...prev,
+                          excursionId: "otro-temp",
+                          excursionNombre: "",
+                          precioAdultoUSD: "",
+                          precioNinoUSD: "",
+                          costoProveedorAdultoUSD: "",
+                          costoProveedorNinoUSD: "",
+                          comisionAdultoUSD: "",
+                          comisionNinoUSD: "",
+                          proveedorId: "",
+                          proveedorNombre: "",
+                        }));
+                        setSelectedExcursionForVenta(null);
+                      } else {
+                        setShowNombrePersonalizado(false);
+                        // Buscar la excursión seleccionada
+                        const excursion = excursiones.find(e => e.id === value);
+                        if (excursion) {
+                          handleSelectExcursion(value);
+                        }
+                      }
+                    }}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    required
+                  >
+                    <option value="">Seleccionar excursión</option>
+                    {excursiones.map(e => (
+                      <option key={e.id} value={e.id}>{e.nombre}</option>
+                    ))}
+                    <option value="otro">Otro (especificar)</option>
+                  </select>
                 </div>
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Zonas</label>
@@ -2868,6 +2952,29 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+
+              {/* Campo para nombre personalizado cuando se selecciona "Otro" */}
+              {excursionSeleccionadaId === "otro" && (
+                <div className="border-l-4 border-[#0a1628] pl-4">
+                  <label className="text-gray-600 text-sm block mb-1">Especificar nombre de la excursión *</label>
+                  <input
+                    type="text"
+                    value={nombrePersonalizado}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setNombrePersonalizado(val);
+                      setFormData(prev => ({
+                        ...prev,
+                        excursionNombre: val,
+                        excursionId: "otro-temp"
+                      }));
+                    }}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    placeholder="Ej: Paseo en Yate Privado"
+                    required={excursionSeleccionadaId === "otro"}
+                  />
+                </div>
+              )}
 
               {/* Fecha y Hora */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -3988,13 +4095,44 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Nombre *</label>
-                  <input
-                    type="text"
-                    value={excursionFormData.nombre}
-                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, nombre: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    required
-                  />
+                  <div className="flex flex-col gap-2">
+                    <select
+                      value={excursionFormData.esOtro ? "otro" : "predefinido"}
+                      onChange={(e) => {
+                        if (e.target.value === "otro") {
+                          setExcursionFormData(prev => ({ ...prev, esOtro: true, nombre: "" }));
+                        } else {
+                          setExcursionFormData(prev => ({ ...prev, esOtro: false, nombre: prev.nombre }));
+                        }
+                      }}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    >
+                      <option value="predefinido">Seleccionar de lista</option>
+                      <option value="otro">Otro (especificar)</option>
+                    </select>
+                    {excursionFormData.esOtro ? (
+                      <input
+                        type="text"
+                        value={excursionFormData.nombrePersonalizado}
+                        onChange={(e) => setExcursionFormData(prev => ({ ...prev, nombrePersonalizado: e.target.value, nombre: e.target.value }))}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                        placeholder="Ej: Paseo en Yate Privado"
+                        required={excursionFormData.esOtro}
+                      />
+                    ) : (
+                      <select
+                        value={excursionFormData.nombre}
+                        onChange={(e) => setExcursionFormData(prev => ({ ...prev, nombre: e.target.value }))}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                        required={!excursionFormData.esOtro}
+                      >
+                        <option value="">Seleccionar excursión</option>
+                        {EXCURSIONES_PREDEFINIDAS.filter(e => e.id !== "otro").map(e => (
+                          <option key={e.id} value={e.nombre}>{e.nombre}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Proveedor *</label>
