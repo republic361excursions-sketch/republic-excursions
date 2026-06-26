@@ -72,7 +72,7 @@ interface Venta {
   cantidadNinos: number;
   tipoServicio: "compartido" | "privado" | "grupo";
   nombreGrupo?: string;
-  tipoRecogida: "hotel" | "airbnb";
+  tipoRecogida: "sin_recogida" | "hotel" | "airbnb";
   transporte: "si" | "no";
   hotelNombre: string;
   hotelHabitacion: string;
@@ -98,7 +98,7 @@ const ZONAS_DEFAULT = [
   "San Juan", "Veron"
 ];
 
-const HOTELES = [
+const HOTELES_DEFAULT = [
   "Hyatt Ziva Cap Cana", "Hyatt Zilara Cap Cana", "Riu Palace Bavaro",
   "Riu Republica", "Riu Bambu", "Riu Naiboa", "Riu Palace Macao",
   "Hard Rock Hotel & Casino", "Iberostar Bavaro Suites",
@@ -179,12 +179,12 @@ export default function Home() {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [excursiones, setExcursiones] = useState<Excursion[]>([]);
   const [zonas, setZonas] = useState<string[]>(ZONAS_DEFAULT);
+  const [hoteles, setHoteles] = useState<string[]>(HOTELES_DEFAULT);
   
   const [showForm, setShowForm] = useState(false);
   const [showClienteForm, setShowClienteForm] = useState(false);
   const [showProveedorForm, setShowProveedorForm] = useState(false);
   const [showExcursionForm, setShowExcursionForm] = useState(false);
-  const [showCrearExcursionDesdeVenta, setShowCrearExcursionDesdeVenta] = useState(false);
   const [editingVentaId, setEditingVentaId] = useState<string | null>(null);
   const [editingExcursionId, setEditingExcursionId] = useState<string | null>(null);
   const [editingProveedorId, setEditingProveedorId] = useState<string | null>(null);
@@ -268,7 +268,7 @@ export default function Home() {
     metodoPagoProveedor: "efectivo" as "efectivo" | "transferencia" | "paypal",
     tipoServicio: "compartido" as "compartido" | "privado" | "grupo",
     nombreGrupo: "",
-    tipoRecogida: "hotel" as "hotel" | "airbnb",
+    tipoRecogida: "sin_recogida" as "sin_recogida" | "hotel" | "airbnb",
     transporte: "no" as "si" | "no",
     hotelNombre: "",
     hotelHabitacion: "",
@@ -310,20 +310,6 @@ export default function Home() {
     beneficiario: "",
     rncCedula: "",
     tipoDocumento: "cedula" as "rnc" | "cedula",
-  });
-
-  const [nuevaExcursionDesdeVenta, setNuevaExcursionDesdeVenta] = useState({
-    nombre: "",
-    precioAdultoUSD: "",
-    precioNinoUSD: "",
-    costoProveedorAdultoUSD: "",
-    costoProveedorNinoUSD: "",
-    tienePrecioNino: false,
-    proveedorId: "",
-    proveedorNombre: "",
-    zona: "",
-    capacidad: "",
-    tipoPrecio: "persona" as "persona" | "maquina",
   });
 
   // ============================================
@@ -456,42 +442,49 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v49");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v49");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v49");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v49");
-    const savedZonas = localStorage.getItem("excursiones_zonas_v49");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v50");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v50");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v50");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v50");
+    const savedZonas = localStorage.getItem("excursiones_zonas_v50");
+    const savedHoteles = localStorage.getItem("excursiones_hoteles_v50");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
     if (savedProveedores) setProveedores(JSON.parse(savedProveedores));
     if (savedExcursiones) setExcursiones(JSON.parse(savedExcursiones));
     if (savedZonas) setZonas(JSON.parse(savedZonas));
+    if (savedHoteles) setHoteles(JSON.parse(savedHoteles));
   }, []);
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v49", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v50", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v49", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v50", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v49", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v50", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v49", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v50", JSON.stringify(data));
   };
 
   const saveZonas = (data: string[]) => {
     setZonas(data);
-    localStorage.setItem("excursiones_zonas_v49", JSON.stringify(data));
+    localStorage.setItem("excursiones_zonas_v50", JSON.stringify(data));
+  };
+
+  const saveHoteles = (data: string[]) => {
+    setHoteles(data);
+    localStorage.setItem("excursiones_hoteles_v50", JSON.stringify(data));
   };
 
   // ============================================
@@ -507,6 +500,23 @@ export default function Home() {
       alert("Esta zona ya existe");
     } else if (nuevaZona && !nuevaZona.trim()) {
       alert("Por favor escribe un nombre de zona");
+    }
+    return null;
+  };
+
+  // ============================================
+  // AGREGAR HOTEL
+  // ============================================
+  const agregarHotel = () => {
+    const nuevoHotel = prompt("Escribe el nombre del nuevo hotel:");
+    if (nuevoHotel && nuevoHotel.trim() && !hoteles.includes(nuevoHotel.trim())) {
+      const nuevosHoteles = [...hoteles, nuevoHotel.trim()];
+      saveHoteles(nuevosHoteles);
+      return nuevoHotel.trim();
+    } else if (hoteles.includes(nuevoHotel?.trim() || "")) {
+      alert("Este hotel ya existe");
+    } else if (nuevoHotel && !nuevoHotel.trim()) {
+      alert("Por favor escribe un nombre de hotel");
     }
     return null;
   };
@@ -744,7 +754,7 @@ export default function Home() {
       metodoPagoProveedor: "efectivo",
       tipoServicio: "compartido",
       nombreGrupo: "",
-      tipoRecogida: "hotel",
+      tipoRecogida: "sin_recogida",
       transporte: "no",
       hotelNombre: "",
       hotelHabitacion: "",
@@ -797,7 +807,7 @@ export default function Home() {
       metodoPagoProveedor: venta.metodoPagoProveedor,
       tipoServicio: venta.tipoServicio,
       nombreGrupo: venta.nombreGrupo || "",
-      tipoRecogida: venta.tipoRecogida || "hotel",
+      tipoRecogida: venta.tipoRecogida || "sin_recogida",
       transporte: venta.transporte || "no",
       hotelNombre: venta.hotelNombre || "",
       hotelHabitacion: venta.hotelHabitacion || "",
@@ -1181,104 +1191,6 @@ export default function Home() {
   };
 
   // ============================================
-  // CREAR EXCURSION DESDE VENTA - RAPIDO
-  // ============================================
-  const handleCrearExcursionDesdeVenta = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const precioAdultoUSD = Number(nuevaExcursionDesdeVenta.precioAdultoUSD) || 0;
-    const costoProveedorAdultoUSD = Number(nuevaExcursionDesdeVenta.costoProveedorAdultoUSD) || 0;
-    const comisionAdultoUSD = calcularComision(precioAdultoUSD, costoProveedorAdultoUSD);
-    
-    let precioNinoUSD: number | null = null;
-    let costoProveedorNinoUSD: number | null = null;
-    let comisionNinoUSD: number | null = null;
-    
-    if (nuevaExcursionDesdeVenta.tienePrecioNino) {
-      precioNinoUSD = Number(nuevaExcursionDesdeVenta.precioNinoUSD) || 0;
-      costoProveedorNinoUSD = Number(nuevaExcursionDesdeVenta.costoProveedorNinoUSD) || 0;
-      comisionNinoUSD = calcularComision(precioNinoUSD, costoProveedorNinoUSD);
-    }
-    
-    let proveedorId = nuevaExcursionDesdeVenta.proveedorId;
-    let proveedorNombre = nuevaExcursionDesdeVenta.proveedorNombre;
-    
-    if (!proveedorId) {
-      const nuevoProveedor: Proveedor = {
-        id: Date.now().toString(),
-        nombre: proveedorNombre || "Proveedor Temporal",
-        empresa: "",
-        telefono: "",
-        email: "",
-        metodosPago: [],
-        banco: "",
-        numeroCuenta: "",
-        monedaCuenta: "RD$",
-        tipoCuenta: [],
-        tipoBeneficiario: "personal",
-        beneficiario: "",
-        rncCedula: "",
-        tipoDocumento: "cedula",
-      };
-      saveProveedores([...proveedores, nuevoProveedor]);
-      proveedorId = nuevoProveedor.id;
-      proveedorNombre = nuevoProveedor.nombre;
-    }
-    
-    const nuevaExcursion: Excursion = {
-      id: Date.now().toString(),
-      nombre: nuevaExcursionDesdeVenta.nombre,
-      proveedorId: proveedorId,
-      proveedorNombre: proveedorNombre,
-      precioAdultoUSD,
-      precioNinoUSD,
-      costoProveedorAdultoUSD,
-      costoProveedorNinoUSD,
-      comisionAdultoUSD,
-      comisionNinoUSD,
-      zona: nuevaExcursionDesdeVenta.zona || "Bavaro",
-      capacidad: nuevaExcursionDesdeVenta.capacidad || undefined,
-      tipoPrecio: nuevaExcursionDesdeVenta.tipoPrecio || "persona",
-    };
-    
-    saveExcursiones([...excursiones, nuevaExcursion]);
-    
-    setFormData({
-      ...formData,
-      excursionId: nuevaExcursion.id,
-      excursionNombre: nuevaExcursion.nombre,
-      precioAdultoUSD: String(nuevaExcursion.precioAdultoUSD || ""),
-      precioNinoUSD: String(nuevaExcursion.precioNinoUSD || ""),
-      costoProveedorAdultoUSD: String(nuevaExcursion.costoProveedorAdultoUSD || ""),
-      costoProveedorNinoUSD: String(nuevaExcursion.costoProveedorNinoUSD || ""),
-      comisionAdultoUSD: String(nuevaExcursion.comisionAdultoUSD || ""),
-      comisionNinoUSD: String(nuevaExcursion.comisionNinoUSD || ""),
-      proveedorId: nuevaExcursion.proveedorId,
-      proveedorNombre: nuevaExcursion.proveedorNombre,
-      zona: nuevaExcursion.zona,
-      tipoPrecio: nuevaExcursion.tipoPrecio || "persona",
-    });
-    
-    setShowCrearExcursionDesdeVenta(false);
-    setNuevaExcursionDesdeVenta({
-      nombre: "",
-      precioAdultoUSD: "",
-      precioNinoUSD: "",
-      costoProveedorAdultoUSD: "",
-      costoProveedorNinoUSD: "",
-      tienePrecioNino: false,
-      proveedorId: "",
-      proveedorNombre: "",
-      zona: "",
-      capacidad: "",
-      tipoPrecio: "persona",
-    });
-    
-    setTimeout(updateCantidades, 50);
-    alert("Excursion creada correctamente");
-  };
-
-  // ============================================
   // FUNCIONES DEL CALENDARIO
   // ============================================
   const getDaysInMonth = (date: Date) => {
@@ -1382,6 +1294,7 @@ export default function Home() {
 
   const getTipoRecogidaText = (tipo: string) => {
     const map: any = {
+      sin_recogida: "Sin Recogida",
       hotel: "Hotel",
       airbnb: "Airbnb"
     };
@@ -1416,7 +1329,8 @@ export default function Home() {
     if (ventas.length === 0) { alert("No hay datos"); return; }
     let csv = "Fecha,Hora,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Recogida,Transporte,Hotel/Airbnb,Estado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Zona,Nota\n";
     ventas.forEach(v => {
-      const recogidaInfo = v.tipoRecogida === "hotel" ? v.hotelNombre : v.airbnbUbicacion;
+      const recogidaInfo = v.tipoRecogida === "hotel" ? v.hotelNombre : 
+                           v.tipoRecogida === "airbnb" ? v.airbnbUbicacion : "Sin recogida";
       csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.zona || ""}","${v.nota || ""}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -1459,7 +1373,7 @@ export default function Home() {
                 
                 <div className="mt-6 text-center md:text-left">
                   <div className="text-4xl font-bold text-white/10">RE</div>
-                  <div className="text-xs text-white/20 mt-1">v4.9 • Republic Excursions</div>
+                  <div className="text-xs text-white/20 mt-1">v5.0 • Republic Excursions</div>
                 </div>
               </div>
 
@@ -1548,7 +1462,7 @@ export default function Home() {
 
                 <div className="mt-6 text-center">
                   <p className="text-xs text-white/20">Acceso seguro y protegido</p>
-                  <p className="text-[10px] text-white/10 mt-1">v4.9 • Republic Excursions © 2026</p>
+                  <p className="text-[10px] text-white/10 mt-1">v5.0 • Republic Excursions © 2026</p>
                 </div>
               </div>
             </div>
@@ -2483,7 +2397,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL - FORMULARIO DE VENTA
+          MODAL - FORMULARIO DE VENTA (CORREGIDO)
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -2527,32 +2441,22 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Excursión con boton Crear separado */}
+              {/* Excursion - SIN BOTON CREAR */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-1">
+                <div>
                   <label className="text-gray-600 text-sm block mb-1">Excursion *</label>
-                  <div className="flex gap-2">
-                    <select
-                      value={formData.excursionId}
-                      onChange={(e) => selectExcursionForVenta(e.target.value)}
-                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      required
-                    >
-                      <option value="">Seleccionar excursion</option>
-                      {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {e.proveedorNombre} ({e.tipoPrecio === "persona" ? "Por Persona" : "Por Maquina"})</option>)}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => setShowCrearExcursionDesdeVenta(true)}
-                      className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm"
-                    >
-                      + Crear
-                    </button>
-                  </div>
+                  <select
+                    value={formData.excursionId}
+                    onChange={(e) => selectExcursionForVenta(e.target.value)}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    required
+                  >
+                    <option value="">Seleccionar excursion</option>
+                    {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {e.proveedorNombre} ({e.tipoPrecio === "persona" ? "Por Persona" : "Por Maquina"})</option>)}
+                  </select>
                   {formData.excursionId && (
                     <div className="mt-1 text-xs text-gray-400">
                       <span className="text-[#0a1628]">Proveedor:</span> {formData.proveedorNombre}
-                      {formData.tipoPrecio && <span className="ml-2">Tipo: {formData.tipoPrecio === "persona" ? "Por Persona" : "Por Maquina"}</span>}
                     </div>
                   )}
                 </div>
@@ -2600,7 +2504,7 @@ export default function Home() {
                       const val = e.target.value as "si" | "no";
                       setFormData(prev => ({ ...prev, transporte: val }));
                       if (val === "no") {
-                        setFormData(prev => ({ ...prev, tipoRecogida: "hotel", hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", horaRecogida: "" }));
+                        setFormData(prev => ({ ...prev, tipoRecogida: "sin_recogida", hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", horaRecogida: "" }));
                       }
                     }}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
@@ -2614,13 +2518,14 @@ export default function Home() {
                   <select
                     value={formData.tipoRecogida}
                     onChange={(e) => {
-                      const val = e.target.value as "hotel" | "airbnb";
+                      const val = e.target.value as "sin_recogida" | "hotel" | "airbnb";
                       setFormData(prev => ({ ...prev, tipoRecogida: val }));
                       setFormData(prev => ({ ...prev, hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", horaRecogida: "" }));
                     }}
                     disabled={formData.transporte === "no"}
                     className={`w-full px-4 py-2 border rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all ${formData.transporte === "no" ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'bg-gray-50 border-gray-200'}`}
                   >
+                    <option value="sin_recogida">Sin Recogida</option>
                     <option value="hotel">Hotel</option>
                     <option value="airbnb">Airbnb</option>
                   </select>
@@ -2632,15 +2537,29 @@ export default function Home() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-l-4 border-[#0a1628] pl-4">
                   <div>
                     <label className="text-gray-600 text-sm block mb-1">Hotel *</label>
-                    <select
-                      value={formData.hotelNombre}
-                      onChange={(e) => setFormData(prev => ({ ...prev, hotelNombre: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      required={formData.tipoRecogida === "hotel"}
-                    >
-                      <option value="">Seleccionar hotel</option>
-                      {HOTELES.map(h => <option key={h} value={h}>{h}</option>)}
-                    </select>
+                    <div className="flex gap-2">
+                      <select
+                        value={formData.hotelNombre}
+                        onChange={(e) => setFormData(prev => ({ ...prev, hotelNombre: e.target.value }))}
+                        className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                        required={formData.tipoRecogida === "hotel"}
+                      >
+                        <option value="">Seleccionar hotel</option>
+                        {hoteles.map(h => <option key={h} value={h}>{h}</option>)}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nuevoHotel = agregarHotel();
+                          if (nuevoHotel) {
+                            setFormData(prev => ({ ...prev, hotelNombre: nuevoHotel }));
+                          }
+                        }}
+                        className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm"
+                      >
+                        + Agregar Hotel
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <label className="text-gray-600 text-sm block mb-1">Habitacion</label>
@@ -2654,14 +2573,12 @@ export default function Home() {
                   </div>
                   <div>
                     <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
-                    <select
+                    <input
+                      type="time"
                       value={formData.horaRecogida}
                       onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
                       className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    >
-                      <option value="">Seleccionar hora</option>
-                      {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
-                    </select>
+                    />
                   </div>
                 </div>
               )}
@@ -2682,15 +2599,20 @@ export default function Home() {
                   </div>
                   <div>
                     <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
-                    <select
+                    <input
+                      type="time"
                       value={formData.horaRecogida}
                       onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
                       className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    >
-                      <option value="">Seleccionar hora</option>
-                      {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
-                    </select>
+                    />
                   </div>
+                </div>
+              )}
+
+              {/* Campos condicionales - SIN RECOGIDA (no muestra nada adicional) */}
+              {formData.transporte === "si" && formData.tipoRecogida === "sin_recogida" && (
+                <div className="text-sm text-gray-400 italic pl-4 border-l-4 border-[#0a1628]">
+                  El cliente se transporta por sus propios medios.
                 </div>
               )}
 
@@ -2816,165 +2738,6 @@ export default function Home() {
                 </button>
                 <button type="submit" className="px-6 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20">
                   {editingVentaId ? "Actualizar Venta" : "Registrar Venta"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL - Crear Excursion Rapida */}
-      {showCrearExcursionDesdeVenta && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[#0a1628] text-xl font-bold">Crear Excursion Rapida</h3>
-              <button onClick={() => setShowCrearExcursionDesdeVenta(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
-            </div>
-            <form onSubmit={handleCrearExcursionDesdeVenta} className="space-y-4">
-              <div>
-                <label className="text-gray-600 text-sm block mb-1">Nombre de la Excursion *</label>
-                <input
-                  type="text"
-                  value={nuevaExcursionDesdeVenta.nombre}
-                  onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, nombre: e.target.value }))}
-                  className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  placeholder="Ej: Safari Punta Cana"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Proveedor</label>
-                  <select
-                    value={nuevaExcursionDesdeVenta.proveedorId}
-                    onChange={(e) => {
-                      const proveedor = proveedores.find(p => p.id === e.target.value);
-                      setNuevaExcursionDesdeVenta(prev => ({
-                        ...prev,
-                        proveedorId: e.target.value,
-                        proveedorNombre: proveedor?.nombre || ""
-                      }));
-                    }}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  >
-                    <option value="">Seleccionar proveedor</option>
-                    {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Zona</label>
-                  <div className="flex gap-2">
-                    <select
-                      value={nuevaExcursionDesdeVenta.zona}
-                      onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, zona: e.target.value }))}
-                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    >
-                      <option value="">Seleccionar zona</option>
-                      {zonas.map(z => <option key={z} value={z}>{z}</option>)}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const nuevaZona = agregarZona();
-                        if (nuevaZona) {
-                          setNuevaExcursionDesdeVenta(prev => ({ ...prev, zona: nuevaZona }));
-                        }
-                      }}
-                      className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm"
-                    >
-                      + Agregar Zona
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Adulto (USD)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={nuevaExcursionDesdeVenta.precioAdultoUSD}
-                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="0.00"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Adulto (USD)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={nuevaExcursionDesdeVenta.costoProveedorAdultoUSD}
-                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="0.00"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Nino (USD)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={nuevaExcursionDesdeVenta.precioNinoUSD}
-                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Nino (USD)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={nuevaExcursionDesdeVenta.costoProveedorNinoUSD}
-                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Tipo de Precio</label>
-                  <select
-                    value={nuevaExcursionDesdeVenta.tipoPrecio}
-                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, tipoPrecio: e.target.value as "persona" | "maquina" }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  >
-                    <option value="persona">Por Persona</option>
-                    <option value="maquina">Por Maquina</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Capacidad</label>
-                  <input
-                    type="text"
-                    value={nuevaExcursionDesdeVenta.capacidad}
-                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, capacidad: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="Ej: 20 personas"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2 text-gray-600 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={nuevaExcursionDesdeVenta.tienePrecioNino}
-                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, tienePrecioNino: e.target.checked }))}
-                  />
-                  Tiene precio para niños
-                </label>
-              </div>
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                <button type="button" onClick={() => setShowCrearExcursionDesdeVenta(false)} className="px-6 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
-                  Cancelar
-                </button>
-                <button type="submit" className="px-6 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20">
-                  Crear Excursion
                 </button>
               </div>
             </form>
