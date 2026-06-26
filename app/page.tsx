@@ -18,6 +18,7 @@ interface Excursion {
   comisionNinoUSD: number | null;
   zona: string;
   capacidad?: string;
+  tipoPrecio: "persona" | "maquina";
 }
 
 interface Proveedor {
@@ -74,7 +75,9 @@ interface Venta {
   tipoRecogida: "hotel" | "airbnb" | "sin_recogida";
   transporte: "si" | "no";
   hotelNombre: string;
+  hotelHabitacion: string;
   airbnbUbicacion: string;
+  airbnbApartamento: string;
   apartamento: string;
   horaRecogida: string;
   precioAdultoPersonalizado: number;
@@ -88,7 +91,7 @@ interface Venta {
 // ============================================
 // LISTAS
 // ============================================
-const ZONAS = [
+const ZONAS_DEFAULT = [
   "Bavaro", "Punta Cana Village", "Cap Cana", "Uvero Alto",
   "Cabeza de Toro", "El Cortecito", "Los Corales", "Bibijagua",
   "Arena Gorda", "Melia", "Riu", "Hard Rock", "Iberostar",
@@ -140,6 +143,8 @@ export default function Home() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [excursiones, setExcursiones] = useState<Excursion[]>([]);
+  const [zonas, setZonas] = useState<string[]>(ZONAS_DEFAULT);
+  const [nuevaZona, setNuevaZona] = useState("");
   
   const [showForm, setShowForm] = useState(false);
   const [showClienteForm, setShowClienteForm] = useState(false);
@@ -193,6 +198,7 @@ export default function Home() {
     zona: "",
     capacidad: "",
     tienePrecioNino: false,
+    tipoPrecio: "persona" as "persona" | "maquina",
   });
 
   // ============================================
@@ -231,12 +237,15 @@ export default function Home() {
     tipoRecogida: "sin_recogida" as "hotel" | "airbnb" | "sin_recogida",
     transporte: "no" as "si" | "no",
     hotelNombre: "",
+    hotelHabitacion: "",
     airbnbUbicacion: "",
+    airbnbApartamento: "",
     apartamento: "",
     horaRecogida: "",
     estado: "pendiente" as "pendiente" | "confirmada" | "cancelada" | "completada",
     nota: "",
     zona: "",
+    tipoPrecio: "persona" as "persona" | "maquina",
   });
 
   const [excursionFormData, setExcursionFormData] = useState({
@@ -252,6 +261,7 @@ export default function Home() {
     zona: "",
     capacidad: "",
     tienePrecioNino: false,
+    tipoPrecio: "persona" as "persona" | "maquina",
   });
 
   const [proveedorFormData, setProveedorFormData] = useState({
@@ -281,6 +291,7 @@ export default function Home() {
     proveedorNombre: "",
     zona: "",
     capacidad: "",
+    tipoPrecio: "persona" as "persona" | "maquina",
   });
 
   // ============================================
@@ -351,6 +362,18 @@ export default function Home() {
     }).format(amount);
   };
 
+  const agregarZona = () => {
+    if (nuevaZona.trim() && !zonas.includes(nuevaZona.trim())) {
+      setZonas([...zonas, nuevaZona.trim()]);
+      setNuevaZona("");
+      alert(`Zona "${nuevaZona.trim()}" agregada correctamente`);
+    } else if (zonas.includes(nuevaZona.trim())) {
+      alert("Esta zona ya existe");
+    } else {
+      alert("Por favor escribe un nombre de zona");
+    }
+  };
+
   // ============================================
   // LOGIN
   // ============================================
@@ -386,35 +409,42 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v47");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v47");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v47");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v47");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v48");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v48");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v48");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v48");
+    const savedZonas = localStorage.getItem("excursiones_zonas_v48");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
     if (savedProveedores) setProveedores(JSON.parse(savedProveedores));
     if (savedExcursiones) setExcursiones(JSON.parse(savedExcursiones));
+    if (savedZonas) setZonas(JSON.parse(savedZonas));
   }, []);
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v47", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v48", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v47", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v48", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v47", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v48", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v47", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v48", JSON.stringify(data));
+  };
+
+  const saveZonas = (data: string[]) => {
+    setZonas(data);
+    localStorage.setItem("excursiones_zonas_v48", JSON.stringify(data));
   };
 
   // ============================================
@@ -497,6 +527,7 @@ export default function Home() {
         proveedorId: excursion.proveedorId,
         proveedorNombre: excursion.proveedorNombre,
         zona: excursion.zona || "",
+        tipoPrecio: excursion.tipoPrecio || "persona",
       }));
       
       setTimeout(() => {
@@ -595,7 +626,9 @@ export default function Home() {
       tipoRecogida: formData.tipoRecogida,
       transporte: formData.transporte,
       hotelNombre: formData.hotelNombre || "",
+      hotelHabitacion: formData.hotelHabitacion || "",
       airbnbUbicacion: formData.airbnbUbicacion || "",
+      airbnbApartamento: formData.airbnbApartamento || "",
       apartamento: formData.apartamento || "",
       horaRecogida: formData.horaRecogida || "",
       precioAdultoPersonalizado: Number(formData.precioAdultoUSD) || 0,
@@ -651,12 +684,15 @@ export default function Home() {
       tipoRecogida: "sin_recogida",
       transporte: "no",
       hotelNombre: "",
+      hotelHabitacion: "",
       airbnbUbicacion: "",
+      airbnbApartamento: "",
       apartamento: "",
       horaRecogida: "",
       estado: "pendiente",
       nota: "",
       zona: "",
+      tipoPrecio: "persona",
     });
     setShowForm(false);
     setEditingVentaId(null);
@@ -703,12 +739,15 @@ export default function Home() {
       tipoRecogida: venta.tipoRecogida || "sin_recogida",
       transporte: venta.transporte || "no",
       hotelNombre: venta.hotelNombre || "",
+      hotelHabitacion: venta.hotelHabitacion || "",
       airbnbUbicacion: venta.airbnbUbicacion || "",
+      airbnbApartamento: venta.airbnbApartamento || "",
       apartamento: venta.apartamento || "",
       horaRecogida: venta.horaRecogida || "",
       estado: venta.estado || "pendiente",
       nota: venta.nota,
       zona: excursion?.zona || "",
+      tipoPrecio: "persona",
     });
     setShowForm(true);
   };
@@ -811,6 +850,7 @@ export default function Home() {
       zona: "",
       capacidad: "",
       tienePrecioNino: false,
+      tipoPrecio: "persona",
     });
   };
 
@@ -843,6 +883,7 @@ export default function Home() {
       comisionNinoUSD: e.comisionNinoUSD,
       zona: e.zona || "",
       capacidad: e.capacidad || "",
+      tipoPrecio: e.tipoPrecio || "persona",
     })));
     
     setShowProveedorForm(true);
@@ -916,6 +957,7 @@ export default function Home() {
         comisionNinoUSD,
         zona: tempExcursionForm.zona || "Bavaro",
         capacidad: tempExcursionForm.capacidad || undefined,
+        tipoPrecio: tempExcursionForm.tipoPrecio || "persona",
       }
     ]);
     
@@ -930,6 +972,7 @@ export default function Home() {
       zona: "",
       capacidad: "",
       tienePrecioNino: false,
+      tipoPrecio: "persona",
     });
   };
 
@@ -975,6 +1018,7 @@ export default function Home() {
               comisionNinoUSD,
               zona: excursionFormData.zona || "Bavaro",
               capacidad: excursionFormData.capacidad || undefined,
+              tipoPrecio: excursionFormData.tipoPrecio || "persona",
             }
           : e
       );
@@ -994,6 +1038,7 @@ export default function Home() {
         comisionNinoUSD,
         zona: excursionFormData.zona || "Bavaro",
         capacidad: excursionFormData.capacidad || undefined,
+        tipoPrecio: excursionFormData.tipoPrecio || "persona",
       };
       saveExcursiones([...excursiones, nuevaExcursion]);
       alert("Excursion agregada correctamente");
@@ -1014,6 +1059,7 @@ export default function Home() {
       zona: "",
       capacidad: "",
       tienePrecioNino: false,
+      tipoPrecio: "persona",
     });
   };
 
@@ -1032,6 +1078,7 @@ export default function Home() {
       zona: excursion.zona || "",
       capacidad: excursion.capacidad || "",
       tienePrecioNino: excursion.precioNinoUSD !== null,
+      tipoPrecio: excursion.tipoPrecio || "persona",
     });
     setShowExcursionForm(true);
   };
@@ -1132,6 +1179,7 @@ export default function Home() {
       comisionNinoUSD,
       zona: nuevaExcursionDesdeVenta.zona || "Bavaro",
       capacidad: nuevaExcursionDesdeVenta.capacidad || undefined,
+      tipoPrecio: nuevaExcursionDesdeVenta.tipoPrecio || "persona",
     };
     
     saveExcursiones([...excursiones, nuevaExcursion]);
@@ -1149,6 +1197,7 @@ export default function Home() {
       proveedorId: nuevaExcursion.proveedorId,
       proveedorNombre: nuevaExcursion.proveedorNombre,
       zona: nuevaExcursion.zona,
+      tipoPrecio: nuevaExcursion.tipoPrecio || "persona",
     });
     
     setShowCrearExcursionDesdeVenta(false);
@@ -1163,6 +1212,7 @@ export default function Home() {
       proveedorNombre: "",
       zona: "",
       capacidad: "",
+      tipoPrecio: "persona",
     });
     
     setTimeout(updateCantidades, 50);
@@ -1402,7 +1452,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-[10px] text-gray-400">v4.7 • Republic Excursions © 2026</p>
+              <p className="text-[10px] text-gray-400">v4.8 • Republic Excursions © 2026</p>
             </div>
           </div>
         </div>
@@ -1459,23 +1509,13 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER DASHBOARD
+  // RENDER DASHBOARD (simplificado por espacio)
   // ============================================
   const renderDashboard = () => {
     const totalVentas = ventas.reduce((sum, v) => sum + v.precioVentaUSD, 0);
     const totalComisiones = ventas.reduce((sum, v) => sum + v.comisionUSD, 0);
     const totalPendiente = ventas.reduce((sum, v) => sum + v.saldoPendienteUSD, 0);
     const totalClientes = clientes.length;
-    const totalProveedores = proveedores.length;
-    const totalExcursiones = excursiones.length;
-    
-    const ventasHoy = ventas.filter(v => {
-      const hoy = new Date();
-      const fechaV = new Date(v.fechaExcursion);
-      return fechaV.getDate() === hoy.getDate() &&
-             fechaV.getMonth() === hoy.getMonth() &&
-             fechaV.getFullYear() === hoy.getFullYear();
-    });
 
     return (
       <div className="space-y-6">
@@ -1532,63 +1572,6 @@ export default function Home() {
                 <p className="text-[#0a1628] text-2xl font-bold">{totalClientes}</p>
               </div>
               <div className="bg-blue-100 w-12 h-12 rounded-xl flex items-center justify-center text-xl">👥</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-gray-600 text-sm font-semibold mb-3">Resumen de Ventas</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Hoy</span>
-                <span className="text-[#0a1628] font-medium">{formatUSD(ventasHoy.reduce((s, v) => s + v.precioVentaUSD, 0))}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Pendientes</span>
-                <span className="text-yellow-600">{ventas.filter(v => v.estado === "pendiente").length}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Confirmadas</span>
-                <span className="text-blue-600">{ventas.filter(v => v.estado === "confirmada").length}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Completadas</span>
-                <span className="text-green-600">{ventas.filter(v => v.estado === "completada").length}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-gray-600 text-sm font-semibold mb-3">Resumen General</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Excursiones</span>
-                <span className="text-[#0a1628] font-medium">{totalExcursiones}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Proveedores</span>
-                <span className="text-[#0a1628] font-medium">{totalProveedores}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Ventas Totales</span>
-                <span className="text-[#0a1628] font-medium">{ventas.length}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-gray-600 text-sm font-semibold mb-3">Ultimas Ventas</h3>
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {ventas.slice(-4).reverse().map(v => (
-                <div key={v.id} className="flex justify-between text-sm border-b border-gray-50 pb-1">
-                  <span className="text-gray-500 truncate max-w-[120px]">{v.clienteNombre}</span>
-                  <span className="text-[#0a1628] font-medium">{formatUSD(v.precioVentaUSD)}</span>
-                </div>
-              ))}
-              {ventas.length === 0 && (
-                <p className="text-gray-400 text-sm text-center py-2">No hay ventas registradas</p>
-              )}
             </div>
           </div>
         </div>
@@ -2195,7 +2178,7 @@ export default function Home() {
             <option value="">Todos los proveedores</option>
             {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
           </select>
-          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false }); setShowExcursionForm(true); }} className="bg-[#0a1628] text-white px-4 py-2.5 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
+          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false, tipoPrecio: "persona" }); setShowExcursionForm(true); }} className="bg-[#0a1628] text-white px-4 py-2.5 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
             <span className="text-lg leading-none">+</span> Nueva Excursion
           </button>
         </div>
@@ -2211,6 +2194,7 @@ export default function Home() {
                     <h3 className="text-[#0a1628] font-semibold">{e.nombre}</h3>
                     <p className="text-gray-400 text-sm">{e.proveedorNombre}</p>
                     <p className="text-xs text-gray-500">Zona: {e.zona || "Sin zona"}</p>
+                    <p className="text-xs text-gray-500">Tipo: {e.tipoPrecio === "persona" ? "Por Persona" : "Por Máquina"}</p>
                     {e.capacidad && <p className="text-xs text-gray-500">Capacidad: {e.capacidad}</p>}
                   </div>
                   <div className="flex gap-2">
@@ -2333,7 +2317,9 @@ export default function Home() {
         {renderView()}
       </main>
 
-      {/* MODAL - Nueva Venta */}
+      {/* ============================================
+          MODAL - FORMULARIO DE VENTA COMPLETO
+      ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
@@ -2388,7 +2374,7 @@ export default function Home() {
                       required
                     >
                       <option value="">Seleccionar excursión</option>
-                      {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {e.proveedorNombre}</option>)}
+                      {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {e.proveedorNombre} ({e.tipoPrecio === "persona" ? "Por Persona" : "Por Máquina"})</option>)}
                     </select>
                     <button
                       type="button"
@@ -2401,6 +2387,7 @@ export default function Home() {
                   {formData.excursionId && (
                     <div className="mt-1 text-xs text-gray-400">
                       <span className="text-[#0a1628]">Proveedor:</span> {formData.proveedorNombre}
+                      {formData.tipoPrecio && <span className="ml-2">Tipo: {formData.tipoPrecio === "persona" ? "Por Persona" : "Por Máquina"}</span>}
                     </div>
                   )}
                 </div>
@@ -2416,17 +2403,16 @@ export default function Home() {
                 </div>
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Hora</label>
-                  <select
+                  <input
+                    type="time"
                     value={formData.horaExcursion}
                     onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  >
-                    {HORAS.map(h => <option key={h} value={h}>{h}</option>)}
-                  </select>
+                  />
                 </div>
               </div>
 
-              {/* Transporte y Recogida */}
+              {/* Transporte */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Transporte</label>
@@ -2436,7 +2422,7 @@ export default function Home() {
                       const val = e.target.value as "si" | "no";
                       setFormData(prev => ({ ...prev, transporte: val }));
                       if (val === "no") {
-                        setFormData(prev => ({ ...prev, tipoRecogida: "sin_recogida", hotelNombre: "", airbnbUbicacion: "", apartamento: "", horaRecogida: "" }));
+                        setFormData(prev => ({ ...prev, tipoRecogida: "sin_recogida", hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", airbnbApartamento: "", apartamento: "", horaRecogida: "" }));
                       }
                     }}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
@@ -2452,7 +2438,7 @@ export default function Home() {
                     onChange={(e) => {
                       const val = e.target.value as "hotel" | "airbnb" | "sin_recogida";
                       setFormData(prev => ({ ...prev, tipoRecogida: val }));
-                      setFormData(prev => ({ ...prev, hotelNombre: "", airbnbUbicacion: "", apartamento: "", horaRecogida: "" }));
+                      setFormData(prev => ({ ...prev, hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", airbnbApartamento: "", apartamento: "", horaRecogida: "" }));
                     }}
                     disabled={formData.transporte === "no"}
                     className={`w-full px-4 py-2 border rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all ${formData.transporte === "no" ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'bg-gray-50 border-gray-200'}`}
@@ -2464,9 +2450,9 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Campos condicionales */}
+              {/* Campos condicionales - HOTEL */}
               {formData.transporte === "si" && formData.tipoRecogida === "hotel" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-l-4 border-[#0a1628] pl-4">
                   <div>
                     <label className="text-gray-600 text-sm block mb-1">Hotel *</label>
                     <input
@@ -2479,30 +2465,13 @@ export default function Home() {
                     />
                   </div>
                   <div>
-                    <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
-                    <select
-                      value={formData.horaRecogida}
-                      onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    >
-                      <option value="">Seleccionar hora</option>
-                      {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
-                    </select>
-                  </div>
-                </div>
-              )}
-
-              {formData.transporte === "si" && formData.tipoRecogida === "airbnb" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
-                  <div>
-                    <label className="text-gray-600 text-sm block mb-1">Ubicación Airbnb *</label>
+                    <label className="text-gray-600 text-sm block mb-1">Habitación</label>
                     <input
                       type="text"
-                      value={formData.airbnbUbicacion}
-                      onChange={(e) => setFormData(prev => ({ ...prev, airbnbUbicacion: e.target.value }))}
+                      value={formData.hotelHabitacion}
+                      onChange={(e) => setFormData(prev => ({ ...prev, hotelHabitacion: e.target.value }))}
                       className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      placeholder="Ej: Parque Central, Pueblo Bavaro"
-                      required={formData.tipoRecogida === "airbnb"}
+                      placeholder="Ej: 305, Suite 12"
                     />
                   </div>
                   <div>
@@ -2519,6 +2488,45 @@ export default function Home() {
                 </div>
               )}
 
+              {/* Campos condicionales - AIRBNB */}
+              {formData.transporte === "si" && formData.tipoRecogida === "airbnb" && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-l-4 border-[#0a1628] pl-4">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Ubicación Airbnb *</label>
+                    <input
+                      type="text"
+                      value={formData.airbnbUbicacion}
+                      onChange={(e) => setFormData(prev => ({ ...prev, airbnbUbicacion: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Ej: Parque Central, Pueblo Bavaro"
+                      required={formData.tipoRecogida === "airbnb"}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Apartamento</label>
+                    <input
+                      type="text"
+                      value={formData.airbnbApartamento}
+                      onChange={(e) => setFormData(prev => ({ ...prev, airbnbApartamento: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                      placeholder="Ej: Apt 3B, Casa 5"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
+                    <select
+                      value={formData.horaRecogida}
+                      onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    >
+                      <option value="">Seleccionar hora</option>
+                      {HORAS_RECOGIDA.map(h => <option key={h} value={h}>{h}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {/* Campos condicionales - SIN RECOGIDA */}
               {formData.transporte === "si" && formData.tipoRecogida === "sin_recogida" && (
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-4 border-l-4 border-[#0a1628] pl-4">
                   <div>
@@ -2705,14 +2713,35 @@ export default function Home() {
                 </div>
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Zona</label>
-                  <select
-                    value={nuevaExcursionDesdeVenta.zona}
-                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, zona: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  >
-                    <option value="">Seleccionar zona</option>
-                    {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
-                  </select>
+                  <div className="flex gap-2">
+                    <select
+                      value={nuevaExcursionDesdeVenta.zona}
+                      onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, zona: e.target.value }))}
+                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    >
+                      <option value="">Seleccionar zona</option>
+                      {zonas.map(z => <option key={z} value={z}>{z}</option>)}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nuevaZonaPrompt = prompt("Escribe el nombre de la nueva zona:");
+                        if (nuevaZonaPrompt && nuevaZonaPrompt.trim() && !zonas.includes(nuevaZonaPrompt.trim())) {
+                          const nuevasZonas = [...zonas, nuevaZonaPrompt.trim()];
+                          saveZonas(nuevasZonas);
+                          setNuevaExcursionDesdeVenta(prev => ({ ...prev, zona: nuevaZonaPrompt.trim() }));
+                          alert(`Zona "${nuevaZonaPrompt.trim()}" agregada correctamente`);
+                        } else if (zonas.includes(nuevaZonaPrompt?.trim() || "")) {
+                          alert("Esta zona ya existe");
+                        } else if (nuevaZonaPrompt && !nuevaZonaPrompt.trim()) {
+                          alert("Por favor escribe un nombre de zona");
+                        }
+                      }}
+                      className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm"
+                    >
+                      + Agregar Zona
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -2760,6 +2789,29 @@ export default function Home() {
                     onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     placeholder="0.00"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Precio</label>
+                  <select
+                    value={nuevaExcursionDesdeVenta.tipoPrecio}
+                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, tipoPrecio: e.target.value as "persona" | "maquina" }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  >
+                    <option value="persona">Por Persona</option>
+                    <option value="maquina">Por Máquina</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Capacidad</label>
+                  <input
+                    type="text"
+                    value={nuevaExcursionDesdeVenta.capacidad}
+                    onChange={(e) => setNuevaExcursionDesdeVenta(prev => ({ ...prev, capacidad: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    placeholder="Ej: 20 personas"
                   />
                 </div>
               </div>
@@ -2883,6 +2935,7 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Resto del formulario de proveedor */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Tipo de Documento</label>
@@ -3016,6 +3069,7 @@ export default function Home() {
                         {e.precioNinoUSD !== null && <span className="text-gray-500 text-sm ml-2">Niño: {formatUSD(e.precioNinoUSD)}</span>}
                         <span className="text-orange-600 text-sm ml-2">Costo: {formatUSD(e.costoProveedorAdultoUSD)}</span>
                         <span className="text-gray-400 text-xs ml-2">Zona: {e.zona || "Sin zona"}</span>
+                        <span className="text-gray-400 text-xs ml-2">Tipo: {e.tipoPrecio === "persona" ? "Persona" : "Máquina"}</span>
                       </div>
                       <button type="button" onClick={() => eliminarTempExcursion(i)} className="text-red-400 hover:text-red-600">×</button>
                     </div>
@@ -3065,6 +3119,30 @@ export default function Home() {
                     className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     placeholder="Costo Niño"
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Zona</label>
+                    <select
+                      value={tempExcursionForm.zona}
+                      onChange={(e) => setTempExcursionForm(prev => ({ ...prev, zona: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    >
+                      <option value="">Seleccionar zona</option>
+                      {zonas.map(z => <option key={z} value={z}>{z}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Tipo de Precio</label>
+                    <select
+                      value={tempExcursionForm.tipoPrecio}
+                      onChange={(e) => setTempExcursionForm(prev => ({ ...prev, tipoPrecio: e.target.value as "persona" | "maquina" }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    >
+                      <option value="persona">Por Persona</option>
+                      <option value="maquina">Por Máquina</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="flex gap-4 mt-2 items-center">
                   <label className="flex items-center gap-2 text-gray-600 text-sm">
@@ -3183,14 +3261,35 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Zona</label>
-                  <select
-                    value={excursionFormData.zona}
-                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, zona: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  >
-                    <option value="">Seleccionar zona</option>
-                    {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
-                  </select>
+                  <div className="flex gap-2">
+                    <select
+                      value={excursionFormData.zona}
+                      onChange={(e) => setExcursionFormData(prev => ({ ...prev, zona: e.target.value }))}
+                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                    >
+                      <option value="">Seleccionar zona</option>
+                      {zonas.map(z => <option key={z} value={z}>{z}</option>)}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nuevaZonaPrompt = prompt("Escribe el nombre de la nueva zona:");
+                        if (nuevaZonaPrompt && nuevaZonaPrompt.trim() && !zonas.includes(nuevaZonaPrompt.trim())) {
+                          const nuevasZonas = [...zonas, nuevaZonaPrompt.trim()];
+                          saveZonas(nuevasZonas);
+                          setExcursionFormData(prev => ({ ...prev, zona: nuevaZonaPrompt.trim() }));
+                          alert(`Zona "${nuevaZonaPrompt.trim()}" agregada correctamente`);
+                        } else if (zonas.includes(nuevaZonaPrompt?.trim() || "")) {
+                          alert("Esta zona ya existe");
+                        } else if (nuevaZonaPrompt && !nuevaZonaPrompt.trim()) {
+                          alert("Por favor escribe un nombre de zona");
+                        }
+                      }}
+                      className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 whitespace-nowrap text-sm"
+                    >
+                      + Agregar Zona
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Capacidad</label>
@@ -3201,6 +3300,19 @@ export default function Home() {
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     placeholder="Ej: 20 personas"
                   />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Precio</label>
+                  <select
+                    value={excursionFormData.tipoPrecio}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, tipoPrecio: e.target.value as "persona" | "maquina" }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
+                  >
+                    <option value="persona">Por Persona</option>
+                    <option value="maquina">Por Máquina</option>
+                  </select>
                 </div>
               </div>
               <div className="flex items-center gap-3">
