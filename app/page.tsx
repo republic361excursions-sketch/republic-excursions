@@ -152,7 +152,7 @@ export default function Home() {
   const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
   const [filterYear, setFilterYear] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones" | "bancos" | "calendario" | "reservas" | "transporte">("dashboard");
+  const [viewMode, setViewMode] = useState<"dashboard" | "ventas" | "clientes" | "proveedores" | "excursiones" | "bancos" | "calendario" | "reservas">("dashboard");
   const [selectedExcursionForVenta, setSelectedExcursionForVenta] = useState<Excursion | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -386,10 +386,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v45");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v45");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v45");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v45");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v46");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v46");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v46");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v46");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -399,22 +399,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v45", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v46", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v45", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v46", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v45", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v46", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v45", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v46", JSON.stringify(data));
   };
 
   // ============================================
@@ -1402,7 +1402,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-[10px] text-gray-400">v4.5 • Republic Excursions © 2026</p>
+              <p className="text-[10px] text-gray-400">v4.6 • Republic Excursions © 2026</p>
             </div>
           </div>
         </div>
@@ -1454,7 +1454,6 @@ export default function Home() {
       case "excursiones": return renderExcursiones();
       case "bancos": return renderBancos();
       case "calendario": return renderCalendario();
-      case "transporte": return renderTransporte();
       default: return renderDashboard();
     }
   };
@@ -2254,217 +2253,10 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER TRANSPORTE
-  // ============================================
-  const renderTransporte = () => {
-    return (
-      <div className="space-y-4">
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h3 className="text-[#0a1628] text-xl font-bold mb-4">Datos del Viaje</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-gray-600 text-sm block mb-1">Aeropuerto Origen *</label>
-              <select
-                value={formData.aeropuertoOrigen || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, aeropuertoOrigen: e.target.value }))}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-              >
-                <option value="">Seleccionar aeropuerto</option>
-                <option value="PUJ - Punta Cana">PUJ - Punta Cana</option>
-                <option value="SDQ - Santo Domingo">SDQ - Santo Domingo</option>
-                <option value="STI - Santiago">STI - Santiago</option>
-                <option value="POP - Puerto Plata">POP - Puerto Plata</option>
-                <option value="LRM - La Romana">LRM - La Romana</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-gray-600 text-sm block mb-1">Destino *</label>
-              <select
-                value={formData.destinoViaje || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, destinoViaje: e.target.value }))}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-              >
-                <option value="">Seleccionar destino</option>
-                {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-gray-600 text-sm block mb-1">Hotel, Airbnb o Residencia *</label>
-              <input
-                type="text"
-                value={formData.hotelNombre || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, hotelNombre: e.target.value }))}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                placeholder="Seleccione de la lista"
-              />
-            </div>
-            <div>
-              <label className="text-gray-600 text-sm block mb-1">Tipo de Viaje *</label>
-              <select
-                value={formData.tipoViaje || "ida"}
-                onChange={(e) => {
-                  const val = e.target.value as "ida" | "ida_vuelta";
-                  setFormData(prev => ({ ...prev, tipoViaje: val }));
-                }}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-              >
-                <option value="ida">Ida</option>
-                <option value="ida_vuelta">Ida y vuelta</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-gray-600 text-sm block mb-1">Fecha Ida *</label>
-              <input
-                type="date"
-                value={formData.fechaExcursion || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, fechaExcursion: e.target.value }))}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-              />
-            </div>
-            <div>
-              <label className="text-gray-600 text-sm block mb-1">Hora Ida</label>
-              <input
-                type="time"
-                value={formData.horaExcursion || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-              />
-            </div>
-            <div>
-              <label className="text-gray-600 text-sm block mb-1">Número de Vuelo</label>
-              <input
-                type="text"
-                value={formData.numeroVuelo || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, numeroVuelo: e.target.value }))}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                placeholder="Ej: AA1234"
-              />
-            </div>
-            <div>
-              <label className="text-gray-600 text-sm block mb-1">Tipo de Vehículo</label>
-              <select
-                value={formData.tipoVehiculo || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, tipoVehiculo: e.target.value }))}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-              >
-                <option value="">Seleccionar vehículo</option>
-                <option value="Sedan (4 pasajeros, 2 maletas)">Sedan (4 pasajeros, 2 maletas)</option>
-                <option value="SUV (6 pasajeros, 4 maletas)">SUV (6 pasajeros, 4 maletas)</option>
-                <option value="Minivan (8 pasajeros, 6 maletas)">Minivan (8 pasajeros, 6 maletas)</option>
-                <option value="Bus (15 pasajeros, 10 maletas)">Bus (15 pasajeros, 10 maletas)</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-gray-600 text-sm block mb-1">Idioma del Conductor</label>
-              <select
-                value={formData.idiomaConductor || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, idiomaConductor: e.target.value }))}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-              >
-                <option value="">Seleccionar idioma</option>
-                <option value="Español">Español</option>
-                <option value="Ingles">Ingles</option>
-                <option value="Frances">Frances</option>
-                <option value="Aleman">Aleman</option>
-                <option value="Italiano">Italiano</option>
-                <option value="Portugues">Portugues</option>
-                <option value="Ruso">Ruso</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-gray-600 text-sm block mb-1">Adultos *</label>
-              <input
-                type="number"
-                min="0"
-                value={formData.cantidadAdultos || 1}
-                onChange={handleCantidadAdultosChange}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-              />
-            </div>
-            <div>
-              <label className="text-gray-600 text-sm block mb-1">Niños (0-12 años)</label>
-              <input
-                type="number"
-                min="0"
-                value={formData.cantidadNinos || 0}
-                onChange={handleCantidadNinosChange}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-              />
-            </div>
-            <div>
-              <label className="text-gray-600 text-sm block mb-1">Maletas</label>
-              <input
-                type="number"
-                min="0"
-                value={formData.maletas || 0}
-                onChange={(e) => setFormData(prev => ({ ...prev, maletas: parseInt(e.target.value) || 0 }))}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-              />
-            </div>
-          </div>
-
-          {/* Datos de regreso - solo si es ida y vuelta */}
-          {formData.tipoViaje === "ida_vuelta" && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <h4 className="text-[#0a1628] font-semibold mb-4">Datos del Regreso</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Aeropuerto de Salida</label>
-                  <select
-                    value={formData.aeropuertoDestino || ""}
-                    onChange={(e) => setFormData(prev => ({ ...prev, aeropuertoDestino: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  >
-                    <option value="">Seleccionar aeropuerto</option>
-                    <option value="PUJ - Punta Cana">PUJ - Punta Cana</option>
-                    <option value="SDQ - Santo Domingo">SDQ - Santo Domingo</option>
-                    <option value="STI - Santiago">STI - Santiago</option>
-                    <option value="POP - Puerto Plata">POP - Puerto Plata</option>
-                    <option value="LRM - La Romana">LRM - La Romana</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Alojamiento Recogida Regreso</label>
-                  <input
-                    type="text"
-                    value={formData.hotelHabitacion || ""}
-                    onChange={(e) => setFormData(prev => ({ ...prev, hotelHabitacion: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="Hotel, Airbnb o residencia"
-                  />
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Fecha Regreso</label>
-                  <input
-                    type="date"
-                    value={formData.fechaRegreso || ""}
-                    onChange={(e) => setFormData(prev => ({ ...prev, fechaRegreso: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="text-gray-600 text-sm block mb-1">Hora Regreso</label>
-                  <input
-                    type="time"
-                    value={formData.horaRegreso || ""}
-                    onChange={(e) => setFormData(prev => ({ ...prev, horaRegreso: e.target.value }))}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // ============================================
   // RENDER PRINCIPAL
   // ============================================
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* HEADER */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -2490,9 +2282,6 @@ export default function Home() {
             <button onClick={() => setViewMode("calendario")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "calendario" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
               Calendario
             </button>
-            <button onClick={() => setViewMode("transporte")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "transporte" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
-              Transporte
-            </button>
             {isAdmin && (
               <>
                 <button onClick={() => setViewMode("clientes")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "clientes" ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'text-gray-600 hover:text-[#0a1628] hover:bg-gray-50'}`}>
@@ -2516,7 +2305,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
@@ -2529,11 +2317,10 @@ export default function Home() {
               {viewMode === "excursiones" && "Excursiones"}
               {viewMode === "bancos" && "Bancos"}
               {viewMode === "calendario" && "Calendario"}
-              {viewMode === "transporte" && "Transporte"}
             </h2>
           </div>
           <div className="flex gap-2">
-            {viewMode !== "calendario" && viewMode !== "dashboard" && viewMode !== "transporte" && (
+            {viewMode !== "calendario" && viewMode !== "dashboard" && (
               <button onClick={() => setShowForm(true)} className="bg-[#0a1628] text-white px-4 py-2 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
                 <span className="text-lg leading-none">+</span> Nueva Venta
               </button>
@@ -2544,8 +2331,7 @@ export default function Home() {
         {renderView()}
       </main>
 
-      {/* MODALES - Formulario de Venta, Cliente, Proveedor, Excursión, Crear Excursión Rápida */}
-      {/* (Los mismos modales de antes) */}
+      {/* MODAL - Nueva Venta */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
@@ -2588,7 +2374,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Excursión y Fechas */}
+              {/* Excursión */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Excursión *</label>
