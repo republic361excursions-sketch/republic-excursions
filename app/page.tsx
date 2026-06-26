@@ -2089,105 +2089,106 @@ export default function Home() {
     );
   };
 
-  // ============================================
-  // RENDER CALENDARIO
-  // ============================================
-  const renderCalendario = () => {
-    const days = getDaysInMonth(currentDate);
+ // ============================================
+// RENDER CALENDARIO - CORREGIDO
+// ============================================
+const renderCalendario = () => {
+  const days = getDaysInMonth(currentDate);
 
-    return (
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-4">
-            <button onClick={() => cambiarMes(-1)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] hover:bg-gray-50 transition-all">◀</button>
-            <h2 className="text-[#0a1628] text-xl font-bold">{getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}</h2>
-            <button onClick={() => cambiarMes(1)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] hover:bg-gray-50 transition-all">▶</button>
-            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all">Hoy</button>
-          </div>
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-4">
+          <button onClick={() => cambiarMes(-1)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] hover:bg-gray-50 transition-all">◀</button>
+          <h2 className="text-[#0a1628] text-xl font-bold">{getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}</h2>
+          <button onClick={() => cambiarMes(1)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] hover:bg-gray-50 transition-all">▶</button>
+          <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all">Hoy</button>
         </div>
+      </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="grid grid-cols-7 gap-0">
-            {["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(day => (
-              <div key={day} className="py-3 px-2 text-center text-gray-400 text-sm font-medium border-b border-gray-100">
-                {day}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="grid grid-cols-7 gap-0">
+          {["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(day => (
+            <div key={day} className="py-3 px-2 text-center text-gray-400 text-sm font-medium border-b border-gray-100">
+              {day}
+            </div>
+          ))}
+          {days.map((day, index) => {
+            const ventasDelDia = getVentasDelDia(day.date);
+            const isToday = day.date.getDate() === new Date().getDate() &&
+                            day.date.getMonth() === new Date().getMonth() &&
+                            day.date.getFullYear() === new Date().getFullYear();
+            const isCurrentMonth = day.isCurrentMonth;
+            
+            return (
+              <div key={index} className={`p-2 min-h-[80px] border-b border-r border-gray-100 ${!isCurrentMonth ? 'opacity-30 bg-gray-50' : ''} ${isToday ? 'bg-[#0a1628]/5 border-[#0a1628]/20' : ''}`}>
+                <div className={`text-sm ${isToday ? 'text-[#0a1628] font-bold' : 'text-gray-600'}`}>
+                  {day.date.getDate()}
+                </div>
+                <div className="mt-1 space-y-1 max-h-[50px] overflow-y-auto">
+                  {isCurrentMonth && ventasDelDia.slice(0, 3).map(v => (
+                    <div key={v.id} className="text-[10px] bg-[#0a1628]/10 text-[#0a1628] rounded px-1 truncate">
+                      {v.clienteNombre} - {formatUSD(v.precioVentaUSD)}
+                    </div>
+                  ))}
+                  {isCurrentMonth && ventasDelDia.length > 3 && (
+                    <div className="text-[10px] text-gray-400">+{ventasDelDia.length - 3} más</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h3 className="text-[#0a1628] font-semibold mb-3">Ventas del Mes</h3>
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {getVentasDelDia(currentDate).slice(0, 10).map(v => (
+              <div key={v.id} className="flex justify-between items-center border-b border-gray-50 py-2">
+                <div>
+                  <p className="text-[#0a1628] text-sm">{v.clienteNombre}</p>
+                  <p className="text-gray-400 text-xs">{v.excursionNombre}</p>
+                </div>
+                <span className="text-[#0a1628] font-medium">{formatUSD(v.precioVentaUSD)}</span>
               </div>
             ))}
-            {days.map((day, index) => {
-              const ventasDelDia = getVentasDelDia(day.date);
-              const isToday = day.date.getDate() === new Date().getDate() &&
-                              day.date.getMonth() === new Date().getMonth() &&
-                              day.date.getFullYear() === new Date().getFullYear();
-              
-              return (
-                <div key={index} className={`p-2 min-h-[80px] border-b border-r border-gray-100 ${!day.isCurrentMonth ? 'opacity-30' : ''} ${isToday ? 'bg-[#0a1628]/5 border-[#0a1628]/20' : ''}`}>
-                  <div className={`text-sm ${isToday ? 'text-[#0a1628] font-bold' : 'text-gray-600'}`}>
-                    {day.date.getDate()}
-                  </div>
-                  <div className="mt-1 space-y-1 max-h-[50px] overflow-y-auto">
-                    {ventasDelDia.slice(0, 3).map(v => (
-                      <div key={v.id} className="text-[10px] bg-[#0a1628]/10 text-[#0a1628] rounded px-1 truncate">
-                        {v.clienteNombre} - {formatUSD(v.precioVentaUSD)}
-                      </div>
-                    ))}
-                    {ventasDelDia.length > 3 && (
-                      <div className="text-[10px] text-gray-400">+{ventasDelDia.length - 3} más</div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {getVentasDelDia(currentDate).length === 0 && (
+              <p className="text-gray-400 text-sm text-center py-4">No hay ventas en este mes</p>
+            )}
           </div>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-[#0a1628] font-semibold mb-3">Ventas del Mes</h3>
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {getVentasDelDia(currentDate).slice(0, 10).map(v => (
-                <div key={v.id} className="flex justify-between items-center border-b border-gray-50 py-2">
-                  <div>
-                    <p className="text-[#0a1628] text-sm">{v.clienteNombre}</p>
-                    <p className="text-gray-400 text-xs">{v.excursionNombre}</p>
-                  </div>
-                  <span className="text-[#0a1628] font-medium">{formatUSD(v.precioVentaUSD)}</span>
-                </div>
-              ))}
-              {getVentasDelDia(currentDate).length === 0 && (
-                <p className="text-gray-400 text-sm text-center py-4">No hay ventas en este mes</p>
-              )}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h3 className="text-[#0a1628] font-semibold mb-3">Resumen del Mes</h3>
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-500">Ventas Totales</span>
+              <span className="text-[#0a1628] font-bold">{formatUSD(ventas.filter(v => {
+                const d = new Date(v.fechaExcursion);
+                return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+              }).reduce((s, v) => s + v.precioVentaUSD, 0))}</span>
             </div>
-          </div>
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-[#0a1628] font-semibold mb-3">Resumen del Mes</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Ventas Totales</span>
-                <span className="text-[#0a1628] font-bold">{formatUSD(ventas.filter(v => {
-                  const d = new Date(v.fechaExcursion);
-                  return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
-                }).reduce((s, v) => s + v.precioVentaUSD, 0))}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Comisiones</span>
-                <span className="text-green-600">{formatUSD(ventas.filter(v => {
-                  const d = new Date(v.fechaExcursion);
-                  return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
-                }).reduce((s, v) => s + v.comisionUSD, 0))}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Total Ventas</span>
-                <span className="text-[#0a1628]">{ventas.filter(v => {
-                  const d = new Date(v.fechaExcursion);
-                  return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
-                }).length}</span>
-              </div>
+            <div className="flex justify-between">
+              <span className="text-gray-500">Comisiones</span>
+              <span className="text-green-600">{formatUSD(ventas.filter(v => {
+                const d = new Date(v.fechaExcursion);
+                return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+              }).reduce((s, v) => s + v.comisionUSD, 0))}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-500">Total Ventas</span>
+              <span className="text-[#0a1628]">{ventas.filter(v => {
+                const d = new Date(v.fechaExcursion);
+                return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+              }).length}</span>
             </div>
           </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
   // ============================================
   // RENDER EXCURSIONES
