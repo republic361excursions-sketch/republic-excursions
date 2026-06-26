@@ -505,17 +505,20 @@ export default function Home() {
   };
 
   // ============================================
-  // AGREGAR HOTEL
+  // AGREGAR HOTEL - CORREGIDO
   // ============================================
   const agregarHotel = () => {
     const nuevoHotel = prompt("Escribe el nombre del nuevo hotel:");
-    if (nuevoHotel && nuevoHotel.trim() && !hoteles.includes(nuevoHotel.trim())) {
-      const nuevosHoteles = [...hoteles, nuevoHotel.trim()];
-      saveHoteles(nuevosHoteles);
-      return nuevoHotel.trim();
-    } else if (hoteles.includes(nuevoHotel?.trim() || "")) {
-      alert("Este hotel ya existe");
-    } else if (nuevoHotel && !nuevoHotel.trim()) {
+    if (nuevoHotel && nuevoHotel.trim()) {
+      const hotelTrimmed = nuevoHotel.trim();
+      if (!hoteles.includes(hotelTrimmed)) {
+        const nuevosHoteles = [...hoteles, hotelTrimmed];
+        saveHoteles(nuevosHoteles);
+        return hotelTrimmed;
+      } else {
+        alert("Este hotel ya existe");
+      }
+    } else if (nuevoHotel !== null && !nuevoHotel.trim()) {
       alert("Por favor escribe un nombre de hotel");
     }
     return null;
@@ -2397,7 +2400,7 @@ export default function Home() {
       </main>
 
       {/* ============================================
-          MODAL - FORMULARIO DE VENTA (CORREGIDO)
+          MODAL - FORMULARIO DE VENTA
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -2441,7 +2444,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Excursion - SIN BOTON CREAR */}
+              {/* Excursion */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-gray-600 text-sm block mb-1">Excursion *</label>
@@ -2609,7 +2612,7 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Campos condicionales - SIN RECOGIDA (no muestra nada adicional) */}
+              {/* Campos condicionales - SIN RECOGIDA */}
               {formData.transporte === "si" && formData.tipoRecogida === "sin_recogida" && (
                 <div className="text-sm text-gray-400 italic pl-4 border-l-4 border-[#0a1628]">
                   El cliente se transporta por sus propios medios.
