@@ -1158,50 +1158,40 @@ export default function Home() {
     saveClientes(updated);
   };
 
-  // ============================================
-  // FUNCIONES DEL CALENDARIO
-  // ============================================
-  const getDaysInMonth = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const days = [];
-    
-    const startDay = firstDay.getDay();
-    for (let i = startDay - 1; i >= 0; i--) {
-      const d = new Date(year, month, -i);
-      days.push({ date: d, isCurrentMonth: false });
-    }
-    
-    for (let i = 1; i <= lastDay.getDate(); i++) {
-      const d = new Date(year, month, i);
-      days.push({ date: d, isCurrentMonth: true });
-    }
-    
-    const remaining = 42 - days.length;
-    for (let i = 1; i <= remaining; i++) {
-      const d = new Date(year, month + 1, i);
-      days.push({ date: d, isCurrentMonth: false });
-    }
-    
-    return days;
-  };
-
-  const getVentasDelDia = (date: Date) => {
-    return ventas.filter(v => {
-      const vDate = new Date(v.fechaExcursion);
-      return vDate.getDate() === date.getDate() &&
-             vDate.getMonth() === date.getMonth() &&
-             vDate.getFullYear() === date.getFullYear();
-    });
-  };
-
-  const cambiarMes = (delta: number) => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(newDate.getMonth() + delta);
-    setCurrentDate(newDate);
-  };
+ // ============================================
+// FUNCION PARA OBTENER DIAS DEL MES - CORREGIDA
+// ============================================
+const getDaysInMonth = (date: Date) => {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const days = [];
+  
+  // Obtener el día de la semana del primer día (0 = Domingo, 6 = Sábado)
+  const startDay = firstDay.getDay();
+  
+  // Días del mes anterior
+  for (let i = startDay - 1; i >= 0; i--) {
+    const d = new Date(year, month, -i);
+    days.push({ date: d, isCurrentMonth: false });
+  }
+  
+  // Días del mes actual
+  for (let i = 1; i <= lastDay.getDate(); i++) {
+    const d = new Date(year, month, i);
+    days.push({ date: d, isCurrentMonth: true });
+  }
+  
+  // Días del mes siguiente
+  const remaining = 42 - days.length;
+  for (let i = 1; i <= remaining; i++) {
+    const d = new Date(year, month + 1, i);
+    days.push({ date: d, isCurrentMonth: false });
+  }
+  
+  return days;
+};
 
   // ============================================
   // FILTROS Y AGRUPACIONES
@@ -2089,11 +2079,27 @@ export default function Home() {
     );
   };
 
- // ============================================
+// ============================================
 // RENDER CALENDARIO - CORREGIDO
 // ============================================
 const renderCalendario = () => {
   const days = getDaysInMonth(currentDate);
+
+  // Función para obtener ventas de un día específico (CORREGIDA)
+  const getVentasDelDia = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate();
+    
+    return ventas.filter(v => {
+      // Parsear la fecha correctamente
+      const vDate = new Date(v.fechaExcursion);
+      // Comparar año, mes y día
+      return vDate.getFullYear() === year &&
+             vDate.getMonth() === month &&
+             vDate.getDate() === day;
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -2121,7 +2127,12 @@ const renderCalendario = () => {
             const isCurrentMonth = day.isCurrentMonth;
             
             return (
-              <div key={index} className={`p-2 min-h-[80px] border-b border-r border-gray-100 ${!isCurrentMonth ? 'opacity-30 bg-gray-50' : ''} ${isToday ? 'bg-[#0a1628]/5 border-[#0a1628]/20' : ''}`}>
+              <div 
+                key={index} 
+                className={`p-2 min-h-[80px] border-b border-r border-gray-100 ${
+                  !isCurrentMonth ? 'opacity-30 bg-gray-50' : ''
+                } ${isToday ? 'bg-[#0a1628]/5 border-[#0a1628]/20' : ''}`}
+              >
                 <div className={`text-sm ${isToday ? 'text-[#0a1628] font-bold' : 'text-gray-600'}`}>
                   {day.date.getDate()}
                 </div>
@@ -2145,18 +2156,22 @@ const renderCalendario = () => {
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <h3 className="text-[#0a1628] font-semibold mb-3">Ventas del Mes</h3>
           <div className="space-y-2 max-h-60 overflow-y-auto">
-            {getVentasDelDia(currentDate).slice(0, 10).map(v => (
-              <div key={v.id} className="flex justify-between items-center border-b border-gray-50 py-2">
-                <div>
-                  <p className="text-[#0a1628] text-sm">{v.clienteNombre}</p>
-                  <p className="text-gray-400 text-xs">{v.excursionNombre}</p>
+            {/* Mostrar ventas del día seleccionado */}
+            {(() => {
+              const ventasHoy = getVentasDelDia(currentDate);
+              if (ventasHoy.length === 0) {
+                return <p className="text-gray-400 text-sm text-center py-4">No hay ventas para hoy</p>;
+              }
+              return ventasHoy.slice(0, 10).map(v => (
+                <div key={v.id} className="flex justify-between items-center border-b border-gray-50 py-2">
+                  <div>
+                    <p className="text-[#0a1628] text-sm">{v.clienteNombre}</p>
+                    <p className="text-gray-400 text-xs">{v.excursionNombre}</p>
+                  </div>
+                  <span className="text-[#0a1628] font-medium">{formatUSD(v.precioVentaUSD)}</span>
                 </div>
-                <span className="text-[#0a1628] font-medium">{formatUSD(v.precioVentaUSD)}</span>
-              </div>
-            ))}
-            {getVentasDelDia(currentDate).length === 0 && (
-              <p className="text-gray-400 text-sm text-center py-4">No hay ventas en este mes</p>
-            )}
+              ));
+            })()}
           </div>
         </div>
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -2189,7 +2204,7 @@ const renderCalendario = () => {
     </div>
   );
 };
-
+  
   // ============================================
   // RENDER EXCURSIONES
   // ============================================
