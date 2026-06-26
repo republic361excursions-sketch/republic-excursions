@@ -115,14 +115,38 @@ const TIPOS_SERVICIO = [
   { value: "grupo_privado", label: "Grupo Privado" },
 ];
 
-const getTipoServicioLabel = (tipo: string) => {
-  const map: any = {
-    compartido: "Compartido",
-    privado: "Privado",
-    grupo: "Grupo",
-    grupo_privado: "Grupo Privado"
-  };
-  return map[tipo] || tipo;
+// ============================================
+// FUNCIONES DE UTILIDAD PARA FECHAS
+// ============================================
+
+// Crear fecha en zona horaria local (República Dominicana UTC-4)
+const crearFechaLocal = (year: number, month: number, day: number) => {
+  return new Date(year, month, day);
+};
+
+// Parsear fecha string "YYYY-MM-DD" a Date en zona horaria local
+const parseFechaLocal = (fechaStr: string) => {
+  if (!fechaStr) return new Date();
+  const partes = fechaStr.split('-').map(Number);
+  return new Date(partes[0], partes[1] - 1, partes[2]);
+};
+
+// Comparar dos fechas (solo año, mes, día) en zona horaria local
+const sonMismaFecha = (fecha1: Date, fecha2: Date) => {
+  return fecha1.getFullYear() === fecha2.getFullYear() &&
+         fecha1.getMonth() === fecha2.getMonth() &&
+         fecha1.getDate() === fecha2.getDate();
+};
+
+// Formatear fecha para mostrar en español
+const formatearFecha = (fechaStr: string) => {
+  if (!fechaStr) return "";
+  const fecha = parseFechaLocal(fechaStr);
+  return fecha.toLocaleDateString("es-DO", {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
 };
 
 // ============================================
@@ -349,8 +373,70 @@ export default function Home() {
   };
 
   const getDayName = (day: number) => {
-    const days = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];
+    const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
     return days[day];
+  };
+
+  const getTipoServicioLabel = (tipo: string) => {
+    const map: any = {
+      compartido: "Compartido",
+      privado: "Privado",
+      grupo: "Grupo",
+      grupo_privado: "Grupo Privado"
+    };
+    return map[tipo] || tipo;
+  };
+
+  const getPagoClienteText = (tipo: string) => {
+    const map: any = {
+      completo: "Pago completo (USD)",
+      deposito_25: "Depósito 25% (USD)",
+      pago_dia: "Pago el día (USD)"
+    };
+    return map[tipo] || tipo;
+  };
+
+  const getTipoRecogidaText = (tipo: string) => {
+    const map: any = {
+      sin_recogida: "Sin Recogida",
+      hotel: "Hotel",
+      airbnb: "Airbnb"
+    };
+    return map[tipo] || tipo;
+  };
+
+  const getTransporteText = (valor: string) => {
+    return valor === "si" ? "Sí" : "No";
+  };
+
+  const getEstadoText = (estado: string) => {
+    const map: any = {
+      pendiente: "Pendiente",
+      confirmada: "Confirmada",
+      cancelada: "Cancelada",
+      completada: "Completada"
+    };
+    return map[estado] || estado;
+  };
+
+  const getEstadoColor = (estado: string) => {
+    const map: any = {
+      pendiente: "bg-yellow-100 text-yellow-800",
+      confirmada: "bg-blue-100 text-blue-800",
+      cancelada: "bg-red-100 text-red-800",
+      completada: "bg-green-100 text-green-800"
+    };
+    return map[estado] || "bg-gray-100 text-gray-800";
+  };
+
+  const getTipoCuentaLabel = (tipo: string) => {
+    const map: any = {
+      corriente: "Corriente",
+      ahorros: "Ahorros",
+      corriente_us: "Corriente US",
+      ahorros_us: "Ahorros US"
+    };
+    return map[tipo] || tipo;
   };
 
   // ============================================
@@ -373,7 +459,7 @@ export default function Home() {
       setLoginError("");
       return true;
     } else {
-      setLoginError("Usuario o contrasena incorrectos");
+      setLoginError("Usuario o contraseña incorrectos");
       return false;
     }
   };
@@ -958,7 +1044,7 @@ export default function Home() {
   // ============================================
   const agregarTempExcursion = () => {
     if (!tempExcursionForm.nombre) {
-      alert("Debes escribir el nombre de la excursion");
+      alert("Debes escribir el nombre de la excursión");
       return;
     }
     
@@ -1057,7 +1143,7 @@ export default function Home() {
           : e
       );
       saveExcursiones(updated);
-      alert("Excursion actualizada correctamente");
+      alert("Excursión actualizada correctamente");
     } else {
       const nuevaExcursion: Excursion = {
         id: Date.now().toString(),
@@ -1076,7 +1162,7 @@ export default function Home() {
         tipoServicio: excursionFormData.tipoServicio || "compartido",
       };
       saveExcursiones([...excursiones, nuevaExcursion]);
-      alert("Excursion agregada correctamente");
+      alert("Excursión agregada correctamente");
     }
     
     setShowExcursionForm(false);
@@ -1121,7 +1207,7 @@ export default function Home() {
   };
 
   const deleteExcursion = (id: string) => {
-    if (!confirm("Eliminar esta excursion?")) return;
+    if (!confirm("Eliminar esta excursión?")) return;
     const updated = excursiones.filter(e => e.id !== id);
     saveExcursiones(updated);
   };
@@ -1143,7 +1229,7 @@ export default function Home() {
       whatsapp: data.get("whatsapp") as string,
       email: data.get("email") as string,
       excursionId: excursionId || "",
-      excursionNombre: excursion?.nombre || "Sin excursion asignada",
+      excursionNombre: excursion?.nombre || "Sin excursión asignada",
       fechaExcursion: data.get("fechaExcursion") as string || "",
     };
     
@@ -1158,227 +1244,152 @@ export default function Home() {
     saveClientes(updated);
   };
 
- // ============================================
-// FUNCIONES DEL CALENDARIO
-// ============================================
-const getDaysInMonth = (date: Date) => {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const days = [];
-  
-  const startDay = firstDay.getDay();
-  for (let i = startDay - 1; i >= 0; i--) {
-    const d = new Date(year, month, -i);
-    days.push({ date: d, isCurrentMonth: false });
-  }
-  
-  for (let i = 1; i <= lastDay.getDate(); i++) {
-    const d = new Date(year, month, i);
-    days.push({ date: d, isCurrentMonth: true });
-  }
-  
-  const remaining = 42 - days.length;
-  for (let i = 1; i <= remaining; i++) {
-    const d = new Date(year, month + 1, i);
-    days.push({ date: d, isCurrentMonth: false });
-  }
-  
-  return days;
-};
-
-// ESTA FUNCIÓN DEBE ESTAR DEFINIDA ANTES DE renderCalendario
-const cambiarMes = (delta: number) => {
-  const newDate = new Date(currentDate);
-  newDate.setMonth(newDate.getMonth() + delta);
-  setCurrentDate(newDate);
-};
-  
   // ============================================
-// FILTROS Y AGRUPACIONES
-// ============================================
-let filtered = ventas;
+  // EXPORTAR CSV
+  // ============================================
+  const exportCSV = () => {
+    if (ventas.length === 0) { 
+      alert("No hay datos para exportar"); 
+      return; 
+    }
+    
+    let csv = "Fecha,Hora,Cliente,Excursión,Adultos,Niños,Servicio,Grupo,Capacidad Grupo,Recogida,Transporte,Hotel/Airbnb,Estado,Precio Venta (USD),Costo Proveedor (USD),Comisión (USD),Pago Cliente,Saldo Pendiente (USD),Método Pago,Proveedor,Pago Proveedor,Zona,Nota\n";
+    
+    ventas.forEach(v => {
+      const recogidaInfo = v.tipoRecogida === "hotel" ? v.hotelNombre : 
+                           v.tipoRecogida === "airbnb" ? v.airbnbUbicacion : "Sin recogida";
+      const tipoServicioLabel = getTipoServicioLabel(v.tipoServicio);
+      
+      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${tipoServicioLabel}","${v.nombreGrupo || ""}","${v.capacidadGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.zona || ""}","${v.nota || ""}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `excursiones_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
-if (filterYear) {
-  filtered = filtered.filter(v => new Date(v.fechaExcursion).getFullYear().toString() === filterYear);
-}
-if (searchTerm) {
-  filtered = filtered.filter(v => 
-    v.clienteNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    v.excursionNombre.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-}
-
-const grouped = filtered.reduce((acc: any, venta) => {
-  const fecha = new Date(venta.fechaExcursion);
-  const year = fecha.getFullYear();
-  const month = fecha.getMonth() + 1;
-  const key = `${year}-${String(month).padStart(2, "0")}`;
+  // ============================================
+  // FUNCIONES DEL CALENDARIO - CORREGIDAS CON ZONA HORARIA LOCAL
+  // ============================================
   
-  if (!acc[key]) {
-    acc[key] = { year, month, totalUSD: 0, totalComision: 0, totalCosto: 0, ventas: [] };
+  // Obtener días del mes en zona horaria local
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const days = [];
+    
+    const startDay = firstDay.getDay();
+    
+    // Días del mes anterior
+    for (let i = startDay - 1; i >= 0; i--) {
+      const d = new Date(year, month, -i);
+      days.push({ date: d, isCurrentMonth: false });
+    }
+    
+    // Días del mes actual
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      const d = new Date(year, month, i);
+      days.push({ date: d, isCurrentMonth: true });
+    }
+    
+    // Días del mes siguiente
+    const remaining = 42 - days.length;
+    for (let i = 1; i <= remaining; i++) {
+      const d = new Date(year, month + 1, i);
+      days.push({ date: d, isCurrentMonth: false });
+    }
+    
+    return days;
+  };
+
+  // Obtener ventas de un día específico (comparación local)
+  const getVentasDelDia = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate();
+    
+    return ventas.filter(v => {
+      if (!v.fechaExcursion) return false;
+      // Parsear la fecha en zona horaria local
+      const partes = v.fechaExcursion.split('-').map(Number);
+      const vDate = new Date(partes[0], partes[1] - 1, partes[2]);
+      return vDate.getFullYear() === year &&
+             vDate.getMonth() === month &&
+             vDate.getDate() === day;
+    });
+  };
+
+  // Cambiar mes
+  const cambiarMes = (delta: number) => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(newDate.getMonth() + delta);
+    setCurrentDate(newDate);
+  };
+
+  // ============================================
+  // FILTROS Y AGRUPACIONES
+  // ============================================
+  let filtered = ventas;
+
+  if (filterYear) {
+    filtered = filtered.filter(v => {
+      if (!v.fechaExcursion) return false;
+      const partes = v.fechaExcursion.split('-').map(Number);
+      return partes[0].toString() === filterYear;
+    });
   }
-  acc[key].totalUSD += venta.precioVentaUSD;
-  acc[key].totalComision += venta.comisionUSD;
-  acc[key].totalCosto += venta.costoProveedorUSD;
-  acc[key].ventas.push(venta);
-  return acc;
-}, {});
-
-let groupedArray = Object.entries(grouped)
-  .map(([key, value]: [string, any]) => ({ ...value, key }))
-  .sort((a, b) => {
-    if (a.year !== b.year) return b.year - a.year;
-    return b.month - a.month;
-  });
-
-const totalVentasUSD = filtered.reduce((sum, v) => sum + v.precioVentaUSD, 0);
-const totalComision = filtered.reduce((sum, v) => sum + v.comisionUSD, 0);
-const totalPendienteUSD = filtered.reduce((sum, v) => sum + v.saldoPendienteUSD, 0);
-
-// ✅ AÑADE ESTA LÍNEA - es la que falta
-const years = [...new Set(ventas.map(v => new Date(v.fechaExcursion).getFullYear().toString()))].sort().reverse();
-
-const toggleMonth = (key: string) => {
-  setExpandedMonth(expandedMonth === key ? null : key);
-};
   
-  // ============================================
-  // LOGIN - DISEÑO PROFESIONAL
-  // ============================================
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-[-30%] left-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[150px]"></div>
-          <div className="absolute bottom-[-30%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[150px]"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-blue-400/5 rounded-full blur-[120px]"></div>
-        </div>
-
-        <div className="relative z-10 w-full max-w-2xl">
-          <div className="bg-white/5 backdrop-blur-2xl rounded-3xl p-8 border border-white/10 shadow-2xl shadow-black/30">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="flex flex-col justify-center items-center md:items-start border-b md:border-b-0 md:border-r border-white/10 pb-6 md:pb-0 md:pr-8">
-                <div className="text-center md:text-left">
-                  <div className="text-5xl font-mono font-bold text-white tracking-wider mb-2">
-                    {currentTime.toLocaleTimeString("es-DO", { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                  </div>
-                  <div className="text-white/60 text-lg">{getDayName(currentTime.getDay())}</div>
-                  <div className="text-white/40 text-sm">
-                    {currentTime.getDate()} de {getMonthName(currentTime.getMonth())} de {currentTime.getFullYear()}
-                  </div>
-                </div>
-                <div className="mt-6 text-center md:text-left">
-                  <div className="text-4xl font-bold text-white/10">RE</div>
-                  <div className="text-xs text-white/20 mt-1">v5.1 • Republic Excursions</div>
-                </div>
-              </div>
-
-              <div>
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-white">Bienvenido de nuevo</h2>
-                  <p className="text-white/40 text-sm">Inicia sesion para continuar</p>
-                </div>
-
-                <form onSubmit={handleLoginSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/60 mb-1.5">Usuario</label>
-                    <select
-                      value={selectedUser}
-                      onChange={(e) => handleSelectUser(e.target.value)}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-white/30 transition-all appearance-none"
-                    >
-                      <option value="">Seleccionar usuario</option>
-                      <option value="Republic">Republic - Administrador</option>
-                      <option value="Raul">Raul - Vendedor</option>
-                      <option value="Gabrielle">Gabrielle - Vendedora</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-white/60 mb-1.5">Contraseña</label>
-                    <input
-                      type="password"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-white/30 transition-all"
-                      placeholder="Ingresa tu contraseña"
-                      disabled={!selectedUser}
-                    />
-                  </div>
-
-                  {loginError && (
-                    <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm text-center">
-                      {loginError}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3.5 rounded-xl font-semibold hover:shadow-xl hover:scale-[1.01] transition-all shadow-lg shadow-blue-500/25"
-                  >
-                    Iniciar Sesion
-                  </button>
-                </form>
-
-                <div className="grid grid-cols-3 gap-3 mt-6">
-                  <button
-                    onClick={() => handleSelectUser("Republic")}
-                    className={`py-2.5 rounded-xl text-sm font-medium transition-all border ${selectedUser === "Republic" ? 'bg-blue-500/20 border-blue-500/50 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}
-                  >
-                    Republic
-                  </button>
-                  <button
-                    onClick={() => handleSelectUser("Raul")}
-                    className={`py-2.5 rounded-xl text-sm font-medium transition-all border ${selectedUser === "Raul" ? 'bg-blue-500/20 border-blue-500/50 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}
-                  >
-                    Raul
-                  </button>
-                  <button
-                    onClick={() => handleSelectUser("Gabrielle")}
-                    className={`py-2.5 rounded-xl text-sm font-medium transition-all border ${selectedUser === "Gabrielle" ? 'bg-blue-500/20 border-blue-500/50 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}
-                  >
-                    Gabrielle
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  if (searchTerm) {
+    filtered = filtered.filter(v => 
+      v.clienteNombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      v.excursionNombre?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }
 
-  // ============================================
-  // TEMA POR USUARIO
-  // ============================================
-  const isAdmin = currentUser === "republic";
-  const isRaul = currentUser === "raul";
-  const isGabrielle = currentUser === "gabrielle";
+  const grouped = filtered.reduce((acc: any, venta) => {
+    if (!venta.fechaExcursion) return acc;
+    const partes = venta.fechaExcursion.split('-').map(Number);
+    const year = partes[0];
+    const month = partes[1];
+    const key = `${year}-${String(month).padStart(2, "0")}`;
+    
+    if (!acc[key]) {
+      acc[key] = { year, month, totalUSD: 0, totalComision: 0, totalCosto: 0, ventas: [] };
+    }
+    acc[key].totalUSD += venta.precioVentaUSD || 0;
+    acc[key].totalComision += venta.comisionUSD || 0;
+    acc[key].totalCosto += venta.costoProveedorUSD || 0;
+    acc[key].ventas.push(venta);
+    return acc;
+  }, {});
 
-  const getUserRole = () => {
-    if (isAdmin) return "Administrador";
-    if (isRaul) return "Vendedor";
-    if (isGabrielle) return "Vendedora";
-    return "Usuario";
-  };
+  let groupedArray = Object.entries(grouped)
+    .map(([key, value]: [string, any]) => ({ ...value, key }))
+    .sort((a, b) => {
+      if (a.year !== b.year) return b.year - a.year;
+      return b.month - a.month;
+    });
 
-  const getUserBadge = () => {
-    if (isAdmin) return "bg-[#0a1628] text-white";
-    if (isRaul) return "bg-blue-100 text-blue-800";
-    if (isGabrielle) return "bg-pink-100 text-pink-800";
-    return "bg-gray-100 text-gray-800";
-  };
+  const totalVentasUSD = filtered.reduce((sum, v) => sum + (v.precioVentaUSD || 0), 0);
+  const totalComision = filtered.reduce((sum, v) => sum + (v.comisionUSD || 0), 0);
+  const totalPendienteUSD = filtered.reduce((sum, v) => sum + (v.saldoPendienteUSD || 0), 0);
 
-  const getTipoCuentaLabel = (tipo: string) => {
-    const map: any = {
-      corriente: "Corriente",
-      ahorros: "Ahorros",
-      corriente_us: "Corriente US",
-      ahorros_us: "Ahorros US"
-    };
-    return map[tipo] || tipo;
+  const years = [...new Set(ventas
+    .filter(v => v.fechaExcursion)
+    .map(v => {
+      const partes = v.fechaExcursion.split('-').map(Number);
+      return partes[0];
+    })
+  )].sort((a, b) => b - a).map(String);
+
+  const toggleMonth = (key: string) => {
+    setExpandedMonth(expandedMonth === key ? null : key);
   };
 
   // ============================================
@@ -1402,20 +1413,17 @@ const toggleMonth = (key: string) => {
   // RENDER DASHBOARD
   // ============================================
   const renderDashboard = () => {
-    const totalVentas = ventas.reduce((sum, v) => sum + v.precioVentaUSD, 0);
-    const totalComisiones = ventas.reduce((sum, v) => sum + v.comisionUSD, 0);
-    const totalPendiente = ventas.reduce((sum, v) => sum + v.saldoPendienteUSD, 0);
+    const totalVentas = ventas.reduce((sum, v) => sum + (v.precioVentaUSD || 0), 0);
+    const totalComisiones = ventas.reduce((sum, v) => sum + (v.comisionUSD || 0), 0);
+    const totalPendiente = ventas.reduce((sum, v) => sum + (v.saldoPendienteUSD || 0), 0);
     const totalClientes = clientes.length;
     const totalProveedores = proveedores.length;
     const totalExcursiones = excursiones.length;
     
-    const ventasHoy = ventas.filter(v => {
-      const hoy = new Date();
-      const fechaV = new Date(v.fechaExcursion);
-      return fechaV.getDate() === hoy.getDate() &&
-             fechaV.getMonth() === hoy.getMonth() &&
-             fechaV.getFullYear() === hoy.getFullYear();
-    });
+    const hoy = new Date();
+    const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    
+    const ventasHoy = ventas.filter(v => v.fechaExcursion === hoyStr);
 
     return (
       <div className="space-y-6">
@@ -1518,7 +1526,7 @@ const toggleMonth = (key: string) => {
           </div>
 
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-gray-600 text-sm font-semibold mb-3">Ultimas Ventas</h3>
+            <h3 className="text-gray-600 text-sm font-semibold mb-3">Últimas Ventas</h3>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {ventas.slice(-4).reverse().map(v => (
                 <div key={v.id} className="flex justify-between text-sm border-b border-gray-50 pb-1">
@@ -1574,7 +1582,7 @@ const toggleMonth = (key: string) => {
             <p className="text-[#0a1628] text-2xl font-bold">{formatUSD(totalVentasUSD)}</p>
           </div>
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <p className="text-gray-500 text-sm">Comision Total</p>
+            <p className="text-gray-500 text-sm">Comisión Total</p>
             <p className="text-green-600 text-2xl font-bold">{formatUSD(totalComision)}</p>
           </div>
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
@@ -1610,12 +1618,12 @@ const toggleMonth = (key: string) => {
                           <th className="text-left py-2 px-2">Fecha</th>
                           <th className="text-left py-2 px-2">Hora</th>
                           <th className="text-left py-2 px-2">Cliente</th>
-                          <th className="text-left py-2 px-2">Excursion</th>
+                          <th className="text-left py-2 px-2">Excursión</th>
                           <th className="text-left py-2 px-2">Servicio</th>
                           <th className="text-left py-2 px-2">Grupo</th>
                           <th className="text-left py-2 px-2">Cap.</th>
                           <th className="text-right py-2 px-2">Precio</th>
-                          <th className="text-right py-2 px-2">Comision</th>
+                          <th className="text-right py-2 px-2">Comisión</th>
                           <th className="text-left py-2 px-2">Estado</th>
                           <th className="text-left py-2 px-2">Acciones</th>
                         </tr>
@@ -1623,7 +1631,7 @@ const toggleMonth = (key: string) => {
                       <tbody>
                         {group.ventas.map((venta: Venta) => (
                           <tr key={venta.id} className="border-b border-gray-50 hover:bg-gray-50">
-                            <td className="py-2 px-2 text-gray-500 text-xs">{new Date(venta.fechaExcursion).toLocaleDateString("es-DO")}</td>
+                            <td className="py-2 px-2 text-gray-500 text-xs">{formatearFecha(venta.fechaExcursion)}</td>
                             <td className="py-2 px-2 text-gray-500 text-xs">{venta.horaExcursion}</td>
                             <td className="py-2 px-2 text-[#0a1628]">{venta.clienteNombre}</td>
                             <td className="py-2 px-2 text-gray-600 text-xs max-w-[100px] truncate">{venta.excursionNombre}</td>
@@ -1666,8 +1674,8 @@ const toggleMonth = (key: string) => {
   // ============================================
   const renderReservas = () => {
     const reservasFiltradas = ventas.filter(v => {
-      const matchesSearch = v.clienteNombre.toLowerCase().includes(searchReservas.toLowerCase()) ||
-                            v.excursionNombre.toLowerCase().includes(searchReservas.toLowerCase());
+      const matchesSearch = v.clienteNombre?.toLowerCase().includes(searchReservas.toLowerCase()) ||
+                            v.excursionNombre?.toLowerCase().includes(searchReservas.toLowerCase());
       const matchesEstado = filterReservaEstado === "todas" || v.estado === filterReservaEstado;
       const matchesFecha = !filterReservaFecha || v.fechaExcursion === filterReservaFecha;
       return matchesSearch && matchesEstado && matchesFecha;
@@ -1729,7 +1737,7 @@ const toggleMonth = (key: string) => {
                 <th className="text-left py-3 px-4">Fecha</th>
                 <th className="text-left py-3 px-4">Hora</th>
                 <th className="text-left py-3 px-4">Cliente</th>
-                <th className="text-left py-3 px-4">Excursion</th>
+                <th className="text-left py-3 px-4">Excursión</th>
                 <th className="text-left py-3 px-4">Servicio</th>
                 <th className="text-left py-3 px-4">Grupo</th>
                 <th className="text-right py-3 px-4">Monto</th>
@@ -1743,7 +1751,7 @@ const toggleMonth = (key: string) => {
               ) : (
                 reservasFiltradas.map(v => (
                   <tr key={v.id} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="py-3 px-4 text-gray-500 text-xs">{new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</td>
+                    <td className="py-3 px-4 text-gray-500 text-xs">{formatearFecha(v.fechaExcursion)}</td>
                     <td className="py-3 px-4 text-gray-500 text-xs">{v.horaExcursion}</td>
                     <td className="py-3 px-4 text-[#0a1628] font-medium">{v.clienteNombre}</td>
                     <td className="py-3 px-4 text-gray-600 max-w-[120px] truncate">{v.excursionNombre}</td>
@@ -1777,8 +1785,8 @@ const toggleMonth = (key: string) => {
   // ============================================
   const renderClientes = () => {
     const clientesFiltrados = clientes.filter(c => {
-      const matchesSearch = c.nombre.toLowerCase().includes(searchClientes.toLowerCase()) ||
-                            c.whatsapp.includes(searchClientes);
+      const matchesSearch = c.nombre?.toLowerCase().includes(searchClientes.toLowerCase()) ||
+                            c.whatsapp?.includes(searchClientes);
       const matchesExcursion = !filterClienteExcursion || c.excursionId === filterClienteExcursion;
       return matchesSearch && matchesExcursion;
     });
@@ -1815,7 +1823,7 @@ const toggleMonth = (key: string) => {
                 <th className="text-left py-3 px-4">Nombre</th>
                 <th className="text-left py-3 px-4">WhatsApp</th>
                 <th className="text-left py-3 px-4">Email</th>
-                <th className="text-left py-3 px-4">Excursion</th>
+                <th className="text-left py-3 px-4">Excursión</th>
                 <th className="text-left py-3 px-4">Fecha</th>
                 <th className="text-left py-3 px-4">Acciones</th>
               </tr>
@@ -1830,7 +1838,7 @@ const toggleMonth = (key: string) => {
                     <td className="py-3 px-4 text-gray-500">{c.whatsapp}</td>
                     <td className="py-3 px-4 text-gray-500 text-xs">{c.email}</td>
                     <td className="py-3 px-4 text-gray-600 max-w-[120px] truncate">{c.excursionNombre}</td>
-                    <td className="py-3 px-4 text-gray-500 text-xs">{c.fechaExcursion ? new Date(c.fechaExcursion).toLocaleDateString("es-DO") : "-"}</td>
+                    <td className="py-3 px-4 text-gray-500 text-xs">{c.fechaExcursion ? formatearFecha(c.fechaExcursion) : "-"}</td>
                     <td className="py-3 px-4">
                       <button onClick={() => deleteCliente(c.id)} className="px-3 py-1 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-xs transition-all">Eliminar</button>
                     </td>
@@ -1849,9 +1857,9 @@ const toggleMonth = (key: string) => {
   // ============================================
   const renderProveedores = () => {
     const proveedoresFiltrados = proveedores.filter(p => {
-      const matchesSearch = p.nombre.toLowerCase().includes(searchProveedores.toLowerCase()) ||
-                            p.empresa.toLowerCase().includes(searchProveedores.toLowerCase());
-      const matchesMetodo = filterProveedorMetodo === "todos" || p.metodosPago.includes(filterProveedorMetodo as any);
+      const matchesSearch = p.nombre?.toLowerCase().includes(searchProveedores.toLowerCase()) ||
+                            p.empresa?.toLowerCase().includes(searchProveedores.toLowerCase());
+      const matchesMetodo = filterProveedorMetodo === "todos" || p.metodosPago?.includes(filterProveedorMetodo as any);
       return matchesSearch && matchesMetodo;
     });
 
@@ -1903,7 +1911,7 @@ const toggleMonth = (key: string) => {
                   <div className="flex items-center gap-2 text-gray-500"><span>Email</span> {p.email || "Sin email"}</div>
                   <div className="flex items-center gap-2 text-gray-500"><span>RNC/Cédula</span> {p.rncCedula || "Sin documento"}</div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.metodosPago.map(m => <span key={m} className="px-2 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg text-xs">{m === "efectivo" ? "Efectivo" : m === "transferencia" ? "Transferencia" : "PayPal"}</span>)}
+                    {p.metodosPago?.map(m => <span key={m} className="px-2 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg text-xs">{m === "efectivo" ? "Efectivo" : m === "transferencia" ? "Transferencia" : "PayPal"}</span>)}
                   </div>
                 </div>
                 <div className="mt-3 text-xs text-gray-400 border-t border-gray-100 pt-2">
@@ -1922,10 +1930,10 @@ const toggleMonth = (key: string) => {
   // ============================================
   const renderBancos = () => {
     const bancosFiltrados = proveedores.filter(p => {
-      const matchesSearch = p.nombre.toLowerCase().includes(searchBancos.toLowerCase()) ||
-                            p.banco.toLowerCase().includes(searchBancos.toLowerCase()) ||
-                            p.beneficiario.toLowerCase().includes(searchBancos.toLowerCase());
-      const matchesTipo = filterBancoTipo === "todos" || p.tipoCuenta.includes(filterBancoTipo as any);
+      const matchesSearch = p.nombre?.toLowerCase().includes(searchBancos.toLowerCase()) ||
+                            p.banco?.toLowerCase().includes(searchBancos.toLowerCase()) ||
+                            p.beneficiario?.toLowerCase().includes(searchBancos.toLowerCase());
+      const matchesTipo = filterBancoTipo === "todos" || p.tipoCuenta?.includes(filterBancoTipo as any);
       const matchesMoneda = filterBancoMoneda === "todas" || p.monedaCuenta === filterBancoMoneda;
       return matchesSearch && matchesTipo && matchesMoneda;
     });
@@ -2002,7 +2010,7 @@ const toggleMonth = (key: string) => {
                   <div className="flex items-center gap-2 text-gray-500"><span>Beneficiario</span> <span className="text-[#0a1628]">{p.beneficiario || "Sin beneficiario"}</span></div>
                   <div className="flex items-center gap-2 text-gray-500"><span>RNC/Cédula</span> <span className="text-[#0a1628]">{p.rncCedula || "Sin documento"}</span></div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.tipoCuenta.map(t => <span key={t} className="px-2 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg text-xs">{getTipoCuentaLabel(t)}</span>)}
+                    {p.tipoCuenta?.map(t => <span key={t} className="px-2 py-1 bg-[#0a1628]/10 text-[#0a1628] rounded-lg text-xs">{getTipoCuentaLabel(t)}</span>)}
                   </div>
                 </div>
               </div>
@@ -2012,135 +2020,127 @@ const toggleMonth = (key: string) => {
       </div>
     );
   };
-// ============================================
-// RENDER CALENDARIO - CORREGIDO
-// ============================================
-const renderCalendario = () => {
-  const days = getDaysInMonth(currentDate);
 
-  // Función para obtener ventas de un día específico
-  const getVentasDelDia = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const day = date.getDate();
-    
-    return ventas.filter(v => {
-      const vDate = new Date(v.fechaExcursion);
-      return vDate.getFullYear() === year &&
-             vDate.getMonth() === month &&
-             vDate.getDate() === day;
-    });
+  // ============================================
+  // RENDER CALENDARIO - CORREGIDO
+  // ============================================
+  const renderCalendario = () => {
+    const days = getDaysInMonth(currentDate);
+
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-4">
+            <button onClick={() => cambiarMes(-1)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] hover:bg-gray-50 transition-all">◀</button>
+            <h2 className="text-[#0a1628] text-xl font-bold">{getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}</h2>
+            <button onClick={() => cambiarMes(1)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] hover:bg-gray-50 transition-all">▶</button>
+            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all">Hoy</button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="grid grid-cols-7 gap-0">
+            {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map(day => (
+              <div key={day} className="py-3 px-2 text-center text-gray-400 text-sm font-medium border-b border-gray-100">
+                {day}
+              </div>
+            ))}
+            {days.map((day, index) => {
+              const ventasDelDia = getVentasDelDia(day.date);
+              const hoy = new Date();
+              const isToday = day.date.getDate() === hoy.getDate() &&
+                              day.date.getMonth() === hoy.getMonth() &&
+                              day.date.getFullYear() === hoy.getFullYear();
+              const isCurrentMonth = day.isCurrentMonth;
+              
+              return (
+                <div 
+                  key={index} 
+                  className={`p-2 min-h-[80px] border-b border-r border-gray-100 ${
+                    !isCurrentMonth ? 'opacity-30 bg-gray-50' : ''
+                  } ${isToday ? 'bg-[#0a1628]/5 border-[#0a1628]/20' : ''}`}
+                >
+                  <div className={`text-sm ${isToday ? 'text-[#0a1628] font-bold' : 'text-gray-600'}`}>
+                    {day.date.getDate()}
+                  </div>
+                  <div className="mt-1 space-y-1 max-h-[50px] overflow-y-auto">
+                    {isCurrentMonth && ventasDelDia.slice(0, 3).map(v => (
+                      <div key={v.id} className="text-[10px] bg-[#0a1628]/10 text-[#0a1628] rounded px-1 truncate">
+                        {v.clienteNombre} - {formatUSD(v.precioVentaUSD)}
+                      </div>
+                    ))}
+                    {isCurrentMonth && ventasDelDia.length > 3 && (
+                      <div className="text-[10px] text-gray-400">+{ventasDelDia.length - 3} más</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-[#0a1628] font-semibold mb-3">Ventas del Mes</h3>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {(() => {
+                const ventasHoy = getVentasDelDia(currentDate);
+                if (ventasHoy.length === 0) {
+                  return <p className="text-gray-400 text-sm text-center py-4">No hay ventas para hoy</p>;
+                }
+                return ventasHoy.slice(0, 10).map(v => (
+                  <div key={v.id} className="flex justify-between items-center border-b border-gray-50 py-2">
+                    <div>
+                      <p className="text-[#0a1628] text-sm">{v.clienteNombre}</p>
+                      <p className="text-gray-400 text-xs">{v.excursionNombre}</p>
+                    </div>
+                    <span className="text-[#0a1628] font-medium">{formatUSD(v.precioVentaUSD)}</span>
+                  </div>
+                ));
+              })()}
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-[#0a1628] font-semibold mb-3">Resumen del Mes</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Ventas Totales</span>
+                <span className="text-[#0a1628] font-bold">{formatUSD(ventas.filter(v => {
+                  if (!v.fechaExcursion) return false;
+                  const partes = v.fechaExcursion.split('-').map(Number);
+                  return partes[0] === currentDate.getFullYear() && partes[1] === currentDate.getMonth() + 1;
+                }).reduce((s, v) => s + v.precioVentaUSD, 0))}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Comisiones</span>
+                <span className="text-green-600">{formatUSD(ventas.filter(v => {
+                  if (!v.fechaExcursion) return false;
+                  const partes = v.fechaExcursion.split('-').map(Number);
+                  return partes[0] === currentDate.getFullYear() && partes[1] === currentDate.getMonth() + 1;
+                }).reduce((s, v) => s + v.comisionUSD, 0))}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Total Ventas</span>
+                <span className="text-[#0a1628]">{ventas.filter(v => {
+                  if (!v.fechaExcursion) return false;
+                  const partes = v.fechaExcursion.split('-').map(Number);
+                  return partes[0] === currentDate.getFullYear() && partes[1] === currentDate.getMonth() + 1;
+                }).length}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-4">
-          <button onClick={() => cambiarMes(-1)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] hover:bg-gray-50 transition-all">◀</button>
-          <h2 className="text-[#0a1628] text-xl font-bold">{getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}</h2>
-          <button onClick={() => cambiarMes(1)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-[#0a1628] hover:bg-gray-50 transition-all">▶</button>
-          <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all">Hoy</button>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="grid grid-cols-7 gap-0">
-          {["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(day => (
-            <div key={day} className="py-3 px-2 text-center text-gray-400 text-sm font-medium border-b border-gray-100">
-              {day}
-            </div>
-          ))}
-          {days.map((day, index) => {
-            const ventasDelDia = getVentasDelDia(day.date);
-            const isToday = day.date.getDate() === new Date().getDate() &&
-                            day.date.getMonth() === new Date().getMonth() &&
-                            day.date.getFullYear() === new Date().getFullYear();
-            const isCurrentMonth = day.isCurrentMonth;
-            
-            return (
-              <div 
-                key={index} 
-                className={`p-2 min-h-[80px] border-b border-r border-gray-100 ${
-                  !isCurrentMonth ? 'opacity-30 bg-gray-50' : ''
-                } ${isToday ? 'bg-[#0a1628]/5 border-[#0a1628]/20' : ''}`}
-              >
-                <div className={`text-sm ${isToday ? 'text-[#0a1628] font-bold' : 'text-gray-600'}`}>
-                  {day.date.getDate()}
-                </div>
-                <div className="mt-1 space-y-1 max-h-[50px] overflow-y-auto">
-                  {isCurrentMonth && ventasDelDia.slice(0, 3).map(v => (
-                    <div key={v.id} className="text-[10px] bg-[#0a1628]/10 text-[#0a1628] rounded px-1 truncate">
-                      {v.clienteNombre} - {formatUSD(v.precioVentaUSD)}
-                    </div>
-                  ))}
-                  {isCurrentMonth && ventasDelDia.length > 3 && (
-                    <div className="text-[10px] text-gray-400">+{ventasDelDia.length - 3} más</div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h3 className="text-[#0a1628] font-semibold mb-3">Ventas del Mes</h3>
-          <div className="space-y-2 max-h-60 overflow-y-auto">
-            {(() => {
-              const ventasHoy = getVentasDelDia(currentDate);
-              if (ventasHoy.length === 0) {
-                return <p className="text-gray-400 text-sm text-center py-4">No hay ventas para hoy</p>;
-              }
-              return ventasHoy.slice(0, 10).map(v => (
-                <div key={v.id} className="flex justify-between items-center border-b border-gray-50 py-2">
-                  <div>
-                    <p className="text-[#0a1628] text-sm">{v.clienteNombre}</p>
-                    <p className="text-gray-400 text-xs">{v.excursionNombre}</p>
-                  </div>
-                  <span className="text-[#0a1628] font-medium">{formatUSD(v.precioVentaUSD)}</span>
-                </div>
-              ));
-            })()}
-          </div>
-        </div>
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h3 className="text-[#0a1628] font-semibold mb-3">Resumen del Mes</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Ventas Totales</span>
-              <span className="text-[#0a1628] font-bold">{formatUSD(ventas.filter(v => {
-                const d = new Date(v.fechaExcursion);
-                return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
-              }).reduce((s, v) => s + v.precioVentaUSD, 0))}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Comisiones</span>
-              <span className="text-green-600">{formatUSD(ventas.filter(v => {
-                const d = new Date(v.fechaExcursion);
-                return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
-              }).reduce((s, v) => s + v.comisionUSD, 0))}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Total Ventas</span>
-              <span className="text-[#0a1628]">{ventas.filter(v => {
-                const d = new Date(v.fechaExcursion);
-                return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
-              }).length}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
   // ============================================
   // RENDER EXCURSIONES
   // ============================================
   const renderExcursiones = () => {
     const excursionesFiltradas = excursiones.filter(e => {
-      const matchesSearch = e.nombre.toLowerCase().includes(searchExcursiones.toLowerCase()) ||
-                            e.proveedorNombre.toLowerCase().includes(searchExcursiones.toLowerCase());
+      const matchesSearch = e.nombre?.toLowerCase().includes(searchExcursiones.toLowerCase()) ||
+                            e.proveedorNombre?.toLowerCase().includes(searchExcursiones.toLowerCase());
       const matchesProveedor = !filterExcursionProveedor || e.proveedorId === filterExcursionProveedor;
       return matchesSearch && matchesProveedor;
     });
@@ -2166,7 +2166,7 @@ const renderCalendario = () => {
             {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
           </select>
           <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false, tipoPrecio: "persona", tipoServicio: "compartido" }); setShowExcursionForm(true); }} className="bg-[#0a1628] text-white px-4 py-2.5 rounded-xl hover:bg-[#1a2a42] transition-all flex items-center gap-2 shadow-lg shadow-[#0a1628]/20">
-            <span className="text-lg leading-none">+</span> Nueva Excursion
+            <span className="text-lg leading-none">+</span> Nueva Excursión
           </button>
         </div>
 
@@ -2185,7 +2185,7 @@ const renderCalendario = () => {
                         {getTipoServicioLabel(e.tipoServicio)}
                       </span>
                       <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded-lg text-xs">
-                        {e.tipoPrecio === "persona" ? "Por Persona" : "Por Maquina"}
+                        {e.tipoPrecio === "persona" ? "Por Persona" : "Por Máquina"}
                       </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">Zona: {e.zona || "Sin zona"}</p>
@@ -2208,17 +2208,17 @@ const renderCalendario = () => {
                   {e.precioNinoUSD !== null && (
                     <>
                       <div className="flex justify-between text-gray-500">
-                        <span>Precio Venta Nino</span>
+                        <span>Precio Venta Niño</span>
                         <span className="text-[#0a1628] font-medium">{formatUSD(e.precioNinoUSD)}</span>
                       </div>
                       <div className="flex justify-between text-gray-500">
-                        <span>Costo Proveedor Nino</span>
+                        <span>Costo Proveedor Niño</span>
                         <span className="text-orange-600 font-medium">{formatUSD(e.costoProveedorNinoUSD || 0)}</span>
                       </div>
                     </>
                   )}
                   <div className="flex justify-between text-gray-500">
-                    <span>Comision</span>
+                    <span>Comisión</span>
                     <span className="text-green-600">{formatUSD(e.comisionAdultoUSD)}</span>
                   </div>
                 </div>
@@ -2233,6 +2233,24 @@ const renderCalendario = () => {
   // ============================================
   // RENDER PRINCIPAL
   // ============================================
+  const isAdmin = currentUser === "republic";
+  const isRaul = currentUser === "raul";
+  const isGabrielle = currentUser === "gabrielle";
+
+  const getUserRole = () => {
+    if (isAdmin) return "Administrador";
+    if (isRaul) return "Vendedor";
+    if (isGabrielle) return "Vendedora";
+    return "Usuario";
+  };
+
+  const getUserBadge = () => {
+    if (isAdmin) return "bg-[#0a1628] text-white";
+    if (isRaul) return "bg-blue-100 text-blue-800";
+    if (isGabrielle) return "bg-pink-100 text-pink-800";
+    return "bg-gray-100 text-gray-800";
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* HEADER */}
@@ -2311,9 +2329,7 @@ const renderCalendario = () => {
         {renderView()}
       </main>
 
-      {/* ============================================
-          MODAL - FORMULARIO DE VENTA
-      ============================================ */}
+      {/* MODAL - FORMULARIO DE VENTA */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
@@ -2356,17 +2372,17 @@ const renderCalendario = () => {
                 </div>
               </div>
 
-              {/* Excursion */}
+              {/* Excursión */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Excursion *</label>
+                  <label className="text-gray-600 text-sm block mb-1">Excursión *</label>
                   <select
                     value={formData.excursionId}
                     onChange={(e) => selectExcursionForVenta(e.target.value)}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     required
                   >
-                    <option value="">Seleccionar excursion</option>
+                    <option value="">Seleccionar excursión</option>
                     {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {e.proveedorNombre} ({getTipoServicioLabel(e.tipoServicio)})</option>)}
                   </select>
                   {formData.excursionId && (
@@ -2465,7 +2481,7 @@ const renderCalendario = () => {
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
                     <option value="no">No</option>
-                    <option value="si">Si</option>
+                    <option value="si">Sí</option>
                   </select>
                 </div>
                 <div>
@@ -2502,7 +2518,7 @@ const renderCalendario = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-gray-600 text-sm block mb-1">Habitacion</label>
+                    <label className="text-gray-600 text-sm block mb-1">Habitación</label>
                     <input
                       type="text"
                       value={formData.hotelHabitacion}
@@ -2527,7 +2543,7 @@ const renderCalendario = () => {
               {formData.transporte === "si" && formData.tipoRecogida === "airbnb" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-[#0a1628] pl-4">
                   <div>
-                    <label className="text-gray-600 text-sm block mb-1">Ubicacion Airbnb *</label>
+                    <label className="text-gray-600 text-sm block mb-1">Ubicación Airbnb *</label>
                     <input
                       type="text"
                       value={formData.airbnbUbicacion}
@@ -2618,7 +2634,7 @@ const renderCalendario = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Nino (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Niño (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2629,7 +2645,7 @@ const renderCalendario = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Nino (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2662,7 +2678,7 @@ const renderCalendario = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-500 text-sm block mb-1">Comision</label>
+                  <label className="text-gray-500 text-sm block mb-1">Comisión</label>
                   <input
                     type="text"
                     value={formData.comisionTotalUSD}
@@ -2707,9 +2723,9 @@ const renderCalendario = () => {
                 <input type="email" name="email" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all" />
               </div>
               <div>
-                <label className="text-gray-600 text-sm block mb-1">Excursion</label>
+                <label className="text-gray-600 text-sm block mb-1">Excursión</label>
                 <select name="excursionId" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all">
-                  <option value="">Seleccionar excursion</option>
+                  <option value="">Seleccionar excursión</option>
                   {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
                 </select>
               </div>
@@ -2764,7 +2780,7 @@ const renderCalendario = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Telefono</label>
+                  <label className="text-gray-600 text-sm block mb-1">Teléfono</label>
                   <input
                     type="text"
                     value={proveedorFormData.telefono}
@@ -2798,12 +2814,12 @@ const renderCalendario = () => {
                     }}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
-                    <option value="cedula">Cedula</option>
+                    <option value="cedula">Cédula</option>
                     <option value="rnc">RNC</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">{proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cedula"}</label>
+                  <label className="text-gray-600 text-sm block mb-1">{proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cédula"}</label>
                   <input
                     type="text"
                     value={proveedorFormData.rncCedula}
@@ -2815,7 +2831,7 @@ const renderCalendario = () => {
               </div>
 
               <div>
-                <label className="text-gray-600 text-sm block mb-2">Metodos de Pago</label>
+                <label className="text-gray-600 text-sm block mb-2">Métodos de Pago</label>
                 <div className="flex gap-4 flex-wrap">
                   <button type="button" onClick={() => toggleMetodoPago("efectivo")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("efectivo") ? 'bg-[#0a1628] text-white shadow-lg shadow-[#0a1628]/20' : 'bg-gray-100 border border-gray-200 text-gray-600'}`}>
                     Efectivo
@@ -2842,7 +2858,7 @@ const renderCalendario = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Numero de Cuenta</label>
+                  <label className="text-gray-600 text-sm block mb-1">Número de Cuenta</label>
                   <input
                     type="text"
                     value={proveedorFormData.numeroCuenta}
@@ -2906,9 +2922,7 @@ const renderCalendario = () => {
                 </div>
               </div>
 
-              {/* ============================================
-                  EXCURSIONES DEL PROVEEDOR CON CAPACIDAD Y TIPO SERVICIO
-              ============================================ */}
+              {/* EXCURSIONES DEL PROVEEDOR CON CAPACIDAD Y TIPO SERVICIO */}
               <div className="border-t border-gray-100 pt-4 mt-4">
                 <h4 className="text-[#0a1628] font-semibold mb-3">Excursiones del Proveedor</h4>
                 <div className="space-y-2 mb-3">
@@ -2917,11 +2931,11 @@ const renderCalendario = () => {
                       <div>
                         <span className="text-[#0a1628]">{e.nombre}</span>
                         <span className="text-gray-500 text-sm ml-2">Precio Venta: {formatUSD(e.precioAdultoUSD)}</span>
-                        {e.precioNinoUSD !== null && <span className="text-gray-500 text-sm ml-2">Nino: {formatUSD(e.precioNinoUSD)}</span>}
+                        {e.precioNinoUSD !== null && <span className="text-gray-500 text-sm ml-2">Niño: {formatUSD(e.precioNinoUSD)}</span>}
                         <span className="text-orange-600 text-sm ml-2">Costo: {formatUSD(e.costoProveedorAdultoUSD)}</span>
                         <span className="text-blue-600 text-xs ml-2">{getTipoServicioLabel(e.tipoServicio)}</span>
                         <span className="text-gray-400 text-xs ml-2">Zona: {e.zona || "Sin zona"}</span>
-                        <span className="text-gray-400 text-xs ml-2">Tipo: {e.tipoPrecio === "persona" ? "Persona" : "Maquina"}</span>
+                        <span className="text-gray-400 text-xs ml-2">Tipo: {e.tipoPrecio === "persona" ? "Persona" : "Máquina"}</span>
                         {e.capacidad && <span className="text-green-600 text-xs ml-2">Cap: {e.capacidad}</span>}
                       </div>
                       <button type="button" onClick={() => eliminarTempExcursion(i)} className="text-red-400 hover:text-red-600">×</button>
@@ -2935,7 +2949,7 @@ const renderCalendario = () => {
                     value={tempExcursionForm.nombre}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, nombre: e.target.value }))}
                     className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="Nombre de excursion"
+                    placeholder="Nombre de excursión"
                   />
                   <div className="flex gap-2">
                     <input
@@ -2952,7 +2966,7 @@ const renderCalendario = () => {
                       value={tempExcursionForm.precioNinoUSD}
                       onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
                       className="w-1/2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                      placeholder="Precio Nino"
+                      placeholder="Precio Niño"
                     />
                   </div>
                 </div>
@@ -2972,7 +2986,7 @@ const renderCalendario = () => {
                     value={tempExcursionForm.costoProveedorNinoUSD}
                     onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
                     className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
-                    placeholder="Costo Nino"
+                    placeholder="Costo Niño"
                   />
                   <input
                     type="text"
@@ -3017,7 +3031,7 @@ const renderCalendario = () => {
                       className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                     >
                       <option value="persona">Por Persona</option>
-                      <option value="maquina">Por Maquina</option>
+                      <option value="maquina">Por Máquina</option>
                     </select>
                   </div>
                 </div>
@@ -3045,7 +3059,7 @@ const renderCalendario = () => {
                       Tiene precio para niños
                     </label>
                     <button type="button" onClick={agregarTempExcursion} className="px-4 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20 text-sm whitespace-nowrap">
-                      Agregar Excursion
+                      Agregar Excursión
                     </button>
                   </div>
                 </div>
@@ -3064,12 +3078,12 @@ const renderCalendario = () => {
         </div>
       )}
 
-      {/* MODAL - Excursion */}
+      {/* MODAL - Excursión */}
       {showExcursionForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[#0a1628] text-xl font-bold">{editingExcursionId ? "Editar Excursion" : "Nueva Excursion"}</h3>
+              <h3 className="text-[#0a1628] text-xl font-bold">{editingExcursionId ? "Editar Excursión" : "Nueva Excursión"}</h3>
               <button onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
             </div>
             <form onSubmit={handleExcursionSubmit} className="space-y-4">
@@ -3118,7 +3132,7 @@ const renderCalendario = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Nino (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Niño (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -3142,7 +3156,7 @@ const renderCalendario = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Nino (USD)</label>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -3197,7 +3211,7 @@ const renderCalendario = () => {
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[#0a1628] focus:ring-2 focus:ring-[#0a1628] focus:border-transparent transition-all"
                   >
                     <option value="persona">Por Persona</option>
-                    <option value="maquina">Por Maquina</option>
+                    <option value="maquina">Por Máquina</option>
                   </select>
                 </div>
               </div>
@@ -3232,7 +3246,7 @@ const renderCalendario = () => {
                   Cancelar
                 </button>
                 <button type="submit" className="px-6 py-2 bg-[#0a1628] text-white rounded-xl hover:bg-[#1a2a42] transition-all shadow-lg shadow-[#0a1628]/20">
-                  {editingExcursionId ? "Actualizar Excursion" : "Guardar Excursion"}
+                  {editingExcursionId ? "Actualizar Excursión" : "Guardar Excursión"}
                 </button>
               </div>
             </form>
