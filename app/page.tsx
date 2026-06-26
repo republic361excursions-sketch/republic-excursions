@@ -97,7 +97,7 @@ interface Venta {
 }
 
 // ============================================
-// ZONAS - Solo 5 iniciales, el resto se agregan manualmente
+// ZONAS - Solo 5 iniciales
 // ============================================
 const ZONAS_INICIALES = [
   "Bavaro", "Los Corales", "Punta Cana", "Jellyfish", "Macao"
@@ -113,7 +113,7 @@ const guardarZonasGlobales = (zonas: string[]) => {
 };
 
 // ============================================
-// EXCURSIONES PREDEFINIDAS + "Otro (especificar)"
+// EXCURSIONES PREDEFINIDAS
 // ============================================
 const EXCURSIONES_PREDEFINIDAS = [
   { id: "party-boat", nombre: "Party Boat Privado" },
@@ -197,6 +197,11 @@ export default function Home() {
 
   const [excursionSeleccionadaId, setExcursionSeleccionadaId] = useState<string>("");
   const [nombrePersonalizado, setNombrePersonalizado] = useState<string>("");
+
+  // Estado para la selección de zona con opción "Otro (zona)"
+  const [zonaSeleccionada, setZonaSeleccionada] = useState<string>("");
+  const [nuevaZonaInputSimple, setNuevaZonaInputSimple] = useState<string>("");
+  const [showNuevaZonaInput, setShowNuevaZonaInput] = useState<boolean>(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -375,6 +380,40 @@ export default function Home() {
     const nuevasZonas = ZONAS_GLOBALES.filter(z => z !== zona);
     guardarZonasGlobales(nuevasZonas);
     setZonasActuales([...nuevasZonas]);
+  };
+
+  // ============================================
+  // FUNCION PARA AGREGAR ZONA DESDE DROPDOWN
+  // ============================================
+  const handleAgregarZonaDesdeDropdown = (zona: string) => {
+    if (!zona || zona.trim() === "") {
+      alert("Por favor escribe el nombre de la zona");
+      return;
+    }
+    const zonaTrim = zona.trim();
+    if (ZONAS_GLOBALES.includes(zonaTrim)) {
+      alert("Esta zona ya existe");
+      return;
+    }
+    const nuevasZonas = [...ZONAS_GLOBALES, zonaTrim];
+    guardarZonasGlobales(nuevasZonas);
+    setZonasActuales([...nuevasZonas]);
+    setNuevaZonaInputSimple("");
+    setShowNuevaZonaInput(false);
+    setZonaSeleccionada(zonaTrim);
+    // Agregar la zona al formulario actual
+    addZonaToCurrentForm(zonaTrim);
+  };
+
+  const addZonaToCurrentForm = (zona: string) => {
+    // Agregar a formData
+    setFormData(prev => {
+      const zonas = prev.zona || [];
+      if (!zonas.includes(zona)) {
+        return { ...prev, zona: [...zonas, zona] };
+      }
+      return prev;
+    });
   };
 
   // ============================================
@@ -765,15 +804,32 @@ export default function Home() {
     setTimeout(updateCantidades, 10);
   };
 
-  const toggleZonaEnForm = (zona: string) => {
+  // Nueva función para manejar selección de zona con dropdown
+  const handleZonaDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === "otro") {
+      setShowNuevaZonaInput(true);
+      setZonaSeleccionada("");
+      return;
+    }
+    setShowNuevaZonaInput(false);
+    setZonaSeleccionada(value);
+    // Agregar la zona a formData
     setFormData(prev => {
       const zonas = prev.zona || [];
-      if (zonas.includes(zona)) {
-        return { ...prev, zona: zonas.filter(z => z !== zona) };
-      } else {
-        return { ...prev, zona: [...zonas, zona] };
+      if (!zonas.includes(value)) {
+        return { ...prev, zona: [...zonas, value] };
       }
+      return prev;
     });
+  };
+
+  // Función para eliminar zona del formulario actual
+  const removeZonaFromForm = (zona: string) => {
+    setFormData(prev => ({
+      ...prev,
+      zona: (prev.zona || []).filter(z => z !== zona)
+    }));
   };
 
   // ============================================
@@ -901,6 +957,9 @@ export default function Home() {
     setSelectedExcursionForVenta(null);
     setExcursionSeleccionadaId("");
     setNombrePersonalizado("");
+    setZonaSeleccionada("");
+    setShowNuevaZonaInput(false);
+    setNuevaZonaInputSimple("");
   };
 
   // ============================================
@@ -2535,7 +2594,7 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER EXCURSIONES - CON MODAL DE ZONAS
+  // RENDER EXCURSIONES - CON DROPDOWN DE ZONAS
   // ============================================
   const renderExcursiones = () => {
     const excursionesFiltradas = excursiones.filter(e => {
@@ -2652,7 +2711,7 @@ export default function Home() {
           )}
         </div>
 
-        {/* MODAL - Gestionar Zonas con Búsqueda y Agregar */}
+        {/* MODAL - Gestionar Zonas */}
         {showZonasModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6">
@@ -2729,11 +2788,10 @@ export default function Home() {
   };
 
   // ============================================
-  // RENDER PRINCIPAL
+  // RENDER PRINCIPAL - HEADER
   // ============================================
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* HEADER */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -2782,7 +2840,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
@@ -2813,8 +2870,6 @@ export default function Home() {
 
         {renderView()}
       </main>
-
-      {/* MODALES - Ver código completo en la respuesta anterior... */}
     </div>
   );
 }
