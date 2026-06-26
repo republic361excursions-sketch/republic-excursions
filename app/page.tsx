@@ -1159,7 +1159,7 @@ export default function Home() {
   };
 
  // ============================================
-// FUNCION PARA OBTENER DIAS DEL MES - CORREGIDA
+// FUNCIONES DEL CALENDARIO
 // ============================================
 const getDaysInMonth = (date: Date) => {
   const year = date.getFullYear();
@@ -1168,22 +1168,17 @@ const getDaysInMonth = (date: Date) => {
   const lastDay = new Date(year, month + 1, 0);
   const days = [];
   
-  // Obtener el día de la semana del primer día (0 = Domingo, 6 = Sábado)
   const startDay = firstDay.getDay();
-  
-  // Días del mes anterior
   for (let i = startDay - 1; i >= 0; i--) {
     const d = new Date(year, month, -i);
     days.push({ date: d, isCurrentMonth: false });
   }
   
-  // Días del mes actual
   for (let i = 1; i <= lastDay.getDate(); i++) {
     const d = new Date(year, month, i);
     days.push({ date: d, isCurrentMonth: true });
   }
   
-  // Días del mes siguiente
   const remaining = 42 - days.length;
   for (let i = 1; i <= remaining; i++) {
     const d = new Date(year, month + 1, i);
@@ -1193,123 +1188,12 @@ const getDaysInMonth = (date: Date) => {
   return days;
 };
 
-  // ============================================
-  // FILTROS Y AGRUPACIONES
-  // ============================================
-  let filtered = ventas;
-  
-  if (filterYear) {
-    filtered = filtered.filter(v => new Date(v.fechaExcursion).getFullYear().toString() === filterYear);
-  }
-  if (searchTerm) {
-    filtered = filtered.filter(v => 
-      v.clienteNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      v.excursionNombre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }
-
-  const grouped = filtered.reduce((acc: any, venta) => {
-    const fecha = new Date(venta.fechaExcursion);
-    const year = fecha.getFullYear();
-    const month = fecha.getMonth() + 1;
-    const key = `${year}-${String(month).padStart(2, "0")}`;
-    
-    if (!acc[key]) {
-      acc[key] = { year, month, totalUSD: 0, totalComision: 0, totalCosto: 0, ventas: [] };
-    }
-    acc[key].totalUSD += venta.precioVentaUSD;
-    acc[key].totalComision += venta.comisionUSD;
-    acc[key].totalCosto += venta.costoProveedorUSD;
-    acc[key].ventas.push(venta);
-    return acc;
-  }, {});
-
-  let groupedArray = Object.entries(grouped)
-    .map(([key, value]: [string, any]) => ({ ...value, key }))
-    .sort((a, b) => {
-      if (a.year !== b.year) return b.year - a.year;
-      return b.month - a.month;
-    });
-
-  const totalVentasUSD = filtered.reduce((sum, v) => sum + v.precioVentaUSD, 0);
-  const totalComision = filtered.reduce((sum, v) => sum + v.comisionUSD, 0);
-  const totalPendienteUSD = filtered.reduce((sum, v) => sum + v.saldoPendienteUSD, 0);
-  
-  const years = [...new Set(ventas.map(v => new Date(v.fechaExcursion).getFullYear().toString()))].sort().reverse();
-
-  const toggleMonth = (key: string) => {
-    setExpandedMonth(expandedMonth === key ? null : key);
-  };
-
-  const getPagoClienteText = (tipo: string) => {
-    const map: any = {
-      completo: "Pago completo (USD)",
-      deposito_25: "Deposito 25% (USD)",
-      pago_dia: "Pago el dia (USD)"
-    };
-    return map[tipo] || tipo;
-  };
-
-  const getTipoRecogidaText = (tipo: string) => {
-    const map: any = {
-      sin_recogida: "Sin Recogida",
-      hotel: "Hotel",
-      airbnb: "Airbnb"
-    };
-    return map[tipo] || tipo;
-  };
-
-  const getTransporteText = (valor: string) => {
-    return valor === "si" ? "Si" : "No";
-  };
-
-  const getEstadoText = (estado: string) => {
-    const map: any = {
-      pendiente: "Pendiente",
-      confirmada: "Confirmada",
-      cancelada: "Cancelada",
-      completada: "Completada"
-    };
-    return map[estado] || estado;
-  };
-
-  const getEstadoColor = (estado: string) => {
-    const map: any = {
-      pendiente: "bg-yellow-100 text-yellow-800",
-      confirmada: "bg-blue-100 text-blue-800",
-      cancelada: "bg-red-100 text-red-800",
-      completada: "bg-green-100 text-green-800"
-    };
-    return map[estado] || "bg-gray-100 text-gray-800";
-  };
-
-  const getTipoServicioLabel = (tipo: string) => {
-    const map: any = {
-      compartido: "Compartido",
-      privado: "Privado",
-      grupo: "Grupo",
-      grupo_privado: "Grupo Privado"
-    };
-    return map[tipo] || tipo;
-  };
-
-  const exportCSV = () => {
-    if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Hora,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Capacidad Grupo,Recogida,Transporte,Hotel/Airbnb,Estado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Zona,Nota\n";
-    ventas.forEach(v => {
-      const recogidaInfo = v.tipoRecogida === "hotel" ? v.hotelNombre : 
-                           v.tipoRecogida === "airbnb" ? v.airbnbUbicacion : "Sin recogida";
-      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${getTipoServicioLabel(v.tipoServicio)}","${v.nombreGrupo || ""}","${v.capacidadGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.zona || ""}","${v.nota || ""}"\n`;
-    });
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `excursiones_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
-
+// ESTA FUNCIÓN DEBE ESTAR DEFINIDA ANTES DE renderCalendario
+const cambiarMes = (delta: number) => {
+  const newDate = new Date(currentDate);
+  newDate.setMonth(newDate.getMonth() + delta);
+  setCurrentDate(newDate);
+};
   // ============================================
   // LOGIN - DISEÑO PROFESIONAL
   // ============================================
@@ -2078,23 +1962,20 @@ const getDaysInMonth = (date: Date) => {
       </div>
     );
   };
-
 // ============================================
 // RENDER CALENDARIO - CORREGIDO
 // ============================================
 const renderCalendario = () => {
   const days = getDaysInMonth(currentDate);
 
-  // Función para obtener ventas de un día específico (CORREGIDA)
+  // Función para obtener ventas de un día específico
   const getVentasDelDia = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const day = date.getDate();
     
     return ventas.filter(v => {
-      // Parsear la fecha correctamente
       const vDate = new Date(v.fechaExcursion);
-      // Comparar año, mes y día
       return vDate.getFullYear() === year &&
              vDate.getMonth() === month &&
              vDate.getDate() === day;
@@ -2156,7 +2037,6 @@ const renderCalendario = () => {
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <h3 className="text-[#0a1628] font-semibold mb-3">Ventas del Mes</h3>
           <div className="space-y-2 max-h-60 overflow-y-auto">
-            {/* Mostrar ventas del día seleccionado */}
             {(() => {
               const ventasHoy = getVentasDelDia(currentDate);
               if (ventasHoy.length === 0) {
@@ -2204,7 +2084,6 @@ const renderCalendario = () => {
     </div>
   );
 };
-  
   // ============================================
   // RENDER EXCURSIONES
   // ============================================
