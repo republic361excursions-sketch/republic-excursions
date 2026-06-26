@@ -386,10 +386,10 @@ export default function Home() {
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v46");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v46");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v46");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v46");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v47");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v47");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v47");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v47");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
@@ -399,22 +399,22 @@ export default function Home() {
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v46", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v47", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v46", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v47", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v46", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v47", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v46", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v47", JSON.stringify(data));
   };
 
   // ============================================
@@ -1402,7 +1402,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-[10px] text-gray-400">v4.6 • Republic Excursions © 2026</p>
+              <p className="text-[10px] text-gray-400">v4.7 • Republic Excursions © 2026</p>
             </div>
           </div>
         </div>
@@ -2257,6 +2257,7 @@ export default function Home() {
   // ============================================
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* HEADER */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -2305,6 +2306,7 @@ export default function Home() {
         </div>
       </header>
 
+      {/* MAIN CONTENT */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
