@@ -19,6 +19,7 @@ interface Excursion {
   zona: string;
   capacidad?: string;
   tipoPrecio: "persona" | "maquina";
+  tipoServicio: "compartido" | "privado" | "grupo" | "grupo_privado";
 }
 
 interface Proveedor {
@@ -70,8 +71,9 @@ interface Venta {
   metodoPagoProveedor: "efectivo" | "transferencia" | "paypal";
   cantidadAdultos: number;
   cantidadNinos: number;
-  tipoServicio: "compartido" | "privado" | "grupo";
+  tipoServicio: "compartido" | "privado" | "grupo" | "grupo_privado";
   nombreGrupo?: string;
+  capacidadGrupo?: string;
   tipoRecogida: "sin_recogida" | "hotel" | "airbnb";
   transporte: "si" | "no";
   hotelNombre: string;
@@ -98,40 +100,6 @@ const ZONAS_DEFAULT = [
   "San Juan", "Veron"
 ];
 
-const HOTELES_DEFAULT = [
-  "Hyatt Ziva Cap Cana", "Hyatt Zilara Cap Cana", "Riu Palace Bavaro",
-  "Riu Republica", "Riu Bambu", "Riu Naiboa", "Riu Palace Macao",
-  "Hard Rock Hotel & Casino", "Iberostar Bavaro Suites",
-  "Iberostar Punta Cana", "Iberostar Dominicana", "Iberostar Selection",
-  "Bahia Principe Ambar", "Bahia Principe Esmeralda", "Bahia Principe Aquamarine",
-  "Bahia Principe Fantasia", "Bahia Principe Grand Bavaro", "Bahia Principe Turquesa",
-  "Dreams Punta Cana", "Dreams Royal Beach", "Dreams Palm Beach",
-  "Excellence Punta Cana", "Excellence El Carmen", "Sanctuary Cap Cana",
-  "Margaritaville Island Reserve", "Nickelodeon Hotels & Resorts",
-  "Barcelo Bavaro Palace", "Barcelo Bavaro Beach", "Barcelo Bavaro Caribe",
-  "Ocean Blue & Sand", "Ocean El Faro", "Ocean Riviera Paradise",
-  "Grand Sirenis Punta Cana", "Sirenis Tropical Suites",
-  "Catalonia Royal Bavaro", "Catalonia Punta Cana", "Catalonia Bavaro",
-  "Majestic Elegance", "Majestic Mirage", "Majestic Colonial",
-  "Secrets Royal Beach", "Secrets Tides", "Secrets Cap Cana",
-  "Now Onyx Punta Cana", "Breathless Punta Cana", "Breathless Cabarete",
-  "Xeliter Vista Sol", "Xeliter St. John", "Vista Sol Punta Cana",
-  "BlueBay Villas Doradas", "BlueBay Grand Esmeralda", "BlueBay Golden Beach",
-  "Lopesan Costa Bavaro", "Lopesan Bavaro Resort", "Lopesan Punta Cana",
-  "Be Live Collection Punta Cana", "Be Live Experience Punta Cana",
-  "Grand Palladium Palace", "Grand Palladium Punta Cana", "Grand Palladium Bavaro",
-  "Whala Bavaro", "Whala Punta Cana", "Whala Tropical",
-  "Sunscape Bavaro", "Sunscape Punta Cana", "Sunscape Mares",
-  "La Pargua", "El Cortecito", "Los Corales", "Bibijagua",
-  "Melia Caribe Beach", "Melia Punta Cana Beach", "Paradisus Punta Cana",
-  "Paradisus Grand Cana", "The Reserve at Paradisus", "Punta Cana Princess",
-  "Royalton Punta Cana", "Royalton Bavaro", "Royalton Splash",
-  "CHIC Punta Cana", "CHIC Royal", "CHIC Sunset",
-  "Boho Punta Cana", "Boho Palms", "Boho Resort",
-  "Tanama Hotel", "Kukua Beach Club", "Natura Park",
-  "Portillo", "Bayahibe", "La Romana", "Casa de Campo"
-];
-
 const BANCOS = [
   "Banco BHD", "Banreservas", "Banco Popular Dominicano",
   "Scotiabank", "Banco Santa Cruz", "Banco Vimenca",
@@ -140,17 +108,34 @@ const BANCOS = [
   "Banco Promerica", "Banco Lafise", "Banesco"
 ];
 
-const HORAS = [
-  "06:00 AM", "06:30 AM", "07:00 AM", "07:30 AM",
-  "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
-  "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-  "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM",
-  "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM",
-  "04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM",
-  "06:00 PM", "06:30 PM", "07:00 PM", "07:30 PM",
-  "08:00 PM", "08:30 PM", "09:00 PM", "09:30 PM",
-  "10:00 PM"
+const TIPOS_SERVICIO = [
+  { value: "compartido", label: "Compartido" },
+  { value: "privado", label: "Privado" },
+  { value: "grupo", label: "Grupo" },
+  { value: "grupo_privado", label: "Grupo Privado" },
 ];
+
+// ============================================
+// FUNCIONES DE UTILIDAD PARA FECHAS
+// ============================================
+
+// Parsear fecha string "YYYY-MM-DD" a Date en zona horaria local
+const parseFechaLocal = (fechaStr: string) => {
+  if (!fechaStr) return new Date();
+  const partes = fechaStr.split('-').map(Number);
+  return new Date(partes[0], partes[1] - 1, partes[2]);
+};
+
+// Formatear fecha para mostrar en español
+const formatearFecha = (fechaStr: string) => {
+  if (!fechaStr) return "";
+  const fecha = parseFechaLocal(fechaStr);
+  return fecha.toLocaleDateString("es-DO", {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+};
 
 // ============================================
 // COMPONENTE PRINCIPAL
@@ -167,7 +152,6 @@ export default function Home() {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [excursiones, setExcursiones] = useState<Excursion[]>([]);
   const [zonas, setZonas] = useState<string[]>(ZONAS_DEFAULT);
-  const [hoteles, setHoteles] = useState<string[]>(HOTELES_DEFAULT);
   
   const [showForm, setShowForm] = useState(false);
   const [showClienteForm, setShowClienteForm] = useState(false);
@@ -221,6 +205,7 @@ export default function Home() {
     capacidad: "",
     tienePrecioNino: false,
     tipoPrecio: "persona" as "persona" | "maquina",
+    tipoServicio: "compartido" as "compartido" | "privado" | "grupo" | "grupo_privado",
   });
 
   // ============================================
@@ -254,8 +239,9 @@ export default function Home() {
     proveedorNombre: "",
     proveedorPagado: "pendiente" as "pendiente" | "pagado",
     metodoPagoProveedor: "efectivo" as "efectivo" | "transferencia" | "paypal",
-    tipoServicio: "compartido" as "compartido" | "privado" | "grupo",
+    tipoServicio: "compartido" as "compartido" | "privado" | "grupo" | "grupo_privado",
     nombreGrupo: "",
+    capacidadGrupo: "",
     tipoRecogida: "sin_recogida" as "sin_recogida" | "hotel" | "airbnb",
     transporte: "no" as "si" | "no",
     hotelNombre: "",
@@ -282,6 +268,7 @@ export default function Home() {
     capacidad: "",
     tienePrecioNino: false,
     tipoPrecio: "persona" as "persona" | "maquina",
+    tipoServicio: "compartido" as "compartido" | "privado" | "grupo" | "grupo_privado",
   });
 
   const [proveedorFormData, setProveedorFormData] = useState({
@@ -374,8 +361,70 @@ export default function Home() {
   };
 
   const getDayName = (day: number) => {
-    const days = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];
+    const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
     return days[day];
+  };
+
+  const getTipoServicioLabel = (tipo: string) => {
+    const map: any = {
+      compartido: "Compartido",
+      privado: "Privado",
+      grupo: "Grupo",
+      grupo_privado: "Grupo Privado"
+    };
+    return map[tipo] || tipo;
+  };
+
+  const getPagoClienteText = (tipo: string) => {
+    const map: any = {
+      completo: "Pago completo (USD)",
+      deposito_25: "Depósito 25% (USD)",
+      pago_dia: "Pago el día (USD)"
+    };
+    return map[tipo] || tipo;
+  };
+
+  const getTipoRecogidaText = (tipo: string) => {
+    const map: any = {
+      sin_recogida: "Sin Recogida",
+      hotel: "Hotel",
+      airbnb: "Airbnb"
+    };
+    return map[tipo] || tipo;
+  };
+
+  const getTransporteText = (valor: string) => {
+    return valor === "si" ? "Sí" : "No";
+  };
+
+  const getEstadoText = (estado: string) => {
+    const map: any = {
+      pendiente: "Pendiente",
+      confirmada: "Confirmada",
+      cancelada: "Cancelada",
+      completada: "Completada"
+    };
+    return map[estado] || estado;
+  };
+
+  const getEstadoColor = (estado: string) => {
+    const map: any = {
+      pendiente: "bg-yellow-100 text-yellow-800",
+      confirmada: "bg-blue-100 text-blue-800",
+      cancelada: "bg-red-100 text-red-800",
+      completada: "bg-green-100 text-green-800"
+    };
+    return map[estado] || "bg-gray-100 text-gray-800";
+  };
+
+  const getTipoCuentaLabel = (tipo: string) => {
+    const map: any = {
+      corriente: "Corriente",
+      ahorros: "Ahorros",
+      corriente_us: "Corriente US",
+      ahorros_us: "Ahorros US"
+    };
+    return map[tipo] || tipo;
   };
 
   // ============================================
@@ -386,16 +435,22 @@ export default function Home() {
       setIsLoggedIn(true);
       setCurrentUser("republic");
       setLoginError("");
+      setLoginEmail("");
+      setLoginPassword("");
       return true;
     } else if (email === "raul@republicexcursions.com" && password === "Republ1c$$") {
       setIsLoggedIn(true);
       setCurrentUser("raul");
       setLoginError("");
+      setLoginEmail("");
+      setLoginPassword("");
       return true;
     } else if (email === "gabrielle@republicexcursions.com" && password === "Republ1c$$") {
       setIsLoggedIn(true);
       setCurrentUser("gabrielle");
       setLoginError("");
+      setLoginEmail("");
+      setLoginPassword("");
       return true;
     } else {
       setLoginError("Correo o contraseña incorrectos");
@@ -418,55 +473,73 @@ export default function Home() {
     setLoginError("");
     setLoginEmail("");
     setLoginPassword("");
+    setViewMode("dashboard");
+    setShowForm(false);
+    setShowClienteForm(false);
+    setShowProveedorForm(false);
+    setShowExcursionForm(false);
+    setEditingVentaId(null);
+    setEditingExcursionId(null);
+    setEditingProveedorId(null);
+    setSelectedExcursionForVenta(null);
+    setExpandedMonth(null);
+    setSearchTerm("");
+    setFilterYear("");
+    setSearchClientes("");
+    setFilterClienteExcursion("");
+    setSearchProveedores("");
+    setFilterProveedorMetodo("todos");
+    setSearchExcursiones("");
+    setFilterExcursionProveedor("");
+    setSearchBancos("");
+    setFilterBancoTipo("todos");
+    setFilterBancoMoneda("todas");
+    setSearchReservas("");
+    setFilterReservaEstado("todas");
+    setFilterReservaFecha("");
+    setCurrentDate(new Date());
   };
 
   // ============================================
   // LOAD DATA
   // ============================================
   useEffect(() => {
-    const savedVentas = localStorage.getItem("excursiones_ventas_v50");
-    const savedClientes = localStorage.getItem("excursiones_clientes_v50");
-    const savedProveedores = localStorage.getItem("excursiones_proveedores_v50");
-    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v50");
-    const savedZonas = localStorage.getItem("excursiones_zonas_v50");
-    const savedHoteles = localStorage.getItem("excursiones_hoteles_v50");
+    const savedVentas = localStorage.getItem("excursiones_ventas_v51");
+    const savedClientes = localStorage.getItem("excursiones_clientes_v51");
+    const savedProveedores = localStorage.getItem("excursiones_proveedores_v51");
+    const savedExcursiones = localStorage.getItem("excursiones_excursiones_v51");
+    const savedZonas = localStorage.getItem("excursiones_zonas_v51");
     
     if (savedVentas) setVentas(JSON.parse(savedVentas));
     if (savedClientes) setClientes(JSON.parse(savedClientes));
     if (savedProveedores) setProveedores(JSON.parse(savedProveedores));
     if (savedExcursiones) setExcursiones(JSON.parse(savedExcursiones));
     if (savedZonas) setZonas(JSON.parse(savedZonas));
-    if (savedHoteles) setHoteles(JSON.parse(savedHoteles));
   }, []);
 
   const saveVentas = (data: Venta[]) => {
     setVentas(data);
-    localStorage.setItem("excursiones_ventas_v50", JSON.stringify(data));
+    localStorage.setItem("excursiones_ventas_v51", JSON.stringify(data));
   };
 
   const saveClientes = (data: Cliente[]) => {
     setClientes(data);
-    localStorage.setItem("excursiones_clientes_v50", JSON.stringify(data));
+    localStorage.setItem("excursiones_clientes_v51", JSON.stringify(data));
   };
 
   const saveProveedores = (data: Proveedor[]) => {
     setProveedores(data);
-    localStorage.setItem("excursiones_proveedores_v50", JSON.stringify(data));
+    localStorage.setItem("excursiones_proveedores_v51", JSON.stringify(data));
   };
 
   const saveExcursiones = (data: Excursion[]) => {
     setExcursiones(data);
-    localStorage.setItem("excursiones_excursiones_v50", JSON.stringify(data));
+    localStorage.setItem("excursiones_excursiones_v51", JSON.stringify(data));
   };
 
   const saveZonas = (data: string[]) => {
     setZonas(data);
-    localStorage.setItem("excursiones_zonas_v50", JSON.stringify(data));
-  };
-
-  const saveHoteles = (data: string[]) => {
-    setHoteles(data);
-    localStorage.setItem("excursiones_hoteles_v50", JSON.stringify(data));
+    localStorage.setItem("excursiones_zonas_v51", JSON.stringify(data));
   };
 
   // ============================================
@@ -482,23 +555,6 @@ export default function Home() {
       alert("Esta zona ya existe");
     } else if (nuevaZona && !nuevaZona.trim()) {
       alert("Por favor escribe un nombre de zona");
-    }
-    return null;
-  };
-
-  // ============================================
-  // AGREGAR HOTEL
-  // ============================================
-  const agregarHotel = () => {
-    const nuevoHotel = prompt("Escribe el nombre del nuevo hotel:");
-    if (nuevoHotel && nuevoHotel.trim() && !hoteles.includes(nuevoHotel.trim())) {
-      const nuevosHoteles = [...hoteles, nuevoHotel.trim()];
-      saveHoteles(nuevosHoteles);
-      return nuevoHotel.trim();
-    } else if (hoteles.includes(nuevoHotel?.trim() || "")) {
-      alert("Este hotel ya existe");
-    } else if (nuevoHotel && !nuevoHotel.trim()) {
-      alert("Por favor escribe un nombre de hotel");
     }
     return null;
   };
@@ -556,7 +612,7 @@ export default function Home() {
   };
 
   // ============================================
-  // SELECCIONAR EXCURSION
+  // SELECCIONAR EXCURSION PARA VENTA
   // ============================================
   const selectExcursionForVenta = (excursionId: string) => {
     const excursion = excursiones.find(e => e.id === excursionId);
@@ -569,6 +625,9 @@ export default function Home() {
       const costoNino = excursion.costoProveedorNinoUSD || 0;
       const comisionAdulto = excursion.comisionAdultoUSD || 0;
       const comisionNino = excursion.comisionNinoUSD || 0;
+      
+      const tipoServicio = excursion.tipoServicio || "compartido";
+      const capacidadGrupo = (tipoServicio === "grupo" || tipoServicio === "grupo_privado") ? excursion.capacidad || "" : "";
       
       setFormData(prev => ({
         ...prev,
@@ -584,6 +643,9 @@ export default function Home() {
         proveedorNombre: excursion.proveedorNombre,
         zona: excursion.zona || "",
         tipoPrecio: excursion.tipoPrecio || "persona",
+        tipoServicio: tipoServicio,
+        capacidadGrupo: capacidadGrupo,
+        nombreGrupo: "",
       }));
       
       setTimeout(() => {
@@ -646,6 +708,18 @@ export default function Home() {
     const { precioTotal, costoTotal, comisionTotal } = calcularTotalesVenta();
     const montoPagadoUSD = Number(formData.montoPagadoUSD) || 0;
     
+    // Validaciones para Grupo y Grupo Privado
+    if ((formData.tipoServicio === "grupo" || formData.tipoServicio === "grupo_privado")) {
+      if (!formData.nombreGrupo.trim()) {
+        alert("El nombre del grupo es obligatorio para este tipo de servicio");
+        return;
+      }
+      if (!formData.capacidadGrupo.trim()) {
+        alert("La capacidad del grupo es obligatoria para este tipo de servicio");
+        return;
+      }
+    }
+    
     let saldoPendienteUSD = 0;
     if (formData.pagoCliente === "completo") {
       saldoPendienteUSD = 0;
@@ -678,7 +752,8 @@ export default function Home() {
       cantidadAdultos: formData.cantidadAdultos,
       cantidadNinos: formData.cantidadNinos,
       tipoServicio: formData.tipoServicio,
-      nombreGrupo: formData.tipoServicio === "grupo" ? formData.nombreGrupo : undefined,
+      nombreGrupo: (formData.tipoServicio === "grupo" || formData.tipoServicio === "grupo_privado") ? formData.nombreGrupo : undefined,
+      capacidadGrupo: (formData.tipoServicio === "grupo" || formData.tipoServicio === "grupo_privado") ? formData.capacidadGrupo : undefined,
       tipoRecogida: formData.tipoRecogida,
       transporte: formData.transporte,
       hotelNombre: formData.hotelNombre || "",
@@ -736,6 +811,7 @@ export default function Home() {
       metodoPagoProveedor: "efectivo",
       tipoServicio: "compartido",
       nombreGrupo: "",
+      capacidadGrupo: "",
       tipoRecogida: "sin_recogida",
       transporte: "no",
       hotelNombre: "",
@@ -787,8 +863,9 @@ export default function Home() {
       proveedorNombre: venta.proveedorNombre,
       proveedorPagado: venta.proveedorPagado,
       metodoPagoProveedor: venta.metodoPagoProveedor,
-      tipoServicio: venta.tipoServicio,
+      tipoServicio: venta.tipoServicio || "compartido",
       nombreGrupo: venta.nombreGrupo || "",
+      capacidadGrupo: venta.capacidadGrupo || "",
       tipoRecogida: venta.tipoRecogida || "sin_recogida",
       transporte: venta.transporte || "no",
       hotelNombre: venta.hotelNombre || "",
@@ -902,6 +979,7 @@ export default function Home() {
       capacidad: "",
       tienePrecioNino: false,
       tipoPrecio: "persona",
+      tipoServicio: "compartido",
     });
   };
 
@@ -935,6 +1013,7 @@ export default function Home() {
       zona: e.zona || "",
       capacidad: e.capacidad || "",
       tipoPrecio: e.tipoPrecio || "persona",
+      tipoServicio: e.tipoServicio || "compartido",
     })));
     
     setShowProveedorForm(true);
@@ -978,7 +1057,7 @@ export default function Home() {
   // ============================================
   const agregarTempExcursion = () => {
     if (!tempExcursionForm.nombre) {
-      alert("Debes escribir el nombre de la excursion");
+      alert("Debes escribir el nombre de la excursión");
       return;
     }
     
@@ -1009,6 +1088,7 @@ export default function Home() {
         zona: tempExcursionForm.zona || "Bavaro",
         capacidad: tempExcursionForm.capacidad || undefined,
         tipoPrecio: tempExcursionForm.tipoPrecio || "persona",
+        tipoServicio: tempExcursionForm.tipoServicio || "compartido",
       }
     ]);
     
@@ -1024,6 +1104,7 @@ export default function Home() {
       capacidad: "",
       tienePrecioNino: false,
       tipoPrecio: "persona",
+      tipoServicio: "compartido",
     });
   };
 
@@ -1070,11 +1151,12 @@ export default function Home() {
               zona: excursionFormData.zona || "Bavaro",
               capacidad: excursionFormData.capacidad || undefined,
               tipoPrecio: excursionFormData.tipoPrecio || "persona",
+              tipoServicio: excursionFormData.tipoServicio || "compartido",
             }
           : e
       );
       saveExcursiones(updated);
-      alert("Excursion actualizada correctamente");
+      alert("Excursión actualizada correctamente");
     } else {
       const nuevaExcursion: Excursion = {
         id: Date.now().toString(),
@@ -1090,9 +1172,10 @@ export default function Home() {
         zona: excursionFormData.zona || "Bavaro",
         capacidad: excursionFormData.capacidad || undefined,
         tipoPrecio: excursionFormData.tipoPrecio || "persona",
+        tipoServicio: excursionFormData.tipoServicio || "compartido",
       };
       saveExcursiones([...excursiones, nuevaExcursion]);
-      alert("Excursion agregada correctamente");
+      alert("Excursión agregada correctamente");
     }
     
     setShowExcursionForm(false);
@@ -1111,6 +1194,7 @@ export default function Home() {
       capacidad: "",
       tienePrecioNino: false,
       tipoPrecio: "persona",
+      tipoServicio: "compartido",
     });
   };
 
@@ -1130,12 +1214,13 @@ export default function Home() {
       capacidad: excursion.capacidad || "",
       tienePrecioNino: excursion.precioNinoUSD !== null,
       tipoPrecio: excursion.tipoPrecio || "persona",
+      tipoServicio: excursion.tipoServicio || "compartido",
     });
     setShowExcursionForm(true);
   };
 
   const deleteExcursion = (id: string) => {
-    if (!confirm("Eliminar esta excursion?")) return;
+    if (!confirm("Eliminar esta excursión?")) return;
     const updated = excursiones.filter(e => e.id !== id);
     saveExcursiones(updated);
   };
@@ -1157,7 +1242,7 @@ export default function Home() {
       whatsapp: data.get("whatsapp") as string,
       email: data.get("email") as string,
       excursionId: excursionId || "",
-      excursionNombre: excursion?.nombre || "Sin excursion asignada",
+      excursionNombre: excursion?.nombre || "Sin excursión asignada",
       fechaExcursion: data.get("fechaExcursion") as string || "",
     };
     
@@ -1170,6 +1255,34 @@ export default function Home() {
     if (!confirm("Eliminar este cliente?")) return;
     const updated = clientes.filter(c => c.id !== id);
     saveClientes(updated);
+  };
+
+  // ============================================
+  // EXPORTAR CSV
+  // ============================================
+  const exportCSV = () => {
+    if (ventas.length === 0) { 
+      alert("No hay datos para exportar"); 
+      return; 
+    }
+    
+    let csv = "Fecha,Hora,Cliente,Excursión,Adultos,Niños,Servicio,Grupo,Capacidad Grupo,Recogida,Transporte,Hotel/Airbnb,Estado,Precio Venta (USD),Costo Proveedor (USD),Comisión (USD),Pago Cliente,Saldo Pendiente (USD),Método Pago,Proveedor,Pago Proveedor,Zona,Nota\n";
+    
+    ventas.forEach(v => {
+      const recogidaInfo = v.tipoRecogida === "hotel" ? v.hotelNombre : 
+                           v.tipoRecogida === "airbnb" ? v.airbnbUbicacion : "Sin recogida";
+      const tipoServicioLabel = getTipoServicioLabel(v.tipoServicio);
+      
+      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${tipoServicioLabel}","${v.nombreGrupo || ""}","${v.capacidadGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.zona || ""}","${v.nota || ""}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `excursiones_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   // ============================================
@@ -1203,11 +1316,17 @@ export default function Home() {
   };
 
   const getVentasDelDia = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate();
+    
     return ventas.filter(v => {
-      const vDate = new Date(v.fechaExcursion);
-      return vDate.getDate() === date.getDate() &&
-             vDate.getMonth() === date.getMonth() &&
-             vDate.getFullYear() === date.getFullYear();
+      if (!v.fechaExcursion) return false;
+      const partes = v.fechaExcursion.split('-').map(Number);
+      const vDate = new Date(partes[0], partes[1] - 1, partes[2]);
+      return vDate.getFullYear() === year &&
+             vDate.getMonth() === month &&
+             vDate.getDate() === day;
     });
   };
 
@@ -1221,29 +1340,35 @@ export default function Home() {
   // FILTROS Y AGRUPACIONES
   // ============================================
   let filtered = ventas;
-  
+
   if (filterYear) {
-    filtered = filtered.filter(v => new Date(v.fechaExcursion).getFullYear().toString() === filterYear);
+    filtered = filtered.filter(v => {
+      if (!v.fechaExcursion) return false;
+      const partes = v.fechaExcursion.split('-').map(Number);
+      return partes[0].toString() === filterYear;
+    });
   }
+  
   if (searchTerm) {
     filtered = filtered.filter(v => 
-      v.clienteNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      v.excursionNombre.toLowerCase().includes(searchTerm.toLowerCase())
+      v.clienteNombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      v.excursionNombre?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }
 
   const grouped = filtered.reduce((acc: any, venta) => {
-    const fecha = new Date(venta.fechaExcursion);
-    const year = fecha.getFullYear();
-    const month = fecha.getMonth() + 1;
+    if (!venta.fechaExcursion) return acc;
+    const partes = venta.fechaExcursion.split('-').map(Number);
+    const year = partes[0];
+    const month = partes[1];
     const key = `${year}-${String(month).padStart(2, "0")}`;
     
     if (!acc[key]) {
       acc[key] = { year, month, totalUSD: 0, totalComision: 0, totalCosto: 0, ventas: [] };
     }
-    acc[key].totalUSD += venta.precioVentaUSD;
-    acc[key].totalComision += venta.comisionUSD;
-    acc[key].totalCosto += venta.costoProveedorUSD;
+    acc[key].totalUSD += venta.precioVentaUSD || 0;
+    acc[key].totalComision += venta.comisionUSD || 0;
+    acc[key].totalCosto += venta.costoProveedorUSD || 0;
     acc[key].ventas.push(venta);
     return acc;
   }, {});
@@ -1255,304 +1380,20 @@ export default function Home() {
       return b.month - a.month;
     });
 
-  const totalVentasUSD = filtered.reduce((sum, v) => sum + v.precioVentaUSD, 0);
-  const totalComision = filtered.reduce((sum, v) => sum + v.comisionUSD, 0);
-  const totalPendienteUSD = filtered.reduce((sum, v) => sum + v.saldoPendienteUSD, 0);
-  
-  const years = [...new Set(ventas.map(v => new Date(v.fechaExcursion).getFullYear().toString()))].sort().reverse();
+  const totalVentasUSD = filtered.reduce((sum, v) => sum + (v.precioVentaUSD || 0), 0);
+  const totalComision = filtered.reduce((sum, v) => sum + (v.comisionUSD || 0), 0);
+  const totalPendienteUSD = filtered.reduce((sum, v) => sum + (v.saldoPendienteUSD || 0), 0);
+
+  const years = [...new Set(ventas
+    .filter(v => v.fechaExcursion)
+    .map(v => {
+      const partes = v.fechaExcursion.split('-').map(Number);
+      return partes[0];
+    })
+  )].sort((a, b) => b - a).map(String);
 
   const toggleMonth = (key: string) => {
     setExpandedMonth(expandedMonth === key ? null : key);
-  };
-
-  const getPagoClienteText = (tipo: string) => {
-    const map: any = {
-      completo: "Pago completo (USD)",
-      deposito_25: "Deposito 25% (USD)",
-      pago_dia: "Pago el dia (USD)"
-    };
-    return map[tipo] || tipo;
-  };
-
-  const getTipoRecogidaText = (tipo: string) => {
-    const map: any = {
-      sin_recogida: "Sin Recogida",
-      hotel: "Hotel",
-      airbnb: "Airbnb"
-    };
-    return map[tipo] || tipo;
-  };
-
-  const getTransporteText = (valor: string) => {
-    return valor === "si" ? "Si" : "No";
-  };
-
-  const getEstadoText = (estado: string) => {
-    const map: any = {
-      pendiente: "Pendiente",
-      confirmada: "Confirmada",
-      cancelada: "Cancelada",
-      completada: "Completada"
-    };
-    return map[estado] || estado;
-  };
-
-  const getEstadoColor = (estado: string) => {
-    const map: any = {
-      pendiente: "bg-yellow-100 text-yellow-800",
-      confirmada: "bg-blue-100 text-blue-800",
-      cancelada: "bg-red-100 text-red-800",
-      completada: "bg-green-100 text-green-800"
-    };
-    return map[estado] || "bg-gray-100 text-gray-800";
-  };
-
-  const exportCSV = () => {
-    if (ventas.length === 0) { alert("No hay datos"); return; }
-    let csv = "Fecha,Hora,Cliente,Excursion,Adultos,Ninos,Servicio,Grupo,Recogida,Transporte,Hotel/Airbnb,Estado,Precio Venta (USD),Costo Proveedor (USD),Comision (USD),Pago Cliente,Saldo Pendiente (USD),Metodo Pago,Proveedor,Pago Proveedor,Zona,Nota\n";
-    ventas.forEach(v => {
-      const recogidaInfo = v.tipoRecogida === "hotel" ? v.hotelNombre : 
-                           v.tipoRecogida === "airbnb" ? v.airbnbUbicacion : "Sin recogida";
-      csv += `"${v.fechaExcursion}","${v.horaExcursion}","${v.clienteNombre}","${v.excursionNombre}",${v.cantidadAdultos},${v.cantidadNinos},"${v.tipoServicio}","${v.nombreGrupo || ""}","${getTipoRecogidaText(v.tipoRecogida)}","${getTransporteText(v.transporte)}","${recogidaInfo}","${getEstadoText(v.estado)}",${v.precioVentaUSD},${v.costoProveedorUSD},${v.comisionUSD},"${getPagoClienteText(v.pagoCliente)}",${v.saldoPendienteUSD},"${v.metodoPagoCliente}","${v.proveedorNombre}","${v.proveedorPagado}","${v.zona || ""}","${v.nota || ""}"\n`;
-    });
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `excursiones_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
-
-  // ============================================
-  // LOGIN - CON FONDO BLANCO
-  // ============================================
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-white">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-blue-500/25">
-                RE
-              </div>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">Bienvenido de nuevo</h1>
-            <p className="text-gray-500 text-sm mt-1">Inicia sesión para continuar</p>
-          </div>
-
-          <form onSubmit={handleLoginSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Correo electrónico
-              </label>
-              <input
-                type="email"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-all"
-                placeholder="ejemplo@republicexcursions.com"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Contraseña
-              </label>
-              <input
-                type="password"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-all"
-                placeholder="Ingresa tu contraseña"
-              />
-              <div className="text-right mt-1.5">
-                <button type="button" className="text-sm text-blue-600 hover:text-blue-800 transition-all font-medium">
-                  ¿Olvidaste tu contraseña?
-                </button>
-              </div>
-            </div>
-
-            {loginError && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-600 text-sm text-center">
-                {loginError}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.01] transition-all shadow-md shadow-blue-500/25 flex items-center justify-center gap-2"
-            >
-              <span className="text-xl leading-none">→</span> Iniciar sesión
-            </button>
-          </form>
-
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-400">o continúa con</span>
-            </div>
-          </div>
-
-          <button
-            onClick={() => {
-              alert("Inicio de sesión con Google - Funcionalidad en desarrollo");
-            }}
-            className="w-full flex items-center justify-center gap-3 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all text-gray-700 font-medium"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 48 48">
-              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-            </svg>
-            Iniciar sesión con Google
-          </button>
-
-          <div className="mt-8 text-center">
-            <p className="text-xs text-gray-400">Acceso seguro y protegido</p>
-            <p className="text-[10px] text-gray-300 mt-1">v5.1 • Republic Excursions © 2026</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ============================================
-  // TEMA POR USUARIO - DISEÑO LIMPIO Y CLARO
-  // ============================================
-  const isAdmin = currentUser === "republic";
-  const isRaul = currentUser === "raul";
-  const isGabrielle = currentUser === "gabrielle";
-
-  const getUserRole = () => {
-    if (isAdmin) return "Administrador";
-    if (isRaul) return "Vendedor";
-    if (isGabrielle) return "Vendedora";
-    return "Usuario";
-  };
-
-  const getThemeColors = () => {
-    if (isAdmin) {
-      return {
-        bg: "bg-gray-50",
-        card: "bg-white",
-        cardBorder: "border-gray-200",
-        text: "text-teal-600",
-        textTitle: "text-gray-900",
-        textSub: "text-gray-500",
-        textWhite: "text-gray-900",
-        headerBg: "bg-white border-b border-gray-200",
-        navActive: "bg-teal-600 text-white shadow-lg shadow-teal-500/30",
-        navInactive: "text-gray-600 hover:text-teal-600 hover:bg-gray-50",
-        buttonBg: "bg-teal-600 hover:bg-teal-700",
-        buttonText: "text-white",
-        shadowColor: "shadow-teal-500/30",
-        badge: "bg-teal-100 text-teal-800",
-        accent: "teal",
-        accentLight: "teal-600",
-        border: "border-teal-600",
-        borderColor: "border-gray-200",
-        gradient: "from-teal-600 to-cyan-600",
-        iconBg: "bg-teal-100",
-        cardBorder: "border-gray-200",
-        bgHover: "hover:bg-gray-50",
-        focusRing: "focus:ring-teal-500",
-      };
-    }
-    if (isRaul) {
-      return {
-        bg: "bg-gray-50",
-        card: "bg-white",
-        cardBorder: "border-gray-200",
-        text: "text-blue-600",
-        textTitle: "text-gray-900",
-        textSub: "text-gray-500",
-        textWhite: "text-gray-900",
-        headerBg: "bg-white border-b border-gray-200",
-        navActive: "bg-blue-600 text-white shadow-lg shadow-blue-500/30",
-        navInactive: "text-gray-600 hover:text-blue-600 hover:bg-gray-50",
-        buttonBg: "bg-blue-600 hover:bg-blue-700",
-        buttonText: "text-white",
-        shadowColor: "shadow-blue-500/30",
-        badge: "bg-blue-100 text-blue-800",
-        accent: "blue",
-        accentLight: "blue-600",
-        border: "border-blue-600",
-        borderColor: "border-gray-200",
-        gradient: "from-blue-600 to-indigo-600",
-        iconBg: "bg-blue-100",
-        cardBorder: "border-gray-200",
-        bgHover: "hover:bg-gray-50",
-        focusRing: "focus:ring-blue-500",
-      };
-    }
-    if (isGabrielle) {
-      return {
-        bg: "bg-gray-50",
-        card: "bg-white",
-        cardBorder: "border-gray-200",
-        text: "text-pink-600",
-        textTitle: "text-gray-900",
-        textSub: "text-gray-500",
-        textWhite: "text-gray-900",
-        headerBg: "bg-white border-b border-gray-200",
-        navActive: "bg-pink-600 text-white shadow-lg shadow-pink-500/30",
-        navInactive: "text-gray-600 hover:text-pink-600 hover:bg-gray-50",
-        buttonBg: "bg-pink-600 hover:bg-pink-700",
-        buttonText: "text-white",
-        shadowColor: "shadow-pink-500/30",
-        badge: "bg-pink-100 text-pink-800",
-        accent: "pink",
-        accentLight: "pink-600",
-        border: "border-pink-600",
-        borderColor: "border-gray-200",
-        gradient: "from-pink-600 to-rose-600",
-        iconBg: "bg-pink-100",
-        cardBorder: "border-gray-200",
-        bgHover: "hover:bg-gray-50",
-        focusRing: "focus:ring-pink-500",
-      };
-    }
-    return {
-      bg: "bg-gray-50",
-      card: "bg-white",
-      cardBorder: "border-gray-200",
-      text: "text-gray-600",
-      textTitle: "text-gray-900",
-      textSub: "text-gray-500",
-      textWhite: "text-gray-900",
-      headerBg: "bg-white border-b border-gray-200",
-      navActive: "bg-gray-600 text-white shadow-lg shadow-gray-500/30",
-      navInactive: "text-gray-600 hover:text-gray-600 hover:bg-gray-50",
-      buttonBg: "bg-gray-600 hover:bg-gray-700",
-      buttonText: "text-white",
-      shadowColor: "shadow-gray-500/30",
-      badge: "bg-gray-100 text-gray-800",
-      accent: "gray",
-      accentLight: "gray-600",
-      border: "border-gray-600",
-      borderColor: "border-gray-200",
-      gradient: "from-gray-600 to-gray-600",
-      iconBg: "bg-gray-100",
-      cardBorder: "border-gray-200",
-      bgHover: "hover:bg-gray-50",
-      focusRing: "focus:ring-gray-500",
-    };
-  };
-
-  const theme = getThemeColors();
-
-  const getTipoCuentaLabel = (tipo: string) => {
-    const map: any = {
-      corriente: "Corriente",
-      ahorros: "Ahorros",
-      corriente_us: "Corriente US",
-      ahorros_us: "Ahorros US"
-    };
-    return map[tipo] || tipo;
   };
 
   // ============================================
@@ -1576,20 +1417,17 @@ export default function Home() {
   // RENDER DASHBOARD
   // ============================================
   const renderDashboard = () => {
-    const totalVentas = ventas.reduce((sum, v) => sum + v.precioVentaUSD, 0);
-    const totalComisiones = ventas.reduce((sum, v) => sum + v.comisionUSD, 0);
-    const totalPendiente = ventas.reduce((sum, v) => sum + v.saldoPendienteUSD, 0);
+    const totalVentas = ventas.reduce((sum, v) => sum + (v.precioVentaUSD || 0), 0);
+    const totalComisiones = ventas.reduce((sum, v) => sum + (v.comisionUSD || 0), 0);
+    const totalPendiente = ventas.reduce((sum, v) => sum + (v.saldoPendienteUSD || 0), 0);
     const totalClientes = clientes.length;
     const totalProveedores = proveedores.length;
     const totalExcursiones = excursiones.length;
     
-    const ventasHoy = ventas.filter(v => {
-      const hoy = new Date();
-      const fechaV = new Date(v.fechaExcursion);
-      return fechaV.getDate() === hoy.getDate() &&
-             fechaV.getMonth() === hoy.getMonth() &&
-             fechaV.getFullYear() === hoy.getFullYear();
-    });
+    const hoy = new Date();
+    const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    
+    const ventasHoy = ventas.filter(v => v.fechaExcursion === hoyStr);
 
     return (
       <div className="space-y-6">
@@ -1615,7 +1453,7 @@ export default function Home() {
                 <p className="text-gray-500 text-sm">Total Ventas</p>
                 <p className="text-gray-900 text-2xl font-bold">{formatUSD(totalVentas)}</p>
               </div>
-              <div className="bg-teal-100 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-gray-200">$</div>
+              <div className="bg-blue-100 w-12 h-12 rounded-xl flex items-center justify-center text-2xl">$</div>
             </div>
           </div>
           
@@ -1625,7 +1463,7 @@ export default function Home() {
                 <p className="text-gray-500 text-sm">Comisiones</p>
                 <p className="text-gray-900 text-2xl font-bold">{formatUSD(totalComisiones)}</p>
               </div>
-              <div className="bg-green-100 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-gray-200">%</div>
+              <div className="bg-green-100 w-12 h-12 rounded-xl flex items-center justify-center text-2xl">%</div>
             </div>
           </div>
           
@@ -1635,7 +1473,7 @@ export default function Home() {
                 <p className="text-gray-500 text-sm">Por Cobrar</p>
                 <p className="text-gray-900 text-2xl font-bold">{formatUSD(totalPendiente)}</p>
               </div>
-              <div className="bg-yellow-100 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-gray-200">!</div>
+              <div className="bg-yellow-100 w-12 h-12 rounded-xl flex items-center justify-center text-2xl">!</div>
             </div>
           </div>
           
@@ -1645,7 +1483,7 @@ export default function Home() {
                 <p className="text-gray-500 text-sm">Clientes</p>
                 <p className="text-gray-900 text-2xl font-bold">{totalClientes}</p>
               </div>
-              <div className="bg-blue-100 w-12 h-12 rounded-xl flex items-center justify-center text-2xl border border-gray-200">👥</div>
+              <div className="bg-purple-100 w-12 h-12 rounded-xl flex items-center justify-center text-2xl">👥</div>
             </div>
           </div>
         </div>
@@ -1692,7 +1530,7 @@ export default function Home() {
           </div>
 
           <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Ultimas Ventas</h3>
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Últimas Ventas</h3>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {ventas.slice(-4).reverse().map(v => (
                 <div key={v.id} className="flex justify-between text-sm border-b border-gray-100 pb-1">
@@ -1723,13 +1561,13 @@ export default function Home() {
               placeholder="Buscar ventas..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
           <select
             value={filterYear}
             onChange={(e) => setFilterYear(e.target.value)}
-            className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-teal-500"
+            className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Todos los años</option>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
@@ -1748,7 +1586,7 @@ export default function Home() {
             <p className="text-gray-900 text-2xl font-bold">{formatUSD(totalVentasUSD)}</p>
           </div>
           <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
-            <p className="text-gray-500 text-sm">Comision Total</p>
+            <p className="text-gray-500 text-sm">Comisión Total</p>
             <p className="text-green-600 text-2xl font-bold">{formatUSD(totalComision)}</p>
           </div>
           <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
@@ -1784,11 +1622,12 @@ export default function Home() {
                           <th className="text-left py-2 px-2">Fecha</th>
                           <th className="text-left py-2 px-2">Hora</th>
                           <th className="text-left py-2 px-2">Cliente</th>
-                          <th className="text-left py-2 px-2">Excursion</th>
-                          <th className="text-left py-2 px-2">Adultos</th>
-                          <th className="text-left py-2 px-2">Niños</th>
+                          <th className="text-left py-2 px-2">Excursión</th>
+                          <th className="text-left py-2 px-2">Servicio</th>
+                          <th className="text-left py-2 px-2">Grupo</th>
+                          <th className="text-left py-2 px-2">Cap.</th>
                           <th className="text-right py-2 px-2">Precio</th>
-                          <th className="text-right py-2 px-2">Comision</th>
+                          <th className="text-right py-2 px-2">Comisión</th>
                           <th className="text-left py-2 px-2">Estado</th>
                           <th className="text-left py-2 px-2">Acciones</th>
                         </tr>
@@ -1796,12 +1635,17 @@ export default function Home() {
                       <tbody>
                         {group.ventas.map((venta: Venta) => (
                           <tr key={venta.id} className="border-b border-gray-100 hover:bg-gray-50">
-                            <td className="py-2 px-2 text-gray-600 text-xs">{new Date(venta.fechaExcursion).toLocaleDateString("es-DO")}</td>
+                            <td className="py-2 px-2 text-gray-600 text-xs">{formatearFecha(venta.fechaExcursion)}</td>
                             <td className="py-2 px-2 text-gray-600 text-xs">{venta.horaExcursion}</td>
                             <td className="py-2 px-2 text-gray-900">{venta.clienteNombre}</td>
                             <td className="py-2 px-2 text-gray-700 text-xs max-w-[100px] truncate">{venta.excursionNombre}</td>
-                            <td className="py-2 px-2 text-gray-600">{venta.cantidadAdultos}</td>
-                            <td className="py-2 px-2 text-gray-600">{venta.cantidadNinos || 0}</td>
+                            <td className="py-2 px-2">
+                              <span className="px-2 py-1 rounded-lg text-xs bg-blue-100 text-blue-800">
+                                {getTipoServicioLabel(venta.tipoServicio)}
+                              </span>
+                            </td>
+                            <td className="py-2 px-2 text-gray-600 text-xs">{venta.nombreGrupo || "-"}</td>
+                            <td className="py-2 px-2 text-gray-600 text-xs">{venta.capacidadGrupo || "-"}</td>
                             <td className="py-2 px-2 text-right text-gray-900 font-medium">{formatUSD(venta.precioVentaUSD)}</td>
                             <td className="py-2 px-2 text-right text-green-600">{formatUSD(venta.comisionUSD)}</td>
                             <td className="py-2 px-2">
@@ -1811,7 +1655,7 @@ export default function Home() {
                             </td>
                             <td className="py-2 px-2">
                               <div className="flex gap-1">
-                                <button onClick={() => editVenta(venta)} className="px-2 py-1 bg-teal-100 text-teal-800 rounded-lg hover:bg-teal-200 text-xs transition-all">Editar</button>
+                                <button onClick={() => editVenta(venta)} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 text-xs transition-all">Editar</button>
                                 <button onClick={() => deleteVenta(venta.id)} className="px-2 py-1 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 text-xs transition-all">Eliminar</button>
                               </div>
                             </td>
@@ -1834,8 +1678,8 @@ export default function Home() {
   // ============================================
   const renderReservas = () => {
     const reservasFiltradas = ventas.filter(v => {
-      const matchesSearch = v.clienteNombre.toLowerCase().includes(searchReservas.toLowerCase()) ||
-                            v.excursionNombre.toLowerCase().includes(searchReservas.toLowerCase());
+      const matchesSearch = v.clienteNombre?.toLowerCase().includes(searchReservas.toLowerCase()) ||
+                            v.excursionNombre?.toLowerCase().includes(searchReservas.toLowerCase());
       const matchesEstado = filterReservaEstado === "todas" || v.estado === filterReservaEstado;
       const matchesFecha = !filterReservaFecha || v.fechaExcursion === filterReservaFecha;
       return matchesSearch && matchesEstado && matchesFecha;
@@ -1850,7 +1694,7 @@ export default function Home() {
               placeholder="Buscar reservas..."
               value={searchReservas}
               onChange={(e) => setSearchReservas(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
           <select
@@ -1897,8 +1741,9 @@ export default function Home() {
                 <th className="text-left py-3 px-4">Fecha</th>
                 <th className="text-left py-3 px-4">Hora</th>
                 <th className="text-left py-3 px-4">Cliente</th>
-                <th className="text-left py-3 px-4">Excursion</th>
-                <th className="text-left py-3 px-4">Contacto</th>
+                <th className="text-left py-3 px-4">Excursión</th>
+                <th className="text-left py-3 px-4">Servicio</th>
+                <th className="text-left py-3 px-4">Grupo</th>
                 <th className="text-right py-3 px-4">Monto</th>
                 <th className="text-left py-3 px-4">Estado</th>
                 <th className="text-left py-3 px-4">Acciones</th>
@@ -1906,18 +1751,20 @@ export default function Home() {
             </thead>
             <tbody>
               {reservasFiltradas.length === 0 ? (
-                <tr><td colSpan={8} className="text-center py-8 text-gray-400">No hay reservas</td></tr>
+                <tr><td colSpan={9} className="text-center py-8 text-gray-400">No hay reservas</td></tr>
               ) : (
                 reservasFiltradas.map(v => (
                   <tr key={v.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 text-gray-600 text-xs">{new Date(v.fechaExcursion).toLocaleDateString("es-DO")}</td>
+                    <td className="py-3 px-4 text-gray-600 text-xs">{formatearFecha(v.fechaExcursion)}</td>
                     <td className="py-3 px-4 text-gray-600 text-xs">{v.horaExcursion}</td>
                     <td className="py-3 px-4 text-gray-900 font-medium">{v.clienteNombre}</td>
-                    <td className="py-3 px-4 text-gray-700 max-w-[150px] truncate">{v.excursionNombre}</td>
-                    <td className="py-3 px-4 text-gray-600 text-xs">
-                      <div>{v.clienteWhatsapp}</div>
-                      <div className="text-xs text-gray-400">{v.clienteEmail}</div>
+                    <td className="py-3 px-4 text-gray-700 max-w-[120px] truncate">{v.excursionNombre}</td>
+                    <td className="py-3 px-4">
+                      <span className="px-2 py-1 rounded-lg text-xs bg-blue-100 text-blue-800">
+                        {getTipoServicioLabel(v.tipoServicio)}
+                      </span>
                     </td>
+                    <td className="py-3 px-4 text-gray-600 text-xs">{v.nombreGrupo || "-"}</td>
                     <td className="py-3 px-4 text-right text-gray-900 font-medium">{formatUSD(v.precioVentaUSD)}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 rounded-lg text-xs ${getEstadoColor(v.estado)}`}>
@@ -1925,7 +1772,7 @@ export default function Home() {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <button onClick={() => editVenta(v)} className="px-3 py-1 bg-teal-100 text-teal-800 rounded-lg hover:bg-teal-200 text-xs transition-all">Editar</button>
+                      <button onClick={() => editVenta(v)} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 text-xs transition-all">Editar</button>
                     </td>
                   </tr>
                 ))
@@ -1942,8 +1789,8 @@ export default function Home() {
   // ============================================
   const renderClientes = () => {
     const clientesFiltrados = clientes.filter(c => {
-      const matchesSearch = c.nombre.toLowerCase().includes(searchClientes.toLowerCase()) ||
-                            c.whatsapp.includes(searchClientes);
+      const matchesSearch = c.nombre?.toLowerCase().includes(searchClientes.toLowerCase()) ||
+                            c.whatsapp?.includes(searchClientes);
       const matchesExcursion = !filterClienteExcursion || c.excursionId === filterClienteExcursion;
       return matchesSearch && matchesExcursion;
     });
@@ -1957,7 +1804,7 @@ export default function Home() {
               placeholder="Buscar clientes..."
               value={searchClientes}
               onChange={(e) => setSearchClientes(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
           <select
@@ -1968,7 +1815,7 @@ export default function Home() {
             <option value="">Todas las excursiones</option>
             {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
           </select>
-          <button onClick={() => setShowClienteForm(true)} className="bg-teal-600 text-white px-4 py-2.5 rounded-xl hover:bg-teal-700 transition-all flex items-center gap-2 shadow-sm">
+          <button onClick={() => setShowClienteForm(true)} className="bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 shadow-sm">
             <span className="text-lg leading-none">+</span> Nuevo Cliente
           </button>
         </div>
@@ -1980,7 +1827,7 @@ export default function Home() {
                 <th className="text-left py-3 px-4">Nombre</th>
                 <th className="text-left py-3 px-4">WhatsApp</th>
                 <th className="text-left py-3 px-4">Email</th>
-                <th className="text-left py-3 px-4">Excursion</th>
+                <th className="text-left py-3 px-4">Excursión</th>
                 <th className="text-left py-3 px-4">Fecha</th>
                 <th className="text-left py-3 px-4">Acciones</th>
               </tr>
@@ -1995,7 +1842,7 @@ export default function Home() {
                     <td className="py-3 px-4 text-gray-600">{c.whatsapp}</td>
                     <td className="py-3 px-4 text-gray-600 text-xs">{c.email}</td>
                     <td className="py-3 px-4 text-gray-700 max-w-[120px] truncate">{c.excursionNombre}</td>
-                    <td className="py-3 px-4 text-gray-600 text-xs">{c.fechaExcursion ? new Date(c.fechaExcursion).toLocaleDateString("es-DO") : "-"}</td>
+                    <td className="py-3 px-4 text-gray-600 text-xs">{c.fechaExcursion ? formatearFecha(c.fechaExcursion) : "-"}</td>
                     <td className="py-3 px-4">
                       <button onClick={() => deleteCliente(c.id)} className="px-3 py-1 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 text-xs transition-all">Eliminar</button>
                     </td>
@@ -2014,9 +1861,9 @@ export default function Home() {
   // ============================================
   const renderProveedores = () => {
     const proveedoresFiltrados = proveedores.filter(p => {
-      const matchesSearch = p.nombre.toLowerCase().includes(searchProveedores.toLowerCase()) ||
-                            p.empresa.toLowerCase().includes(searchProveedores.toLowerCase());
-      const matchesMetodo = filterProveedorMetodo === "todos" || p.metodosPago.includes(filterProveedorMetodo as any);
+      const matchesSearch = p.nombre?.toLowerCase().includes(searchProveedores.toLowerCase()) ||
+                            p.empresa?.toLowerCase().includes(searchProveedores.toLowerCase());
+      const matchesMetodo = filterProveedorMetodo === "todos" || p.metodosPago?.includes(filterProveedorMetodo as any);
       return matchesSearch && matchesMetodo;
     });
 
@@ -2029,7 +1876,7 @@ export default function Home() {
               placeholder="Buscar proveedores..."
               value={searchProveedores}
               onChange={(e) => setSearchProveedores(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
           <select
@@ -2042,7 +1889,7 @@ export default function Home() {
             <option value="transferencia">Transferencia</option>
             <option value="paypal">PayPal</option>
           </select>
-          <button onClick={() => { setEditingProveedorId(null); setProveedorFormData({ nombre: "", empresa: "", telefono: "", email: "", metodosPago: [], banco: "", numeroCuenta: "", monedaCuenta: "RD$", tipoCuenta: [], tipoBeneficiario: "personal", beneficiario: "", rncCedula: "", tipoDocumento: "cedula" }); setTempExcursiones([]); setShowProveedorForm(true); }} className="bg-teal-600 text-white px-4 py-2.5 rounded-xl hover:bg-teal-700 transition-all flex items-center gap-2 shadow-sm">
+          <button onClick={() => { setEditingProveedorId(null); setProveedorFormData({ nombre: "", empresa: "", telefono: "", email: "", metodosPago: [], banco: "", numeroCuenta: "", monedaCuenta: "RD$", tipoCuenta: [], tipoBeneficiario: "personal", beneficiario: "", rncCedula: "", tipoDocumento: "cedula" }); setTempExcursiones([]); setShowProveedorForm(true); }} className="bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 shadow-sm">
             <span className="text-lg leading-none">+</span> Nuevo Proveedor
           </button>
         </div>
@@ -2059,7 +1906,7 @@ export default function Home() {
                     <p className="text-gray-500 text-sm">{p.empresa || "Sin empresa"}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => editProveedor(p)} className="px-3 py-1 bg-teal-100 text-teal-800 rounded-lg hover:bg-teal-200 text-xs transition-all">Editar</button>
+                    <button onClick={() => editProveedor(p)} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 text-xs transition-all">Editar</button>
                     <button onClick={() => deleteProveedor(p.id)} className="px-3 py-1 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 text-xs transition-all">Eliminar</button>
                   </div>
                 </div>
@@ -2068,7 +1915,7 @@ export default function Home() {
                   <div className="flex items-center gap-2 text-gray-600"><span>Email</span> {p.email || "Sin email"}</div>
                   <div className="flex items-center gap-2 text-gray-600"><span>RNC/Cédula</span> {p.rncCedula || "Sin documento"}</div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.metodosPago.map(m => <span key={m} className="px-2 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs">{m === "efectivo" ? "Efectivo" : m === "transferencia" ? "Transferencia" : "PayPal"}</span>)}
+                    {p.metodosPago?.map(m => <span key={m} className="px-2 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs">{m === "efectivo" ? "Efectivo" : m === "transferencia" ? "Transferencia" : "PayPal"}</span>)}
                   </div>
                 </div>
                 <div className="mt-3 text-xs text-gray-400 border-t border-gray-100 pt-2">
@@ -2087,10 +1934,10 @@ export default function Home() {
   // ============================================
   const renderBancos = () => {
     const bancosFiltrados = proveedores.filter(p => {
-      const matchesSearch = p.nombre.toLowerCase().includes(searchBancos.toLowerCase()) ||
-                            p.banco.toLowerCase().includes(searchBancos.toLowerCase()) ||
-                            p.beneficiario.toLowerCase().includes(searchBancos.toLowerCase());
-      const matchesTipo = filterBancoTipo === "todos" || p.tipoCuenta.includes(filterBancoTipo as any);
+      const matchesSearch = p.nombre?.toLowerCase().includes(searchBancos.toLowerCase()) ||
+                            p.banco?.toLowerCase().includes(searchBancos.toLowerCase()) ||
+                            p.beneficiario?.toLowerCase().includes(searchBancos.toLowerCase());
+      const matchesTipo = filterBancoTipo === "todos" || p.tipoCuenta?.includes(filterBancoTipo as any);
       const matchesMoneda = filterBancoMoneda === "todas" || p.monedaCuenta === filterBancoMoneda;
       return matchesSearch && matchesTipo && matchesMoneda;
     });
@@ -2104,7 +1951,7 @@ export default function Home() {
               placeholder="Buscar bancos..."
               value={searchBancos}
               onChange={(e) => setSearchBancos(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
           <select
@@ -2143,7 +1990,7 @@ export default function Home() {
               </p>
               <button 
                 onClick={() => setViewMode("proveedores")} 
-                className="mt-6 px-6 py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-all shadow-sm inline-flex items-center gap-2"
+                className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm inline-flex items-center gap-2"
               >
                 <span className="text-lg leading-none">+</span> Ir a Proveedores
               </button>
@@ -2167,7 +2014,7 @@ export default function Home() {
                   <div className="flex items-center gap-2 text-gray-600"><span>Beneficiario</span> <span className="text-gray-900">{p.beneficiario || "Sin beneficiario"}</span></div>
                   <div className="flex items-center gap-2 text-gray-600"><span>RNC/Cédula</span> <span className="text-gray-900">{p.rncCedula || "Sin documento"}</span></div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {p.tipoCuenta.map(t => <span key={t} className="px-2 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs">{getTipoCuentaLabel(t)}</span>)}
+                    {p.tipoCuenta?.map(t => <span key={t} className="px-2 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs">{getTipoCuentaLabel(t)}</span>)}
                   </div>
                 </div>
               </div>
@@ -2191,38 +2038,42 @@ export default function Home() {
             <button onClick={() => cambiarMes(-1)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-all">◀</button>
             <h2 className="text-gray-900 text-xl font-bold">{getMonthName(currentDate.getMonth())} {currentDate.getFullYear()}</h2>
             <button onClick={() => cambiarMes(1)} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-all">▶</button>
-            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-all">Hoy</button>
-          </div>
-          <div className="flex items-center gap-2 text-gray-500 text-sm">
-            <span className="px-2 py-1 bg-teal-100 text-teal-800 rounded-lg">● Ventas</span>
+            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all">Hoy</button>
           </div>
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
           <div className="grid grid-cols-7 gap-0">
-            {["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"].map(day => (
+            {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map(day => (
               <div key={day} className="py-3 px-2 text-center text-gray-500 text-sm font-medium border-b border-gray-200">
                 {day}
               </div>
             ))}
             {days.map((day, index) => {
               const ventasDelDia = getVentasDelDia(day.date);
-              const isToday = day.date.getDate() === new Date().getDate() &&
-                              day.date.getMonth() === new Date().getMonth() &&
-                              day.date.getFullYear() === new Date().getFullYear();
+              const hoy = new Date();
+              const isToday = day.date.getDate() === hoy.getDate() &&
+                              day.date.getMonth() === hoy.getMonth() &&
+                              day.date.getFullYear() === hoy.getFullYear();
+              const isCurrentMonth = day.isCurrentMonth;
               
               return (
-                <div key={index} className={`p-2 min-h-[80px] border-b border-r border-gray-100 ${!day.isCurrentMonth ? 'opacity-30' : ''} ${isToday ? 'bg-teal-50 border-teal-200' : ''}`}>
-                  <div className={`text-sm ${isToday ? 'text-teal-600 font-bold' : 'text-gray-600'}`}>
+                <div 
+                  key={index} 
+                  className={`p-2 min-h-[80px] border-b border-r border-gray-100 ${
+                    !isCurrentMonth ? 'opacity-30 bg-gray-50' : ''
+                  } ${isToday ? 'bg-blue-50 border-blue-200' : ''}`}
+                >
+                  <div className={`text-sm ${isToday ? 'text-blue-600 font-bold' : 'text-gray-600'}`}>
                     {day.date.getDate()}
                   </div>
                   <div className="mt-1 space-y-1 max-h-[50px] overflow-y-auto">
-                    {ventasDelDia.slice(0, 3).map(v => (
-                      <div key={v.id} className="text-[10px] bg-teal-100 text-teal-800 rounded px-1 truncate">
+                    {isCurrentMonth && ventasDelDia.slice(0, 3).map(v => (
+                      <div key={v.id} className="text-[10px] bg-blue-100 text-blue-800 rounded px-1 truncate">
                         {v.clienteNombre} - {formatUSD(v.precioVentaUSD)}
                       </div>
                     ))}
-                    {ventasDelDia.length > 3 && (
+                    {isCurrentMonth && ventasDelDia.length > 3 && (
                       <div className="text-[10px] text-gray-400">+{ventasDelDia.length - 3} más</div>
                     )}
                   </div>
@@ -2236,18 +2087,21 @@ export default function Home() {
           <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
             <h3 className="text-gray-900 font-semibold mb-3">Ventas del Mes</h3>
             <div className="space-y-2 max-h-60 overflow-y-auto">
-              {getVentasDelDia(currentDate).slice(0, 10).map(v => (
-                <div key={v.id} className="flex justify-between items-center border-b border-gray-100 py-2">
-                  <div>
-                    <p className="text-gray-900 text-sm">{v.clienteNombre}</p>
-                    <p className="text-gray-400 text-xs">{v.excursionNombre}</p>
+              {(() => {
+                const ventasHoy = getVentasDelDia(currentDate);
+                if (ventasHoy.length === 0) {
+                  return <p className="text-gray-400 text-sm text-center py-4">No hay ventas para hoy</p>;
+                }
+                return ventasHoy.slice(0, 10).map(v => (
+                  <div key={v.id} className="flex justify-between items-center border-b border-gray-100 py-2">
+                    <div>
+                      <p className="text-gray-900 text-sm">{v.clienteNombre}</p>
+                      <p className="text-gray-400 text-xs">{v.excursionNombre}</p>
+                    </div>
+                    <span className="text-gray-900 font-medium">{formatUSD(v.precioVentaUSD)}</span>
                   </div>
-                  <span className="text-gray-900 font-medium">{formatUSD(v.precioVentaUSD)}</span>
-                </div>
-              ))}
-              {getVentasDelDia(currentDate).length === 0 && (
-                <p className="text-gray-400 text-sm text-center py-4">No hay ventas en este mes</p>
-              )}
+                ));
+              })()}
             </div>
           </div>
           <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
@@ -2256,22 +2110,25 @@ export default function Home() {
               <div className="flex justify-between">
                 <span className="text-gray-500">Ventas Totales</span>
                 <span className="text-gray-900 font-bold">{formatUSD(ventas.filter(v => {
-                  const d = new Date(v.fechaExcursion);
-                  return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+                  if (!v.fechaExcursion) return false;
+                  const partes = v.fechaExcursion.split('-').map(Number);
+                  return partes[0] === currentDate.getFullYear() && partes[1] === currentDate.getMonth() + 1;
                 }).reduce((s, v) => s + v.precioVentaUSD, 0))}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Comisiones</span>
                 <span className="text-green-600">{formatUSD(ventas.filter(v => {
-                  const d = new Date(v.fechaExcursion);
-                  return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+                  if (!v.fechaExcursion) return false;
+                  const partes = v.fechaExcursion.split('-').map(Number);
+                  return partes[0] === currentDate.getFullYear() && partes[1] === currentDate.getMonth() + 1;
                 }).reduce((s, v) => s + v.comisionUSD, 0))}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Total Ventas</span>
                 <span className="text-gray-900">{ventas.filter(v => {
-                  const d = new Date(v.fechaExcursion);
-                  return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+                  if (!v.fechaExcursion) return false;
+                  const partes = v.fechaExcursion.split('-').map(Number);
+                  return partes[0] === currentDate.getFullYear() && partes[1] === currentDate.getMonth() + 1;
                 }).length}</span>
               </div>
             </div>
@@ -2286,8 +2143,8 @@ export default function Home() {
   // ============================================
   const renderExcursiones = () => {
     const excursionesFiltradas = excursiones.filter(e => {
-      const matchesSearch = e.nombre.toLowerCase().includes(searchExcursiones.toLowerCase()) ||
-                            e.proveedorNombre.toLowerCase().includes(searchExcursiones.toLowerCase());
+      const matchesSearch = e.nombre?.toLowerCase().includes(searchExcursiones.toLowerCase()) ||
+                            e.proveedorNombre?.toLowerCase().includes(searchExcursiones.toLowerCase());
       const matchesProveedor = !filterExcursionProveedor || e.proveedorId === filterExcursionProveedor;
       return matchesSearch && matchesProveedor;
     });
@@ -2301,7 +2158,7 @@ export default function Home() {
               placeholder="Buscar excursiones..."
               value={searchExcursiones}
               onChange={(e) => setSearchExcursiones(e.target.value)}
-              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
           <select
@@ -2312,8 +2169,8 @@ export default function Home() {
             <option value="">Todos los proveedores</option>
             {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
           </select>
-          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false, tipoPrecio: "persona" }); setShowExcursionForm(true); }} className="bg-teal-600 text-white px-4 py-2.5 rounded-xl hover:bg-teal-700 transition-all flex items-center gap-2 shadow-sm">
-            <span className="text-lg leading-none">+</span> Nueva Excursion
+          <button onClick={() => { setEditingExcursionId(null); setExcursionFormData({ nombre: "", proveedorId: "", proveedorNombre: "", precioAdultoUSD: "", precioNinoUSD: "", costoProveedorAdultoUSD: "", costoProveedorNinoUSD: "", comisionAdultoUSD: "", comisionNinoUSD: "", zona: "", capacidad: "", tienePrecioNino: false, tipoPrecio: "persona", tipoServicio: "compartido" }); setShowExcursionForm(true); }} className="bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 shadow-sm">
+            <span className="text-lg leading-none">+</span> Nueva Excursión
           </button>
         </div>
 
@@ -2327,12 +2184,19 @@ export default function Home() {
                   <div>
                     <h3 className="text-gray-900 font-semibold">{e.nombre}</h3>
                     <p className="text-gray-500 text-sm">{e.proveedorNombre}</p>
-                    <p className="text-xs text-gray-400">Zona: {e.zona || "Sin zona"}</p>
-                    <p className="text-xs text-gray-400">Tipo: {e.tipoPrecio === "persona" ? "Por Persona" : "Por Maquina"}</p>
-                    {e.capacidad && <p className="text-xs text-gray-400">Capacidad: {e.capacidad}</p>}
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-lg text-xs">
+                        {getTipoServicioLabel(e.tipoServicio)}
+                      </span>
+                      <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded-lg text-xs">
+                        {e.tipoPrecio === "persona" ? "Por Persona" : "Por Máquina"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Zona: {e.zona || "Sin zona"}</p>
+                    {e.capacidad && <p className="text-xs text-gray-500">Capacidad: {e.capacidad}</p>}
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => editExcursion(e)} className="px-3 py-1 bg-teal-100 text-teal-800 rounded-lg hover:bg-teal-200 text-xs transition-all">Editar</button>
+                    <button onClick={() => editExcursion(e)} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 text-xs transition-all">Editar</button>
                     <button onClick={() => deleteExcursion(e.id)} className="px-3 py-1 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 text-xs transition-all">Eliminar</button>
                   </div>
                 </div>
@@ -2348,17 +2212,17 @@ export default function Home() {
                   {e.precioNinoUSD !== null && (
                     <>
                       <div className="flex justify-between text-gray-600">
-                        <span>Precio Venta Nino</span>
+                        <span>Precio Venta Niño</span>
                         <span className="text-gray-900 font-medium">{formatUSD(e.precioNinoUSD)}</span>
                       </div>
                       <div className="flex justify-between text-gray-600">
-                        <span>Costo Proveedor Nino</span>
+                        <span>Costo Proveedor Niño</span>
                         <span className="text-orange-600 font-medium">{formatUSD(e.costoProveedorNinoUSD || 0)}</span>
                       </div>
                     </>
                   )}
                   <div className="flex justify-between text-gray-600">
-                    <span>Comision</span>
+                    <span>Comisión</span>
                     <span className="text-green-600">{formatUSD(e.comisionAdultoUSD)}</span>
                   </div>
                 </div>
@@ -2373,47 +2237,65 @@ export default function Home() {
   // ============================================
   // RENDER PRINCIPAL
   // ============================================
+  const isAdmin = currentUser === "republic";
+  const isRaul = currentUser === "raul";
+  const isGabrielle = currentUser === "gabrielle";
+
+  const getUserRole = () => {
+    if (isAdmin) return "Administrador";
+    if (isRaul) return "Vendedor";
+    if (isGabrielle) return "Vendedora";
+    return "Usuario";
+  };
+
+  const getUserBadge = () => {
+    if (isAdmin) return "bg-blue-600 text-white";
+    if (isRaul) return "bg-blue-100 text-blue-800";
+    if (isGabrielle) return "bg-pink-100 text-pink-800";
+    return "bg-gray-100 text-gray-800";
+  };
+
   return (
-    <div className={`min-h-screen ${theme.bg}`}>
+    <div className="min-h-screen bg-white">
       <div className="relative z-10">
         {/* HEADER */}
-        <header className={`${theme.headerBg} sticky top-0 z-50`}>
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${theme.gradient} flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                 RE
               </div>
               <div>
                 <h1 className="text-gray-900 font-bold text-lg tracking-tight">Republic Excursions</h1>
-                <p className={`text-xs ${theme.text}`}>{getUserRole()}</p>
+                <p className={`text-xs ${getUserBadge()} px-2 py-0.5 rounded-full inline-block`}>{getUserRole()}</p>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <button onClick={() => setViewMode("dashboard")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "dashboard" ? `${theme.navActive}` : `${theme.navInactive}`}`}>
+              <button onClick={() => setViewMode("dashboard")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "dashboard" ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'}`}>
                 Dashboard
               </button>
-              <button onClick={() => setViewMode("ventas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "ventas" ? `${theme.navActive}` : `${theme.navInactive}`}`}>
+              <button onClick={() => setViewMode("ventas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "ventas" ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'}`}>
                 Ventas
               </button>
-              <button onClick={() => setViewMode("reservas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "reservas" ? `${theme.navActive}` : `${theme.navInactive}`}`}>
+              <button onClick={() => setViewMode("reservas")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "reservas" ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'}`}>
                 Reservas
               </button>
-              <button onClick={() => setViewMode("calendario")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "calendario" ? `${theme.navActive}` : `${theme.navInactive}`}`}>
+              <button onClick={() => setViewMode("calendario")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "calendario" ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'}`}>
                 Calendario
               </button>
               {isAdmin && (
                 <>
-                  <button onClick={() => setViewMode("clientes")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "clientes" ? `${theme.navActive}` : `${theme.navInactive}`}`}>
+                  <button onClick={() => setViewMode("clientes")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "clientes" ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'}`}>
                     Clientes
                   </button>
-                  <button onClick={() => setViewMode("proveedores")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "proveedores" ? `${theme.navActive}` : `${theme.navInactive}`}`}>
+                  <button onClick={() => setViewMode("proveedores")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "proveedores" ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'}`}>
                     Proveedores
                   </button>
-                  <button onClick={() => setViewMode("excursiones")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "excursiones" ? `${theme.navActive}` : `${theme.navInactive}`}`}>
+                  <button onClick={() => setViewMode("excursiones")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "excursiones" ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'}`}>
                     Excursiones
                   </button>
-                  <button onClick={() => setViewMode("bancos")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "bancos" ? `${theme.navActive}` : `${theme.navInactive}`}`}>
+                  <button onClick={() => setViewMode("bancos")} className={`px-3 py-1.5 rounded-xl text-sm transition-all ${viewMode === "bancos" ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'}`}>
                     Bancos
                   </button>
                 </>
@@ -2442,7 +2324,7 @@ export default function Home() {
             </div>
             <div className="flex gap-2">
               {viewMode !== "calendario" && viewMode !== "dashboard" && (
-                <button onClick={() => setShowForm(true)} className={`${theme.buttonBg} ${theme.buttonText} px-4 py-2 rounded-xl hover:shadow-lg transition-all flex items-center gap-2 shadow-sm`}>
+                <button onClick={() => setShowForm(true)} className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 shadow-sm">
                   <span className="text-lg leading-none">+</span> Nueva Venta
                 </button>
               )}
@@ -2453,10 +2335,938 @@ export default function Home() {
         </main>
       </div>
 
-      {/* MODALES - Los mismos de antes pero con estilos claros */}
-      {/* ... (mantener los modales con estilos claros) ... */}
-      
-      {/* NOTA: Los modales se mantienen igual pero con fondo blanco y bordes grises */}
+      {/* ============================================
+          MODAL - FORMULARIO DE VENTA
+      ============================================ */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-gray-900 text-xl font-bold">{editingVentaId ? "Editar Venta" : "Nueva Venta"}</h3>
+              <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Cliente */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Cliente *</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={formData.clienteId}
+                      onChange={(e) => selectCliente(e.target.value)}
+                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    >
+                      <option value="">Seleccionar cliente existente</option>
+                      {clientes.map(c => <option key={c.id} value={c.id}>{c.nombre} - {c.whatsapp}</option>)}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowClienteForm(true)}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm whitespace-nowrap text-sm"
+                    >
+                      + Nuevo
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">WhatsApp</label>
+                  <input
+                    type="text"
+                    value={formData.clienteWhatsapp}
+                    onChange={(e) => setFormData(prev => ({ ...prev, clienteWhatsapp: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="WhatsApp"
+                  />
+                </div>
+              </div>
+
+              {/* Excursión */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Excursión *</label>
+                  <select
+                    value={formData.excursionId}
+                    onChange={(e) => selectExcursionForVenta(e.target.value)}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  >
+                    <option value="">Seleccionar excursión</option>
+                    {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre} - {e.proveedorNombre} ({getTipoServicioLabel(e.tipoServicio)})</option>)}
+                  </select>
+                  {formData.excursionId && (
+                    <div className="mt-1 text-xs text-gray-400">
+                      <span className="text-gray-700">Proveedor:</span> {formData.proveedorNombre} | 
+                      <span className="text-gray-700 ml-1">Servicio:</span> {getTipoServicioLabel(formData.tipoServicio)}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Fecha *</label>
+                  <input
+                    type="date"
+                    value={formData.fechaExcursion}
+                    onChange={(e) => setFormData(prev => ({ ...prev, fechaExcursion: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Hora</label>
+                  <input
+                    type="time"
+                    value={formData.horaExcursion}
+                    onChange={(e) => setFormData(prev => ({ ...prev, horaExcursion: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Tipo de Servicio (solo lectura) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Servicio</label>
+                  <input
+                    type="text"
+                    value={getTipoServicioLabel(formData.tipoServicio)}
+                    className="w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-700 cursor-not-allowed"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Zona</label>
+                  <select
+                    value={formData.zona}
+                    onChange={(e) => setFormData(prev => ({ ...prev, zona: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  >
+                    <option value="">Seleccionar zona</option>
+                    {zonas.map(z => <option key={z} value={z}>{z}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Campos condicionales para Grupo y Grupo Privado */}
+              {(formData.tipoServicio === "grupo" || formData.tipoServicio === "grupo_privado") && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-blue-600 pl-4">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Nombre del Grupo *</label>
+                    <input
+                      type="text"
+                      value={formData.nombreGrupo}
+                      onChange={(e) => setFormData(prev => ({ ...prev, nombreGrupo: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      placeholder="Ej: Boda de María, Grupo IBM"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Capacidad del Grupo *</label>
+                    <input
+                      type="text"
+                      value={formData.capacidadGrupo}
+                      onChange={(e) => setFormData(prev => ({ ...prev, capacidadGrupo: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      placeholder="Ej: 20 personas"
+                      required
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Transporte */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Transporte</label>
+                  <select
+                    value={formData.transporte}
+                    onChange={(e) => {
+                      const val = e.target.value as "si" | "no";
+                      setFormData(prev => ({ ...prev, transporte: val }));
+                      if (val === "no") {
+                        setFormData(prev => ({ ...prev, tipoRecogida: "sin_recogida", hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", horaRecogida: "" }));
+                      }
+                    }}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  >
+                    <option value="no">No</option>
+                    <option value="si">Sí</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Recogida</label>
+                  <select
+                    value={formData.tipoRecogida}
+                    onChange={(e) => {
+                      const val = e.target.value as "sin_recogida" | "hotel" | "airbnb";
+                      setFormData(prev => ({ ...prev, tipoRecogida: val }));
+                      setFormData(prev => ({ ...prev, hotelNombre: "", hotelHabitacion: "", airbnbUbicacion: "", horaRecogida: "" }));
+                    }}
+                    disabled={formData.transporte === "no"}
+                    className={`w-full px-4 py-2 border rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${formData.transporte === "no" ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'bg-gray-50 border-gray-200'}`}
+                  >
+                    <option value="sin_recogida">Sin Recogida</option>
+                    <option value="hotel">Hotel</option>
+                    <option value="airbnb">Airbnb</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* SECCION HOTEL - INPUT DE TEXTO LIBRE */}
+              {formData.transporte === "si" && formData.tipoRecogida === "hotel" && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-l-4 border-blue-600 pl-4">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Hotel *</label>
+                    <input
+                      type="text"
+                      value={formData.hotelNombre}
+                      onChange={(e) => setFormData(prev => ({ ...prev, hotelNombre: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      placeholder="Escribe el nombre del hotel"
+                      required={formData.tipoRecogida === "hotel"}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Habitación</label>
+                    <input
+                      type="text"
+                      value={formData.hotelHabitacion}
+                      onChange={(e) => setFormData(prev => ({ ...prev, hotelHabitacion: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      placeholder="Ej: 305, Suite 12"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
+                    <input
+                      type="time"
+                      value={formData.horaRecogida}
+                      onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* AIRBNB */}
+              {formData.transporte === "si" && formData.tipoRecogida === "airbnb" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-l-4 border-blue-600 pl-4">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Ubicación Airbnb *</label>
+                    <input
+                      type="text"
+                      value={formData.airbnbUbicacion}
+                      onChange={(e) => setFormData(prev => ({ ...prev, airbnbUbicacion: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      placeholder="Ej: Parque Central, Pueblo Bavaro"
+                      required={formData.tipoRecogida === "airbnb"}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Hora de Recogida</label>
+                    <input
+                      type="time"
+                      value={formData.horaRecogida}
+                      onChange={(e) => setFormData(prev => ({ ...prev, horaRecogida: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* SIN RECOGIDA */}
+              {formData.transporte === "si" && formData.tipoRecogida === "sin_recogida" && (
+                <div className="text-sm text-gray-400 italic pl-4 border-l-4 border-blue-600">
+                  El cliente se transporta por sus propios medios.
+                </div>
+              )}
+
+              {/* Adultos, Niños y Estado */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Adultos</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.cantidadAdultos}
+                    onChange={handleCantidadAdultosChange}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Niños</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.cantidadNinos}
+                    onChange={handleCantidadNinosChange}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Estado</label>
+                  <select
+                    value={formData.estado}
+                    onChange={(e) => setFormData(prev => ({ ...prev, estado: e.target.value as any }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  >
+                    <option value="pendiente">Pendiente</option>
+                    <option value="confirmada">Confirmada</option>
+                    <option value="cancelada">Cancelada</option>
+                    <option value="completada">Completada</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Precios */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Adulto (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.precioAdultoUSD}
+                    onChange={handlePrecioAdultoChange}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Adulto (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.costoProveedorAdultoUSD}
+                    onChange={handleCostoAdultoChange}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Niño (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.precioNinoUSD}
+                    onChange={handlePrecioNinoChange}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.costoProveedorNinoUSD}
+                    onChange={handleCostoNinoChange}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+
+              {/* Totales */}
+              <div className="grid grid-cols-3 gap-4 bg-gray-50 rounded-2xl p-4 border border-gray-200">
+                <div>
+                  <label className="text-gray-500 text-sm block mb-1">Total Venta</label>
+                  <input
+                    type="text"
+                    value={formData.precioTotalUSD}
+                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 font-bold text-lg"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-500 text-sm block mb-1">Costo Proveedor</label>
+                  <input
+                    type="text"
+                    value={formData.costoTotalUSD}
+                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-orange-600 font-bold text-lg"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-500 text-sm block mb-1">Comisión</label>
+                  <input
+                    type="text"
+                    value={formData.comisionTotalUSD}
+                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-green-600 font-bold text-lg"
+                    disabled
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <button type="button" onClick={resetForm} className="px-6 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
+                  Cancelar
+                </button>
+                <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm">
+                  {editingVentaId ? "Actualizar Venta" : "Registrar Venta"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================
+          MODAL - Cliente
+      ============================================ */}
+      {showClienteForm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-gray-900 text-xl font-bold">Nuevo Cliente</h3>
+              <button onClick={() => setShowClienteForm(false)} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+            </div>
+            <form onSubmit={handleClienteSubmit} className="space-y-4">
+              <div>
+                <label className="text-gray-600 text-sm block mb-1">Nombre</label>
+                <input type="text" name="nombre" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required />
+              </div>
+              <div>
+                <label className="text-gray-600 text-sm block mb-1">WhatsApp</label>
+                <input type="text" name="whatsapp" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+              </div>
+              <div>
+                <label className="text-gray-600 text-sm block mb-1">Email</label>
+                <input type="email" name="email" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+              </div>
+              <div>
+                <label className="text-gray-600 text-sm block mb-1">Excursión</label>
+                <select name="excursionId" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                  <option value="">Seleccionar excursión</option>
+                  {excursiones.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-gray-600 text-sm block mb-1">Fecha</label>
+                <input type="date" name="fechaExcursion" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <button type="button" onClick={() => setShowClienteForm(false)} className="px-6 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
+                  Cancelar
+                </button>
+                <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm">
+                  Guardar Cliente
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================
+          MODAL - Proveedor
+      ============================================ */}
+      {showProveedorForm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-gray-900 text-xl font-bold">{editingProveedorId ? "Editar Proveedor" : "Nuevo Proveedor"}</h3>
+              <button onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+            </div>
+            <form onSubmit={handleProveedorSubmit} className="space-y-4">
+              {/* Datos del Proveedor */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Nombre</label>
+                  <input
+                    type="text"
+                    value={proveedorFormData.nombre}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, nombre: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Empresa</label>
+                  <input
+                    type="text"
+                    value={proveedorFormData.empresa}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, empresa: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Teléfono</label>
+                  <input
+                    type="text"
+                    value={proveedorFormData.telefono}
+                    onChange={manejarCambioTelefono}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="(XXX) XXX-XXXX"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={proveedorFormData.email}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, email: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Documento</label>
+                  <select
+                    value={proveedorFormData.tipoDocumento}
+                    onChange={(e) => {
+                      setProveedorFormData(prev => ({ 
+                        ...prev, 
+                        tipoDocumento: e.target.value as "rnc" | "cedula",
+                        rncCedula: ""
+                      }));
+                    }}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  >
+                    <option value="cedula">Cédula</option>
+                    <option value="rnc">RNC</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">{proveedorFormData.tipoDocumento === "rnc" ? "RNC" : "Cédula"}</label>
+                  <input
+                    type="text"
+                    value={proveedorFormData.rncCedula}
+                    onChange={manejarCambioRNCcedula}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder={proveedorFormData.tipoDocumento === "rnc" ? "XX-XXXXXXX-X" : "XXX-XXXXXXX-X"}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-gray-600 text-sm block mb-2">Métodos de Pago</label>
+                <div className="flex gap-4 flex-wrap">
+                  <button type="button" onClick={() => toggleMetodoPago("efectivo")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("efectivo") ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 border border-gray-200 text-gray-600 hover:bg-gray-200'}`}>
+                    Efectivo
+                  </button>
+                  <button type="button" onClick={() => toggleMetodoPago("transferencia")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("transferencia") ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 border border-gray-200 text-gray-600 hover:bg-gray-200'}`}>
+                    Transferencia
+                  </button>
+                  <button type="button" onClick={() => toggleMetodoPago("paypal")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.metodosPago.includes("paypal") ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 border border-gray-200 text-gray-600 hover:bg-gray-200'}`}>
+                    PayPal
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Banco</label>
+                  <select
+                    value={proveedorFormData.banco}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, banco: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  >
+                    <option value="">Seleccionar banco</option>
+                    {BANCOS.map(b => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Número de Cuenta</label>
+                  <input
+                    type="text"
+                    value={proveedorFormData.numeroCuenta}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, numeroCuenta: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Moneda</label>
+                  <select
+                    value={proveedorFormData.monedaCuenta}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, monedaCuenta: e.target.value as "USD" | "RD$" }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  >
+                    <option value="RD$">RD$</option>
+                    <option value="USD">USD</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-2">Tipo de Cuenta</label>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => toggleTipoCuenta("corriente")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("corriente") ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 border border-gray-200 text-gray-600 hover:bg-gray-200'}`}>
+                      Corriente
+                    </button>
+                    <button type="button" onClick={() => toggleTipoCuenta("ahorros")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("ahorros") ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 border border-gray-200 text-gray-600 hover:bg-gray-200'}`}>
+                      Ahorros
+                    </button>
+                    <button type="button" onClick={() => toggleTipoCuenta("corriente_us")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("corriente_us") ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 border border-gray-200 text-gray-600 hover:bg-gray-200'}`}>
+                      Corriente US
+                    </button>
+                    <button type="button" onClick={() => toggleTipoCuenta("ahorros_us")} className={`px-4 py-2 rounded-xl transition-all ${proveedorFormData.tipoCuenta.includes("ahorros_us") ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 border border-gray-200 text-gray-600 hover:bg-gray-200'}`}>
+                      Ahorros US
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Beneficiario</label>
+                  <select
+                    value={proveedorFormData.tipoBeneficiario}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, tipoBeneficiario: e.target.value as "personal" | "empresarial" }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  >
+                    <option value="personal">Personal</option>
+                    <option value="empresarial">Empresarial</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Beneficiario</label>
+                  <input
+                    type="text"
+                    value={proveedorFormData.beneficiario}
+                    onChange={(e) => setProveedorFormData(prev => ({ ...prev, beneficiario: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* EXCURSIONES DEL PROVEEDOR */}
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <h4 className="text-gray-900 font-semibold mb-3">Excursiones del Proveedor</h4>
+                <div className="space-y-2 mb-3">
+                  {tempExcursiones.map((e, i) => (
+                    <div key={i} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-2">
+                      <div>
+                        <span className="text-gray-900">{e.nombre}</span>
+                        <span className="text-gray-500 text-sm ml-2">Precio Venta: {formatUSD(e.precioAdultoUSD)}</span>
+                        {e.precioNinoUSD !== null && <span className="text-gray-500 text-sm ml-2">Niño: {formatUSD(e.precioNinoUSD)}</span>}
+                        <span className="text-orange-600 text-sm ml-2">Costo: {formatUSD(e.costoProveedorAdultoUSD)}</span>
+                        <span className="text-blue-600 text-xs ml-2">{getTipoServicioLabel(e.tipoServicio)}</span>
+                        <span className="text-gray-400 text-xs ml-2">Zona: {e.zona || "Sin zona"}</span>
+                        <span className="text-gray-400 text-xs ml-2">Tipo: {e.tipoPrecio === "persona" ? "Persona" : "Máquina"}</span>
+                        {e.capacidad && <span className="text-green-600 text-xs ml-2">Cap: {e.capacidad}</span>}
+                      </div>
+                      <button type="button" onClick={() => eliminarTempExcursion(i)} className="text-red-400 hover:text-red-600">×</button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={tempExcursionForm.nombre}
+                    onChange={(e) => setTempExcursionForm(prev => ({ ...prev, nombre: e.target.value }))}
+                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="Nombre de excursión"
+                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={tempExcursionForm.precioAdultoUSD}
+                      onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
+                      className="w-1/2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      placeholder="Precio Venta"
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={tempExcursionForm.precioNinoUSD}
+                      onChange={(e) => setTempExcursionForm(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
+                      className="w-1/2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      placeholder="Precio Niño"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={tempExcursionForm.costoProveedorAdultoUSD}
+                    onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
+                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="Costo Proveedor"
+                  />
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={tempExcursionForm.costoProveedorNinoUSD}
+                    onChange={(e) => setTempExcursionForm(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
+                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="Costo Niño"
+                  />
+                  <input
+                    type="text"
+                    value={tempExcursionForm.capacidad}
+                    onChange={(e) => setTempExcursionForm(prev => ({ ...prev, capacidad: e.target.value }))}
+                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="Capacidad (ej: 20 personas)"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Zona</label>
+                    <div className="flex gap-2">
+                      <select
+                        value={tempExcursionForm.zona}
+                        onChange={(e) => setTempExcursionForm(prev => ({ ...prev, zona: e.target.value }))}
+                        className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      >
+                        <option value="">Seleccionar zona</option>
+                        {zonas.map(z => <option key={z} value={z}>{z}</option>)}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nuevaZona = agregarZona();
+                          if (nuevaZona) {
+                            setTempExcursionForm(prev => ({ ...prev, zona: nuevaZona }));
+                          }
+                        }}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm whitespace-nowrap text-sm"
+                      >
+                        + Agregar Zona
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Tipo de Precio</label>
+                    <select
+                      value={tempExcursionForm.tipoPrecio}
+                      onChange={(e) => setTempExcursionForm(prev => ({ ...prev, tipoPrecio: e.target.value as "persona" | "maquina" }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    >
+                      <option value="persona">Por Persona</option>
+                      <option value="maquina">Por Máquina</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <div>
+                    <label className="text-gray-600 text-sm block mb-1">Tipo de Servicio</label>
+                    <select
+                      value={tempExcursionForm.tipoServicio}
+                      onChange={(e) => setTempExcursionForm(prev => ({ ...prev, tipoServicio: e.target.value as "compartido" | "privado" | "grupo" | "grupo_privado" }))}
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    >
+                      {TIPOS_SERVICIO.map(t => (
+                        <option key={t.value} value={t.value}>{t.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-end gap-4">
+                    <label className="flex items-center gap-2 text-gray-600 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={tempExcursionForm.tienePrecioNino}
+                        onChange={(e) => setTempExcursionForm(prev => ({ ...prev, tienePrecioNino: e.target.checked }))}
+                      />
+                      Tiene precio para niños
+                    </label>
+                    <button type="button" onClick={agregarTempExcursion} className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm text-sm whitespace-nowrap">
+                      Agregar Excursión
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <button type="button" onClick={() => { setShowProveedorForm(false); setEditingProveedorId(null); }} className="px-6 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
+                  Cancelar
+                </button>
+                <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm">
+                  {editingProveedorId ? "Actualizar Proveedor" : "Guardar Proveedor"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================
+          MODAL - Excursión
+      ============================================ */}
+      {showExcursionForm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-gray-900 text-xl font-bold">{editingExcursionId ? "Editar Excursión" : "Nueva Excursión"}</h3>
+              <button onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+            </div>
+            <form onSubmit={handleExcursionSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Nombre</label>
+                  <input
+                    type="text"
+                    value={excursionFormData.nombre}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, nombre: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Proveedor</label>
+                  <select
+                    value={excursionFormData.proveedorId}
+                    onChange={(e) => {
+                      const proveedor = proveedores.find(p => p.id === e.target.value);
+                      setExcursionFormData(prev => ({
+                        ...prev,
+                        proveedorId: e.target.value,
+                        proveedorNombre: proveedor?.nombre || ""
+                      }));
+                    }}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  >
+                    <option value="">Seleccionar proveedor</option>
+                    {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Adulto (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={excursionFormData.precioAdultoUSD}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, precioAdultoUSD: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Precio Venta Niño (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={excursionFormData.precioNinoUSD}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, precioNinoUSD: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Adulto (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={excursionFormData.costoProveedorAdultoUSD}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, costoProveedorAdultoUSD: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Costo Proveedor Niño (USD)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={excursionFormData.costoProveedorNinoUSD}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, costoProveedorNinoUSD: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Zona</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={excursionFormData.zona}
+                      onChange={(e) => setExcursionFormData(prev => ({ ...prev, zona: e.target.value }))}
+                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    >
+                      <option value="">Seleccionar zona</option>
+                      {zonas.map(z => <option key={z} value={z}>{z}</option>)}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nuevaZona = agregarZona();
+                        if (nuevaZona) {
+                          setExcursionFormData(prev => ({ ...prev, zona: nuevaZona }));
+                        }
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm whitespace-nowrap text-sm"
+                    >
+                      + Agregar Zona
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Capacidad</label>
+                  <input
+                    type="text"
+                    value={excursionFormData.capacidad}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, capacidad: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="Ej: 20 personas"
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Precio</label>
+                  <select
+                    value={excursionFormData.tipoPrecio}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, tipoPrecio: e.target.value as "persona" | "maquina" }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  >
+                    <option value="persona">Por Persona</option>
+                    <option value="maquina">Por Máquina</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-600 text-sm block mb-1">Tipo de Servicio</label>
+                  <select
+                    value={excursionFormData.tipoServicio}
+                    onChange={(e) => setExcursionFormData(prev => ({ ...prev, tipoServicio: e.target.value as "compartido" | "privado" | "grupo" | "grupo_privado" }))}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  >
+                    {TIPOS_SERVICIO.map(t => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-end">
+                  <label className="flex items-center gap-2 text-gray-600 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={excursionFormData.tienePrecioNino}
+                      onChange={(e) => setExcursionFormData(prev => ({ ...prev, tienePrecioNino: e.target.checked }))}
+                    />
+                    Tiene precio para niños
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <button type="button" onClick={() => { setShowExcursionForm(false); setEditingExcursionId(null); }} className="px-6 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-200 transition-all">
+                  Cancelar
+                </button>
+                <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-sm">
+                  {editingExcursionId ? "Actualizar Excursión" : "Guardar Excursión"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
