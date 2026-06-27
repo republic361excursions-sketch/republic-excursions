@@ -159,7 +159,7 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<"raul" | "gabrielle" | "republic" | null>(null);
   const [loginError, setLoginError] = useState("");
-  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   
   const [ventas, setVentas] = useState<Venta[]>([]);
@@ -379,50 +379,45 @@ export default function Home() {
   };
 
   // ============================================
-  // LOGIN
+  // LOGIN - CON FONDO BLANCO Y DISEÑO DE LA IMAGEN
   // ============================================
-  const handleLogin = (username: string, password: string) => {
-    if (username === "Republic" && password === "Admin2026") {
+  const handleLogin = (email: string, password: string) => {
+    // Mapeo de emails a usuarios
+    if (email === "republic@republicexcursions.com" && password === "Admin2026") {
       setIsLoggedIn(true);
       setCurrentUser("republic");
       setLoginError("");
       return true;
-    } else if (username === "Raul" && password === "Republ1c$$") {
+    } else if (email === "raul@republicexcursions.com" && password === "Republ1c$$") {
       setIsLoggedIn(true);
       setCurrentUser("raul");
       setLoginError("");
       return true;
-    } else if (username === "Gabrielle" && password === "Republ1c$$") {
+    } else if (email === "gabrielle@republicexcursions.com" && password === "Republ1c$$") {
       setIsLoggedIn(true);
       setCurrentUser("gabrielle");
       setLoginError("");
       return true;
     } else {
-      setLoginError("Usuario o contrasena incorrectos");
+      setLoginError("Correo o contraseña incorrectos");
       return false;
     }
   };
 
-  const handleSelectUser = (user: string) => {
-    setSelectedUser(user);
-    setLoginPassword("");
-    setLoginError("");
-  };
-
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUser) {
-      setLoginError("Selecciona un usuario");
+    if (!loginEmail || !loginPassword) {
+      setLoginError("Por favor completa todos los campos");
       return;
     }
-    handleLogin(selectedUser, loginPassword);
+    handleLogin(loginEmail, loginPassword);
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setCurrentUser(null);
     setLoginError("");
-    setSelectedUser("");
+    setLoginEmail("");
     setLoginPassword("");
   };
 
@@ -1331,129 +1326,101 @@ export default function Home() {
   };
 
   // ============================================
-  // LOGIN - DISEÑO PROFESIONAL
+  // LOGIN - CON FONDO BLANCO Y DISEÑO DE LA IMAGEN
   // ============================================
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-[-30%] left-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[150px]"></div>
-          <div className="absolute bottom-[-30%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[150px]"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-blue-400/5 rounded-full blur-[120px]"></div>
-        </div>
-
-        <div className="relative z-10 w-full max-w-2xl">
-          <div className="bg-white/5 backdrop-blur-2xl rounded-3xl p-8 border border-white/10 shadow-2xl shadow-black/30">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Columna Izquierda - Hora y Fecha */}
-              <div className="flex flex-col justify-center items-center md:items-start border-b md:border-b-0 md:border-r border-white/10 pb-6 md:pb-0 md:pr-8">
-                <div className="text-center md:text-left">
-                  <div className="text-5xl font-mono font-bold text-white tracking-wider mb-2">
-                    {currentTime.toLocaleTimeString("es-DO", { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                  </div>
-                  <div className="text-white/60 text-lg">
-                    {getDayName(currentTime.getDay())}
-                  </div>
-                  <div className="text-white/40 text-sm">
-                    {currentTime.getDate()} de {getMonthName(currentTime.getMonth())} de {currentTime.getFullYear()}
-                  </div>
-                </div>
-                
-                <div className="mt-6 text-center md:text-left">
-                  <div className="text-4xl font-bold text-white/10">RE</div>
-                  <div className="text-xs text-white/20 mt-1">v5.1 • Republic Excursions</div>
-                </div>
-              </div>
-
-              {/* Columna Derecha - Formulario */}
-              <div>
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-white">Bienvenido de nuevo</h2>
-                  <p className="text-white/40 text-sm">Inicia sesion para continuar</p>
-                </div>
-
-                <form onSubmit={handleLoginSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/60 mb-1.5">Usuario</label>
-                    <select
-                      value={selectedUser}
-                      onChange={(e) => handleSelectUser(e.target.value)}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-white/30 transition-all appearance-none"
-                    >
-                      <option value="">Seleccionar usuario</option>
-                      <option value="Republic">Republic - Administrador</option>
-                      <option value="Raul">Raul - Vendedor</option>
-                      <option value="Gabrielle">Gabrielle - Vendedora</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-white/60 mb-1.5">Contraseña</label>
-                    <input
-                      type="password"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-white/30 transition-all"
-                      placeholder="Ingresa tu contraseña"
-                      disabled={!selectedUser}
-                    />
-                    <div className="text-right mt-1">
-                      <button type="button" className="text-xs text-white/30 hover:text-white/60 transition-all">
-                        ¿Olvidaste tu contraseña?
-                      </button>
-                    </div>
-                  </div>
-
-                  {loginError && (
-                    <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm text-center">
-                      {loginError}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3.5 rounded-xl font-semibold hover:shadow-xl hover:scale-[1.01] transition-all shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
-                  >
-                    Iniciar Sesion
-                  </button>
-                </form>
-
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-white/10"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-transparent text-white/30">o continua con</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <button
-                    onClick={() => handleSelectUser("Republic")}
-                    className={`py-2.5 rounded-xl text-sm font-medium transition-all border ${selectedUser === "Republic" ? 'bg-blue-500/20 border-blue-500/50 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}
-                  >
-                    Republic
-                  </button>
-                  <button
-                    onClick={() => handleSelectUser("Raul")}
-                    className={`py-2.5 rounded-xl text-sm font-medium transition-all border ${selectedUser === "Raul" ? 'bg-blue-500/20 border-blue-500/50 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}
-                  >
-                    Raul
-                  </button>
-                  <button
-                    onClick={() => handleSelectUser("Gabrielle")}
-                    className={`py-2.5 rounded-xl text-sm font-medium transition-all border ${selectedUser === "Gabrielle" ? 'bg-pink-500/20 border-pink-500/50 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}
-                  >
-                    Gabrielle
-                  </button>
-                </div>
-
-                <div className="mt-6 text-center">
-                  <p className="text-xs text-white/20">Acceso seguro y protegido</p>
-                  <p className="text-[10px] text-white/10 mt-1">v5.1 • Republic Excursions © 2026</p>
-                </div>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+        <div className="w-full max-w-md">
+          {/* Logo y título */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-blue-500/25">
+                RE
               </div>
             </div>
+            <h1 className="text-2xl font-bold text-gray-900">Bienvenido de nuevo</h1>
+            <p className="text-gray-500 text-sm mt-1">Inicia sesión para continuar</p>
+          </div>
+
+          {/* Formulario de Login */}
+          <form onSubmit={handleLoginSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Correo electrónico
+              </label>
+              <input
+                type="email"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-all"
+                placeholder="ejemplo@republicexcursions.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-all"
+                placeholder="Ingresa tu contraseña"
+              />
+              <div className="text-right mt-1.5">
+                <button type="button" className="text-sm text-blue-600 hover:text-blue-800 transition-all font-medium">
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
+            </div>
+
+            {loginError && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-600 text-sm text-center">
+                {loginError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.01] transition-all shadow-md shadow-blue-500/25 flex items-center justify-center gap-2"
+            >
+              <span className="text-xl leading-none">→</span> Iniciar sesión
+            </button>
+          </form>
+
+          {/* Separador */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-400">o continúa con</span>
+            </div>
+          </div>
+
+          {/* Botón Google */}
+          <button
+            onClick={() => {
+              // Redirigir a Google o mostrar mensaje
+              alert("Inicio de sesión con Google - Funcionalidad en desarrollo");
+            }}
+            className="w-full flex items-center justify-center gap-3 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all text-gray-700 font-medium"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            Iniciar sesión con Google
+          </button>
+
+          {/* Footer */}
+          <div className="mt-8 text-center">
+            <p className="text-xs text-gray-400">Acceso seguro y protegido</p>
+            <p className="text-[10px] text-gray-300 mt-1">v5.1 • Republic Excursions © 2026</p>
           </div>
         </div>
       </div>
@@ -1461,7 +1428,7 @@ export default function Home() {
   }
 
   // ============================================
-  // TEMA POR USUARIO - CON COLOR ROSADO PARA GABRIELLE
+  // TEMA POR USUARIO
   // ============================================
   const isAdmin = currentUser === "republic";
   const isRaul = currentUser === "raul";
@@ -1472,13 +1439,6 @@ export default function Home() {
     if (isRaul) return "Vendedor";
     if (isGabrielle) return "Vendedora";
     return "Usuario";
-  };
-
-  const getUserBadge = () => {
-    if (isAdmin) return "bg-[#0a1628] text-white";
-    if (isRaul) return "bg-blue-100 text-blue-800";
-    if (isGabrielle) return "bg-pink-100 text-pink-800";
-    return "bg-gray-100 text-gray-800";
   };
 
   const getThemeColors = () => {
@@ -1500,9 +1460,8 @@ export default function Home() {
         buttonBg: "bg-gradient-to-r from-teal-400 to-cyan-500",
         buttonText: "text-white",
         shadowColor: "shadow-teal-500/30",
-        loginButton: "bg-gradient-to-r from-teal-400 to-cyan-500 text-white shadow-lg shadow-teal-500/25",
         navActive: "bg-gradient-to-r from-teal-400 to-cyan-500 text-white shadow-lg shadow-teal-500/30",
-        navInactive: "text-gray-600 hover:text-teal-400 hover:bg-gray-50",
+        navInactive: "text-gray-300 hover:text-teal-400 hover:bg-white/10",
         focusRing: "focus:ring-teal-400",
         borderColor: "border-teal-500/30",
         textColor: "text-teal-400",
@@ -1526,16 +1485,14 @@ export default function Home() {
         buttonBg: "bg-gradient-to-r from-blue-400 to-indigo-500",
         buttonText: "text-white",
         shadowColor: "shadow-blue-500/30",
-        loginButton: "bg-gradient-to-r from-blue-400 to-indigo-500 text-white shadow-lg shadow-blue-500/25",
         navActive: "bg-gradient-to-r from-blue-400 to-indigo-500 text-white shadow-lg shadow-blue-500/30",
-        navInactive: "text-gray-600 hover:text-blue-400 hover:bg-gray-50",
+        navInactive: "text-gray-300 hover:text-blue-400 hover:bg-white/10",
         focusRing: "focus:ring-blue-400",
         borderColor: "border-blue-500/30",
         textColor: "text-blue-400",
       };
     }
     if (isGabrielle) {
-      // 🔥 COLOR ROSADO PARA GABRIELLE
       return {
         bg: "from-rose-950 via-pink-950 to-rose-950",
         accent: "pink",
@@ -1553,9 +1510,8 @@ export default function Home() {
         buttonBg: "bg-gradient-to-r from-pink-400 to-rose-500",
         buttonText: "text-white",
         shadowColor: "shadow-pink-500/30",
-        loginButton: "bg-gradient-to-r from-pink-400 to-rose-500 text-white shadow-lg shadow-pink-500/25",
         navActive: "bg-gradient-to-r from-pink-400 to-rose-500 text-white shadow-lg shadow-pink-500/30",
-        navInactive: "text-gray-600 hover:text-pink-400 hover:bg-gray-50",
+        navInactive: "text-gray-300 hover:text-pink-400 hover:bg-white/10",
         focusRing: "focus:ring-pink-400",
         borderColor: "border-pink-500/30",
         textColor: "text-pink-300",
@@ -1578,9 +1534,8 @@ export default function Home() {
       buttonBg: "bg-gradient-to-r from-gray-400 to-gray-500",
       buttonText: "text-white",
       shadowColor: "shadow-gray-500/30",
-      loginButton: "bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-lg shadow-gray-500/25",
       navActive: "bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-lg shadow-gray-500/30",
-      navInactive: "text-gray-600 hover:text-gray-400 hover:bg-gray-50",
+      navInactive: "text-gray-300 hover:text-gray-400 hover:bg-white/10",
       focusRing: "focus:ring-gray-400",
       borderColor: "border-gray-500/30",
       textColor: "text-gray-400",
@@ -2507,9 +2462,8 @@ export default function Home() {
         </main>
       </div>
 
-      {/* ============================================
-          MODALES - Formularios
-      ============================================ */}
+      {/* MODALES - Formularios */}
+      {/* MODAL Venta */}
       {showForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className={`${theme.card} rounded-3xl border ${theme.cardBorder} max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6`}>
@@ -2846,7 +2800,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL - Cliente */}
+      {/* MODAL Cliente */}
       {showClienteForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className={`${theme.card} rounded-3xl border ${theme.cardBorder} max-w-lg w-full p-6`}>
@@ -2891,7 +2845,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL - Proveedor */}
+      {/* MODAL Proveedor */}
       {showProveedorForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className={`${theme.card} rounded-3xl border ${theme.cardBorder} max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6`}>
@@ -3193,7 +3147,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL - Excursion */}
+      {/* MODAL Excursion */}
       {showExcursionForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className={`${theme.card} rounded-3xl border ${theme.cardBorder} max-w-2xl w-full p-6`}>
