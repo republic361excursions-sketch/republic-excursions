@@ -2508,7 +2508,7 @@ export default function Home() {
       </div>
 
       {/* ============================================
-          MODALES - Formularios (se mantienen igual)
+          MODALES - Formularios
       ============================================ */}
       {showForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
